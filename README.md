@@ -1,13 +1,14 @@
 Shafquat, Afrah
-
 shafquat@hsph.harvard.edu
-
 November 18, 2014
 
-===================
+Novel Automated gene Annotation eNumeration (NAAN)
+===================================================
 
 Prioritization pipeline for characterizing unannotated genes
 
+```
+#!python
 
 usage: naan.py [-h] [-i INPUT_TABLE] [-f FASTA_FOLDER] [-u [UCLUST_FOLDER]]
                [-t TYPE] [-o OUTPUT_FOLDER]
@@ -24,4 +25,8 @@ optional arguments:
                         reads_assemblies]
   -o OUTPUT_FOLDER, --output_folder OUTPUT_FOLDER
                         Folder containing results
+
+```
+
+
 
