@@ -1,8 +1,10 @@
 Shafquat, Afrah
+
 shafquat@hsph.harvard.edu
+
 November 18, 2014
 
-Novel Automated gene Annotation eNumeration (NAAN)
+**Novel Automated gene Annotation eNumeration (NAAN)**
 ===================================================
 
 Prioritization pipeline for characterizing unannotated genes
