@@ -79,7 +79,7 @@ def extract_fasta_names(metadata, fasta_folder):
 	return location
 
 
-def get_centroids(gis_unannotated, fasta_folder, metadata, uclust_folder, uniref_gis):
+def get_centroids(gis_unannotated, fasta_folder, metadata, usearch_folder, uniref_gis):
 	'''Returns the dict of all centroids containing clusters of gene IDs
 
 	Input:	gis_unannotated = {sample_id: [gene ids]}
@@ -87,7 +87,7 @@ def get_centroids(gis_unannotated, fasta_folder, metadata, uclust_folder, uniref
 			uniref_gis = {UniRef_XYZ: [list of gene ids]}
 			gis_unannotated = {sample_id: [gene ids]}
 			fasta_folder = Location of the fasta files
-			uclust_folder = Location of the USEARCH program
+			usearch_folder = Location of the USEARCH program
 
 	Output: all_centroids = {gene_centroid : [List of gene ids]}'''
 
@@ -114,7 +114,7 @@ def get_centroids(gis_unannotated, fasta_folder, metadata, uclust_folder, uniref
 				break
 		foo.close()
 
-	centroid_gis = get_clusters(centroids_fasta, uclust_folder)
+	centroid_gis = get_clusters(centroids_fasta, usearch_folder)
 	
 	for sample in gis_unannotated:
 		for gi in gis_unannotated[sample]:
@@ -124,10 +124,10 @@ def get_centroids(gis_unannotated, fasta_folder, metadata, uclust_folder, uniref
 	return all_centroids 
 
 
-def get_clusters(centroids_fasta, uclust_folder):
+def get_clusters(centroids_fasta, usearch_folder):
 	'''Returns the dict of unannotated gene centroids containing clusters of genes at 90% similarity
 	Input:	centroids_fasta = {UniRef90_unknown: [List of gene ids]}
-			uclust_folder = Location of the USEARCH program
+			usearch_folder = Location of the USEARCH program
 	Output: centroids_gis = {gene_centroid: [List of genes in the cluster]}
 			'''
 
@@ -135,7 +135,7 @@ def get_clusters(centroids_fasta, uclust_folder):
 	foo.writelines(centroids_fasta)
 	foo.close()
 
-	out_clust = os.system(uclust_folder + \
+	out_clust = os.system(usearch_folder + \
 		'/usearch -cluster_fast tmp/centroids_for_clustering.fasta -id 0.9 \
 		          -centroids tmp/centroids.fasta -uc tmp/clusters.uc')
 
@@ -242,7 +242,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i','--input_table', help='Gene abundance table with metadata')
 	parser.add_argument('-f','--fasta_folder', help='Folder containing fasta files')
-	parser.add_argument('-u','--uclust_folder', nargs = '?' , help='Path for UCLUST program')
+	parser.add_argument('-u','--usearch_folder', nargs = '?' , help='Path for USEARCH program')
 	parser.add_argument('-t','--type', help='Type of analysis Choose: [gene_table, reads_assemblies]')
 	parser.add_argument('-o','--output_folder', help='Folder containing results')
 	args = parser.parse_args()
@@ -258,7 +258,7 @@ if __name__ == '__main__':
 		pass
 	
 	[metadata, uniref_gis, gis_unannotated, gene_ids, data_matrix] = read_gene_table(args.input_table)
-	all_centroids = get_centroids(gis_unannotated, args.fasta_folder, metadata, args.uclust_folder, uniref_gis)
+	all_centroids = get_centroids(gis_unannotated, args.fasta_folder, metadata, args.usearch_folder, uniref_gis)
 	centroids_data_matrix = get_centroids_table(gene_ids, all_centroids, data_matrix, metadata)
 	[centroid_prev_abund, all_prevalence, all_mean_abund] = get_prevalence_abundance(centroids_data_matrix, metadata)
 	imp_centroids = get_important_centroids(centroid_prev_abund, all_prevalence, all_mean_abund, args.output_folder)
