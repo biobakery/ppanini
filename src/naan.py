@@ -3,7 +3,6 @@ import sys
 import pdb
 import re
 import argparse
-import subprocess
 import numpy
 
 def read_gene_table(gene_table_fname):
@@ -24,16 +23,16 @@ def read_gene_table(gene_table_fname):
 	
 	for line in gtab_lines:
 		#Metadata containing Sample names, Niche specifics and optionally fasta file locations
-		if line[0] == '#':
+		if line.startswith('#'):
 			metadata += [line]
 		samples = [re.sub('[\r\t\n]','',i) for i in metadata[-1].split('\t')[2:]]
 		
-		if not line[0] == '#':
+		if not line.startswith('#'):
 			split_i = line.split('\t')
 			gene_ids += [split_i[0]]
 		
 			data_row = [float(i) for i in split_i[2:]]
-			sample_inds = [i for i , val in enumerate(data_row) if val>0]
+			sample_inds = [i for i, val in enumerate(data_row) if val > 0]
 			data_matrix += [data_row]
 		
 			#Add unknown UniRef gene ids to a dict to be processed for clustering later {Sample: [gids]}
@@ -65,15 +64,15 @@ def extract_fasta_names(metadata, fasta_folder):
 	location = {}
 	line = []
 	for i in metadata:
-		if '#FASTA' in i:
+		if i.startswith('#FASTA'):
 			line = i
 			break
 	samples = metadata[-1].split('\t')[2:]
 	
 	if line:
 		split_i = line.split('\t')
-		for i in range(len(split_i[2:])):
-			location[re.sub('[\t\r\n]', '', samples[i])] = fasta_folder+'/'+re.sub('[\t\n\r]','',split_i[2:][i])
+		for i, val in enumerate(split_i[2:]):
+			location[re.sub('[\t\r\n]', '', samples[i])] = fasta_folder+'/'+re.sub('[\t\n\r]','', val)
 	else:
 		raise Exception("Missing #FASTA metadata for sample names!")
 
@@ -109,18 +108,19 @@ def get_centroids(gis_unannotated, fasta_folder, metadata, uclust_folder, uniref
 				centroids_fasta += [line]
 			elif '>' not in line and check:
 				centroids_fasta += [line]
-			elif '>' in line and not re.sub('[\t\r\n]','', line[1:]).strip() in genes:
+			elif '>' in line and re.sub('[\t\r\n]','', line[1:]).strip() not in genes:
 				check = False
 			if not check and genes_done == len(genes):
 				break
 		foo.close()
+
 	centroid_gis = get_clusters(centroids_fasta, uclust_folder)
+	
 	for sample in gis_unannotated:
 		for gi in gis_unannotated[sample]:
-			if not gi in centroid_gis:
+			if gi not in centroid_gis:
 				centroid_gis[gi] = [gi]
 		all_centroids = dict(centroid_gis.items()+ uniref_gis.items())
-
 	return all_centroids 
 
 
@@ -142,7 +142,7 @@ def get_clusters(centroids_fasta, uclust_folder):
 	cluster_txt = os.popen('grep -w H tmp/clusters.uc')
 	centroid_gis = {}
 	for line in cluster_txt.xreadlines():
-		split_i = [re.sub('[\r\t\n]', '',i) for i in line.split('\t')]
+		split_i = [re.sub('[\r\t\n]', '', i) for i in line.split('\t')]
 		if split_i[-1] in centroid_gis:
 			centroid_gis[split_i[-1]] += [split_i[-2]]
 		else:
@@ -163,8 +163,8 @@ def get_centroids_table(gene_ids, all_centroids, data_matrix, metadata):
 	centroids_data_matrix = {}
 	
 	for centroid in all_centroids:
-		centroids_data_matrix[centroid] = sum(numpy.array([[data_matrix[gene_ids.index(gene)]] \
-												for gene in all_centroids[centroid]]))
+		centroid_row = [[data_matrix[gene_ids.index(gene)]] for gene in all_centroids[centroid]]
+		centroids_data_matrix[centroid] = sum(numpy.array(centroid_row))
 		
 		if len(centroids_data_matrix[centroid]) == 1:
 			centroids_data_matrix[centroid] = [i for i in centroids_data_matrix[centroid][0]]
@@ -218,7 +218,9 @@ def get_important_centroids(centroid_prev_abund, all_prevalence, all_mean_abund,
 	imp_centroids = {}
 
 	for centroid in centroid_prev_abund:
-		if centroid_prev_abund[centroid]['abund'] >=tshld_abund and centroid_prev_abund[centroid]['prev'] >= tshld_prev:
+		abund_check = centroid_prev_abund[centroid]['abund'] >= tshld_abund
+		prev_check = centroid_prev_abund[centroid]['prev'] >= tshld_prev
+		if abund_check and prev_check:
 			imp_centroids[centroid]={'abund': centroid_prev_abund[centroid]['abund'], \
 									 'prev': centroid_prev_abund[centroid]['prev']}
 	
@@ -233,7 +235,7 @@ def write_prev_abund_matrix(centroid_prev_abund, out_file):
 	foo.writelines(['Centroids\tAbundance\tPrevalence\n'])
 	for centroid in centroid_prev_abund:
 		foo.writelines([str.join('\t', [centroid, str(centroid_prev_abund[centroid]['abund']), \
-												str(centroid_prev_abund[centroid]['prev'])])+'\n'])
+												  str(centroid_prev_abund[centroid]['prev'])])+'\n'])
 	foo.close()
 
 if __name__ == '__main__':
