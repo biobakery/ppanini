@@ -1,4 +1,3 @@
-#FASTA	N/A	SRS056210.with_fasta.gff3.faa	SRS011132.with_fasta.gff3.faa	SRS019597.with_fasta.gff3.faa	SRS015996.with_fasta.gff3.faa	SRS016033.with_fasta.gff3.faa
 #Niche	N/A	X	X	X	Y	Y
 #Gene ID	Annotation	SRS056210	SRS011132	SRS019597	SRS015996	SRS016033
 SRS056210.50-T1-C	UniRef_unknown	0.0670926517572	0.0	0.0	0.0	0.0
