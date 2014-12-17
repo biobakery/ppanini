@@ -7,6 +7,15 @@ import subprocess
 import numpy
 
 def read_gene_table(gene_table_fname):
+	'''Returns the different elements from the gene table
+
+	Input: gene_table_fname = Filename of the gene_table
+
+	Output: metadata = [metadata strings]; Rows with # as first character in table
+			uniref_gis = {UniRef_XYZ: [list of gene ids]}
+			gis_unannotated = {sample_id: [gene ids]}
+			gene_ids = [List of all gene ids]
+			data_matrix = The abundance table [[0, 0,.],[0, 0,.],...]'''
 
 	gene_table = open(gene_table_fname) 
 	gtab_lines = gene_table.readlines()
@@ -47,7 +56,12 @@ def read_gene_table(gene_table_fname):
 	return [metadata, uniref_gis, gis_unannotated, gene_ids, data_matrix] 
 
 def extract_fasta_names(metadata, fasta_folder):
+	'''Returns the dict of fasta files corresp. to each sample from metadata
 	
+	Input:	metadata = [metadata strings]; Rows with # as first character in table
+			fasta_folder = Location of the fasta files
+	Output: location = {sample_id : path_to_fasta_file}'''
+
 	location = {}
 	line = []
 	for i in metadata:
@@ -67,8 +81,18 @@ def extract_fasta_names(metadata, fasta_folder):
 
 
 def get_centroids(gis_unannotated, fasta_folder, metadata, uclust_folder, uniref_gis):
+	'''Returns the dict of all centroids containing clusters of gene IDs
+
+	Input:	gis_unannotated = {sample_id: [gene ids]}
+			metadata = [metadata strings]; Rows with # as first character in table
+			uniref_gis = {UniRef_XYZ: [list of gene ids]}
+			gis_unannotated = {sample_id: [gene ids]}
+			fasta_folder = Location of the fasta files
+			uclust_folder = Location of the USEARCH program
+
+	Output: all_centroids = {gene_centroid : [List of gene ids]}'''
+
 	#samples = metadata[-1][3:] Pending functionality--ability to point to fasta files??
-	
 	centroids_fasta = []
 	
 	location = extract_fasta_names(metadata, fasta_folder)
@@ -101,13 +125,20 @@ def get_centroids(gis_unannotated, fasta_folder, metadata, uclust_folder, uniref
 
 
 def get_clusters(centroids_fasta, uclust_folder):
-	
+	'''Returns the dict of unannotated gene centroids containing clusters of genes at 90% similarity
+	Input:	centroids_fasta = {UniRef90_unknown: [List of gene ids]}
+			uclust_folder = Location of the USEARCH program
+	Output: centroids_gis = {gene_centroid: [List of genes in the cluster]}
+			'''
+
 	foo = open('tmp/centroids_for_clustering.fasta','w')
 	foo.writelines(centroids_fasta)
 	foo.close()
 
 	out_clust = os.system(uclust_folder + \
-		'/usearch -cluster_fast tmp/centroids_for_clustering.fasta -id 0.9 -centroids tmp/centroids.fasta -uc tmp/clusters.uc')
+		'/usearch -cluster_fast tmp/centroids_for_clustering.fasta -id 0.9 \
+		          -centroids tmp/centroids.fasta -uc tmp/clusters.uc')
+
 	cluster_txt = os.popen('grep -w H tmp/clusters.uc')
 	centroid_gis = {}
 	for line in cluster_txt.xreadlines():
@@ -121,12 +152,19 @@ def get_clusters(centroids_fasta, uclust_folder):
 
 
 def get_centroids_table(gene_ids, all_centroids, data_matrix, metadata):
+	'''Returns data matrix containing gene centroids and abundance per sample
+	Input:	metadata = [metadata strings]; Rows with # as first character in table
+			gene_ids = [List of all gene ids]
+			data_matrix = The abundance table [[0, 0,.],[0, 0,.],...]
+			all_centroids = {gene_centroid : [List of gene ids]}
+	Output: centroids_data_matrix = {gene_centroid: [Gene centroid abundance across samples]}
+			'''
 	
 	centroids_data_matrix = {}
 	
 	for centroid in all_centroids:
 		centroids_data_matrix[centroid] = sum(numpy.array([[data_matrix[gene_ids.index(gene)]] \
-															for gene in all_centroids[centroid]]))
+												for gene in all_centroids[centroid]]))
 		
 		if len(centroids_data_matrix[centroid]) == 1:
 			centroids_data_matrix[centroid] = [i for i in centroids_data_matrix[centroid][0]]
@@ -143,6 +181,13 @@ def get_centroids_table(gene_ids, all_centroids, data_matrix, metadata):
 	return centroids_data_matrix 
 
 def get_prevalence_abundance(centroids_data_matrix, metadata):
+	'''Returns the dict of centroids with their prevalence and abundance
+	Input:	centroids_data_matrix = {gene_centroid: [Gene centroid abundance across samples]}
+			metadata = [metadata strings]; Rows with # as first character in table
+	Output: centroid_prev_abund = {centroid: {'abund': mean abundance, 'prev': prevalence}}
+			all_prevalence = [List of all observed gene centroid prevalence values (>0) across samples]
+			all_mean_abund = [List of all calculated mean gene centroid abundance across samples]'''
+	
 	#Niche specific Beta-prevalence?
 	centroid_prev_abund = {}
 	all_prevalence = []
@@ -160,6 +205,13 @@ def get_prevalence_abundance(centroids_data_matrix, metadata):
 	return [centroid_prev_abund, all_prevalence, all_mean_abund]
 
 def get_important_centroids(centroid_prev_abund, all_prevalence, all_mean_abund, output_folder):
+	'''Returns the dict of important gene centroids [>= 10th percentile of prevalence and abundance]
+	Input:	centroid_prev_abund = {centroid: {'abund': mean abundance, 'prev': prevalence}}
+			all_prevalence = [List of all observed gene centroid prevalence values (>0) across samples]
+			all_mean_abund = [List of all calculated mean gene centroid abundance across samples]
+			output_folder = Location of the results folder
+	Output: imp_centroids = {centroid: {'abund': mean abundance, 'prev': prevalence}}'''
+	
 	tshld_prev = numpy.percentile(all_prevalence, 10)
 	tshld_abund = numpy.percentile(all_mean_abund, 10)
 
@@ -168,13 +220,15 @@ def get_important_centroids(centroid_prev_abund, all_prevalence, all_mean_abund,
 	for centroid in centroid_prev_abund:
 		if centroid_prev_abund[centroid]['abund'] >=tshld_abund and centroid_prev_abund[centroid]['prev'] >= tshld_prev:
 			imp_centroids[centroid]={'abund': centroid_prev_abund[centroid]['abund'], \
-									'prev': centroid_prev_abund[centroid]['prev']}
+									 'prev': centroid_prev_abund[centroid]['prev']}
 	
 	write_prev_abund_matrix(centroid_prev_abund, output_folder+'/imp_centroid_prev_abund.txt')
 	
 	return imp_centroids
 
 def write_prev_abund_matrix(centroid_prev_abund, out_file):
+	'''Writes the centroids prevalence and abundance information in text file'''
+
 	foo = open(out_file,'w')
 	foo.writelines(['Centroids\tAbundance\tPrevalence\n'])
 	for centroid in centroid_prev_abund:
