@@ -76,8 +76,17 @@ Returns a list of "important" uncharacterized genes.
 ```
 #!text
 #GENEID  PREVALENCE MEAN_ABUNDANCE
-geneID_XYZ  2.0   0.05
+geneID_XYZ  0.25   0.05
 ```
+
+**For NICHE-SPECIFIC ANALYSIS**:
+
+```
+#!text
+#GENEID   MEAN_ABUNDANCE  ALPHA_PREVALENCE_NICHEX ALPHA_PREVALENCE_NICHEY BETA_PREVALENCE
+geneID_XYZ  0.05  0.35  0.50   0.42 
+``
+
 
 ##METHODOLOGY
 
@@ -90,15 +99,21 @@ geneID_XYZ  2.0   0.05
 7. Output the important genes in the results folder specified by user
 8. Dump all the intermediate files in the ``tmp`` folder.
 
+**For NICHE-SPECIFIC ANALYSIS**:
+5. Take the prevalence of each gene centroid across samples within EACH NICHE. (Alpha_prevalence)
+6. Use the 10th percentile of the mean abundance and alpha_prevalence observed within EACH NICHE as the threshold to categorize importance
+* * If the centroid alpha_prevalence within ANY NICHE is >= 10th percentile within that NICHE, then count it as important
+
 
 #APPENDIX
 
 ##RELEVANT DEFINITIONS
 
 * **Alpha-prevalence**: Prevalence of gene centroid in a specific niche of samples (i.e. HumanSkin, HumanStool, DesertSoil etc.) 
-* **Beta-prevalence**: Prevalence of gene centroid across different niches = Median(for all _X_, prevalence in niche _X_)
+* **Beta-prevalence**: Median of gene centroids's alpha_prevalence across niches.
 * **Important genes**
-* * Genes that are prevalent in >=10th percentile of observed prevalence (alpha- and/or beta-prevalence)
 * * Genes that are abundant in >=10th percentile of mean abundance across samples
+* * Genes that are prevalent in >=10th percentile of observed prevalence
+* * * In the case of **niche-specific analysis**, genes that are >=10th percentile of alpha_prevalence observed for each niche for ANY of the niches!
 * **Uncharacterized genes**: Genes that have UniRef90 annotations, but are below *** level of characterization acc. to GO Annotations
 * **Unannotated genes**: Genes that lack UniRef90 annotations

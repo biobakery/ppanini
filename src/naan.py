@@ -194,7 +194,8 @@ def get_prevalence_abundance(centroids_data_matrix, metadata):
 			metadata = [metadata strings]; Rows with # as first character in table
 	Output: centroid_prev_abund = {centroid: {'abund': mean abundance, 'prev': prevalence}}
 			all_prevalence = [List of all observed gene centroid prevalence values (>0) across samples]
-			all_mean_abund = [List of all calculated mean gene centroid abundance across samples]'''
+			all_mean_abund = [List of all calculated mean gene centroid abundance across samples]
+			flag = True (if NICHE PRESENT) or False(if NICHE ABSENT)'''
 	
 	[line, ind] = is_present(metadata, '#NICHE')
 	
@@ -203,7 +204,7 @@ def get_prevalence_abundance(centroids_data_matrix, metadata):
 		return [centroid_prev_abund, all_alpha_prev, all_mean_abund, True]
 	else:
 		centroid_prev_abund = {}
-		all_prevalence = []
+		all_prevalence = [] 
 		all_mean_abund = []
 		
 		for centroid in centroids_data_matrix:
@@ -283,6 +284,8 @@ def get_important_niche_centroids(centroid_prev_abund, all_alpha_prev, all_mean_
 
 	for centroid in centroid_prev_abund:
 		abund_check = centroid_prev_abund[centroid]['abund'] >= tshld_abund
+		#If Alpha-prevalence of the centroid is higher than the niche-specific threshold in ANY of the niches;
+		#Note: SUM is used to implement the OR functionality
 		prev_check = sum([centroid_prev_abund[centroid]['a_prev'][niche]>=tshld_prev[niche] for niche in centroid_prev_abund[centroid]['a_prev']])
 		
 		if abund_check and prev_check:
@@ -324,6 +327,8 @@ def write_prev_abund_matrix(centroid_prev_abund, out_file):
 	'''Writes the centroids prevalence and abundance information in text file'''
 
 	foo = open(out_file,'w')
+	#Assumes the dictionary structure to be consistent and fixed
+	#dict_X = {key1: {subkey1: [value]}}
 	keys = centroid_prev_abund.values()[0].keys()
 	
 	foo.writelines(['Centroids\t'+str.join('\t', keys)+'\n'])
