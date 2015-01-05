@@ -101,8 +101,9 @@ geneID_XYZ  0.05  0.35  0.50   0.42
 
 **For NICHE-SPECIFIC ANALYSIS**:
 
-Step 5. Take the prevalence of each gene centroid across samples within EACH NICHE. (Alpha_prevalence)
-Step 6. Use the 10th percentile of the mean abundance and alpha_prevalence observed within EACH NICHE as the threshold to categorize importance
+**Step 5.** Take the prevalence of each gene centroid across samples within EACH NICHE. (Alpha_prevalence)
+
+**Step 6.** Use the 10th percentile of the mean abundance and alpha_prevalence observed within EACH NICHE as the threshold to categorize importance
 * * If the centroid alpha_prevalence within ANY NICHE is >= 10th percentile within that NICHE, then count it as important
 
 
