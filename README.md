@@ -119,3 +119,10 @@ geneID_XYZ  0.05  0.35  0.50   0.42
 * * * In the case of **niche-specific analysis**, genes that are >=10th percentile of alpha_prevalence observed for each niche for ANY of the niches!
 * **Uncharacterized genes**: Genes that have UniRef90 annotations, but are below *** level of characterization acc. to GO Annotations
 * **Unannotated genes**: Genes that lack UniRef90 annotations
+
+
+======================
+
+Alternate names
+
+* Annotation of Novel Genes via Integrated Re-assignment Approach (ANGIRA)
