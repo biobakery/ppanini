@@ -351,8 +351,7 @@ if __name__ == '__main__':
 	parser.add_argument('-i','--input_table', help='Gene abundance table with metadata')
 	parser.add_argument('-f','--fasta_folder', help='Folder containing fasta files')
 	parser.add_argument('-u','--usearch_folder', nargs = '?' , help='Path for USEARCH program')
-	parser.add_argument('-t','--type', help='Type of analysis Choose: [gene_table, reads_assemblies]')
-	parser.add_argument('-o','--output_folder', help='Folder containing results')
+		parser.add_argument('-o','--output_folder', help='Folder containing results')
 	args = parser.parse_args()
 
 	try:
