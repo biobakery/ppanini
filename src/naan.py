@@ -128,21 +128,21 @@ def get_clusters(centroids_fasta, usearch_folder):
 			usearch_folder = Location of the USEARCH program
 	Output: centroids_gis = {gene_centroid: [List of genes in the cluster]}
 			'''
-	allgenes_file_path = 'tmp/centroids_for_clustering.fasta'
-	genecentroids_file_path = 'tmp/centroids.fasta'
-	genecentroidclusters_file_path = 'tmp/clusters.uc'
+	allgenes_file_path = 'data_files/centroids_for_clustering.fasta'
+	gene_centroids_file_path = 'data_files/centroids.fasta'
+	gene_centroid_clusters_file_path = 'data_files/clusters.uc'
 
 	foo = open(allgenes_file_path,'w')
 	foo.writelines(centroids_fasta)
 	foo.close()
 
 	out_clust = os.system(usearch_folder + \
-		'/usearch -cluster_fast '+allgenes_file_path +' \
+		'/usearch -cluster_fast ' + allgenes_file_path +' \
 		  		  -id 0.9 \
-		          -centroids '+ genecentroids_file_path + ' \
-		          -uc ' + genecentroidclusters_file_path)
+		          -centroids '+ gene_centroids_file_path + ' \
+		          -uc ' + gene_centroid_clusters_file_path)
 
-	cluster_txt = os.popen('grep -w H ' + genecentroidclusters_file_path)
+	cluster_txt = os.popen('grep -w H ' + gene_centroid_clusters_file_path)
 	centroid_gis = {}
 	for line in cluster_txt.xreadlines():
 		split_i = [re.sub('[\r\t\n]', '', i) for i in line.split('\t')]
@@ -174,9 +174,10 @@ def get_centroids_table(gene_ids, all_centroids, data_matrix, metadata):
 		else:
 			centroids_data_matrix[centroid] = list(centroids_data_matrix[centroid][0])
 	
-	genecentroidstable_file_path = 'tmp/gene_centroids_table.txt'
+	gene_centroids_table_file_path = 'data_files/gene_centroids_table.txt'
 	
-	foo = open(genecentroidstable_file_path,'w')	
+	foo = open(gene_centroids_table_file_path,'w')	
+
 	foo.writelines(metadata[:-1])
 	foo.writelines([str.join('\t', ['Centroids'] + metadata[-1].split('\t')[2:]) +  '\n'])
 	for centroid in centroids_data_matrix:
@@ -203,6 +204,8 @@ def get_prevalence_abundance(centroids_data_matrix, metadata):
 			all_prevalence = [List of all observed gene centroid prevalence values (>0) across samples]
 			all_mean_abund = [List of all calculated mean gene centroid abundance across samples]
 			flag = True (if NICHE PRESENT) or False(if NICHE ABSENT)'''
+
+	centroid_prev_abund_file_path = 'data_files/centroid_prev_abund.txt'
 	
 	[line, ind] = is_present(metadata, '#NICHE')
 	
@@ -221,7 +224,7 @@ def get_prevalence_abundance(centroids_data_matrix, metadata):
 			all_prevalence += [centroid_prev_abund[centroid]['prev']]
 			all_mean_abund += [centroid_prev_abund[centroid]['abund']]
 		
-		write_prev_abund_matrix(centroid_prev_abund, 'tmp/centroid_prev_abund.txt')
+		write_prev_abund_matrix(centroid_prev_abund, centroid_prev_abund_file_path)
 		
 		return [centroid_prev_abund, all_prevalence, all_mean_abund, False]
 
@@ -235,7 +238,10 @@ def get_niche_prevalence_abundance(centroids_data_matrix, metadata, line, ind):
 			all_alpha_prev = {niche: List of all observed gene centroid alpha prevalence values (>0) across samples within each niche}
 			all_mean_abund = [List of all calculated mean gene centroid abundance across samples]'''
 
+	centroid_prev_abund_file_path = 'data_files/centroid_prev_abund.txt'
+	
 	niches = {}
+	
 	split_i = [re.sub('[\r\t\n]', '', i) for i in line.split('\t')[2:]]
 	for i, val in enumerate(split_i):
 		if val not in niches:
@@ -268,7 +274,7 @@ def get_niche_prevalence_abundance(centroids_data_matrix, metadata, line, ind):
 		centroid_prev_abund[centroid]['b_prev'] = b_prev
 		all_mean_abund += [centroid_prev_abund[centroid]['abund']]
 
-	write_prev_abund_matrix(centroid_prev_abund, 'tmp/centroid_prev_abund.txt')
+	write_prev_abund_matrix(centroid_prev_abund, centroid_prev_abund_file_path)
 	
 	return [centroid_prev_abund, all_alpha_prev, all_mean_abund]
 
@@ -282,7 +288,7 @@ def get_important_niche_centroids(centroid_prev_abund, all_alpha_prev, all_mean_
 	Output: imp_centroids = {centroid: {'mean_abundance': mean abundance, 
 										'beta_prevalence': median of alpha prevalences observed in each niche, 
 										'alpha_prevalence_NICHE***': alpha_prevalence for niche X, ...}}'''
-	genecentroidprevabund_file_path = 'imp_centroid_prev_abund.txt'
+	imp_centroid_prev_abund_file_path = 'imp_centroid_prev_abund.txt'
 	tshld_prev = {}
 	for niche in all_alpha_prev:
 		tshld_prev[niche] = numpy.percentile(all_alpha_prev[niche], 10)
@@ -302,7 +308,7 @@ def get_important_niche_centroids(centroid_prev_abund, all_alpha_prev, all_mean_
 			for niche in centroid_prev_abund[centroid]['a_prev']:
 				imp_centroids[centroid]['alpha_prevalence_' + niche] = centroid_prev_abund[centroid]['a_prev'][niche]
 	
-	write_prev_abund_matrix(imp_centroids, output_folder + '/' + genecentroidprevabund_file_path)
+	write_prev_abund_matrix(imp_centroids, output_folder + '/' + imp_centroid_prev_abund_file_path)
 	
 	return imp_centroids
 
@@ -315,7 +321,7 @@ def get_important_centroids(centroid_prev_abund, all_prevalence, all_mean_abund,
 			output_folder = Location of the results folder
 	Output: imp_centroids = {centroid: {'abund': mean abundance, 'prev': prevalence}}'''
 	
-	genecentroidprevabund_file_path = 'imp_centroid_prev_abund.txt'
+	imp_centroid_prev_abund_file_path = 'imp_centroid_prev_abund.txt'
 	
 	tshld_prev = numpy.percentile(all_prevalence, 10)
 	tshld_abund = numpy.percentile(all_mean_abund, 10)
@@ -329,7 +335,7 @@ def get_important_centroids(centroid_prev_abund, all_prevalence, all_mean_abund,
 			imp_centroids[centroid]={'mean_abundance': centroid_prev_abund[centroid]['abund'], \
 									 'prevalence': centroid_prev_abund[centroid]['prev']}
 	
-	write_prev_abund_matrix(imp_centroids, output_folder + '/' + genecentroidprevabund_file_path)
+	write_prev_abund_matrix(imp_centroids, output_folder + '/' + imp_centroid_prev_abund_file_path)
 	
 	return imp_centroids
 
@@ -355,7 +361,7 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 
 	try:
-		os.mkdir('tmp')
+		os.mkdir('data_files')
 	except:
 		pass
 
