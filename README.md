@@ -4,14 +4,14 @@ shafquat@hsph.harvard.edu
 
 November 18, 2014
 
-#**Novel Automated gene Annotation eNumeration (NAAN)**
+#**PPANINI: Prioritization and Prediction of functional Annotation via automated Network Integration for Novel and Important genes**
 
 Prioritization of functional characterization of novel and uncharacterized genes
 
 ```
 #!python
 
-usage: naan.py [-h] [-i INPUT_TABLE] [-f FASTA_FOLDER] [-u [UCLUST_FOLDER]]
+usage: ppanini.py [-h] [-i INPUT_TABLE] [-f FASTA_FOLDER] [-u [UCLUST_FOLDER]]
                [-t TYPE] [-o OUTPUT_FOLDER]
 
 optional arguments:
@@ -162,4 +162,3 @@ optional arguments:
   -o OUTPUT_TABLE, --output_table OUTPUT_TABLE
                         Gene Table to write
 ```
-
