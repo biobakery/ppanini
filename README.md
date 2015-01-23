@@ -126,3 +126,40 @@ geneID_XYZ  0.05  0.35  0.50   0.42
 Alternate names
 
 * Annotation of Novel Genes via Integrated Re-assignment Approach (ANGIRA)
+
+
+=========================================================================
+
+#PREPROCESSING SCRIPTS
+
+```
+#!cmd
+
+usage: preprocess_genedata_table.py [-h] [-m MAPPER_FILE] [-p PROCESSES]
+                                    [-umap UNIREF90_50] [-u90 UNIREF90_INDEX]
+                                    [-u50 UNIREF50_INDEX] [-w {1,2,3}]
+                                    [-o OUTPUT_TABLE]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -m MAPPER_FILE, --mapper_file MAPPER_FILE
+                        Mapper file associating read files with their
+                        corresponding assembly files and, if available, GFF3
+                        files and NICHE informations
+  -p PROCESSES, --processes PROCESSES
+                        Folder containing GFF3 files
+  -umap UNIREF90_50, --uniref90_50 UNIREF90_50
+                        UniRef90 XML file
+  -u90 UNIREF90_FASTA, --uniref90_fasta UNIREF90_INDEX
+                        UniRef90 fasta file
+  -u50 UNIREF50_FASTA, --uniref50_fasta UNIREF50_INDEX
+                        UniRef50 fasta file
+  -w {1,2,3}, --workflow {1,2,3}
+                        Workflow type Choices:[1, 2, 3]; 
+			1: BAM and FASTA files; 
+			2: SAM and FASTA FILES; 
+			3: CONTIG ASSEMBLIES, READS and GFF3 files
+  -o OUTPUT_TABLE, --output_table OUTPUT_TABLE
+                        Gene Table to write
+```
+
