@@ -49,7 +49,7 @@ geneID_MNO  UniRef90_unknown  0.00 0.09
 ```
 #!text
 #FASTA	N/A	location_fasta_SAMPLE_X	location_fasta_SAMPLE_Y
-#GENEID	ANNOTATION	SAMPLE_X	SAMPLE_Y
+#GENEID|UniRef90_XYZ|UniRef50_XYZ	SAMPLE_X	SAMPLE_Y
 ```
 
 * * **Metadata**: *Optional*
@@ -150,9 +150,9 @@ optional arguments:
                         Folder containing GFF3 files
   -umap UNIREF90_50, --uniref90_50 UNIREF90_50
                         UniRef90 XML file
-  -u90 UNIREF90_FASTA, --uniref90_fasta UNIREF90_INDEX
+  -u90 UNIREF90_INDEX, --uniref90_fasta UNIREF90_INDEX
                         UniRef90 fasta file
-  -u50 UNIREF50_FASTA, --uniref50_fasta UNIREF50_INDEX
+  -u50 UNIREF50_INDEX, --uniref50_fasta UNIREF50_INDEX
                         UniRef50 fasta file
   -w {1,2,3}, --workflow {1,2,3}
                         Workflow type Choices:[1, 2, 3]; 
