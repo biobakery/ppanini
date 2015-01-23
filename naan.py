@@ -29,17 +29,16 @@ def read_gene_table(gene_table_fname):
 		
 		if not line.startswith('#'):
 			split_i = line.split('\t')
-			annot = split_i[0].split('|')
+			annot = split_i[0].split('|') #geneID column split 
+			u90_annot = [i for i in annot if 'UniRef90' in i]
 			gene_ids += [annot[0]]
 		
 			data_row = [float(i) for i in split_i[1:]]
 			sample_inds = [i for i, val in enumerate(data_row) if val > 0]
 			data_matrix += [data_row]
 		
-			
 			#Add unknown UniRef gene ids to a dict to be processed for clustering later {Sample: [gids]}
-			if 'UniRef90_unknown' == annot[1]:
-		
+			if 'UniRef90_unknown' == u90_annot:
 				for i in sample_inds:
 					if samples[i] not in gis_unannotated:
 						gis_unannotated[samples[i]] = [annot[0]]
@@ -47,12 +46,12 @@ def read_gene_table(gene_table_fname):
 						gis_unannotated[samples[i]] += [annot[0]]
 			else:
 		
-				if annot[1] in uniref_gis: ###CHECK AND EDIT
+				if u90_annot in uniref_gis: ###CHECK AND EDIT
 					#Add gene id to the list of uniref90 cluster id genes
-					uniref_gis[annot[1]] += [annot[0]] 
+					uniref_gis[u90_annot] += [annot[0]] 
 				else:
 					#Initiate a list of gene ids that belong to a specific UniRef90 ID
-					uniref_gis[annot[1]] = [annot[0]] 
+					uniref_gis[u90_annot] = [annot[0]] 
 	
 	return [metadata, uniref_gis, gis_unannotated, gene_ids, data_matrix] 
 

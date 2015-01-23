@@ -110,7 +110,11 @@ if __name__ == '__main__':
 
 	[mapper, niche_flag] = parse_mapper(args.mapper_file)
 	abundance_dict = annotations_mod.get_abundance(mapper, nprocesses, args.workflow) #sample:contig: mapped reads/seq_length
-	annotations_dict = abundance_mod.get_annotations(mapper_with_abundance_dict, all_paths, nprocesses)
+	if args.workflow in [1, 2]:
+		annotations_dict = abundance_mod.get_annotations(mapper_with_abundance_dict, all_paths, nprocesses)
+	else:
+		pass
+	
 	generate_gene_table(abundance_dict, annotations_dict, all_paths, niche_flag, mapper, args.output_table)
 
 	
