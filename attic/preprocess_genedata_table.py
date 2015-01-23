@@ -30,7 +30,7 @@ def parse_mapper(mapper_file):
 	mapper_final = {}
 
 	for i in mapper:
-		mapper_final[mapper[i]['SAMPLES']] = mapper[i]
+		mapper_final[mapper[i]['SAMPLE']] = mapper[i]
 
 	return [mapper_final, niche_flag]
 
@@ -50,7 +50,7 @@ def generate_gene_table(abundance_dict, annotations_dict, all_paths, niche_flag,
 	umap90_50 = read_id_mapping(all_paths['uniref_map'])
 	
 	samples = abundance_dict.keys()
-	fasta_row = [mapper[i]['FASTAS'] for i in samples]
+	fasta_row = [mapper[i]['FASTA'] for i in samples]
 
 	if niche_flag:
 		niche_row = [mapper[i]['NICHE'] for i in samples]
@@ -59,7 +59,7 @@ def generate_gene_table(abundance_dict, annotations_dict, all_paths, niche_flag,
 		if niche_flag:
 			foo.writelines([str.join('\t', ['#NICHE']+niche_row)+'\n']) #header
 
-		foo.writelines([str.join('\t', ['#FASTAS']+fasta_row)+'\n']) #header
+		foo.writelines([str.join('\t', ['#FASTA']+fasta_row)+'\n']) #header
 		foo.writelines([str.join('\t', ['#GENES']+samples)+'\n']) #header
 		
 		for i, sample in enumerate(samples):
@@ -89,7 +89,7 @@ if __name__ == '__main__':
 	parser.add_argument('-umap', '--uniref90_50', help='UniRef90 XML file')
 	parser.add_argument('-u90', '--uniref90_fasta', help='UniRef90 fasta file')
 	parser.add_argument('-u50', '--uniref50_fasta', help='UniRef50 fasta file')
-	parser.add_argument('-w', '--workflow', choices=[1, 2, 3], help='Workflow type Choices:[1, 2, 3]; \
+	parser.add_argument('-w', '--workflow', choices=[1,2,3], help='Workflow type Choices:[1, 2, 3]; \
 																   1: BAM and FASTA files; \
 																   2: SAM and FASTA FILES; \
 																   3: CONTIG ASSEMBLIES, READS and GFF3 files')
@@ -109,13 +109,11 @@ if __name__ == '__main__':
 				 'uniref50': args.uniref50_fasta, }
 
 	[mapper, niche_flag] = parse_mapper(args.mapper_file)
-	abundance_dict = abundance_mod.get_abundance(mapper, nprocesses, args.workflow) #sample:contig: mapped reads/seq_length
-	
+	abundance_dict = annotations_mod.get_abundance(mapper, nprocesses, args.workflow) #sample:contig: mapped reads/seq_length
 	if args.workflow in [1, 2]:
-		annotations_dict = annotations_mod.get_annotations_fromgenes(mapper, all_paths, nprocesses)
+		annotations_dict = abundance_mod.get_annotations(mapper_with_abundance_dict, all_paths, nprocesses)
 	else:
-		[annotations_dict, gene_contig_mapper] = annotations_mod.get_annotations_fromcontigs(mapper, all_paths, nprocesses)
-		abundance_dict = abundance_mod.update_abundance_dict(abundance_dict, gene_contig_mapper)
+		pass
 	
 	generate_gene_table(abundance_dict, annotations_dict, all_paths, niche_flag, mapper, args.output_table)
 
