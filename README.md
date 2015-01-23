@@ -4,7 +4,7 @@ shafquat@hsph.harvard.edu
 
 November 18, 2014
 
-#**PPANINI: Prioritization and Prediction of functional Annotation via automated Network Integration for Novel and Important genes**
+#**PPANINI: Prioritization and Prediction of functional Annotations for Novel and Important genes via automated data Network Integration**
 
 Prioritization of functional characterization of novel and uncharacterized genes
 
