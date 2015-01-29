@@ -9,14 +9,17 @@ import multiprocessing
 import Bio
 from Bio import Seq
 
-def read_fasta(foo):
-	'''Returns fasta dict with Seqname:sequence'''
-	foo = open(foo)
+def read_fasta(fasta_filename):
+	'''Reads a fasta_file and returns a fasta dict
+	Input: fasta_filename = path_to_fasta_file
+	Output: fasta_seq = {sequence_header: sequence, ...}'''
+	
+	fasta_file = open(fasta_filename)
 	fasta_seq = {}
 
 	name = ''
 	
-	for line in foo.readlines():
+	for line in fasta_file.readlines():
 		if not line.startswith('#'):
 			if line.startswith('>'):
 				name = line.split(' ')[0][1:].strip()
@@ -28,6 +31,15 @@ def read_fasta(foo):
 	return fasta_seq
 
 def parse_annotation_table(annotations_file, fasta_sequences, thld_ref):
+	'''Parses annotations result from RAPSEARCH to ensure they pass threshold
+	Input: annotations_file = path_to_rapsearch_results_file
+		   fasta_sequences = {sequence_header: sequence}
+		   thld_ref = int, threshold for sequence acceptance
+	
+	Output: [sample_annotations, rapsearch50_seqs]
+	where, sample_annotations = {sequence: UniRef annotation}
+		   rapsearch50_seqs = {sequence_header:  sequence} for all sequences that need to be redone'''
+
 	foo = open(annotations_file)
 	sample_annotations = {}
 	for line in foo.readlines():
@@ -51,6 +63,10 @@ def parse_annotation_table(annotations_file, fasta_sequences, thld_ref):
 	return [sample_annotations, rapsearch50_seqs]
 
 def write_dict(dictX, gene_annotations_file):
+	'''Writes dictionary of genes and their annotations into text file
+	Input: dictX = {geneID: annotation}
+		   gene_annotations_file = path_to_output_gene_annotations_table
+	'''
 
 	with open(gene_annotations_file, 'w') as foo:
 		foo.writelines('#GENEID\tANNOTATION')
@@ -59,6 +75,16 @@ def write_dict(dictX, gene_annotations_file):
 
 
 def generate_annotation(gene_x_file, all_paths, nprocesses, sample):
+	'''Runs rapsearch2 for genes_fasta file against UniRef90 and UniRef50
+	Input: gene_x_file: path_to_genes_fasta_file
+		   all_paths = {'uniref90': path_to_uniref90_index, 
+		   				'uniref50': path_to_uniref50_index, 
+		   				'umap90_50': path_to_uniref90_uniref50_mapping}
+		   nprocesses = int, Number of processes
+		   sample = sample_name
+
+	Output: all_annotations = {gene: UniRef annotation}'''
+
 	#assembly_x_withpath = mapper[sample]['#ASSEMBLIES'] #Full path inlcuded to Assembly X
 	
 	gene_x_fname = gene_x_file.rpartition('/')[-1] #Name of Assembly X
@@ -121,6 +147,10 @@ def generate_annotation(gene_x_file, all_paths, nprocesses, sample):
 	return all_annotations
 
 def write_fasta(seqs_dict, filename):
+	'''Writes dictionary of fasta sequences into text file
+	Input: seqs_dict = {geneID: sequence}
+		   filename = path_to_output_genes_fastafile
+	'''
 	with open(filename,'w') as foo:
 		test = seqs_dict.values()[0]
 		format = True  #'FNA'
@@ -139,7 +169,20 @@ def write_fasta(seqs_dict, filename):
 				foo.writelines([seqs_dict[seq]+'\n'])
 
 def get_annotations_fromgenes(mapper, all_paths, nprocesses):
+	'''Return dictionary of annotations for all samples' genes fasta files
+	Input: mapper = {sample:{'READS': path_to_reads_file, 
+		   					 'CONTIG_ASSEMBLIES': path_to_assemblies, 
+		   					 'FASTAS': path_to_fasta_file,
+		   					 'SAMS': path_to_sam_file,
+		   					 'BAMS': path_to_bam_file,
+		   					 'GFF3S': path_to_gff3_file,
+		   					 'NICHE': niche_metadata}, ...}
+		   all_paths = {'uniref90': path_to_uniref90_index, 
+		   				'uniref50': path_to_uniref50_index, 
+		   				'umap90_50': path_to_uniref90_uniref50_mapping}
+		   nprocesses = int, Number of processes
 
+	Output: annotations_dict = {sample :{gene: UniRef annotation}}'''
 	pool = multiprocessing.Pool(processes=nprocesses)
 	results = [pool.apply_async(generate_annotation, args=(mapper[sample]['FASTAS'], all_paths, nprocesses, sample)) for sample in mapper]
 
@@ -156,6 +199,24 @@ def get_annotations_fromgenes(mapper, all_paths, nprocesses):
 	return annotations_dict
 
 def get_annotations_fromcontigs(mapper, all_paths, nprocesses):
+	'''Return dictionary of annotations for genes from each sample's contig_assembly
+
+	Input: mapper = {sample:{'READS': path_to_reads_file, 
+		   					 'CONTIG_ASSEMBLIES': path_to_assemblies, 
+		   					 'FASTAS': path_to_fasta_file,
+		   					 'SAMS': path_to_sam_file,
+		   					 'BAMS': path_to_bam_file,
+		   					 'GFF3S': path_to_gff3_file,
+		   					 'NICHE': niche_metadata}, ...}
+		   all_paths = {'uniref90': path_to_uniref90_index, 
+		   				'uniref50': path_to_uniref50_index, 
+		   				'umap90_50': path_to_uniref90_uniref50_mapping}
+		   nprocesses = int, Number of processes
+
+	Output: [annotations_dict, gene_contig_mapper]
+	annotations_dict = {sample :{gene: UniRef annotation}}
+	gene_contig_mapper = {sample: {gene: contig}}'''	
+
 	gene_contig_mapper = {}
 	contig_gene_mapper = {}
 	gene_start_stop = {}
@@ -173,6 +234,19 @@ def get_annotations_fromcontigs(mapper, all_paths, nprocesses):
 	return [annotations_dict, gene_contig_mapper]
 
 def pull_genes_fromcontigs(mapper, gene_start_stop, contig_gene_mapper):
+	''' Pull genes from contig_assemblies and returns mapper with created genes_fasta_files
+	Input: mapper = {sample:{'READS': path_to_reads_file, 
+		   					 'CONTIG_ASSEMBLIES': path_to_assemblies, 
+		   					 'GFF3S': path_to_gff3_file,
+		   					 'NICHE': niche_metadata}, ...}
+		   gene_start_stop = {sample: {gene: [start, stop, strand]}, ...}
+		   contig_gene_mapper = {sample: {contig: [List of genes]}}
+	
+	Output: mapper = {sample:{'READS': path_to_reads_file, 
+		   					 'CONTIG_ASSEMBLIES': path_to_assemblies, 
+		   					 'FASTAS': path_to_fasta_file,
+		   					 'GFF3S': path_to_gff3_file,
+		   					 'NICHE': niche_metadata}, ...}'''
 	try:
 		os.mkdir('tmp/fasta_files')
 	except:
@@ -204,25 +278,29 @@ def pull_genes_fromcontigs(mapper, gene_start_stop, contig_gene_mapper):
 	return mapper
 
 def read_gff3(filename):
+	'''Reads GFF3 files and returns the relevant information
+	Input: filename = path_to_gff3_file
+	Output: [gene_contig_mapper, gene_start_stop, contig_gene_mapper]
+	gene_contig_mapper = {gene: contig, ...}
+	gene_start_stop = {gene: [start, stop, strand], ...}
+	contig_gene_mapper = {contig: [List of genes], ...}'''
+
 	gene_contig_mapper = {}
 	contig_gene_mapper = {}
 	gene_start_stop = {}
 
-	try:
-		with open(filename,'r') as foo:
-			foo_lines = foo.readlines()
-			for line in foo_lines:
-				if re.match('(\w+)\t(\w+)\tgene\t(\w+)', line):
-					split_line = [re.sub('[\r\t\n]','', i).strip() for i in line.split('\t')]
-					gid = split_line[-1].split('=')[-1]
-					gene_contig_mapper[gid] = split_line[0]
-					gene_start_stop[gid] = [int(split_line[3]), int(split_line[4]), split_line[6]]
-					
-					if split_line[0] in contig_gene_mapper:
-						contig_gene_mapper[split_line[0]] += [gid]
-					else:
-						contig_gene_mapper[split_line[0]] = [gid]
-	except:
-		pdb.set_trace()
+	with open(filename,'r') as foo:
+		foo_lines = foo.readlines()
+		for line in foo_lines:
+			if re.match('(\w+)\t(\w+)\tgene\t(\w+)', line):
+				split_line = [re.sub('[\r\t\n]','', i).strip() for i in line.split('\t')]
+				gid = split_line[-1].split('=')[-1]
+				gene_contig_mapper[gid] = split_line[0]
+				gene_start_stop[gid] = [int(split_line[3]), int(split_line[4]), split_line[6]]
+				
+				if split_line[0] in contig_gene_mapper:
+					contig_gene_mapper[split_line[0]] += [gid]
+				else:
+					contig_gene_mapper[split_line[0]] = [gid]
 
 	return [gene_contig_mapper, gene_start_stop, contig_gene_mapper]

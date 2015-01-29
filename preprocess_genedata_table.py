@@ -12,6 +12,22 @@ from src import abundance_mod
 
 
 def parse_mapper(mapper_file):
+	'''Reads the mapper_file that contains all the paths and metadata for input
+
+	Input: mapper_file = path_to_mapper_file
+	Format_1: #SAMPLE<\t>?NICHE<\t>FASTA<\t>BAMS<\n>
+	Format_2: #SAMPLE<\t>?NICHE<\t>FASTA<\t>SAMS<\n>
+	Format_3: #SAMPLE<\t>READS<\t>ASSEMBLIES<\t>GFF3S<\t>?NICHE<\n>
+	
+	?NICHE: optional metadata
+
+	Output: mapper_final = {sample:{'READS': path_to_reads_file, #Format_3
+		   					 'CONTIG_ASSEMBLIES': path_to_assemblies, #Format_3
+		   					 'FASTAS': path_to_fasta_file, #Format_1 or Format_2
+		   					 'SAMS': path_to_sam_file, #Format_2
+		   					 'BAMS': path_to_bam_file, #Format_1
+		   					 'GFF3S': path_to_gff3_file, #Format_3
+		   					 'NICHE': niche_metadata}, ...}'''
 # #SAMPLE<\t>?READS<\t>?ASSEMBLIES<\t>?NICHE<\t>?FASTA<\t>?GFF3S<\t>?SAMS<\t>?BAMS
 	mapper = {}
 	mapper_foo = open(mapper_file)
@@ -25,13 +41,11 @@ def parse_mapper(mapper_file):
 		split_val_i = [re.sub('[\t\n\r]', '', i) for i in val_i.split('\t')]
 		mapper[i] = {}
 		for j, val_j in enumerate(split_val_i):
-			#pdb.set_trace()
 			mapper[i][header[j]] = val_j
 
 	mapper_final = {}
 
 	for i in mapper:
-		#pdb.set_trace()
 		mapper_final[mapper[i]['SAMPLES']] = mapper[i]
 
 	return [mapper_final, niche_flag]
@@ -46,11 +60,23 @@ def read_id_mapping(mapping_file):
 	return umap90_50
 
 def generate_gene_table(abundance_dict, annotations_dict, all_paths, niche_flag, mapper, output_table):
-	print 'HERE'
-	#annotations_dict = annotations_dict #mapper_with_annotations_dict['annotations_dict']	#sample:{gene:annotation}
-	#abundance_dict = abundance_dict #mapper_with_annotations_dict['abundance_dict'] #sample:{gene:abundance}
-	#umap90_50 = read_id_mapping(all_paths['uniref_map'])
+	'''Writes the final gene abundance table with annotations for PPANINI input
 	
+	Input: abundance_dict = {sample: {gene: abundance, ...},...}	   
+		   annotations_dict = {sample: {gene: annotation, ...},...}
+		   all_paths = {'uniref90': path_to_uniref90_index, 
+		   				'uniref50': path_to_uniref50_index, 
+		   				'umap90_50': path_to_uniref90_uniref50_mapping}
+		   niche_flag = Boolean [True, False] If niches present in mapper_file
+		   mapper = {sample:{'READS': path_to_reads_file, 
+		   					 'CONTIG_ASSEMBLIES': path_to_assemblies, 
+		   					 'FASTAS': path_to_fasta_file,
+		   					 'SAMS': path_to_sam_file,
+		   					 'BAMS': path_to_bam_file,
+		   					 'GFF3S': path_to_gff3_file,
+		   					 'NICHE': niche_metadata}, ...}
+		   output_table = path_to_output_table'''
+
 	samples = abundance_dict.keys()
 	fasta_row = [mapper[i]['FASTAS'] for i in samples]
 
@@ -111,14 +137,21 @@ if __name__ == '__main__':
 	all_paths = {'uniref_map': args.uniref90_50, \
 				 'uniref90': args.uniref90_fasta, \
 				 'uniref50': args.uniref50_fasta, }
+	
+	print 'Step1: Reading MAPPER FILE, located at: ' + args.mapper_file
 
 	[mapper, niche_flag] = parse_mapper(args.mapper_file)
+
+	print 'Step2: Calculating abundance for genes via bowtie2/samtools'
 	abundance_dict = abundance_mod.get_abundance(mapper, nprocesses, int(args.workflow)) #sample:contig: mapped reads/seq_length
 	
+	print 'Step3: Annotating genes via RAPSEARCH2'
 	if int(args.workflow) in [1, 2]:
 		annotations_dict = annotations_mod.get_annotations_fromgenes(mapper, all_paths, nprocesses)
 	else:
 		[annotations_dict, gene_contig_mapper] = annotations_mod.get_annotations_fromcontigs(mapper, all_paths, nprocesses)
+		
+		##Update abundance_dict from {sample:{contig:abundance}} to {sample:{gene:abundance}} via gene_contig_mapper
 		abundance_dict = abundance_mod.update_abundance_dict(abundance_dict, gene_contig_mapper)
 	print 'Calling generate_gene_table'
 	generate_gene_table(abundance_dict, annotations_dict, all_paths, niche_flag, mapper, args.output_table)

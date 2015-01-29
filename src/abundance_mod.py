@@ -8,7 +8,15 @@ import subprocess
 import multiprocessing
 
 def generate_abundance_viabwt2(assembly_x_withpath, reads_x, sample):
-	'''To go from ASSEMBLIES, READS to IDXSTATS'''
+	'''Calculate Genes/Contigs abundance from Contig_assemblies and reads
+	Input: assembly_x_withpath= path_to_assemblies_file
+		   reads_x = path_to_reads_file To go from ASSEMBLIES, READS to IDXSTATS
+		   sample = sample_name
+
+	Output: generate_abundance_viabam(assembly_x_bam, sample)
+	
+	where assembly_x_bam = path_to_bam_file, 
+		  sample = sample_name'''
 	#assembly_x_withpath = mapper[sample]['#ASSEMBLIES'] #Full path inlcuded to Assembly X
 	assembly_x = assembly_x_withpath.rpartition('/')[-1] #Name of Assembly X
 	#reads_x = mapper[sample]['#READS'] #Path included to Reads of X
@@ -19,12 +27,18 @@ def generate_abundance_viabwt2(assembly_x_withpath, reads_x, sample):
 	os.system('tar -xOvf ' + reads_x + ' | \
 			   bowtie2 -x ' + assembly_x_index + ' -U - --no-unal --very-sensitive | \
 			   samtools view -bS - > ' + assembly_x_bam)
-	#pdb.set_trace()
 	return generate_abundance_viabam(assembly_x_bam, sample)
 	
 
 def generate_abundance_viasam(assembly_x_sam_withpath, sample):
-	'''To go from SAM to IDXSTATS'''
+	'''Calculate Genes/Contigs abundance from SAM file
+	Input: assembly_x_sam_withpath= path_to_sam_file
+		   sample = sample_name
+
+	Output: generate_abundance_viabam(assembly_x_bam, sample)
+	
+	where assembly_x_bam = path_to_bam_file, 
+		  sample = sample_name'''
 	
 	assembly_x_sam = assembly_x_sam_withpath.rpartition('/')[-1] #Name of Assembly X
 	assembly_x_bam = 'tmp/' + assembly_x_sam + '.bam'
@@ -35,7 +49,15 @@ def generate_abundance_viasam(assembly_x_sam_withpath, sample):
 	
 
 def generate_abundance_viabam(assembly_x_bam_withpath, sample):
-	'''To go from BAM to IDXSTATS'''
+	'''Calculate Genes/Contigs abundance from BAM file
+	Input: assembly_x_bam_withpath= path_to_bam_file
+		   sample = sample_name
+
+	Output: [assembly_x_stats, sample]
+	
+	where assembly_x_stats = path_to_samtools_abundance_file, 
+		  sample = sample_name'''
+
 	assembly_x_bam = assembly_x_bam_withpath.rpartition('/')[-1]
 	assembly_x_bam_presort = 'tmp/' + assembly_x_bam + '.sorted'
 	assembly_x_bam_sorted = 'tmp/' + assembly_x_bam + '.sorted.bam'
@@ -49,8 +71,33 @@ def generate_abundance_viabam(assembly_x_bam_withpath, sample):
 
 
 def get_abundance(mapper, nprocesses, w_i):
+	''' Processes the user input of CONTIG_ASSEMBLIES+READS+GFF3, or BAMS+FASTAS or SAMS+FASTAS,
+	and calls the appropriate workflow to calculate the abundances of the components (genes or contigs)
+
 	
-	workflows = {1: [generate_abundance_viabam,'BAMS'], 2: [generate_abundance_viasam, 'SAMS'], 3: [generate_abundance_viabwt2, 'CONTIG_ASSEMBLIES']}
+	Input: mapper = {sample:{'READS': path_to_reads_file, 
+		   					 'CONTIG_ASSEMBLIES': path_to_assemblies, 
+		   					 'FASTAS': path_to_fasta_file,
+		   					 'SAMS': path_to_sam_file,
+		   					 'BAMS': path_to_bam_file,
+		   					 'GFF3S': path_to_gff3_file,
+		   					 'NICHE': niche_metadata}, ...}
+
+	Output: read_abundance_tables(mapper)
+	
+	* where mapper:
+	mapper = {sample:{'READS': path_to_reads_file, 
+	   				  'CONTIG_ASSEMBLIES': path_to_assemblies, 
+	   				  'FASTAS': path_to_fasta_file,
+	   				  'SAMS': path_to_sam_file,
+	   				  'BAMS': path_to_bam_file,
+	   				  'GFF3S': path_to_gff3_file,
+	   				  'NICHE': niche_metadata,
+	   				  'abundance_file': path_to_abundance_file_from_get_abundance}, ...} '''
+
+	workflows = {1: [generate_abundance_viabam,'BAMS'], \
+				 2: [generate_abundance_viasam, 'SAMS'], \
+				 3: [generate_abundance_viabwt2, 'CONTIG_ASSEMBLIES']}
 	
 	pool = multiprocessing.Pool(processes=nprocesses)
 	
@@ -60,7 +107,8 @@ def get_abundance(mapper, nprocesses, w_i):
 		results = [pool.apply_async(workflows[w_i][0], args=(mapper[sample]['SAMS'], sample)) for sample in mapper]
 	elif w_i == 3:
 		#results = [pool.apply_async(workflows[w_i][0], args=(mapper[sample]['CONTIG_ASSEMBLIES'], mapper[sample]['READS'], sample)) for sample in mapper]
-		results = [generate_abundance_viabwt2(mapper[sample]['CONTIG_ASSEMBLIES'], mapper[sample]['READS'], sample) for sample in mapper]
+		results = [generate_abundance_viabwt2(mapper[sample]['CONTIG_ASSEMBLIES'], \
+											  mapper[sample]['READS'], sample) for sample in mapper]
 	else:
 		raise Exception('Invalid workflow inserted! Should be either 1, 2 or 3')
 	
@@ -79,28 +127,43 @@ def get_abundance(mapper, nprocesses, w_i):
 
 		
 def read_abundance_tables(mapper):
+	''' Reads the abundance tables generated from get_abundance and
+		returns a dictionary cataloging all samples and their component abundances (genes or contigs)
+
+	Input: mapper = {sample:{'READS': path_to_reads_file, 
+		   					 'CONTIG_ASSEMBLIES': path_to_assemblies, 
+		   					 'FASTAS': path_to_fasta_file,
+		   					 'SAMS': path_to_sam_file,
+		   					 'BAMS': path_to_bam_file,
+		   					 'GFF3S': path_to_gff3_file,
+		   					 'NICHE': niche_metadata,
+		   					 'abundance_file': path_to_abundance_file_from_get_abundance}, ...}
+
+	Output: abundance_dict= {sample:{ID: abundance}, ...}
+	* ID can be GENE_ID or CONTIG_ID depending on workflow '''
+
 	abundance_dict = {}
 	for sample in mapper:
 		abundance_dict[sample] = {}
 		foo = open(mapper[sample]['abundance_file'])
-		try:
-			for line in foo.readlines():
-				if not (line.startswith('#') and line.startswith('*')):
-					#FILE_FORMAT: Seq_Name<\t>Seq_Length<\t>Mapped_Reads<\t>Unmapped_Reads
-					split_line = [re.sub('[\t\r\n]', '', i) for i in line.split('\t')]
-					#abundance_dict[sample][contig_name] = [number_mapped_reads, sequence_length]
-					abundance_dict[sample][split_line[0].strip()] = float(split_line[2])/(float(split_line[1])-100.0) #avg. read length?
-		except:
-			pdb.set_trace()
+		for line in foo.readlines():
+			if not (line.startswith('#') and line.startswith('*')):
+				#FILE_FORMAT: Seq_Name<\t>Seq_Length<\t>Mapped_Reads<\t>Unmapped_Reads
+				split_line = [re.sub('[\t\r\n]', '', i) for i in line.split('\t')]
+				#abundance_dict[sample][contig_name] = [number_mapped_reads, sequence_length]
+				abundance_dict[sample][split_line[0].strip()] = float(split_line[2])/(float(split_line[1])-100.0) #avg. read length?
 	
 	return abundance_dict
 
 def update_abundance_dict(abundance_dict, gene_contig_mapper):
-	'''abundance_dict= {sample:{contig: abundance}}; 
-	   gene_contig_mapper={sample:{gene:contig}}; 
-	   abundance_dict_mod= {sample:{gene:abundance}}'''
+	'''Update abundance_dict from {sample:{contig:abundance}} to {sample:{gene:abundance}} via gene to contig mapping
+
+	Input: abundance_dict= {sample:{contig: abundance}, ...}
+		   gene_contig_mapper={sample:{gene:contig}, ...}
+	
+	Output: abundance_dict_mod= {sample:{gene:abundance}, ...}'''
+	
 	abundance_dict_mod = {}
-	print 'In update_abundance_dict'
 
 	for sample in gene_contig_mapper:
 		abundance_dict_mod[sample] = {}

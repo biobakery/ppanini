@@ -38,25 +38,22 @@ def read_gene_table(gene_table_fname):
 			data_row = [float(i) for i in split_i[1:]]
 			sample_inds = [i for i, val in enumerate(data_row) if val > 0]
 			data_matrix += [data_row]
-			try:
 			#Add unknown UniRef gene ids to a dict to be processed for clustering later {Sample: [gids]}
-				if 'UniRef90_unknown' == u90_annot:
-					for i in sample_inds:
-						if samples[i] not in gis_unannotated:
-							gis_unannotated[samples[i]] = [annot[0]]
-						else:
-							gis_unannotated[samples[i]] += [annot[0]]
-				else:
-
-					if u90_annot in uniref_gis: ###CHECK AND EDIT
-						#Add gene id to the list of uniref90 cluster id genes
-						uniref_gis[u90_annot] += [annot[0]] 
+			if 'UniRef90_unknown' == u90_annot:
+				for i in sample_inds:
+					if samples[i] not in gis_unannotated:
+						gis_unannotated[samples[i]] = [annot[0]]
 					else:
-						#Initiate a list of gene ids that belong to a specific UniRef90 ID
-						uniref_gis[u90_annot] = [annot[0]] 
-			except:
-				pdb.set_trace()
-	
+						gis_unannotated[samples[i]] += [annot[0]]
+			else:
+
+				if u90_annot in uniref_gis: ###CHECK AND EDIT
+					#Add gene id to the list of uniref90 cluster id genes
+					uniref_gis[u90_annot] += [annot[0]] 
+				else:
+					#Initiate a list of gene ids that belong to a specific UniRef90 ID
+					uniref_gis[u90_annot] = [annot[0]] 
+					
 	return [metadata, uniref_gis, gis_unannotated, gene_ids, data_matrix] 
 
 def extract_fasta_names(metadata, fasta_folder):
