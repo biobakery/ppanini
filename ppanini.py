@@ -5,6 +5,8 @@ import re
 import argparse
 import numpy
 
+from src import annotations_mod
+
 def read_gene_table(gene_table_fname):
 	'''Returns the different elements from the gene table
 
@@ -30,28 +32,30 @@ def read_gene_table(gene_table_fname):
 		if not line.startswith('#'):
 			split_i = line.split('\t')
 			annot = split_i[0].split('|') #geneID column split 
-			u90_annot = [i for i in annot if 'UniRef90' in i]
+			u90_annot = [i for i in annot if 'UniRef90' in i][0]
 			gene_ids += [annot[0]]
 		
 			data_row = [float(i) for i in split_i[1:]]
 			sample_inds = [i for i, val in enumerate(data_row) if val > 0]
 			data_matrix += [data_row]
-		
+			try:
 			#Add unknown UniRef gene ids to a dict to be processed for clustering later {Sample: [gids]}
-			if 'UniRef90_unknown' == u90_annot:
-				for i in sample_inds:
-					if samples[i] not in gis_unannotated:
-						gis_unannotated[samples[i]] = [annot[0]]
-					else:
-						gis_unannotated[samples[i]] += [annot[0]]
-			else:
-		
-				if u90_annot in uniref_gis: ###CHECK AND EDIT
-					#Add gene id to the list of uniref90 cluster id genes
-					uniref_gis[u90_annot] += [annot[0]] 
+				if 'UniRef90_unknown' == u90_annot:
+					for i in sample_inds:
+						if samples[i] not in gis_unannotated:
+							gis_unannotated[samples[i]] = [annot[0]]
+						else:
+							gis_unannotated[samples[i]] += [annot[0]]
 				else:
-					#Initiate a list of gene ids that belong to a specific UniRef90 ID
-					uniref_gis[u90_annot] = [annot[0]] 
+
+					if u90_annot in uniref_gis: ###CHECK AND EDIT
+						#Add gene id to the list of uniref90 cluster id genes
+						uniref_gis[u90_annot] += [annot[0]] 
+					else:
+						#Initiate a list of gene ids that belong to a specific UniRef90 ID
+						uniref_gis[u90_annot] = [annot[0]] 
+			except:
+				pdb.set_trace()
 	
 	return [metadata, uniref_gis, gis_unannotated, gene_ids, data_matrix] 
 
@@ -90,29 +94,18 @@ def get_centroids(gis_unannotated, fasta_folder, metadata, usearch_folder, unire
 
 	Output: all_centroids = {gene_centroid : [List of gene ids]}'''
 
-	
-	centroids_fasta = []
-	
+	centroids_fasta = {}
+
 	location = extract_fasta_names(metadata, fasta_folder)
 
 	for sample in gis_unannotated:
 		genes = gis_unannotated[sample]
-		foo = open(location[sample],'r')
-		check = False
-		genes_done = 0
-		for line in foo.readlines():
-			if '>' in line and re.sub('[\t\r\n]', '', line[1:]).strip() in genes:
-				check = True
-				genes_done += 1
-				centroids_fasta += [line]
-			elif '>' not in line and check:
-				centroids_fasta += [line]
-			elif '>' in line and re.sub('[\t\r\n]', '', line[1:]).strip() not in genes:
-				check = False
-			if not check and genes_done == len(genes):
-				break
-		foo.close()
-	centroid_gis = get_clusters(centroids_fasta, usearch_folder)
+		file_fasta = annotations_mod.read_fasta(location[sample])
+		for gid in file_fasta:
+			if gid in genes:
+				centroids_fasta[gid] = file_fasta[gid]
+
+	centroid_gis = get_clusters(centroids_fasta, usearch_folder) #all UniRef90_unknowns are clustered across samples
 	
 	all_centroids = {}
 
@@ -136,9 +129,7 @@ def get_clusters(centroids_fasta, usearch_folder): #ONLY FOR THE UNIREF UNANNOTA
 	gene_centroids_file_path = 'data_files/centroids.fasta'
 	gene_centroid_clusters_file_path = 'data_files/clusters.uc'
 
-	foo = open(allgenes_file_path,'w')
-	foo.writelines(centroids_fasta)
-	foo.close()
+	annotations_mod.write_fasta(centroids_fasta, allgenes_file_path) #ensures all clustering happens to FAAs
 
 	out_clust = os.system(usearch_folder + \
 		'/usearch -cluster_fast ' + allgenes_file_path +' \
@@ -375,6 +366,8 @@ if __name__ == '__main__':
 	except:
 		pass
 	
+	print args.input_table
+
 	[metadata, uniref_gis, gis_unannotated, gene_ids, data_matrix] = read_gene_table(args.input_table)
 	all_centroids = get_centroids(gis_unannotated, args.fasta_folder, metadata, args.usearch_folder, uniref_gis)
 	centroids_data_matrix = get_centroids_table(gene_ids, all_centroids, data_matrix, metadata)

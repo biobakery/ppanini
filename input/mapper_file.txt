@@ -1,7 +1,0 @@
-#READS #ASSEMBLIES
-SRS011132.tar.gz	SRS011132.with_fasta.gff3.faa
-SRS015996.tar.gz	SRS015996.with_fasta.gff3.faa
-SRS056210.tar.gz	SRS056210.with_fasta.gff3.faa
-SRS016033.tar.gz	SRS016033.with_fasta.gff3.faa
-SRS019597.tar.gz	SRS019597.with_fasta.gff3.faa
-
