@@ -15,9 +15,9 @@ def parse_mapper(mapper_file):
 	'''Reads the mapper_file that contains all the paths and metadata for input
 
 	Input: mapper_file = path_to_mapper_file
-	Format_1: #SAMPLE<\t>?NICHE<\t>FASTA<\t>BAMS<\n>
-	Format_2: #SAMPLE<\t>?NICHE<\t>FASTA<\t>SAMS<\n>
-	Format_3: #SAMPLE<\t>READS<\t>ASSEMBLIES<\t>GFF3S<\t>?NICHE<\n>
+	Format_1: #SAMPLE\t?NICHE\tFASTA\tBAMS\n
+	Format_2: #SAMPLE\t?NICHE\tFASTA\tSAMS\n
+	Format_3: #SAMPLE\tREADS\tASSEMBLIES\tGFF3S\t?NICHE\n
 	
 	?NICHE: optional metadata
 
@@ -117,8 +117,8 @@ if __name__ == '__main__':
 	parser.add_argument('-m', '--mapper_file', help='Mapper file associating read files with their corresponding assembly files and, if available, GFF3 files and NICHE informations')
 	parser.add_argument('-p', '--processes', help='Folder containing GFF3 files', default=4)
 	parser.add_argument('-umap', '--uniref90_50', help='UniRef90 XML file')
-	parser.add_argument('-u90', '--uniref90_fasta', help='UniRef90 fasta file')
-	parser.add_argument('-u50', '--uniref50_fasta', help='UniRef50 fasta file')
+	parser.add_argument('-u90', '--uniref90_fasta', help='UniRef90 INDEX file')
+	parser.add_argument('-u50', '--uniref50_fasta', help='UniRef50 INDEX file')
 	parser.add_argument('-w', '--workflow', choices=['1', '2', '3'], help='Workflow type Choices:[1, 2, 3]; \
 																   1: BAM and FASTA files; \
 																   2: SAM and FASTA FILES; \
@@ -146,12 +146,13 @@ if __name__ == '__main__':
 	abundance_dict = abundance_mod.get_abundance(mapper, nprocesses, int(args.workflow)) #sample:contig: mapped reads/seq_length
 	
 	print 'Step3: Annotating genes via RAPSEARCH2'
-	if int(args.workflow) in [1, 2]:
-		annotations_dict = annotations_mod.get_annotations_fromgenes(mapper, all_paths, nprocesses)
-	else:
+	if int(args.workflow) == 3:
 		[annotations_dict, gene_contig_mapper] = annotations_mod.get_annotations_fromcontigs(mapper, all_paths, nprocesses)
-		
 		##Update abundance_dict from {sample:{contig:abundance}} to {sample:{gene:abundance}} via gene_contig_mapper
 		abundance_dict = abundance_mod.update_abundance_dict(abundance_dict, gene_contig_mapper)
+	else:
+		annotations_dict = annotations_mod.get_annotations_fromgenes(mapper, all_paths, nprocesses)
+
 	print 'Calling generate_gene_table'
+	
 	generate_gene_table(abundance_dict, annotations_dict, all_paths, niche_flag, mapper, args.output_table)

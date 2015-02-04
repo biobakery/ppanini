@@ -106,16 +106,14 @@ def get_abundance(mapper, nprocesses, w_i):
 	elif w_i == 2:
 		results = [pool.apply_async(workflows[w_i][0], args=(mapper[sample]['SAMS'], sample)) for sample in mapper]
 	elif w_i == 3:
-		#results = [pool.apply_async(workflows[w_i][0], args=(mapper[sample]['CONTIG_ASSEMBLIES'], mapper[sample]['READS'], sample)) for sample in mapper]
-		results = [generate_abundance_viabwt2(mapper[sample]['CONTIG_ASSEMBLIES'], \
-											  mapper[sample]['READS'], sample) for sample in mapper]
+		results = [pool.apply_async(workflows[w_i][0], args=(mapper[sample]['CONTIG_ASSEMBLIES'], mapper[sample]['READS'], sample)) for sample in mapper]
+		#results = [generate_abundance_viabwt2(mapper[sample]['CONTIG_ASSEMBLIES'], \
+		#									  mapper[sample]['READS'], sample) for sample in mapper]
 	else:
 		raise Exception('Invalid workflow inserted! Should be either 1, 2 or 3')
 	
-	out = results #[p.get() for p in results]
-
-	if None in out:
-		raise Exception('The Abundance calculations encountered an issue; please check the code')
+	#out = results 
+	out = [p.get() for p in results])
 
 	for entry in out:
 		sample = entry[1]

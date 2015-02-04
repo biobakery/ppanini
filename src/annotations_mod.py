@@ -185,12 +185,7 @@ def get_annotations_fromgenes(mapper, all_paths, nprocesses):
 	Output: annotations_dict = {sample :{gene: UniRef annotation}}'''
 	pool = multiprocessing.Pool(processes=nprocesses)
 	results = [pool.apply_async(generate_annotation, args=(mapper[sample]['FASTAS'], all_paths, nprocesses, sample)) for sample in mapper]
-
-	out = sum([1 for p in results])
 	
-	if out/len(results) < 1:
-		raise Exception('The Annotation calculations encountered an issue; please check the code')
-
 	annotations_dict = {}
 	for p in results:
 		tmp_dict = p.get()

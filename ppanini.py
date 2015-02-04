@@ -47,10 +47,10 @@ def read_gene_table(gene_table_fname):
 						gis_unannotated[samples[i]] += [annot[0]]
 			else:
 
-				if u90_annot in uniref_gis: ###CHECK AND EDIT
+				try:
 					#Add gene id to the list of uniref90 cluster id genes
 					uniref_gis[u90_annot] += [annot[0]] 
-				else:
+				except KeyError:
 					#Initiate a list of gene ids that belong to a specific UniRef90 ID
 					uniref_gis[u90_annot] = [annot[0]] 
 					
@@ -98,9 +98,11 @@ def get_centroids(gis_unannotated, fasta_folder, metadata, usearch_folder, unire
 	for sample in gis_unannotated:
 		genes = gis_unannotated[sample]
 		file_fasta = annotations_mod.read_fasta(location[sample])
-		for gid in file_fasta:
-			if gid in genes:
+		for gid in genes:
+			try:
 				centroids_fasta[gid] = file_fasta[gid]
+			except KeyError:
+				raise Exception('Unannotated gene '+gene+' not found in sample FASTA: '+location[sample])
 
 	centroid_gis = get_clusters(centroids_fasta, usearch_folder) #all UniRef90_unknowns are clustered across samples
 	
@@ -138,9 +140,9 @@ def get_clusters(centroids_fasta, usearch_folder): #ONLY FOR THE UNIREF UNANNOTA
 	centroid_gis = {}
 	for line in cluster_txt.xreadlines():
 		split_i = [re.sub('[\r\t\n]', '', i) for i in line.split('\t')]
-		if split_i[-1] in centroid_gis:
+		try:
 			centroid_gis[split_i[-1]] += [split_i[-2]]
-		else:
+		except KeyError:
 			centroid_gis[split_i[-1]] = [split_i[-2], split_i[-1]]
 	return centroid_gis
 
@@ -161,10 +163,11 @@ def get_centroids_table(gene_ids, all_centroids, data_matrix, metadata):
 		centroid_row = [[data_matrix[gene_ids.index(gene)]] for gene in all_centroids[centroid]]
 		centroids_data_matrix[centroid] = sum(numpy.array(centroid_row))
 		
-		if len(centroids_data_matrix[centroid]) == 1: #if only one member in cluster
+		if len(centroids_data_matrix[centroid]) == 1: 
+			raise Exception('length of data row is one?')#if only one member in cluster
 			centroids_data_matrix[centroid] = [i for i in centroids_data_matrix[centroid][0]]
 		else:
-			centroids_data_matrix[centroid] = list(centroids_data_matrix[centroid][0])
+			centroids_data_matrix[centroid] = list(centroids_data_matrix[centroid])#[0])
 	
 	gene_centroids_table_file_path = 'data_files/gene_centroids_table.txt'
 	
@@ -235,7 +238,7 @@ def get_niche_prevalence_abundance(centroids_data_matrix, metadata, line, ind):
 	
 	niches = {}
 	
-	split_i = [re.sub('[\r\t\n]', '', i) for i in line.split('\t')[2:]]
+	split_i = [re.sub('[\r\t\n]', '', i) for i in line.split('\t')[1:]]
 	for i, val in enumerate(split_i):
 		if val not in niches:
 			niches[val] = [i]
