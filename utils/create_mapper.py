@@ -23,17 +23,26 @@ if __name__ == '__main__':
 	 #.scaffolds.fa
 	reads = os.listdir(reads_folder)
 	gff3s = os.listdir(gff3s_folder)
-	samples = [i.split('.')[0] for i in assemblies] #.tar.bz2 or .tar.gz
+	samples = [i.split('.')[0] for i in gff3s] #.tar.bz2 or .tar.gz
 	#.with_fasta.gff3
-
+	niche = args.niche
 	with open(args.output_table, 'w') as foo:
-		foo.writlines([str.join('\t', ['SAMPLES','CONTIG_ASSEMBLIES','READS', 'GFF3S', args.niche])+'\n'])
+		foo.writelines([str.join('\t', ['#SAMPLES','CONTIG_ASSEMBLIES','READS', 'GFF3S', 'NICHE'])+'\n'])
 		for sample in samples:
 			a = assemblies_folder+'/'+sample+'.scaffolds.fa'
+			print sample
+			print a
+			if not os.path.exists(a):
+				a = assemblies_folder+'/'+sample+'.scaffold.fa'
+			if not os.path.exists(a):
+				print a
+				raise IOError('CANT FIND FILE')
+
 			if sample+'.tar.gz' in reads:
 				r = reads_folder+'/'+ sample+'.tar.gz'
 			else:
 				r = reads_folder+'/'+ sample+'.tar.bz2'
+
 			g = gff3s_folder+'/'+sample+'.with_fasta.gff3'
-			foo.writlines([str.join('\t', [sample, a, r, g])+'\n'])
+			foo.writelines([str.join('\t', [sample, a, r, g, niche])+'\n'])
 

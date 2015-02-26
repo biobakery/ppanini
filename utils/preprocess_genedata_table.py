@@ -39,16 +39,16 @@ def parse_mapper(mapper_file):
 	
 	for i, val_i in enumerate(mapper_foo[1:]):
 		split_val_i = [re.sub('[\t\n\r]', '', i) for i in val_i.split('\t')]
-		mapper[i] = {}
+		mapper[split_val_i[0]] = {}
 		for j, val_j in enumerate(split_val_i):
-			mapper[i][header[j]] = val_j
+			mapper[split_val_i[0]][header[j]] = val_j
+#	pdb.set_trace()
+	#mapper_final = {}
 
-	mapper_final = {}
+	#for i in mapper:
+	#	mapper_final[mapper[i]['SAMPLES']] = mapper[i]
 
-	for i in mapper:
-		mapper_final[mapper[i]['SAMPLES']] = mapper[i]
-
-	return [mapper_final, niche_flag]
+	return [mapper, niche_flag]
 
 def read_id_mapping(mapping_file):
 	umap90_50 = {}
@@ -101,7 +101,7 @@ def generate_gene_table(abundance_dict, annotations_dict, all_paths, niche_flag,
 				
 				if gene in annotations_dict[sample]: 
 					annot_x_i = annotations_dict[sample][gene]
-					if annot_x.startswith('UniRef90'):
+					if annot_x_i.startswith('UniRef90'):
 						umap_i = re.sub('[\t\n\r]','',subprocess.check_output('grep -w '+annot_x_i+' '+all_paths['uniref_map']).split('\t')[-1])
 						annot_x = annot_x_i + '|' + umap90_50[annot_x_i]
 					else:
@@ -124,6 +124,7 @@ if __name__ == '__main__':
 																   2: SAM and FASTA FILES; \
 																   3: CONTIG ASSEMBLIES, READS and GFF3 files')
 	parser.add_argument('-o', '--output_table', help='Gene Table to write', default=sys.stdout)
+	parser.add_argument('-r','--rapsearch',help='RAPSEARCH2 path')
 
 	args = parser.parse_args()
 
@@ -136,7 +137,7 @@ if __name__ == '__main__':
 
 	all_paths = {'uniref_map': args.uniref90_50, \
 				 'uniref90': args.uniref90_fasta, \
-				 'uniref50': args.uniref50_fasta, }
+				 'uniref50': args.uniref50_fasta, 'rapsearch':args.rapsearch}
 	
 	print 'Step1: Reading MAPPER FILE, located at: ' + args.mapper_file
 
