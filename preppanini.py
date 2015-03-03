@@ -57,10 +57,10 @@ def abundance_module(mapper, workflow):
 
 	if workflow == 3:
 		for sample in mapper:
-			mapper[sample]['abundance_file'] = abundance_method[workflow](mapper[sample]['CONTIG_ASSEMBLIES'], mapper[sample]['READS'], sample)
+			mapper[sample]['abundance_file'] = abundance_method[workflow](mapper[sample]['CONTIG_ASSEMBLIES'], mapper[sample]['READS'], sample)[0]
 	else:
 		for sample in mapper:
-			mapper[sample]['abundance_file'] = abundance_method[workflow](mapper[sample][keywords[workflow]], sample)
+			mapper[sample]['abundance_file'] = abundance_method[workflow](mapper[sample][keywords[workflow]], sample)[0]
 	return mapper
 	
 def annotation_module(mapper, all_paths, nprocesses):
@@ -115,12 +115,14 @@ if __name__ == '__main__':
 	             'uniref50': args.uniref50_fasta, \
 	             'rapsearch': args.rapsearch}
 
-	if not annotation_only and not write_tables_only:
+	mapper = parse_mapper(args.mapper_file)
+
+	if not annotation_only and not write_tables_only: #abundance_only or ALL
 		print 'Step'+str(n)+': Creating abundance tables via SAMTOOLS'
 		mapper = abundance_module(mapper, workflow)
 		n +=1
 
-	if not write_tables_only and not abundance_only:
+	if not write_tables_only and not abundance_only: #annotation_only or ALL
 		print 'Step'+str(n)+': Mapping genes against UniRef90 and UniRef50 via RAPSEARCH2'
 		if workflow == 3:
 			print 'Step'+str(n)+': Pulling genes from contigs'
@@ -134,12 +136,22 @@ if __name__ == '__main__':
 		n +=1
 	
 
-	if not annotation_only and not abundance_only:
+	if not annotation_only and not abundance_only: #write_tables_only or ALL
 
 		if write_tables_only:
 			#create annotations_dict
+			annotations_dict = {}
+			for sample in mapper:
+				annotations_dict[sample] = create_annotations.read_dict('tmp/annot/'+sample+'.m8')
 			#create abundance_files keys in mapper
+			for sample in mapper:
+				mapper[sample]['abundance_file'] = 'tmp/idxstats/'+sample+'.txt'
 			#mapper for gene_contig for workflow3?
+			if workflow == 3:
+				gene_contig_mapper = {}
+				for sample in mapper:
+					[gene_contig_mapper_i, gene_start_stop_i, contig_gene_mapper_i] = create_fastas.read_gff3(mapper[sample]['GFF3S'])
+					gene_contig_mapper[sample] = gene_contig_mapper_i
 
 		print 'Step'+str(n)+': Compiling Abundance dictionary'
 		abundance_dict = create_idxstats.read_abundance_tables(mapper)

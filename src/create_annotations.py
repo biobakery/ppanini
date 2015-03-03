@@ -60,6 +60,21 @@ def parse_annotation_table(annotations_file, fasta_sequences, thld_ref):
 
 	return [sample_annotations, rapsearch50_seqs]
 
+def read_dict(gene_annotations_file):
+	'''Writes dictionary of genes and their annotations into text file
+	Input: dictX = {geneID: annotation}
+		   gene_annotations_file = path_to_output_gene_annotations_table
+	'''
+	dictX = {}
+
+	with open(gene_annotations_file) as foo:
+		for line in foo.readlines:
+			if not line.startswith('#'):
+				split_line = [re.sub('[\t\r\n]','', i).strip() for i in line.split('\t')]
+				dictX[split_line[0]] = split_line[1]
+	
+	return dictX
+
 def write_dict(dictX, gene_annotations_file):
 	'''Writes dictionary of genes and their annotations into text file
 	Input: dictX = {geneID: annotation}
@@ -127,7 +142,7 @@ def generate_annotation(gene_x_file, all_paths, nprocesses):
 	u90_out_fname =  'tmp/u90/' + gene_x_fname
 	u50_out_fname =  'tmp/u50/' + gene_x_fname 
 	u50_gene_input = 'tmp/u50input_' + gene_x_fname
-	gene_annotations_file = 'tmp/annot/allannot_parsed_' + gene_x_fname + '.m8'
+	gene_annotations_file = 'tmp/annot/' + sample + '.m8'
 
 	os.system(all_paths['rapsearch']+'/rapsearch -q ' + gene_x_file + ' \
 						 -d ' + all_paths['uniref90'] + ' \

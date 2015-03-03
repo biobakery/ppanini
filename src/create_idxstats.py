@@ -57,10 +57,16 @@ def generate_abundance_viabam(assembly_x_bam_withpath, sample):
   where assembly_x_stats = path_to_samtools_abundance_file, 
           sample = sample_name'''
 
+  try:
+    os.mkdir('tmp/idxstats')
+  except:
+    pass
+
   assembly_x_bam = assembly_x_bam_withpath.rpartition('/')[-1]
   assembly_x_bam_presort = 'tmp/' + assembly_x_bam + '.sorted'
   assembly_x_bam_sorted = 'tmp/' + assembly_x_bam + '.sorted.bam'
-  assembly_x_stats = 'tmp/' + assembly_x_bam + '.txt'
+  #assembly_x_stats = 'tmp/' + assembly_x_bam + '.txt'
+  assembly_x_stats = 'tmp/idxstats/' + sample + '.txt'
 
   os.system('samtools sort ' + assembly_x_bam_withpath + ' ' + assembly_x_bam_presort)
   os.system('samtools index ' + assembly_x_bam_sorted)
