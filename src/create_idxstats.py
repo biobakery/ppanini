@@ -95,7 +95,7 @@ def read_abundance_tables(mapper):
     abundance_dict[sample] = {}
     foo = open(mapper[sample]['abundance_file'])
     for line in foo.readlines():
-      if not (line.startswith('#') and line.startswith('*')):
+      if not (line.startswith('#') or line.startswith('*') or line.startswith('_')):
         #FILE_FORMAT: Seq_Name<\t>Seq_Length<\t>Mapped_Reads<\t>Unmapped_Reads
         split_line = [re.sub('[\t\r\n]', '', i) for i in line.split('\t')]
         #abundance_dict[sample][contig_name] = [number_mapped_reads, sequence_length]

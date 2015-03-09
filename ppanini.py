@@ -6,6 +6,7 @@ import argparse
 import numpy
 
 from src import create_fastas
+from src import create_annotations
 
 def read_gene_table(gene_table_fname):
 	'''Returns the different elements from the gene table
@@ -128,22 +129,11 @@ def get_clusters(centroids_fasta, usearch_folder): #ONLY FOR THE UNIREF UNANNOTA
 
 	create_fasta.write_fasta(centroids_fasta, allgenes_file_path) #ensures all clustering happens to FAAs
 
-	out_clust = os.system(usearch_folder + \
-		'/usearch -cluster_fast ' + allgenes_file_path +' \
-		  		  -id 0.9 \
-		          -centroids '+ gene_centroids_file_path + ' \
-		          -uc ' + gene_centroid_clusters_file_path)
+	create_annotations.run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, 0.9)
+	
+	create_annotations.centroid_gis = get_clusters_dict(gene_centroid_clusters_file_path)
 
-	cluster_txt = os.popen('grep -w H ' + gene_centroid_clusters_file_path)
-	centroid_gis = {}
-	for line in cluster_txt.xreadlines():
-		split_i = [re.sub('[\r\t\n]', '', i) for i in line.split('\t')]
-		try:
-			centroid_gis[split_i[-1]] += [split_i[-2]]
-		except KeyError:
-			centroid_gis[split_i[-1]] = [split_i[-2], split_i[-1]]
 	return centroid_gis
-
 
 
 def get_centroids_table(gene_ids, all_centroids, data_matrix, metadata):

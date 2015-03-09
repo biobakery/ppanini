@@ -64,12 +64,10 @@ def abundance_module(mapper, workflow):
 	return mapper
 	
 def annotation_module(mapper, all_paths, nprocesses):
+	## create pangenome insert
+	annotations_dict = create_annotations.generate_annotation(mapper[sample]['FASTAS'], all_paths, nprocesses)
 
-	annotations_dict = {}
-	for sample in mapper:
-		annotations_dict[sample] = create_annotations.generate_annotation(mapper[sample]['FASTAS'], all_paths, nprocesses)
-
-	return mapper
+	return annotations_dict
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
@@ -78,14 +76,14 @@ if __name__ == '__main__':
 	parser.add_argument('--uniref90_50', help='IDMAPPING FILE for UniRef90 ID to UniRef50 ID mapping')
 	parser.add_argument('--uniref90', help='UniRef90 INDEX file')
 	parser.add_argument('--uniref50', help='UniRef50 INDEX file')
-	parser.add_argument('--rapsearch', help='Path to folder containing RAPSEARCH2')
+	parser.add_argument('--diamond', help='Path to folder containing DIAMOND')
 	parser.add_argument('-w', '--workflow', choices=['1', '2', '3'], help='Workflow type Choices:[1, 2, 3]; \
 	                                                                        1: BAM and FASTA files; \
 	                                                                        2: SAM and FASTA FILES; \
 	                                                                        3: CONTIG ASSEMBLIES, READS and GFF3 files')
 	parser.add_argument('--annotation_only', default=False, help='Perform annotation only')
 	parser.add_argument('--abundance_only', default=False, help='Perform abundance only')
-	parser.add_argument('--write_tables_only', default=False, help='Everything exists--write table only')
+	parser.add_argument('--write_tables_only', default=False, help='Write table only (Annotations and Abundance files exist under /n/annot/ and /tmp/idxstats/')
 	
 	parser.add_argument('-o', '--output_table', help='Gene Table to write', default=sys.stdout)
 
@@ -100,6 +98,9 @@ if __name__ == '__main__':
 	gene_contig_mapper = {}
 	n = 1
 
+	#################################
+	###Initiating folder hierarchy
+	#################################
 	try:
 	    os.mkdir('tmp')
 	except:
@@ -109,21 +110,28 @@ if __name__ == '__main__':
 	    os.mkdir('tmp/fasta_files')
 	except:
 	    pass
+	#################################
 
 	all_paths = {'uniref_map': args.uniref90_50, \
 	             'uniref90': args.uniref90_fasta, \
 	             'uniref50': args.uniref50_fasta, \
-	             'rapsearch': args.rapsearch}
+	             'diamond': args.diamond}
 
 	mapper = parse_mapper(args.mapper_file)
 
-	if not annotation_only and not write_tables_only: #abundance_only or ALL
+	###################################
+	##MODULE1: abundance_only or ALL
+	###################################
+	if not annotation_only and not write_tables_only: 
 		print 'Step'+str(n)+': Creating abundance tables via SAMTOOLS'
 		mapper = abundance_module(mapper, workflow)
 		n +=1
 
-	if not write_tables_only and not abundance_only: #annotation_only or ALL
-		print 'Step'+str(n)+': Mapping genes against UniRef90 and UniRef50 via RAPSEARCH2'
+	###################################
+	##MODULE2: annotation_only or ALL
+	###################################
+	if not write_tables_only and not abundance_only: 
+		print 'Step'+str(n)+': Mapping genes against UniRef90 and UniRef50 via DIAMOND'
 		if workflow == 3:
 			print 'Step'+str(n)+': Pulling genes from contigs'
 			n +=1
@@ -135,8 +143,10 @@ if __name__ == '__main__':
 		annotations_dict = annotation_module(mapper, all_paths, nprocesses)
 		n +=1
 	
-
-	if not annotation_only and not abundance_only: #write_tables_only or ALL
+	###################################
+	##MODULE3: write_tables_only or ALL
+	###################################
+	if not annotation_only and not abundance_only: 
 
 		if write_tables_only:
 			#create annotations_dict
@@ -163,8 +173,3 @@ if __name__ == '__main__':
 		print 'Step'+str(n)+': Writing to PPANINI-input format table...'
 		n +=1
 		write_ppanini_table.generate_gene_table(abundance_dict, annotations_dict, all_paths, niche_flag, mapper, args.output_table)
-
-
-
-
-	
