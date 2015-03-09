@@ -77,6 +77,7 @@ if __name__ == '__main__':
 	parser.add_argument('--uniref90', help='UniRef90 INDEX file')
 	parser.add_argument('--uniref50', help='UniRef50 INDEX file')
 	parser.add_argument('--diamond', help='Path to folder containing DIAMOND')
+	parser.add_argument('--usearch', help='Path to folder containing USEARCH')
 	parser.add_argument('-w', '--workflow', choices=['1', '2', '3'], help='Workflow type Choices:[1, 2, 3]; \
 	                                                                        1: BAM and FASTA files; \
 	                                                                        2: SAM and FASTA FILES; \
@@ -115,7 +116,8 @@ if __name__ == '__main__':
 	all_paths = {'uniref_map': args.uniref90_50, \
 	             'uniref90': args.uniref90_fasta, \
 	             'uniref50': args.uniref50_fasta, \
-	             'diamond': args.diamond}
+	             'diamond': args.diamond, \
+	             'usearch': args.usearch}
 
 	mapper = parse_mapper(args.mapper_file)
 
