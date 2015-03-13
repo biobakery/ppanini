@@ -11,7 +11,7 @@ import multiprocessing
 from src import create_idxstats
 from src import create_fastas
 from src import create_annotations
-
+from src import write_ppanini_table
 
 def parse_mapper(mapper_file):
 	'''Reads the mapper_file that contains all the paths and metadata for input
@@ -114,12 +114,12 @@ if __name__ == '__main__':
 	#################################
 
 	all_paths = {'uniref_map': args.uniref90_50, \
-	             'uniref90': args.uniref90_fasta, \
-	             'uniref50': args.uniref50_fasta, \
+	             'uniref90': args.uniref90, \
+	             'uniref50': args.uniref50, \
 	             'diamond': args.diamond, \
 	             'usearch': args.usearch}
 
-	mapper = parse_mapper(args.mapper_file)
+	[mapper, niche_flag, gff3_flag] = parse_mapper(args.mapper_file)
 
 	###################################
 	##MODULE1: abundance_only or ALL
@@ -158,6 +158,7 @@ if __name__ == '__main__':
 			#create abundance_files keys in mapper
 			for sample in mapper:
 				mapper[sample]['abundance_file'] = 'tmp/idxstats/'+sample+'.txt'
+				mapper[sample]['FASTAS'] = 'tmp/fasta_files/'+sample+'.fasta'
 			#mapper for gene_contig for workflow3?
 			if workflow == 3:
 				gene_contig_mapper = {}

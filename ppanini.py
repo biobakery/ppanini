@@ -127,11 +127,11 @@ def get_clusters(centroids_fasta, usearch_folder): #ONLY FOR THE UNIREF UNANNOTA
 	gene_centroids_file_path = 'data_files/centroids.fasta'
 	gene_centroid_clusters_file_path = 'data_files/clusters.uc'
 
-	create_fasta.write_fasta(centroids_fasta, allgenes_file_path) #ensures all clustering happens to FAAs
+	create_fastas.write_fasta(centroids_fasta, allgenes_file_path) #ensures all clustering happens to FAAs
 
 	create_annotations.run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, 0.9)
 	
-	create_annotations.centroid_gis = get_clusters_dict(gene_centroid_clusters_file_path)
+	centroid_gis = create_annotations.get_clusters_dict(gene_centroid_clusters_file_path)
 
 	return centroid_gis
 
@@ -170,6 +170,7 @@ def get_centroids_table(gene_ids, all_centroids, data_matrix, metadata):
 	return centroids_data_matrix 
 
 def is_present(metadata, meta_type):
+	'''Returns True if meta_type is present in metadata extracted from mappert_file'''
 	line = []
 	ind = []
 	for i, val in enumerate(metadata):
@@ -342,6 +343,7 @@ if __name__ == '__main__':
 	parser.add_argument('-i','--input_table', help='Gene abundance table with metadata')
 	parser.add_argument('-u','--usearch_folder', nargs = '?' , help='Path for USEARCH program')
 	parser.add_argument('-o','--output_folder', help='Folder containing results')
+	parser.add_argument('--uc','--uclust_file', help='File containing UCLUST results')
 	args = parser.parse_args()
 
 	try:

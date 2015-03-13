@@ -1,0 +1,86 @@
+# ##########################################
+# ####WITHOUT THE PANGENOME MECHANISM#######
+# ##########################################
+# def generate_annotation_withoutPG(gene_x_file, all_paths, nprocesses):
+# 	'''Runs diamond for genes_fasta file against UniRef90 and UniRef50
+# 	Input: gene_x_file: path_to_genes_fasta_file
+# 		   all_paths = {'uniref90': path_to_uniref90_index, 
+# 		   				'uniref50': path_to_uniref50_index, 
+# 		   				'umap90_50': path_to_uniref90_uniref50_mapping}
+# 		   nprocesses = int, Number of processes
+# 		   sample = sample_name
+
+# 	Output: all_annotations = {gene: UniRef annotation}'''
+
+# 	gene_x_fname = gene_x_file.rpartition('/')[-1] 
+
+# 	#################################
+# 	#Initiating folder hierarchy
+# 	#################################
+# 	try:
+# 		os.mkdir('tmp/u90')
+# 	except:
+# 		pass
+	
+# 	try:
+# 		os.mkdir('tmp/u50')
+# 	except:
+# 		pass
+
+# 	try:
+# 		os.mkdir('tmp/annot')
+# 	except:
+# 		pass
+# 	#################################
+
+# 	fasta_sequences = read_fasta(gene_x_file)
+# 	all_annotations = {}
+# 	u90_out_fname =  'tmp/u90/' + gene_x_fname
+# 	u50_out_fname =  'tmp/u50/' + gene_x_fname 
+# 	u50_gene_input = 'tmp/u50input_' + gene_x_fname
+# 	gene_annotations_file = 'tmp/annot/' + sample + '.m8'
+
+# 	run_diamond(gene_x_file, all_paths, u90_out_fname, nprocesses, 'uniref90')
+	
+# 	[sample_annotations90, diamond50_seqs] = parse_annotation_table(u90_out_fname+'.m8', fasta_sequences, 90.0)
+	
+# 	all_annotations = sample_annotations90
+
+# 	if not diamond50_seqs == {}:
+# 		write_fasta(diamond50_seqs, u50_gene_input)
+		
+# 		run_diamond(u50_gene_input, all_paths, u50_out_fname, nprocesses, 'uniref50')
+		
+# 		[sample_annotations50, diamondukn_seqs] = parse_annotation_table(u50_out_fname+'.m8', diamond50_seqs, 50.0)
+		
+# 		for gid in sample_annotations50:
+# 			if gid not in all_annotations:
+# 				all_annotations[gid] = sample_annotations50[gid]
+# 			else:
+# 				raise Exception('GeneID for UniRef50 exists in Uniref90;\nSearching twice for the same gene;\nError in parse_annotation_table\n')
+# 	write_dict(all_annotations, gene_annotations_file)
+
+# 	return all_annotations
+
+###############!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!@@@@@@@@@@@@@@@@@@@@@@@@!########################
+def write_fasta(seqs_dict, filename):
+	'''Writes dictionary of fasta sequences into text file
+	Input: seqs_dict = {geneID: sequence}
+		   filename = path_to_output_genes_fastafile
+	'''
+	with open(filename,'w') as foo:
+		test = seqs_dict.values()[0]
+		format = True  #'FNA'
+		try:
+			Bio.Seq.translate(test) 
+		except:
+			format = False #'FAA'
+
+		if format:
+			for seq in seqs_dict:
+				foo.writelines(['>'+seq+'\n'])
+				foo.writelines([Bio.Seq.translate(seqs_dict[seq], to_stop=True)+'\n'])
+		else:
+			for seq in seqs_dict:
+				foo.writelines(['>'+seq+'\n'])
+				foo.writelines([seqs_dict[seq]+'\n'])

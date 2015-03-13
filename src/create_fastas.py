@@ -117,7 +117,7 @@ def write_fasta(seqs_dict, filename):
         test = if_protein(seqs_dict.values()[0])
         
 
-        if format:
+        if not format:
             for seq in seqs_dict:
                 foo.writelines(['>'+seq+'\n'])
                 foo.writelines([Bio.Seq.translate(seqs_dict[seq], to_stop=True)+'\n'])

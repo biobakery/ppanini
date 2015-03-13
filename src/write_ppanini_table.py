@@ -9,7 +9,6 @@ import subprocess
 import multiprocessing
 
 
-
 def generate_gene_table(abundance_dict, annotations_dict, all_paths, niche_flag, mapper, output_table):
 
 	#annotations_dict = mapper_with_annotations_dict['annotations_dict']	#sample:{gene:annotation}
@@ -21,6 +20,8 @@ def generate_gene_table(abundance_dict, annotations_dict, all_paths, niche_flag,
 
 	if niche_flag:
 		niche_row = [mapper[i]['NICHE'] for i in samples]
+	
+	umap_temp = {}
 
 	with open(output_table, 'w') as foo:
 		if niche_flag:
@@ -40,9 +41,13 @@ def generate_gene_table(abundance_dict, annotations_dict, all_paths, niche_flag,
 				if gene in annotations_dict[sample]: 
 					annot_x_i = annotations_dict[sample][gene]
 					if annot_x_i.startswith('UniRef90'):
-						umap_i = re.sub('[\t\n\r]', \
-										'', \
-										subprocess.check_output('grep -w ' + annot_x_i + ' ' + all_paths['uniref_map']).split('\t')[-1])
+						if not annot_x_i in umap_temp:
+							xx = os.popen('grep -w '+annot_x_i+' '+all_paths['uniref_map']).read()
+							xx = xx.split('\t')[-1].strip()
+							umap_i = re.sub('[\t\n\r]','', xx)
+							umap_temp[annot_x_i] = umap_i
+						else:
+							umap_i = umap_temp[annot_x_i]
 						annot_x = annot_x_i + '|' + umap_i
 					else:
 						annot_x = 'UniRef90_unknown|' + annot_x_i 

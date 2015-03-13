@@ -3,8 +3,10 @@ import sys
 import numpy
 import re
 import Bio
-from Bio import Seq
 import argparse
+
+from Bio import Seq
+from src import create_fastas
 
 
 def read_fasta(fasta_filename):
@@ -68,7 +70,7 @@ def read_dict(gene_annotations_file):
 	dictX = {}
 
 	with open(gene_annotations_file) as foo:
-		for line in foo.readlines:
+		for line in foo.readlines():
 			if not line.startswith('#'):
 				split_line = [re.sub('[\t\r\n]','', i).strip() for i in line.split('\t')]
 				dictX[split_line[0]] = split_line[1]
@@ -85,28 +87,6 @@ def write_dict(dictX, gene_annotations_file):
 		foo.writelines('#GENEID\tANNOTATION')
 		for i in dictX:
 			foo.writelines([str.join('\t', [i, dictX[i]])+'\n'])
-
-def write_fasta(seqs_dict, filename):
-	'''Writes dictionary of fasta sequences into text file
-	Input: seqs_dict = {geneID: sequence}
-		   filename = path_to_output_genes_fastafile
-	'''
-	with open(filename,'w') as foo:
-		test = seqs_dict.values()[0]
-		format = True  #'FNA'
-		try:
-			Bio.Seq.translate(test) 
-		except:
-			format = False #'FAA'
-
-		if format:
-			for seq in seqs_dict:
-				foo.writelines(['>'+seq+'\n'])
-				foo.writelines([Bio.Seq.translate(seqs_dict[seq], to_stop=True)+'\n'])
-		else:
-			for seq in seqs_dict:
-				foo.writelines(['>'+seq+'\n'])
-				foo.writelines([seqs_dict[seq]+'\n'])
 
 def run_diamond(query_file, all_paths, out_fname, nprocesses, db):
 	
@@ -141,6 +121,7 @@ def get_clusters_dict(gene_centroid_clusters_file_path):
 		except KeyError:
 			centroid_gis[split_i[-1]] = [split_i[-2], split_i[-1]]
 	return centroid_gis
+	
 def get_genes_samples(mapper):
 	genes_samples = {} #Dicitonary of genes and their samples
 
@@ -198,7 +179,7 @@ def generate_annotation(mapper, all_paths, nprocesses):
 	centroid_annotations = centroid_annotations90
 
 	if not diamond50_seqs == {}:
-		write_fasta(diamond50_seqs, u50_gene_input)
+		create_fastas.write_fasta(diamond50_seqs, u50_gene_input)
 		
 		run_diamond(u50_gene_input, all_paths, u50_out_fname, nprocesses, 'uniref50')
 		[centroid_annotations50, diamondukn_seqs] = parse_annotation_table(u50_out_fname+'.m8', diamond50_seqs, 50.0)
@@ -214,77 +195,6 @@ def generate_annotation(mapper, all_paths, nprocesses):
 
 	return get_annotations_dict(mapper, genes_samples, centroid_annotations, centroid_gis)
 
-# ##########################################
-# ####WITHOUT THE PANGENOME MECHANISM#######
-# ##########################################
-# def generate_annotation_withoutPG(gene_x_file, all_paths, nprocesses):
-# 	'''Runs diamond for genes_fasta file against UniRef90 and UniRef50
-# 	Input: gene_x_file: path_to_genes_fasta_file
-# 		   all_paths = {'uniref90': path_to_uniref90_index, 
-# 		   				'uniref50': path_to_uniref50_index, 
-# 		   				'umap90_50': path_to_uniref90_uniref50_mapping}
-# 		   nprocesses = int, Number of processes
-# 		   sample = sample_name
-
-# 	Output: all_annotations = {gene: UniRef annotation}'''
-
-# 	gene_x_fname = gene_x_file.rpartition('/')[-1] 
-
-# 	#################################
-# 	#Initiating folder hierarchy
-# 	#################################
-# 	try:
-# 		os.mkdir('tmp/u90')
-# 	except:
-# 		pass
-	
-# 	try:
-# 		os.mkdir('tmp/u50')
-# 	except:
-# 		pass
-
-# 	try:
-# 		os.mkdir('tmp/annot')
-# 	except:
-# 		pass
-# 	#################################
-
-# 	fasta_sequences = read_fasta(gene_x_file)
-# 	all_annotations = {}
-# 	u90_out_fname =  'tmp/u90/' + gene_x_fname
-# 	u50_out_fname =  'tmp/u50/' + gene_x_fname 
-# 	u50_gene_input = 'tmp/u50input_' + gene_x_fname
-# 	gene_annotations_file = 'tmp/annot/' + sample + '.m8'
-
-# 	run_diamond(gene_x_file, all_paths, u90_out_fname, nprocesses, 'uniref90')
-	
-# 	[sample_annotations90, diamond50_seqs] = parse_annotation_table(u90_out_fname+'.m8', fasta_sequences, 90.0)
-	
-# 	all_annotations = sample_annotations90
-
-# 	if not diamond50_seqs == {}:
-# 		write_fasta(diamond50_seqs, u50_gene_input)
-		
-# 		run_diamond(u50_gene_input, all_paths, u50_out_fname, nprocesses, 'uniref50')
-		
-# 		[sample_annotations50, diamondukn_seqs] = parse_annotation_table(u50_out_fname+'.m8', diamond50_seqs, 50.0)
-		
-# 		for gid in sample_annotations50:
-# 			if gid not in all_annotations:
-# 				all_annotations[gid] = sample_annotations50[gid]
-# 			else:
-# 				raise Exception('GeneID for UniRef50 exists in Uniref90;\nSearching twice for the same gene;\nError in parse_annotation_table\n')
-# 	write_dict(all_annotations, gene_annotations_file)
-
-# 	return all_annotations
-
-
 	
 if __name__ == '__main__':
-	#python create_annotations.py fasta uniref90 uniref50 rapsearch_path nprocesses >> gives all_annotations files
-	##EDIT THE COMMAND LINE mechanism
-	gene_x_file = sys.argv[1]
-	nprocesses = int(sys.argv[5])
-	all_paths = {'uniref90': sys.argv[2], 'uniref50': sys.argv[3], 'diamond': sys.argv[4]}
-	print 'Mechanism needs to be added'
-	#generate_annotation(gene_x_file, all_paths, nprocesses)
+	pass
