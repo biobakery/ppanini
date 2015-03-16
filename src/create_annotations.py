@@ -2,10 +2,8 @@ import os
 import sys
 import numpy
 import re
-import Bio
 import argparse
 
-from Bio import Seq
 from src import create_fastas
 
 

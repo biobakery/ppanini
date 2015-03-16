@@ -128,10 +128,10 @@ def write_fasta(seqs_dict, filename):
 
 def if_protein(sequence):
     format = False  #'FNA'
-        try:
-            Bio.Seq.translate(sequence)
-        except:
-            format = True #'FAA'
+    try:
+        Bio.Seq.translate(sequence)
+    except:
+        format = True #'FAA'
     return format
 
 if __name__ == '__main__':
