@@ -79,7 +79,7 @@ def extract_fasta_names(metadata):
 	return location
 
 
-def get_centroids(gis_unannotated, metadata, usearch_folder, uniref_gis):
+def get_centroids(gis_unannotated, metadata, usearch_folder, uniref_gis, uclust_file):
 	'''Returns the dict of all centroids containing clusters of gene IDs
 
 	Input:	gis_unannotated = {sample_id: [gene ids]}
@@ -90,31 +90,42 @@ def get_centroids(gis_unannotated, metadata, usearch_folder, uniref_gis):
 
 	Output: all_centroids = {gene_centroid : [List of gene ids]}'''
 
+
 	centroids_fasta = {}
 
 	location = extract_fasta_names(metadata)
+	if not uclust_file:
+		for sample in gis_unannotated:
+			genes = gis_unannotated[sample]
+			file_fasta = create_fastas.read_fasta(location[sample])
+			for gid in genes:
+				try:
+					centroids_fasta[gid] = file_fasta[gid]
+				except KeyError:
+					raise Exception('Unannotated gene '+gene+' not found in sample FASTA: '+location[sample])
 
-	for sample in gis_unannotated:
-		genes = gis_unannotated[sample]
-		file_fasta = create_fastas.read_fasta(location[sample])
-		for gid in genes:
-			try:
-				centroids_fasta[gid] = file_fasta[gid]
-			except KeyError:
-				raise Exception('Unannotated gene '+gene+' not found in sample FASTA: '+location[sample])
-
-	centroid_gis = get_clusters(centroids_fasta, usearch_folder) #all UniRef90_unknowns are clustered across samples
-	
-	all_centroids = {}
+		centroid_gis = get_clusters(centroids_fasta, usearch_folder) #all UniRef90_unknowns are clustered across samples
+	else:
+		pre_centroid_gis = create_annotations.get_clusters_dict(gene_centroid_clusters_file_path)
+		uniref_ids = []
+		centroids_gis = {}
+		for uid in uniref_gis:
+			uniref_ids += uniref_gis[uid]
+		
+		for i in pre_centroid_gis:
+			#assuming that if cluster not in UniRef, none of the cluster members are either?!!!!!
+			if i not in uniref_ids: 
+				centroids_gis[i] = pre_centroid_gis[i]
 
 	for sample in gis_unannotated:
 		for gi in gis_unannotated[sample]:
 			if gi not in centroid_gis:
 				centroid_gis[gi] = [gi]
-		all_centroids = dict(centroid_gis.items() + uniref_gis.items())
-
 	
-	return all_centroids 
+	for gi in uniref_gis:
+		centroid_gis[gi] = uniref_gis[gi]
+	
+	return centroid_gis
 
 
 def get_clusters(centroids_fasta, usearch_folder): #ONLY FOR THE UNIREF UNANNOTATED
@@ -357,7 +368,7 @@ if __name__ == '__main__':
 		pass
 
 	[metadata, uniref_gis, gis_unannotated, gene_ids, data_matrix] = read_gene_table(args.input_table)
-	all_centroids = get_centroids(gis_unannotated, metadata, args.usearch_folder, uniref_gis)
+	all_centroids = get_centroids(gis_unannotated, metadata, args.usearch_folder, uniref_gis, uclust_file)
 	centroids_data_matrix = get_centroids_table(gene_ids, all_centroids, data_matrix, metadata)
 	[centroid_prev_abund, all_prevalence, all_mean_abund, flag] = get_prevalence_abundance(centroids_data_matrix, metadata)
 
