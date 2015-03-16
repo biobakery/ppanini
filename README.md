@@ -11,22 +11,19 @@ Prioritization of functional characterization of novel and uncharacterized genes
 ```
 #!python
 
-usage: ppanini.py [-h] [-i INPUT_TABLE] [-f FASTA_FOLDER] [-u [UCLUST_FOLDER]]
-               [-t TYPE] [-o OUTPUT_FOLDER]
+usage: ppanini.py [-h] [-i INPUT_TABLE] [-u [USEARCH_FOLDER]]
+                  [-o OUTPUT_FOLDER] [--uc UC]
 
 optional arguments:
   -h, --help            show this help message and exit
   -i INPUT_TABLE, --input_table INPUT_TABLE
                         Gene abundance table with metadata
-  -f FASTA_FOLDER, --fasta_folder FASTA_FOLDER
-                        Folder containing fasta files
-  -u USEARCH_FOLDER, --usearch_folder [USEARCH_FOLDER]
+  -u [USEARCH_FOLDER], --usearch_folder [USEARCH_FOLDER]
                         Path for USEARCH program
-  -t TYPE, --type TYPE  Type of analysis Choose: [gene_table,
-                        reads_assemblies]
   -o OUTPUT_FOLDER, --output_folder OUTPUT_FOLDER
                         Folder containing results
-
+  --uc UC, --uclust_file UC
+                        File containing UCLUST results
 ```
 
 
@@ -135,10 +132,13 @@ Alternate names
 ```
 #!cmd
 
-usage: preprocess_genedata_table.py [-h] [-m MAPPER_FILE] [-p PROCESSES]
-                                    [-umap UNIREF90_50] [-u90 UNIREF90_INDEX]
-                                    [-u50 UNIREF50_INDEX] [-w {1,2,3}]
-                                    [-o OUTPUT_TABLE]
+usage: preppanini.py [-h] [-m MAPPER_FILE] [-p PROCESSES]
+                     [--uniref90_50 UNIREF90_50] [--uniref90 UNIREF90]
+                     [--uniref50 UNIREF50] [--diamond DIAMOND]
+                     [--usearch USEARCH] [-w {1,2,3}]
+                     [--annotation_only ANNOTATION_ONLY]
+                     [--abundance_only ABUNDANCE_ONLY]
+                     [--write_tables_only WRITE_TABLES_ONLY] [-o OUTPUT_TABLE]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -147,18 +147,24 @@ optional arguments:
                         corresponding assembly files and, if available, GFF3
                         files and NICHE informations
   -p PROCESSES, --processes PROCESSES
-                        Folder containing GFF3 files
-  -umap UNIREF90_50, --uniref90_50 UNIREF90_50
-                        UniRef90 XML file
-  -u90 UNIREF90_INDEX, --uniref90_fasta UNIREF90_INDEX
-                        UniRef90 fasta file
-  -u50 UNIREF50_INDEX, --uniref50_fasta UNIREF50_INDEX
-                        UniRef50 fasta file
+                        Number of threads
+  --uniref90_50 UNIREF90_50
+                        IDMAPPING FILE for UniRef90 ID to UniRef50 ID mapping
+  --uniref90 UNIREF90   UniRef90 INDEX file
+  --uniref50 UNIREF50   UniRef50 INDEX file
+  --diamond DIAMOND     Path to folder containing DIAMOND
+  --usearch USEARCH     Path to folder containing USEARCH
   -w {1,2,3}, --workflow {1,2,3}
-                        Workflow type Choices:[1, 2, 3]; 
-			1: BAM and FASTA files; 
-			2: SAM and FASTA FILES; 
-			3: CONTIG ASSEMBLIES, READS and GFF3 files
+                        Workflow type Choices:[1, 2, 3]; 1: BAM and FASTA
+                        files; 2: SAM and FASTA FILES; 3: CONTIG ASSEMBLIES,
+                        READS and GFF3 files
+  --annotation_only ANNOTATION_ONLY
+                        Perform annotation only
+  --abundance_only ABUNDANCE_ONLY
+                        Perform abundance only
+  --write_tables_only WRITE_TABLES_ONLY
+                        Write table only (Annotations and Abundance files
+                        exist under /n/annot/ and /tmp/idxstats/
   -o OUTPUT_TABLE, --output_table OUTPUT_TABLE
                         Gene Table to write
 ```
