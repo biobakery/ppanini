@@ -71,17 +71,17 @@ def annotation_module(mapper, all_paths, nprocesses):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-m', '--mapper_file', help='Mapper file associating read files with their corresponding assembly files and, if available, GFF3 files and NICHE informations')
+	parser.add_argument('-m', '--mapper_file', help='Mapper file associating read files with their corresponding assembly files and, if available, GFF3 files and NICHE informations', required=True)
 	parser.add_argument('-p', '--processes', help='Number of threads', default=4)
-	parser.add_argument('--uniref90_50', help='IDMAPPING FILE for UniRef90 ID to UniRef50 ID mapping')
+	parser.add_argument('--uniref90_50', help='IDMAPPING FILE for UniRef90 ID to UniRef50 ID mapping', required=True)
 	parser.add_argument('--uniref90', help='UniRef90 INDEX file')
 	parser.add_argument('--uniref50', help='UniRef50 INDEX file')
-	parser.add_argument('--diamond', help='Path to folder containing DIAMOND')
-	parser.add_argument('--usearch', help='Path to folder containing USEARCH')
+	parser.add_argument('--diamond', help='Path to folder containing DIAMOND') #add to be in path??
+	parser.add_argument('--usearch', help='Path to folder containing USEARCH') #add to be in path?
 	parser.add_argument('-w', '--workflow', choices=['1', '2', '3'], help='Workflow type Choices:[1, 2, 3]; \
 	                                                                        1: BAM and FASTA files; \
 	                                                                        2: SAM and FASTA FILES; \
-	                                                                        3: CONTIG ASSEMBLIES, READS and GFF3 files')
+	                                                                        3: CONTIG ASSEMBLIES, READS and GFF3 files', required=True)
 	parser.add_argument('--annotation_only', default=False, help='Perform annotation only')
 	parser.add_argument('--abundance_only', default=False, help='Perform abundance only')
 	parser.add_argument('--write_tables_only', default=False, help='Write table only (Annotations and Abundance files exist under /n/annot/ and /tmp/idxstats/')

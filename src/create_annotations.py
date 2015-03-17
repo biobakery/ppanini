@@ -104,10 +104,16 @@ def run_rapsearch(query_file, all_paths, out_fname, nprocesses, db):
 												 -z' + str(nprocesses))	
 
 def run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, id):
-	os.system(usearch_folder + '/usearch -cluster_fast ' + allgenes_file_path +' \
-								  		 -id '+str(id)+' \
-								         -centroids '+ gene_centroids_file_path + ' \
-								         -uc ' + gene_centroid_clusters_file_path)
+	
+	if not usearch_folder:
+		usearch_folder = ''
+	else:
+		usearch_folder = usearch_folder+'/'
+
+	os.system(usearch_folder + 'usearch -cluster_fast ' + allgenes_file_path +' \
+								  		-id '+str(id)+' \
+								        -centroids '+ gene_centroids_file_path + ' \
+								        -uc ' + gene_centroid_clusters_file_path)
 
 def get_clusters_dict(gene_centroid_clusters_file_path):
 	cluster_txt = os.popen('grep -w H ' + gene_centroid_clusters_file_path)
