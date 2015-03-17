@@ -373,6 +373,7 @@ if __name__ == '__main__':
 
 	basename = args.basename
 	input_table = args.input_table
+	uclust_file = args.uclust_file
 
 	if not basename:
 		basename = input_table.split('.')[0].split('/')[-1]
