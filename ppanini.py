@@ -8,8 +8,7 @@ import numpy
 from src import create_fastas
 from src import create_annotations
 
-
-global basename = ''
+basename = ''
 
 def read_gene_table(gene_table_fname):
 	'''Returns the different elements from the gene table
