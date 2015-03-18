@@ -9,7 +9,9 @@ from src import create_fastas
 
 def read_fasta(fasta_filename):
 	'''Reads a fasta_file and returns a fasta dict
+
 	Input: fasta_filename = path_to_fasta_file
+
 	Output: fasta_seq = {sequence_header: sequence, ...}'''
 	
 	fasta_file = open(fasta_filename)
@@ -30,6 +32,7 @@ def read_fasta(fasta_filename):
 
 def parse_annotation_table(annotations_file, fasta_sequences, thld_ref):
 	'''Parses annotations result from RAPSEARCH/DIAMOND to ensure they pass threshold
+
 	Input: annotations_file = path_to_RAPSEARCH/DIAMOND_results_file
 		   fasta_sequences = {sequence_header: sequence}
 		   thld_ref = int, threshold for sequence acceptance
@@ -61,10 +64,12 @@ def parse_annotation_table(annotations_file, fasta_sequences, thld_ref):
 	return [sample_annotations, search50_seqs]
 
 def read_dict(gene_annotations_file):
-	'''Writes dictionary of genes and their annotations into text file
-	Input: dictX = {geneID: annotation}
-		   gene_annotations_file = path_to_output_gene_annotations_table
-	'''
+	'''Reads tabulated file into a dictionary
+
+	Input: gene_annotations_file = path_to_output_gene_annotations_table
+
+	Output: dictX = {geneID: annotation}'''
+
 	dictX = {}
 
 	with open(gene_annotations_file) as foo:
@@ -87,7 +92,16 @@ def write_dict(dictX, gene_annotations_file):
 			foo.writelines([str.join('\t', [i, dictX[i]])+'\n'])
 
 def run_diamond(query_file, all_paths, out_fname, nprocesses, db):
-	
+	'''Runs DIAMOND on query_file to produce results in out_fname
+
+	Input: query_file = path to query_fasta_file
+		   all_paths = {'uniref90': path_to_uniref90_index, 
+                                            'uniref50': path_to_uniref50_index, 
+                                            'umap90_50': path_to_uniref90_uniref50_mapping}
+           out_fname = path of output_file to put the results in
+           nprocesses = Number of processes
+           db = DIAMOND preprocessed database'''
+
 	os.system(all_paths['diamond']+'/diamond blastp -q ' + query_file + ' \
 													-d ' + all_paths[db] + ' \
 													-k 1 \
@@ -95,6 +109,16 @@ def run_diamond(query_file, all_paths, out_fname, nprocesses, db):
 													-p ' + str(nprocesses)) #check if command is correct.
 
 def run_rapsearch(query_file, all_paths, out_fname, nprocesses, db):
+	'''Runs RAPSEARCH2 on query_file to produce results in out_fname
+
+	Input: query_file = path to query_fasta_file
+		   all_paths = {'uniref90': path_to_uniref90_index, 
+                                            'uniref50': path_to_uniref50_index, 
+                                            'umap90_50': path_to_uniref90_uniref50_mapping}
+           out_fname = path of output_file to put the results in
+           nprocesses = Number of processes
+           db = RAPSEARCH2 preprocessed database'''
+    
 	os.system(all_paths['rapsearch']+'/rapsearch -q ' + query_file + ' \
 												 -d ' + all_paths[db] + ' \
 												 -o ' + out_fname + ' \
@@ -104,7 +128,14 @@ def run_rapsearch(query_file, all_paths, out_fname, nprocesses, db):
 												 -z' + str(nprocesses))	
 
 def run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, id):
-	
+	'''Runs USEARCH UCLUST on query_file to produce results in out_fname
+
+	Input: usearch_folder = path to folder containing USEARCH
+		   allgenes_file_path = path to input fasta file
+		   gene_centroids_file_path = path to place all the centroids produced in
+		   gene_centroid_clusters_file_path = path to file containing clustering results in
+		   id = %ID to cluster sequences at'''
+
 	if not usearch_folder:
 		usearch_folder = ''
 	else:
@@ -163,14 +194,15 @@ def get_annotations_dict(mapper, genes_samples, centroid_annotations, centroid_g
 ######################
 ##WITHPANGENOME
 ######################
-def generate_annotation(mapper, all_paths, nprocesses):
-	
-	allgenes_file_path = 'tmp/preppanini_allsequences.fasta'
-	gene_centroids_file_path = 'tmp/preppanini_centroids.fasta'
-	gene_centroid_clusters_file_path = 'tmp/preppanini_centroid_clusters.uc'
-	out_u90_fname = 'tmp/preppanini_centroids_u90'
-	out_u50_fname = 'tmp/preppanini_centroids_u50'
-	u50_gene_input = 'tmp/preppanini_centroids_u50input.fasta'
+def generate_annotation(mapper, all_paths, nprocesses, basename):
+	'''Returns an annotation dictionary {sample: {gene:annotation}, ...}
+	'''
+	allgenes_file_path = 'tmp/'+basename+'_preppanini_allsequences.fasta'
+	gene_centroids_file_path = 'tmp/'+basename+'_preppanini_centroids.fasta'
+	gene_centroid_clusters_file_path = 'tmp/'+basename+'_preppanini_centroid_clusters.uc'
+	out_u90_fname = 'tmp/'+basename+'_preppanini_centroids_u90'
+	out_u50_fname = 'tmp/'+basename+'_preppanini_centroids_u50'
+	u50_gene_input = 'tmp/'+basename+'_preppanini_centroids_u50input.fasta'
 
 	os.system('cat '+str.join(' ', [mapper[i]['FASTAS'] for i in mapper[i]]) + ' > ' + all_fastas_seqs)
 	run_uclust(all_paths['usearch'], allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, 0.9)

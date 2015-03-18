@@ -7,6 +7,7 @@ import numpy
 
 from src import create_fastas
 from src import create_annotations
+from utils import utilities
 
 basename = ''
 
@@ -63,6 +64,7 @@ def extract_fasta_names(metadata):
 	'''Returns the dict of fasta files corresp. to each sample from metadata
 	
 	Input:	metadata = [metadata strings]; Rows with # as first character in table
+
 	Output: location = {sample_id : path_to_fasta_file}'''
 
 	location = {}
@@ -80,6 +82,39 @@ def extract_fasta_names(metadata):
 
 	return location
 
+def get_centroids_fromUCLUST(gene_centroid_clusters_file_path, uniref_gis):
+	# THIS OPTION IS JUST NOT RECOMMENDED?
+	#assuming that if cluster not in UniRef, none of the cluster members are either?!!!!! 
+	# The fix doesnt solve the issue when one cluster members, are distributed between several UniRef90 clusters?
+			#will be counted twice in Uniref90 adn artificial centroid. TO ASSUME OR NOT?
+	pre_centroid_gis = create_annotations.get_clusters_dict(gene_centroid_clusters_file_path)
+		
+	uniref_ids = [] #all genes under unirefids!
+	centroid_gis = {} 
+
+	for uid in uniref_gis:
+		uniref_ids += uniref_gis[uid]
+	
+	for i in pre_centroid_gis:
+		all_gis = pre_centroid_gis[i]
+		tag = False
+		tag_gi = []
+		for gi in all_gis:
+			if gi in uniref_ids:
+				tag =True #THAT WHOLE CLUSTER SHOULD BE ADDED TO UNIREF_GIS
+				tag_gi = gi
+				break
+		if not tag:
+			centroid_gis[i] = pre_centroid_gis[i]
+		else:
+			for uid in uniref_gis:
+				if tag_gi in uniref_gis[uid]:
+					for gi in all_gis:
+						if not gi in uniref_gis[uid]:
+							uniref_gis[uid] += [gi]
+					break #assuming tag_gi is only in one UniRef90 cluster? YES?
+	return centroid_gis
+
 
 def get_centroids(gis_unannotated, metadata, usearch_folder, uniref_gis, uclust_file):
 	'''Returns the dict of all centroids containing clusters of gene IDs
@@ -88,10 +123,10 @@ def get_centroids(gis_unannotated, metadata, usearch_folder, uniref_gis, uclust_
 			metadata = [metadata strings]; Rows with # as first character in table
 			uniref_gis = {UniRef_XYZ: [list of gene ids]}
 			gis_unannotated = {sample_id: [gene ids]}
-			usearch_folder = Location of the USEARCH program
+			usearch_folder = Location of the USEARCH program or in path if not provided
+			uclust_file = path to USEARCH_UCLUST FILE from PREPPANINI
 
 	Output: all_centroids = {gene_centroid : [List of gene ids]}'''
-
 
 	centroids_fasta = {}
 
@@ -108,20 +143,15 @@ def get_centroids(gis_unannotated, metadata, usearch_folder, uniref_gis, uclust_
 
 		centroid_gis = get_clusters(centroids_fasta, usearch_folder) #all UniRef90_unknowns are clustered across samples
 	else:
-		pre_centroid_gis = create_annotations.get_clusters_dict(gene_centroid_clusters_file_path)
-		uniref_ids = []
-		centroids_gis = {}
-		for uid in uniref_gis:
-			uniref_ids += uniref_gis[uid]
-		
-		for i in pre_centroid_gis:
-			#assuming that if cluster not in UniRef, none of the cluster members are either?!!!!!
-			if i not in uniref_ids: 
-				centroids_gis[i] = pre_centroid_gis[i]
+		centroid_gis = get_centroids_fromUCLUST(gene_centroid_clusters_file_path, uniref_gis)
+
+	all_centroid_gis = []
+	for gid in centroid_gis:
+		all_centroid_gis += centroid_gis[gid]
 
 	for sample in gis_unannotated:
 		for gi in gis_unannotated[sample]:
-			if gi not in centroid_gis:
+			if gi not in all_centroid_gis: 
 				centroid_gis[gi] = [gi]
 	
 	for gi in uniref_gis:
@@ -132,10 +162,12 @@ def get_centroids(gis_unannotated, metadata, usearch_folder, uniref_gis, uclust_
 
 def get_clusters(centroids_fasta, usearch_folder): #ONLY FOR THE UNIREF UNANNOTATED
 	'''Returns the dict of unannotated gene centroids containing clusters of genes at 90% similarity
+
 	Input:	centroids_fasta = {UniRef90_unknown: [List of gene ids]}
 			usearch_folder = Location of the USEARCH program
-	Output: centroids_gis = {gene_centroid: [List of genes in the cluster]}
-			'''
+
+	Output: centroid_gis = {gene_centroid: [List of genes in the cluster]}'''
+
 	allgenes_file_path = 'data_files/'+basename+'_centroids_for_clustering.fasta'
 	gene_centroids_file_path = 'data_files/'+basename+'_centroids.fasta'
 	gene_centroid_clusters_file_path = 'data_files/'+basename+'_clusters.uc'
@@ -151,12 +183,13 @@ def get_clusters(centroids_fasta, usearch_folder): #ONLY FOR THE UNIREF UNANNOTA
 
 def get_centroids_table(gene_ids, all_centroids, data_matrix, metadata):
 	'''Returns data matrix containing gene centroids and abundance per sample
+
 	Input:	metadata = [metadata strings]; Rows with # as first character in table
 			gene_ids = [List of all gene ids]
 			data_matrix = The abundance table [[0, 0,.],[0, 0,.],...]
 			all_centroids = {gene_centroid : [List of gene ids]}
-	Output: centroids_data_matrix = {gene_centroid: [Gene centroid abundance across samples]}
-			'''
+
+	Output: centroids_data_matrix = {gene_centroid: [Gene centroid abundance across samples]}'''
 	
 	centroids_data_matrix = {}
 	
@@ -183,7 +216,15 @@ def get_centroids_table(gene_ids, all_centroids, data_matrix, metadata):
 	return centroids_data_matrix 
 
 def is_present(metadata, meta_type):
-	'''Returns True if meta_type is present in metadata extracted from mappert_file'''
+	'''Returns True if meta_type is present in metadata extracted from mappert_file
+
+	Input: metadata = [metadata strings]; Rows with # as first character in table
+		   meta_type = Type of metadata that you are querying e.g. FASTAS, NICHE etc.
+
+	Output: [line, ind]
+			line = The corresponding line from metadata, [] if not present
+			ind = The index of the line in the metadata sequence, [] if not present'''
+
 	line = []
 	ind = []
 	for i, val in enumerate(metadata):
@@ -195,8 +236,10 @@ def is_present(metadata, meta_type):
 
 def get_prevalence_abundance(centroids_data_matrix, metadata):
 	'''Returns the dict of centroids with their prevalence and abundance
+
 	Input:	centroids_data_matrix = {gene_centroid: [Gene centroid abundance across samples]}
 			metadata = [metadata strings]; Rows with # as first character in table
+
 	Output: centroid_prev_abund = {centroid: {'abund': mean abundance, 'prev': prevalence}}
 			all_prevalence = [List of all observed gene centroid prevalence values (>0) across samples]
 			all_mean_abund = [List of all calculated mean gene centroid abundance across samples]
@@ -207,7 +250,7 @@ def get_prevalence_abundance(centroids_data_matrix, metadata):
 	[line, ind] = is_present(metadata, '#NICHE')
 	
 	if line:
-		[centroid_prev_abund, all_alpha_prev, all_mean_abund] = get_niche_prevalence_abundance (centroids_data_matrix, metadata, line, ind)
+		[centroid_prev_abund, all_alpha_prev, all_mean_abund] = get_niche_prevalence_abundance (centroids_data_matrix, metadata, line)
 		return [centroid_prev_abund, all_alpha_prev, all_mean_abund, True]
 	else:
 		centroid_prev_abund = {}
@@ -226,10 +269,13 @@ def get_prevalence_abundance(centroids_data_matrix, metadata):
 		
 		return [centroid_prev_abund, all_prevalence, all_mean_abund, False]
 
-def get_niche_prevalence_abundance(centroids_data_matrix, metadata, line, ind):
+def get_niche_prevalence_abundance(centroids_data_matrix, metadata, line):
 	'''Returns the dict of centroids with their prevalence and abundance
+
 	Input:	centroids_data_matrix = {gene_centroid: [Gene centroid abundance across samples]}
 			metadata = [metadata strings]; Rows with # as first character in table
+			line = line from mapper file containing NICHE information
+
 	Output: centroid_prev_abund = {centroid: {'abund': float_mean abundance, 
 											  'a_prev': {'NICHE**': prevalence of centroid across samples within niche, ...}},
 											  'b_prev': float_median of alpha prevalence within niches for centroid}}
@@ -279,13 +325,16 @@ def get_niche_prevalence_abundance(centroids_data_matrix, metadata, line, ind):
 
 def get_important_niche_centroids(centroid_prev_abund, all_alpha_prev, all_mean_abund, output_folder):
 	'''Returns the dict of important gene centroids [>= 10th percentile of alpha_prevalence and mean abundance]
+
 	Input:	centroid_prev_abund = {centroid: {'abund': mean abundance, 'prev': prevalence}}
 			all_alpha_preva = {niche: List of all observed gene centroid alpha prevalence values (>0) across samples within each niche}
 			all_mean_abund = [List of all calculated mean gene centroid abundance across samples]
 			output_folder = Location of the results folder
+
 	Output: imp_centroids = {centroid: {'mean_abundance': mean abundance, 
 										'beta_prevalence': median of alpha prevalences observed in each niche, 
 										'alpha_prevalence_NICHEX': alpha_prevalence for niche X, ...}}'''
+
 	imp_centroid_prev_abund_file_path = 'imp_centroid_prev_abund.txt'
 	tshld_prev = {}
 	#not good for small sample space? 10th percentile; need a better metric? z-score?
@@ -314,10 +363,12 @@ def get_important_niche_centroids(centroid_prev_abund, all_alpha_prev, all_mean_
 
 def get_important_centroids(centroid_prev_abund, all_prevalence, all_mean_abund, output_folder):
 	'''Returns the dict of important gene centroids [>= 10th percentile of prevalence and abundance]
+
 	Input:	centroid_prev_abund = {centroid: {'abund': mean abundance, 'prev': prevalence}}
 			all_prevalence = [List of all observed gene centroid prevalence values (>0) across samples]
 			all_mean_abund = [List of all calculated mean gene centroid abundance across samples]
 			output_folder = Location of the results folder
+
 	Output: imp_centroids = {centroid: {'abund': mean abundance, 'prev': prevalence}}'''
 	
 	imp_centroid_prev_abund_file_path = 'imp_centroid_prev_abund.txt'
@@ -339,7 +390,12 @@ def get_important_centroids(centroid_prev_abund, all_prevalence, all_mean_abund,
 	return imp_centroids
 
 def write_prev_abund_matrix(centroid_prev_abund, out_file):
-	'''Writes the centroids prevalence and abundance information in text file'''
+	'''Writes the centroids prevalence and abundance information in text file
+
+	Input: centroid_prev_abund = {centroids: {'abund': mean abundance, ...}}
+		   out_file = output_filename
+
+	Output: Writes the centroids dictionary to the output_filename'''
 
 	foo = open(out_file,'w')
 	#Assumes the dictionary structure to be consistent and fixed
@@ -351,15 +407,9 @@ def write_prev_abund_matrix(centroid_prev_abund, out_file):
 		foo.writelines([str.join('\t', [centroid] + [str(centroid_prev_abund[centroid][key]) for key in keys]) + '\n'])
 	foo.close()
 
-def create_folders(list_folders):
-
-	for fname in list_folders:
-		try:
-			os.mkdir(fname)
-		except:
-			pass
 
 if __name__ == '__main__':
+	
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i','--input_table', help='Gene abundance table with metadata', required=True)
 	parser.add_argument('-u','--usearch_folder', nargs = '?' , help='Path for USEARCH program; if not provided, assumed to be in path')
@@ -369,7 +419,7 @@ if __name__ == '__main__':
 
 	args = parser.parse_args()
 
-	create_folders(['data_files', args.output_folder])
+	utilities.create_folders(['data_files', args.output_folder])
 
 	basename = args.basename
 	input_table = args.input_table

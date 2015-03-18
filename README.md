@@ -11,19 +11,21 @@ Prioritization of functional characterization of novel and uncharacterized genes
 ```
 #!python
 
-usage: ppanini.py [-h] [-i INPUT_TABLE] [-u [USEARCH_FOLDER]]
-                  [-o OUTPUT_FOLDER] [--uc UC]
+usage: ppanini.py [-h] -i INPUT_TABLE [-u [USEARCH_FOLDER]] [-o OUTPUT_FOLDER]
+                  [--uclust_file UCLUST_FILE] [--basename BASENAME]
 
 optional arguments:
   -h, --help            show this help message and exit
   -i INPUT_TABLE, --input_table INPUT_TABLE
                         Gene abundance table with metadata
   -u [USEARCH_FOLDER], --usearch_folder [USEARCH_FOLDER]
-                        Path for USEARCH program
+                        Path for USEARCH program; if not provided, assumed to
+                        be in path
   -o OUTPUT_FOLDER, --output_folder OUTPUT_FOLDER
                         Folder containing results
-  --uc UC, --uclust_file UC
+  --uclust_file UCLUST_FILE
                         File containing UCLUST results
+  --basename BASENAME   BASENAME for all the output files
 ```
 
 
@@ -45,7 +47,7 @@ geneID_MNO  UniRef90_unknown  0.00 0.09
 
 ```
 #!text
-#FASTA	N/A	location_fasta_SAMPLE_X	location_fasta_SAMPLE_Y
+#FASTAS	location_fasta_SAMPLE_X	location_fasta_SAMPLE_Y
 #GENEID|UniRef90_XYZ|UniRef50_XYZ	SAMPLE_X	SAMPLE_Y
 ```
 
@@ -60,11 +62,10 @@ geneID_MNO  UniRef90_unknown  0.00 0.09
 * * * This data is used to calculate the alpha- and beta- prevalence of the gene centroids i.e. prevalence within a specific niche and/or prevalence across different niches
 * * * In absence of niche data, only alpha-prevalence is calculated.
 
-* **FASTA_FOLDER**: Location of the fasta files containing gene sequences (amino acids) per sample.
-* * See mock fasta files under input/faa_only
 * **USEARCH_FOLDER**: Location of the USEARCH PATH = version required 7.0 (?confirm)
-* **TYPE**: Defines type of input. input can be gene_table or reads/assemblies data
-* **OUTPUT**: Location of output directory
+* **OUTPUT_FOLDER**: folder containing all the 
+* **UCLUST_FILE**: File containing the clustering information for all the genes in input file
+* **BASENAME**: name prefix for all intermediate output files
 
 ## **OUTPUT**
 

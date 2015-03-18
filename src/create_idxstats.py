@@ -7,6 +7,9 @@ import numpy
 import subprocess
 import multiprocessing
 
+
+from utils import utilities
+
 def generate_abundance_viabwt2(assembly_x_withpath, reads_x, sample):
   '''Calculate Genes/Contigs abundance from Contig_assemblies and reads
   Input: assembly_x_withpath= path_to_assemblies_file
@@ -57,15 +60,11 @@ def generate_abundance_viabam(assembly_x_bam_withpath, sample):
   where assembly_x_stats = path_to_samtools_abundance_file, 
           sample = sample_name'''
 
-  try:
-    os.mkdir('tmp/idxstats')
-  except:
-    pass
+  utilities.create_folders(['tmp/idxstats'])
 
   assembly_x_bam = assembly_x_bam_withpath.rpartition('/')[-1]
   assembly_x_bam_presort = 'tmp/' + assembly_x_bam + '.sorted'
   assembly_x_bam_sorted = 'tmp/' + assembly_x_bam + '.sorted.bam'
-  #assembly_x_stats = 'tmp/' + assembly_x_bam + '.txt'
   assembly_x_stats = 'tmp/idxstats/' + sample + '.txt'
 
   os.system('samtools sort ' + assembly_x_bam_withpath + ' ' + assembly_x_bam_presort)

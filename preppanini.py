@@ -12,6 +12,9 @@ from src import create_idxstats
 from src import create_fastas
 from src import create_annotations
 from src import write_ppanini_table
+from utils import utilities
+
+basename = ''
 
 def parse_mapper(mapper_file):
 	'''Reads the mapper_file that contains all the paths and metadata for input
@@ -65,7 +68,7 @@ def abundance_module(mapper, workflow):
 	
 def annotation_module(mapper, all_paths, nprocesses):
 	## create pangenome insert
-	annotations_dict = create_annotations.generate_annotation(mapper[sample]['FASTAS'], all_paths, nprocesses)
+	annotations_dict = create_annotations.generate_annotation(mapper[sample]['FASTAS'], all_paths, nprocesses, basename)
 
 	return annotations_dict
 
@@ -85,7 +88,7 @@ if __name__ == '__main__':
 	parser.add_argument('--annotation_only', default=False, help='Perform annotation only')
 	parser.add_argument('--abundance_only', default=False, help='Perform abundance only')
 	parser.add_argument('--write_tables_only', default=False, help='Write table only (Annotations and Abundance files exist under /n/annot/ and /tmp/idxstats/')
-	
+	parser.add_argument('--basename', help='BASENAME for all the output files')
 	parser.add_argument('-o', '--output_table', help='Gene Table to write', default=sys.stdout)
 
 	args = parser.parse_args()
@@ -95,6 +98,11 @@ if __name__ == '__main__':
 
 	nprocesses = int(args.processes)
 	workflow = int(args.workflow)
+	mapper_file = args.mapper_file
+	basename = args.basename
+
+	if not basename:
+		basename = mapper_file.split('.')[0].split('/')[-1]
 
 	gene_contig_mapper = {}
 	n = 1
@@ -102,15 +110,7 @@ if __name__ == '__main__':
 	#################################
 	###Initiating folder hierarchy
 	#################################
-	try:
-	    os.mkdir('tmp')
-	except:
-	    pass
-
-	try:
-	    os.mkdir('tmp/fasta_files')
-	except:
-	    pass
+	utilities.create_folders(['tmp', 'tmp/fasta_files'])
 	#################################
 
 	all_paths = {'uniref_map': args.uniref90_50, \
@@ -119,7 +119,7 @@ if __name__ == '__main__':
 	             'diamond': args.diamond, \
 	             'usearch': args.usearch}
 
-	[mapper, niche_flag, gff3_flag] = parse_mapper(args.mapper_file)
+	[mapper, niche_flag, gff3_flag] = parse_mapper(mapper_file)
 
 	###################################
 	##MODULE1: abundance_only or ALL
