@@ -127,7 +127,7 @@ def run_rapsearch(query_file, all_paths, out_fname, nprocesses, db):
 												 -v 1 \
 												 -z' + str(nprocesses))	
 
-def run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, id):
+def run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, id, nprocesses):
 	'''Runs USEARCH UCLUST on query_file to produce results in out_fname
 
 	Input: usearch_folder = path to folder containing USEARCH
@@ -144,7 +144,8 @@ def run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gen
 	os.system(usearch_folder + 'usearch -cluster_fast ' + allgenes_file_path +' \
 								  		-id '+str(id)+' \
 								        -centroids '+ gene_centroids_file_path + ' \
-								        -uc ' + gene_centroid_clusters_file_path)
+								        -uc ' + gene_centroid_clusters_file_path+ '\
+								        -threads '+str(nprocesses))
 
 def get_clusters_dict(gene_centroid_clusters_file_path):
 	cluster_txt = os.popen('grep -w H ' + gene_centroid_clusters_file_path)
@@ -205,7 +206,7 @@ def generate_annotation(mapper, all_paths, nprocesses, basename):
 	u50_gene_input = 'tmp/'+basename+'_preppanini_centroids_u50input.fasta'
 
 	os.system('cat '+str.join(' ', [mapper[i]['FASTAS'] for i in mapper[i]]) + ' > ' + all_fastas_seqs)
-	run_uclust(all_paths['usearch'], allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, 0.9)
+	run_uclust(all_paths['usearch'], allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, 0.9, nprocesses)
 
 	run_diamond(gene_centroids_file_path, all_paths, out_fname, nprocesses, 'uniref90')
 

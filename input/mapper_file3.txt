@@ -1,6 +1,0 @@
-#READS	CONTIG_ASSEMBLIES	SAMPLES	GFF3S
-/home/hutlab5/Desktop/tmp/input/reads/SRS011132.tar.gz	/home/hutlab5/Desktop/tmp/input/fna_only/SRS011132.with_fasta.gff3.fna	SRS011132	/home/hutlab5/Desktop/tmp/input/txt_only/SRS011132.with_fasta.gff3.txt
-/home/hutlab5/Desktop/tmp/input/reads/SRS016033.tar.gz	/home/hutlab5/Desktop/tmp/input/fna_only/SRS016033.with_fasta.gff3.fna	SRS016033	/home/hutlab5/Desktop/tmp/input/txt_only/SRS016033.with_fasta.gff3.txt
-/home/hutlab5/Desktop/tmp/input/reads/SRS015996.tar.gz	/home/hutlab5/Desktop/tmp/input/fna_only/SRS015996.with_fasta.gff3.fna	SRS015996	/home/hutlab5/Desktop/tmp/input/txt_only/SRS015996.with_fasta.gff3.txt
-/home/hutlab5/Desktop/tmp/input/reads/SRS019597.tar.gz	/home/hutlab5/Desktop/tmp/input/fna_only/SRS019597.with_fasta.gff3.fna	SRS019597	/home/hutlab5/Desktop/tmp/input/txt_only/SRS019597.with_fasta.gff3.txt
-/home/hutlab5/Desktop/tmp/input/reads/SRS056210.tar.bz2	/home/hutlab5/Desktop/tmp/input/fna_only/SRS056210.with_fasta.gff3.fna	SRS056210	/home/hutlab5/Desktop/tmp/input/txt_only/SRS056210.with_fasta.gff3.txt

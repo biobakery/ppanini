@@ -76,7 +76,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-m', '--mapper_file', help='Mapper file associating read files with their corresponding assembly files and, if available, GFF3 files and NICHE informations', required=True)
 	parser.add_argument('-p', '--processes', help='Number of threads', default=4)
-	parser.add_argument('--uniref90_50', help='IDMAPPING FILE for UniRef90 ID to UniRef50 ID mapping', required=True)
+	parser.add_argument('--uniref90_50', help='IDMAPPING FILE for UniRef90 ID to UniRef50 ID mapping')
 	parser.add_argument('--uniref90', help='UniRef90 INDEX file')
 	parser.add_argument('--uniref50', help='UniRef50 INDEX file')
 	parser.add_argument('--diamond', help='Path to folder containing DIAMOND') #add to be in path??
@@ -158,11 +158,11 @@ if __name__ == '__main__':
 			#create abundance_files keys in mapper
 			for sample in mapper:
 				mapper[sample]['abundance_file'] = 'tmp/idxstats/'+sample+'.txt'
-				mapper[sample]['FASTAS'] = 'tmp/fasta_files/'+sample+'.fasta'
 			#mapper for gene_contig for workflow3?
 			if workflow == 3:
 				gene_contig_mapper = {}
 				for sample in mapper:
+					mapper[sample]['FASTAS'] = 'tmp/fasta_files/'+sample+'.fasta'
 					[gene_contig_mapper_i, gene_start_stop_i, contig_gene_mapper_i] = create_fastas.read_gff3(mapper[sample]['GFF3S'])
 					gene_contig_mapper[sample] = gene_contig_mapper_i
 

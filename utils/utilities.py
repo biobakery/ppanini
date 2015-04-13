@@ -16,3 +16,10 @@ def create_folders(list_folders):
 			os.mkdir(fname)
 		except:
 			pass
+
+
+
+
+
+
+

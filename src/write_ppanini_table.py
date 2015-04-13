@@ -28,7 +28,7 @@ def generate_gene_table(abundance_dict, annotations_dict, all_paths, niche_flag,
 			foo.writelines([str.join('\t', ['#NICHE']+niche_row)+'\n']) #header
 
 		foo.writelines([str.join('\t', ['#FASTAS']+fasta_row)+'\n']) #header
-		foo.writelines([str.join('\t', ['#GENES']+samples)+'\n']) #header
+		foo.writelines([str.join('\t', ['#SAMPLES']+samples)+'\n']) #header
 		
 		for i, sample in enumerate(samples):
 			for gene in abundance_dict[sample]:
@@ -41,13 +41,15 @@ def generate_gene_table(abundance_dict, annotations_dict, all_paths, niche_flag,
 				if gene in annotations_dict[sample]: 
 					annot_x_i = annotations_dict[sample][gene]
 					if annot_x_i.startswith('UniRef90'):
-						if not annot_x_i in umap_temp:
-							xx = os.popen('grep -w '+annot_x_i+' '+all_paths['uniref_map']).read()
-							xx = xx.split('\t')[-1].strip()
-							umap_i = re.sub('[\t\n\r]','', xx)
-							umap_temp[annot_x_i] = umap_i
-						else:
-							umap_i = umap_temp[annot_x_i]
+						##Add accumulation of UniRef90 ids and grep -f to accumulate all the mappings
+						# if not annot_x_i in umap_temp:
+						# 	xx = os.popen('grep -w '+annot_x_i+' '+all_paths['uniref_map']).read()
+						# 	xx = xx.split('\t')[-1].strip()
+						# 	umap_i = re.sub('[\t\n\r]','', xx)
+						# 	umap_temp[annot_x_i] = umap_i
+						# else:
+						# 	umap_i = umap_temp[annot_x_i]
+						umap_i = 'UniRef50_unknown'
 						annot_x = annot_x_i + '|' + umap_i
 					else:
 						annot_x = 'UniRef90_unknown|' + annot_x_i 
