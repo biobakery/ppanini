@@ -134,16 +134,18 @@ if __name__ == '__main__':
 	###################################
 	if not write_tables_only and not abundance_only: 
 		print 'Step'+str(n)+': Mapping genes against UniRef90 and UniRef50 via DIAMOND'
+		n +=1
+		for sample in mapper:
+			if 'FASTAS' not in mapper[sample]:
+				mapper[sample]['FASTAS'] = 'tmp/fasta_files/'+sample+'.fasta'
 		if workflow == 3:
 			print 'Step'+str(n)+': Pulling genes from contigs'
 			n +=1
 			for sample in mapper:
-				mapper[sample]['FASTAS'] = 'tmp/fasta_files/'+sample+'.fasta'
 				gene_contig_mapper[sample] = create_fastas.pullgenes_fromcontigs(mapper[sample]['CONTIG_ASSEMBLIES'], \
 														  mapper[sample]['GFF3S'], \
 														  mapper[sample]['FASTAS'])
 		annotations_dict = annotation_module(mapper, all_paths, nprocesses)
-		n +=1
 	
 	###################################
 	##MODULE3: write_tables_only or ALL
@@ -162,7 +164,8 @@ if __name__ == '__main__':
 			if workflow == 3:
 				gene_contig_mapper = {}
 				for sample in mapper:
-					mapper[sample]['FASTAS'] = 'tmp/fasta_files/'+sample+'.fasta'
+					if not 'FASTAS' in mapper[sample]:
+						mapper[sample]['FASTAS'] = 'tmp/fasta_files/'+sample+'.fasta'
 					[gene_contig_mapper_i, gene_start_stop_i, contig_gene_mapper_i] = create_fastas.read_gff3(mapper[sample]['GFF3S'])
 					gene_contig_mapper[sample] = gene_contig_mapper_i
 

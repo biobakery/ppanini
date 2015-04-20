@@ -148,14 +148,15 @@ def run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gen
 								        -threads '+str(nprocesses))
 
 def get_clusters_dict(gene_centroid_clusters_file_path):
-	cluster_txt = os.popen('grep -w H ' + gene_centroid_clusters_file_path)
+	cluster_txt = open(gene_centroid_clusters_file_path)#os.popen('grep -w H ' + gene_centroid_clusters_file_path)
 	centroid_gis = {}
-	for line in cluster_txt.xreadlines():
-		split_i = [re.sub('[\r\t\n]', '', i) for i in line.split('\t')]
-		try:
-			centroid_gis[split_i[-1]] += [split_i[-2]]
-		except KeyError:
-			centroid_gis[split_i[-1]] = [split_i[-2], split_i[-1]]
+	for line in cluster_txt:#.xreadlines():
+		if line.startswith('H'):
+			split_i = [re.sub('[\r\t\n]', '', i) for i in line.split('\t')]
+			try:
+				centroid_gis[split_i[-1]] += [split_i[-2]]
+			except KeyError:
+				centroid_gis[split_i[-1]] = [split_i[-2], split_i[-1]]
 	return centroid_gis
 	
 def get_genes_samples(mapper):
