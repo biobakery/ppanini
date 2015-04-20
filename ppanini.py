@@ -218,7 +218,7 @@ def get_centroids_table(gene_ids, all_centroids, data_matrix, metadata):
 
 	#NORMALIZATION PER SAMPLE
 	centroids_data_matrix = numpy.array(centroids_data_matrix)
-	norm_data_matrix = centroids_data_matrix/sum(centroids_data_matrix)
+	norm_data_matrix = centroids_data_matrix*1000000/sum(centroids_data_matrix)
 		
 		# if len(centroids_data_matrix[centroid]) == 1: 
 		# 	#raise Exception('length of data row is one?')#if only one member in cluster
