@@ -114,10 +114,9 @@ def draw_cloud(cloud_points, data_points, labels, margins):
 
 	pyplot.savefig(labels['filename'])
 
-def get_go_mapping(uniref_table, inds, map_go_fname):
+def get_go_mapping(uniref_table, inds, map_go_fname, out_fname):
 	uniref, uniref_go = {}, {}
 	map = open(map_go_fname,'r')
-	map = map.readlines()
 	mapper = {}
 	t= time.time()
 	for line in map:
@@ -126,11 +125,14 @@ def get_go_mapping(uniref_table, inds, map_go_fname):
 			mapper[re.sub('[\r\t\n]','',i)] = split_line[0]
 	t2=time.time()
 	print (t2-t)/60
-	for gene in uniref_table:
-		if gene in mapper:
-			uniref_go[gene] = uniref_table[gene]
-		else:
-			uniref[gene] = uniref_table[gene]
+	with open(out_fname, 'w') as foo:
+		for gene in uniref_table:
+			if gene in mapper:
+				uniref_go[gene] = uniref_table[gene]
+				foo.writelines(gene+'\t'+mapper[gene]+'\n')
+			else:
+				foo.writelines(gene+'\tNA\n')
+				uniref[gene] = uniref_table[gene]
 	uniref_x_y = split_table(uniref, inds)
 	uniref_go_x_y = split_table(uniref_go, inds)
 	#pdb.set_trace()
@@ -177,14 +179,25 @@ if __name__ == '__main__':
 	parser.add_argument('--prev', default=False, help='Graph will be prevalence across centroids')
 	parser.add_argument('--abund', default=False, help='Graph will be mean abundance across centroids')
 	parser.add_argument('-m','--mapper', help='GO to UniRef mapper')
-
+	parser.add_argument('--write_mapper', default=True, help='Gene to GO')
 	args = parser.parse_args()
 	[genes_table_i, uniref_table_i, inds_i, keys_i] = parse_table(args.input_table)
+	if bool(args.write_mapper):
+		alpha_is = inds_i['alpha']
+		abund_i = inds_i['abund']
+		map_go_fname = args.mapper
+		[uniref_i_x_y, uniref_go_x_y] = get_go_mapping(uniref_table_i, [alpha_is, abund_i], map_go_fname, args.input_table+'_GO_map.txt_tmp')
+		r = open(args.input_table+'_GO_map.txt_tmp')
+		with open(args.input_table+'_GO_map.txt','w') as foo:
+			for line in r:
+				foo.writelines(line)
+			for gene in genes_table_i:
+				foo.writelines(gene+'\tNA\n')
+		os.system('rm '+args.input_table+'_GO_map.txt_tmp')
 
 	if bool(args.abund_prev):	
 		[genes_table, uniref_table, inds, keys] = parse_table(args.original_table)
-		map_go_fname = args.mapper
-
+		
 		genes_table_o, uniref_table_o = {}, {}
 		for gene in genes_table:
 			if gene not in genes_table_i:
@@ -195,8 +208,6 @@ if __name__ == '__main__':
 				uniref_table_o[gene] = uniref_table[gene]
 		
 		## Abundance vs. Alpha Prevalence ##
-		alpha_is = inds_i['alpha']
-		abund_i = inds_i['abund']
 		
 		cloud_points = split_x_y([genes_table_o, uniref_table_o], \
 								 [alpha_is, abund_i])
@@ -204,14 +215,15 @@ if __name__ == '__main__':
 								[alpha_is, abund_i])
 		print time.time()
 		t=time.time()
-		[uniref_i_x_y, uniref_go_x_y] = get_go_mapping(uniref_table_i, [alpha_is, abund_i], map_go_fname)
-		print (time.time()-t)/60
-		data_points[1] = uniref_i_x_y
-		data_points += [uniref_go_x_y]
 		labels = {'xlabel': keys_i[alpha_is], \
 				  'ylabel': keys_i[abund_i], \
 				  'title': 'Mean Abundance vs. '+keys_i[alpha_is], \
 				  'filename': args.input_table+'_cloud.pdf'}
+		# [uniref_i_x_y, uniref_go_x_y] = get_go_mapping(uniref_table_i, [alpha_is, abund_i], map_go_fname, args.input_table+'_GO_map.txt')
+		print (time.time()-t)/60
+		data_points[1] = uniref_i_x_y
+		data_points += [uniref_go_x_y]
+		
 
 		draw_cloud(cloud_points, data_points, labels, [args.abund, args.prev])
 	if bool(args.prev):

@@ -13,6 +13,7 @@ from utils import utilities
 logger = logging.getLogger(__name__)
 
 basename = ''
+numpy.seterr(divide='ignore', invalid='ignore')
 
 def read_gene_table(gene_table_fname):
 	'''Returns the different elements from the gene table
@@ -218,8 +219,9 @@ def get_centroids_table(gene_ids, all_centroids, data_matrix, metadata):
 
 	#NORMALIZATION PER SAMPLE
 	centroids_data_matrix = numpy.array(centroids_data_matrix)
-	norm_data_matrix = centroids_data_matrix*1000000/sum(centroids_data_matrix)
-		
+	norm_data_matrix = centroids_data_matrix/sum(centroids_data_matrix)
+	norm_data_matrix = norm_data_matrix*1e6
+	
 		# if len(centroids_data_matrix[centroid]) == 1: 
 		# 	#raise Exception('length of data row is one?')#if only one member in cluster
 		# 	centroids_data_matrix[centroid] = [i for i in centroids_data_matrix[centroid][0]]
@@ -232,13 +234,13 @@ def get_centroids_table(gene_ids, all_centroids, data_matrix, metadata):
 		foo.writelines(metadata[:-1])
 		foo.writelines([str.join('\t', ['#SAMPLES'] + metadata[-1].split('\t')[1:])])
 		for i, val in enumerate(centroids_list):
-			foo.writelines([str.join('\t', val + [str(j) for j in norm_data_matrix[i]]) + '\n'])
-	
+			foo.writelines([str.join('\t', [val] + [str(j) for j in norm_data_matrix[i]]) + '\n'])
+			
 	dict_matrix = {}
 	for i, val in enumerate(centroids_list):
 		dict_matrix[val] = list(centroids_data_matrix[i])
 
-	return centroids_data_matrix 
+	return dict_matrix 
 
 def is_present(metadata, meta_type):
 	'''Returns True if meta_type is present in metadata extracted from mappert_file
@@ -384,7 +386,7 @@ def get_important_niche_centroids(centroid_prev_abund, all_alpha_prev, all_alpha
 										'alpha_prevalence_NICHEX': alpha_prevalence for niche X, ...}}'''
 	logging.debug('get_important_niche_centroids')
 
-	imp_centroid_prev_abund_file_path = 'imp_centroid_prev_abund.txt'
+	imp_centroid_prev_abund_file_path = basename+'_imp_centroid_prev_abund.txt'
 	tshld_prev = {}
 	##This is weird when in a specific niche-things are highly expressed? Gut vs. vagina or skin?
 	tshld_abund = tshld[0]*numpy.std(all_alpha_abund)/numpy.sqrt(len(all_alpha_abund))
@@ -428,7 +430,7 @@ def get_important_centroids(centroid_prev_abund, all_prevalence, all_abund, tshl
 
 	Output: imp_centroids = {centroid: {'abund': mean abundance, 'prev': prevalence}}'''
 	logging.debug('get_important_centroids')
-	imp_centroid_prev_abund_file_path = 'imp_centroid_prev_abund.txt'
+	imp_centroid_prev_abund_file_path = basename+'_imp_centroid_prev_abund.txt'
 	tshld_prev = tshld[0]*numpy.std(numpy.array(all_prevalence))/numpy.sqrt(len(all_prevalence))
 	tshld_abund = tshld[0]*numpy.std(numpy.array(all_abund))/numpy.sqrt(len(all_abund))
 	

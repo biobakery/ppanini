@@ -19,7 +19,7 @@ def read_fasta(fasta_filename):
 
     name = ''
 
-    for line in fasta_file.readlines():
+    for line in fasta_file:
         if not line.startswith('#'):
             if line.startswith('>'):
                 name = line.split(' ')[0][1:].strip()
