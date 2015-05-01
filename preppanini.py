@@ -90,6 +90,7 @@ if __name__ == '__main__':
 	parser.add_argument('--write_tables_only', default=False, help='Write table only (Annotations and Abundance files exist under /n/annot/ and /tmp/idxstats/')
 	parser.add_argument('--basename', help='BASENAME for all the output files')
 	parser.add_argument('-o', '--output_table', help='Gene Table to write', default=sys.stdout)
+	parser.add_argument('-n', '--norm_flag', default=False, help='Gene Table to write')
 
 	args = parser.parse_args()
 	annotation_only = bool(args.annotation_only)
@@ -100,6 +101,7 @@ if __name__ == '__main__':
 	workflow = int(args.workflow)
 	mapper_file = args.mapper_file
 	basename = args.basename
+	norm_flag = args.norm_flag
 
 	if not basename:
 		basename = mapper_file.split('.')[0].split('/')[-1]
@@ -151,28 +153,25 @@ if __name__ == '__main__':
 	##MODULE3: write_tables_only or ALL
 	###################################
 	if not annotation_only and not abundance_only: 
-
 		if write_tables_only:
 			#create annotations_dict
 			annotations_dict = {}
 			for sample in mapper:
-				annotations_dict[sample] = create_annotations.read_dict('tmp/annot/'+sample+'.m8')
+				annotations_dict[sample] = create_annotations.read_dict(mapper[sample]['ANNOTS'])
 			#create abundance_files keys in mapper
 			for sample in mapper:
-				mapper[sample]['abundance_file'] = 'tmp/idxstats/'+sample+'.txt'
+				mapper[sample]['abundance_file'] = mapper[sample]['ABUNDS']
 			#mapper for gene_contig for workflow3?
 			if workflow == 3:
 				gene_contig_mapper = {}
 				for sample in mapper:
-					if not 'FASTAS' in mapper[sample]:
-						mapper[sample]['FASTAS'] = 'tmp/fasta_files/'+sample+'.fasta'
+					# if not 'FASTAS' in mapper[sample]:
+					# 	mapper[sample]['FASTAS'] = 'tmp/fasta_files/'+sample+'.fasta'
 					[gene_contig_mapper_i, gene_start_stop_i, contig_gene_mapper_i] = create_fastas.read_gff3(mapper[sample]['GFF3S'])
 					gene_contig_mapper[sample] = gene_contig_mapper_i
-
 		print 'Step'+str(n)+': Compiling Abundance dictionary'
-		abundance_dict = create_idxstats.read_abundance_tables(mapper)
+		abundance_dict = create_idxstats.read_abundance_tables(mapper, norm_flag)
 		n +=1
-		
 		if workflow == 3:
 			abundance_dict = create_idxstats.update_abundance_dict(abundance_dict, gene_contig_mapper)
 		
