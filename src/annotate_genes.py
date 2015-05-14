@@ -4,31 +4,7 @@ import numpy
 import re
 import argparse
 
-from src import create_fastas
-
-
-def read_fasta(fasta_filename):
-	'''Reads a fasta_file and returns a fasta dict
-
-	Input: fasta_filename = path_to_fasta_file
-
-	Output: fasta_seq = {sequence_header: sequence, ...}'''
-	
-	fasta_file = open(fasta_filename)
-	fasta_seq = {}
-
-	name = ''
-	
-	for line in fasta_file.readlines():
-		if not line.startswith('#'):
-			if line.startswith('>'):
-				name = line.split(' ')[0][1:].strip()
-			else:
-				if name not in fasta_seq:
-					fasta_seq[name] =  re.sub('[\r\t\n]','', line)
-				else:
-					fasta_seq[name] +=  re.sub('[\r\t\n]','', line)
-	return fasta_seq
+from src import utilities
 
 def parse_annotation_table(annotations_file, fasta_sequences, thld_ref):
 	'''Parses annotations result from RAPSEARCH/DIAMOND to ensure they pass threshold
@@ -43,7 +19,7 @@ def parse_annotation_table(annotations_file, fasta_sequences, thld_ref):
 
 	foo = open(annotations_file)
 	sample_annotations = {}
-	for line in foo.readlines():
+	for line in foo:
 		if not line.startswith('#'):
 			#FILE_FORMAT: Seq_Name<\t>Seq_Length<\t>Mapped_Reads<\t>Unmapped_Reads
 			split_line = [re.sub('[\t\r\n]', '', i) for i in line.split('\t')]
@@ -62,34 +38,6 @@ def parse_annotation_table(annotations_file, fasta_sequences, thld_ref):
 			search50_seqs[seq] = fasta_sequences[seq]
 
 	return [sample_annotations, search50_seqs]
-
-def read_dict(gene_annotations_file):
-	'''Reads tabulated file into a dictionary
-
-	Input: gene_annotations_file = path_to_output_gene_annotations_table
-
-	Output: dictX = {geneID: annotation}'''
-
-	dictX = {}
-
-	with open(gene_annotations_file) as foo:
-		for line in foo.readlines():
-			if not line.startswith('#'):
-				split_line = [re.sub('[\t\r\n]','', i).strip() for i in line.split('\t')]
-				dictX[split_line[0]] = split_line[1]
-	
-	return dictX
-
-def write_dict(dictX, gene_annotations_file):
-	'''Writes dictionary of genes and their annotations into text file
-	Input: dictX = {geneID: annotation}
-		   gene_annotations_file = path_to_output_gene_annotations_table
-	'''
-
-	with open(gene_annotations_file, 'w') as foo:
-		foo.writelines('#GENEID\tANNOTATION')
-		for i in dictX:
-			foo.writelines([str.join('\t', [i, dictX[i]])+'\n'])
 
 def run_diamond(query_file, all_paths, out_fname, nprocesses, db):
 	'''Runs DIAMOND on query_file to produce results in out_fname
@@ -182,7 +130,7 @@ def get_genes_samples(mapper):
 	genes_samples = {} #Dicitonary of genes and their samples
 
 	for sample in mapper:
-		seqs_i = create_fastas.read_fasta(mapper[sample]['FASTAS'])
+		seqs_i = utilities.read_fasta(mapper[sample]['FAAS'])
 		seqs_i = seqs_i.keys()
 
 		for gene in seqs_i:
@@ -225,19 +173,18 @@ def generate_annotation(mapper, all_paths, nprocesses, basename):
 	out_u50_fname = 'tmp/'+basename+'_preppanini_centroids_u50'
 	u50_gene_input = 'tmp/'+basename+'_preppanini_centroids_u50input.fasta'
 
-	os.system('cat '+str.join(' ', [mapper[i]['FASTAS'] for i in mapper[i]]) + ' > ' + all_fastas_seqs)
+	os.system('cat '+str.join(' ', [mapper[i]['FAAS'] for i in mapper[i]]) + ' > ' + all_fastas_seqs)
 	run_uclust(all_paths['usearch'], allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, 0.9, nprocesses)
 
 	run_diamond(gene_centroids_file_path, all_paths, out_fname, nprocesses, 'uniref90')
 
-	centroid_sequences = create_fastas.read_fasta(gene_centroids_file_path)
+	centroid_sequences = utilities.read_fasta(gene_centroids_file_path)
 	[centroid_annotations90, diamond50_seqs] = parse_annotation_table(u90_out_fname+'.m8', centroid_sequences, 90.0)
 	
 	centroid_annotations = centroid_annotations90
 
 	if not diamond50_seqs == {}:
-		create_fastas.write_fasta(diamond50_seqs, u50_gene_input)
-		
+		utilities.write_fasta(diamond50_seqs, u50_gene_input, True)
 		run_diamond(u50_gene_input, all_paths, u50_out_fname, nprocesses, 'uniref50')
 		[centroid_annotations50, diamondukn_seqs] = parse_annotation_table(u50_out_fname+'.m8', diamond50_seqs, 50.0)
 		
