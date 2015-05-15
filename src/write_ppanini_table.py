@@ -9,7 +9,7 @@ import subprocess
 import multiprocessing
 
 
-def generate_gene_table(abundance_dict, annotations_dict, all_paths, niche_flag, mapper, output_table):
+def generate_gene_table(abundance_dict, annotations_dict, niche_flag, mapper, output_table):
 
 	#annotations_dict = mapper_with_annotations_dict['annotations_dict']	#sample:{gene:annotation}
 	#abundance_dict = mapper_with_annotations_dict['abundance_dict'] #sample:{gene:abundance}

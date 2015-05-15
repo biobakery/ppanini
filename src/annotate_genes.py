@@ -39,7 +39,7 @@ def parse_annotation_table(annotations_file, fasta_sequences, thld_ref):
 
 	return [sample_annotations, search50_seqs]
 
-def run_diamond(query_file, all_paths, out_fname, nprocesses, db):
+def run_diamond(query_file, db, out_fname, nprocesses):
 	'''Runs DIAMOND on query_file to produce results in out_fname
 
 	Input: query_file = path to query_fasta_file
@@ -51,12 +51,12 @@ def run_diamond(query_file, all_paths, out_fname, nprocesses, db):
            db = DIAMOND preprocessed database'''
 
 	os.system(all_paths['diamond']+'/diamond blastp -q ' + query_file + ' \
-													-d ' + all_paths[db] + ' \
+													-d ' + db + ' \
 													-k 1 \
 													-o ' + out_fname + ' \
 													-p ' + str(nprocesses)) #check if command is correct.
 
-def run_rapsearch(query_file, all_paths, out_fname, nprocesses, db):
+def run_rapsearch(query_file, db, out_fname, nprocesses):
 	'''Runs RAPSEARCH2 on query_file to produce results in out_fname
 
 	Input: query_file = path to query_fasta_file
@@ -68,14 +68,14 @@ def run_rapsearch(query_file, all_paths, out_fname, nprocesses, db):
            db = RAPSEARCH2 preprocessed database'''
     
 	os.system(all_paths['rapsearch']+'/rapsearch -q ' + query_file + ' \
-												 -d ' + all_paths[db] + ' \
+												 -d ' + db + ' \
 												 -o ' + out_fname + ' \
 												 -u 2 \
 												 -b 0 \
 												 -v 1 \
 												 -z' + str(nprocesses))	
 
-def run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, id, nprocesses):
+def run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, perc_id, nprocesses):
 	'''Runs USEARCH UCLUST on query_file to produce results in out_fname
 
 	Input: usearch_folder = path to folder containing USEARCH
@@ -90,11 +90,11 @@ def run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gen
 		usearch_folder = usearch_folder
 
 	os.system(usearch_folder + ' -cluster_fast ' + allgenes_file_path +' \
-								  		-id '+str(id)+' \
+								  		-id '+str(perc_id)+' \
 								        -centroids '+ gene_centroids_file_path + ' \
 								        -uc ' + gene_centroid_clusters_file_path+ '\
 								        -threads '+str(nprocesses))
-def run_vclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, id, nprocesses):
+def run_vclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, perc_id, nprocesses):
         '''Runs USEARCH UCLUST on query_file to produce results in out_fname
 
         Input: usearch_folder = path to folder containing USEARCH
@@ -109,7 +109,7 @@ def run_vclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gen
                 usearch_folder = usearch_folder
 
         os.system(usearch_folder + ' --cluster_fast ' + allgenes_file_path +' \
-                                                                                --id '+str(id)+' \
+                                                                                --id '+str(perc_id)+' \
                                                                         --centroids '+ gene_centroids_file_path + ' \
                                                                         --uc ' + gene_centroid_clusters_file_path+ '\
                                                                         --threads '+str(nprocesses))
@@ -140,26 +140,33 @@ def get_genes_samples(mapper):
 				raise Exception('Non-unique gene identifiers across samples; please rename gene ids')
 	return genes_samples
 
-def get_annotations_dict(mapper, genes_samples, centroid_annotations, centroid_gis):
+def get_annotations_dict(centroid_annotations, centroid_gis):
 	annotations_dict = {}
-	for sample in mapper:
-		annotations_dict[sample] = {}
-
 	for centroid in centroid_annotations:
-		annot_i = centroid_annotations[centroid]
-		
-		if not centroid in centroid_gis:
-			centroid_gis[centroid] = [centroid] #If no cluster with centroid, then one member cluster
-
-		genes_i = centroid_gis[centroid]
-		for gene in genes_i:
-			if not gene in annotations_dict[genes_samples[gene]]:
-				annotations_dict[genes_samples[gene]][gene] = annot_i
-			else:
-				raise Exception('Multiple annotation assignment for the same gene')
+		gis = centroid_gis[centroid]
+		for gi in gis:
+			annotations_dict[gi] = centroid_annotations[centroid]
 
 	return annotations_dict
+# def get_annotations_dict(mapper, genes_samples, centroid_annotations, centroid_gis):
+# 	annotations_dict = {}
+# 	for sample in mapper:
+# 		annotations_dict[sample] = {}
 
+# 	for centroid in centroid_annotations:
+# 		annot_i = centroid_annotations[centroid]
+		
+# 		if not centroid in centroid_gis:
+# 			centroid_gis[centroid] = [centroid] #If no cluster with centroid, then one member cluster
+
+# 		genes_i = centroid_gis[centroid]
+# 		for gene in genes_i:
+# 			if not gene in annotations_dict[genes_samples[gene]]:
+# 				annotations_dict[genes_samples[gene]][gene] = annot_i
+# 			else:
+# 				raise Exception('Multiple annotation assignment for the same gene')
+
+# 	return annotations_dict
 ######################
 ##WITHPANGENOME
 ######################

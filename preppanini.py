@@ -86,18 +86,18 @@ if __name__ == '__main__':
 	parser.add_argument('--bypass_abundance', default=False, action='store_true', help='Bypass quantifying abundance')
 	parser.add_argument('--bypass_annotation', default=False, action='store_true', help='Bypass annotating genes')
 	parser.add_argument('--bypass_clust', default=False, action='store_true', help='Bypass annotating genes')
+	parser.add_argument('--bypass_write_table', default=False, action='store_true', help='Bypass writing table')
 	parser.add_argument('--usearch', default=False, help='Path to USEARCH') #add to be in path?
 	parser.add_argument('--vsearch', default=False, help='Path to VSEARCH') #add to be in path?
 	parser.add_argument('--diamond', default=False, help='Path to DIAMOND') #add to be in path??
 	parser.add_argument('--rapsearch', default=False, help='Path to RAPSEARCH') #add to be in path??
 	parser.add_argument('--threads', help='Number of threads', default=1)
+	parser.add_argument('--uniref90', help='UniRef90 INDEX file')
+	parser.add_argument('--uniref50', help='UniRef50 INDEX file')
+	parser.add_argument('--to_normalize', default=False, action='store_true', help='Default HUMAnN2 table; if sam-idxstats table; enable')
 
 
 	parser.add_argument('--uniref90_50', help='IDMAPPING FILE for UniRef90 ID to UniRef50 ID mapping')
-	parser.add_argument('--uniref90', help='UniRef90 INDEX file')
-	parser.add_argument('--uniref50', help='UniRef50 INDEX file')
-	
-	
 	parser.add_argument('-w', '--workflow', choices=['1', '2', '3'], help='Workflow type Choices:[1, 2, 3]; \
 	                                                                        1: BAM and FASTA files; \
 	                                                                        2: SAM and FASTA FILES; \
@@ -107,7 +107,7 @@ if __name__ == '__main__':
 	parser.add_argument('--write_tables_only', default=False, help='Write table only (Annotations and Abundance files exist under /n/annot/ and /tmp/idxstats/')
 	
 	# parser.add_argument('-o', '--output_table', help='Gene Table to write', default=sys.stdout)
-	parser.add_argument('-n', '--norm_flag', default=False, help='Gene Table to write')
+	
 	parser.add_argument('--log_level',default='DEBUG', help='Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]')
 
 	args = parser.parse_args()
@@ -153,7 +153,7 @@ if __name__ == '__main__':
 											    mapper[sample]['GFF3S'], \
 											    mapper[sample]['FNAS'], \
 												mapper[sample]['FAAS'])
-	if not bypass_abundance:
+	if not args.bypass_abundance or not flags['ABUNDANCE_TABLES']:
 
 		paths_dict['ABUNDANCE_TMP'] = output_folder+'/tmp/abundance_tmp'
 		paths_dict['ABUNDANCE_TABLES'] = output_folder+'/tmp/abundance_tables'
@@ -181,79 +181,171 @@ if __name__ == '__main__':
 		else:
 			raise Exception('No Abundance information; See --bypass_abundance if no calculation required')		
 	
-	if not bypass_annotation:
+	if not args.bypass_annotation or not flags['ANNOTATION']:
 		paths_dict['ANNOTATION_TMP'] = output_folder+'/tmp/annotation_tmp'
-		paths_dict['ANNOTATION_TABLES'] = output_folder+'/tmp/annotation_tables/'
-		utilities.create_folders([paths_dict['ANNOTATION_TMP'], paths_dict['ANNOTATION_TABLES']])
-		
+
+		whole_genome_catalog = paths_dict['ANNOTATION_TMP']+'/'+basename+'.fasta'
+		utilities.create_folders([paths_dict['ANNOTATION_TMP']])
+		annotation_table = paths_dict['ANNOTATION_TMP']+'/'+basename+'.annotations.txt'
+		# mapper['ANNOTATION'] = annotation_table
+		#To ensure all samples have FAAs
 		for sample in mapper:
 			if not 'FAAS' in mapper[sample]:
 				if not 'FNAS' in mapper[sample]:
-					raise Exception('No FNAS found. Either provide in mapper or add GFF3s to pull from contigs')
+					raise Exception('No FNAS or FAAS found. Either provide in mapper or add GFF3s to pull from contigs')
 				else:
 					paths_dict['FASTAS'] = output_folder+'/tmp/fasta_files'
 					utilities.create_folders([paths_dict['FASTA_FILES']])
 					mapper[sample]['FAAS'] = paths_dict['FASTA_FILES']+'/'+sample+'.faa'
-					#################################### <-- add parsing to FAA from FNA and continue.
+					faa = utilities.read_fasta(mapper[sample]['FNAS'])
+					utilities.write_fasta(faa, mapper[sample]['FAAS'])
+		os.system('cat '+' '.join([mapper[sample]['FAAS'] for sample in mapper])+' > '+whole_genome_catalog)
 
-	gene_contig_mapper = {}
-
-	all_paths = {'uniref_map': args.uniref90_50, \
-	             'uniref90': args.uniref90, \
-	             'uniref50': args.uniref50, \
-	             'diamond': args.diamond, \
-	             'usearch': args.usearch}
-
-	###################################
-	##MODULE1: abundance_only or ALL
-	###################################
-	if not annotation_only and not write_tables_only: 
-		print 'Step'+str(n)+': Creating abundance tables via SAMTOOLS'
-		mapper = abundance_module(mapper, workflow)
-		n +=1
-
-	###################################
-	##MODULE2: annotation_only or ALL
-	###################################
-	if not write_tables_only and not abundance_only: 
-		print 'Step'+str(n)+': Mapping genes against UniRef90 and UniRef50 via DIAMOND'
-		n +=1
+		genome_catalog = '' #The catalog run against UniRef90
 		
-		if workflow == 3:
-			print 'Step'+str(n)+': Pulling genes from contigs'
-			n +=1
-			for sample in mapper:
-				gene_contig_mapper[sample] = utilities.pullgenes_fromcontigs(mapper[sample]['CONTIG_ASSEMBLIES'], \
-														  mapper[sample]['GFF3S'], \
-														  mapper[sample]['FAAS'])
-		annotations_dict = annotation_module(mapper, all_paths, nprocesses)
-	
-	###################################
-	##MODULE3: write_tables_only or ALL
-	###################################
-	if not annotation_only and not abundance_only: 
-		if write_tables_only:
-			#create annotations_dict
-			annotations_dict = {}
-			for sample in mapper:
-				annotations_dict[sample] = utilties.read_dict(mapper[sample]['ANNOTS'])
-			#create abundance_files keys in mapper
-			for sample in mapper:
-				mapper[sample]['abundance_file'] = mapper[sample]['ABUNDS']
-			#mapper for gene_contig for workflow3?
-			if workflow == 3:
-				gene_contig_mapper = {}
+		if not args.bypass_clust:
+			clust_method = 'vsearch'
+			gene_centroids_file_path = paths_dict['ANNOTATION_TMP']+'/'+basename+'.centroids.fasta'
+			gene_centroid_clusters_file_path = paths_dict['ANNOTATION_TMP']+'/'+basename+'.uc'
+			if args.usearch:
+				clust_method = args.usearch
+				utilities.run_uclust(clust_method, \
+									 whole_genome_catalog, \
+									 gene_centroids_file_path, \
+									 gene_centroid_clusters_file_path, \
+									 0.9, \
+									 nprocesses)
+			else:
+				if args.vsearch:
+					clust_method = args.vsearch #assumes vsearch in path if not provided
+				utilities.run_vclust(clust_method, \
+								 	 whole_genome_catalog, \
+								 	 gene_centroids_file_path, \
+								 	 gene_centroid_clusters_file_path, \
+								 	 0.9, \
+								 	 nprocesses)
+				genome_catalog = gene_centroids_file_path
+		else:
+			genome_catalog = whole_genome_catalog
+
+		##Run UniRef now
+		out_u90_fname = paths_dict['ANNOTATION_TMP']+'/'+basename+'.centroids.u90'
+		out_u50_fname = paths_dict['ANNOTATION_TMP']+'/'+basename+'.centroids.u50'
+		u50_gene_input = paths_dict['ANNOTATION_TMP']+'/'+basename+'.centroids.u50input.fasta'
+
+		search_method = 'diamond'
+		if args.rapsearch:
+			search_method = args.rapsearch
+		else:
+			if args.diamond:
+				search_method = args.diamond
+		
+		run_diamond(genome_catalog, args.uniref90, out_u90_fname, nprocesses)
+		centroid_sequences = utilities.read_fasta(genome_catalog)
+		[centroid_annotations90, diamond50_seqs] = parse_annotation_table(u90_out_fname+'.m8', centroid_sequences, 90.0)
+		centroid_annotations = centroid_annotations90
+
+		if not diamond50_seqs == {}:
+			utilities.write_fasta(diamond50_seqs, u50_gene_input, True)
+			run_diamond(u50_gene_input, args.uniref50, u50_out_fname, nprocesses)
+			[centroid_annotations50, diamondukn_seqs] = parse_annotation_table(u50_out_fname+'.m8', diamond50_seqs, 50.0)
+		
+		for gid in centroid_annotations50:
+			if gid not in centroid_annotations:
+				centroid_annotations[gid] = sample_annotations50[gid]
+			else:
+				raise Exception('GeneID for UniRef50 exists in UniRef90;\nSearching twice for the same gene;\nError in parse_annotation_table\n')
+		
+		if not args.bypass_clust:
+			centroid_gis = get_clusters_dict(gene_centroid_clusters_file_path)
+			annotation_dict = annotate_genes.get_annotations_dict(centroid_annotations, centroid_gis)
+		else:
+			annotation_dict = centroid_annotations
+
+		utilities.write_dict(annotation_dict, annotation_table)
+
+	if not args.bypass_write_table:
+		if args.to_normalize:
+			abundance_dict = quantify_genes.read_abundance_tables(mapper, True)
+		else:
+			abundance_dict = quantify_genes.read_abundance_tables(mapper, False)
+
+		try:
+			annotation_dict = annotation_dict
+		except: #if Annotations have not been performed
+			paths_dict['ANNOTATION_TMP'] = output_folder+'/tmp/annotation_tmp'
+			utilities.create_folders([paths_dict['ANNOTATION_TMP']])
+			annotation_table = paths_dict['ANNOTATION_TMP']+'/'+basename+'.annotations.txt'
+			paths_annots = []
+			try:
 				for sample in mapper:
-					# if not 'FASTAS' in mapper[sample]:
-					# 	mapper[sample]['FASTAS'] = 'tmp/fasta_files/'+sample+'.fasta'
-					[gene_contig_mapper_i, gene_start_stop_i, contig_gene_mapper_i] = utilities.read_gff3(mapper[sample]['GFF3S'])
-					gene_contig_mapper[sample] = gene_contig_mapper_i
-		print 'Step'+str(n)+': Compiling Abundance dictionary'
-		abundance_dict = quantify_genes.read_abundance_tables(mapper, norm_flag)
-		n +=1
-		if workflow == 3:
-			abundance_dict = quantify_genes.update_abundance_dict(abundance_dict, gene_contig_mapper)
+					if not mapper[sample]['ANNOTATION'] in paths_annots:
+						paths_annots += [mapper[sample]['ANNOTATION']]
+			except KeyError:
+				raise Exception('Annotations have not been performed\nAdd ANNOTATION to mapper file\n')
+			os.system('cat '+' '.join(paths_annots)+' > '+annotation_table)
+			annotation_dict = utilities.read_dict(annotation_table)
+
+		generate_gene_table(abundance_dict, annotations_dict, niche_flag, mapper, output_table):
+
+	# gene_contig_mapper = {}
+
+	# all_paths = {'uniref_map': args.uniref90_50, \
+	#              'uniref90': args.uniref90, \
+	#              'uniref50': args.uniref50, \
+	#              'diamond': args.diamond, \
+	#              'usearch': args.usearch}
+
+	# ###################################
+	# ##MODULE1: abundance_only or ALL
+	# ###################################
+	# if not annotation_only and not write_tables_only: 
+	# 	print 'Step'+str(n)+': Creating abundance tables via SAMTOOLS'
+	# 	mapper = abundance_module(mapper, workflow)
+	# 	n +=1
+
+	# ###################################
+	# ##MODULE2: annotation_only or ALL
+	# ###################################
+	# if not write_tables_only and not abundance_only: 
+	# 	print 'Step'+str(n)+': Mapping genes against UniRef90 and UniRef50 via DIAMOND'
+	# 	n +=1
 		
-		print 'Step'+str(n)+': Writing to PPANINI-input format table...'
-		n +=1
-		write_ppanini_table.generate_gene_table(abundance_dict, annotations_dict, all_paths, niche_flag, mapper, output_table)
+	# 	if workflow == 3:
+	# 		print 'Step'+str(n)+': Pulling genes from contigs'
+	# 		n +=1
+	# 		for sample in mapper:
+	# 			gene_contig_mapper[sample] = utilities.pullgenes_fromcontigs(mapper[sample]['CONTIG_ASSEMBLIES'], \
+	# 													  mapper[sample]['GFF3S'], \
+	# 													  mapper[sample]['FAAS'])
+	# 	annotations_dict = annotation_module(mapper, all_paths, nprocesses)
+	
+	# ###################################
+	# ##MODULE3: write_tables_only or ALL
+	# ###################################
+	# if not annotation_only and not abundance_only: 
+	# 	if write_tables_only:
+	# 		#create annotations_dict
+	# 		annotations_dict = {}
+	# 		for sample in mapper:
+	# 			annotations_dict[sample] = utilties.read_dict(mapper[sample]['ANNOTS'])
+	# 		#create abundance_files keys in mapper
+	# 		for sample in mapper:
+	# 			mapper[sample]['abundance_file'] = mapper[sample]['ABUNDS']
+	# 		#mapper for gene_contig for workflow3?
+	# 		if workflow == 3:
+	# 			gene_contig_mapper = {}
+	# 			for sample in mapper:
+	# 				# if not 'FASTAS' in mapper[sample]:
+	# 				# 	mapper[sample]['FASTAS'] = 'tmp/fasta_files/'+sample+'.fasta'
+	# 				[gene_contig_mapper_i, gene_start_stop_i, contig_gene_mapper_i] = utilities.read_gff3(mapper[sample]['GFF3S'])
+	# 				gene_contig_mapper[sample] = gene_contig_mapper_i
+	# 	print 'Step'+str(n)+': Compiling Abundance dictionary'
+	# 	abundance_dict = quantify_genes.read_abundance_tables(mapper, norm_flag)
+	# 	n +=1
+	# 	if workflow == 3:
+	# 		abundance_dict = quantify_genes.update_abundance_dict(abundance_dict, gene_contig_mapper)
+		
+	# 	print 'Step'+str(n)+': Writing to PPANINI-input format table...'
+	# 	n +=1
+	# 	write_ppanini_table.generate_gene_table(abundance_dict, annotations_dict, all_paths, niche_flag, mapper, output_table)
