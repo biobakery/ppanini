@@ -19,9 +19,7 @@ def generate_abundance_viabwt2(assembly_x_withpath, reads_x, sample, out):
 
   where assembly_x_bam = path_to_bam_file, 
             sample = sample_name'''
-  #assembly_x_withpath = mapper[sample]['#ASSEMBLIES'] #Full path inlcuded to Assembly X
   assembly_x = assembly_x_withpath.rpartition('/')[-1] #Name of Assembly X
-  #reads_x = mapper[sample]['#READS'] #Path included to Reads of X
   assembly_x_index = out['ABUNDANCE_TMP']+'/' + assembly_x + '_index' # 
   assembly_x_bam = out['ABUNDANCE_TMP']+'/' + assembly_x + '.bam'
 
@@ -59,8 +57,6 @@ def generate_abundance_viabam(assembly_x_bam_withpath, sample, out):
   where assembly_x_stats = path_to_samtools_abundance_file, 
           sample = sample_name'''
 
-  # utilities.create_folders([out+'/abundance_tables/'])
-
   assembly_x_bam = assembly_x_bam_withpath.rpartition('/')[-1]
   assembly_x_bam_presort = out['ABUNDANCE_TMP']+'/' + assembly_x_bam + '.sorted'
   assembly_x_bam_sorted = out['ABUNDANCE_TMP']+'/' + assembly_x_bam + '.sorted.bam'
@@ -87,8 +83,6 @@ def read_abundance_tables(mapper, norm_flag):
 
   Output: abundance_dict= {sample:{ID: abundance}, ...}
   * ID can be GENE_ID or CONTIG_ID depending on workflow '''
-
-
   abundance_dict = {}
   for sample in mapper:
     abundance_dict[sample] = {}
@@ -101,29 +95,10 @@ def read_abundance_tables(mapper, norm_flag):
   if norm_flag:
           abundance_dict[sample][split_line[0].strip()] = float(split_line[2])/(float(split_line[1])-200.0) #avg. read length?
   else:
-          abundance_dict[sample][split_line[0].strip()] = float(split_line[1])#/(float(split_line[1])-100.0) #avg. read length?
+          abundance_dict[sample][split_line[0].strip()] = float(split_line[1]) #HUMAnN2
   
   return abundance_dict
 
-def update_abundance_dict(abundance_dict, gene_contig_mapper):
-  '''Update abundance_dict from {sample:{contig:abundance}} to {sample:{gene:abundance}} via gene to contig mapping
-
-  Input: abundance_dict= {sample:{contig: abundance}, ...}
-       gene_contig_mapper={sample:{gene:contig}, ...}
-  
-  Output: abundance_dict_mod= {sample:{gene:abundance}, ...}'''
-  
-  abundance_dict_mod = {}
-
-  for sample in gene_contig_mapper:
-    abundance_dict_mod[sample] = {}
-    for gene in gene_contig_mapper[sample]:
-      abundance_dict_mod[sample][gene] = abundance_dict[sample][gene_contig_mapper[sample][gene]]
-
-  return abundance_dict_mod
   
 if __name__ == '__main__':
-  reads = sys.argv[2]
-  assembly = sys.argv[1]
-  sample = sys.argv[3]
-  generate_abundance_viabwt2(assembly, reads, sample)
+  pass

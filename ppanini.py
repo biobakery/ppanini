@@ -33,7 +33,6 @@ def read_gene_table(gene_table_fname):
 	samples = []
 
 	for line in gene_table:
-		#Metadata containing Sample names, Niche specifics and optionally fasta file locations
 		if line.startswith('#'):
 			metadata += [line]
 			[samples_row, sii] = is_present(metadata, '#SAMPLES')
@@ -76,10 +75,6 @@ def extract_fasta_names(metadata, samples):
 	
 	[line, ind] = is_present(metadata, '#FASTAS')
 
-	# [samples_row, sii] = is_present(metadata, '#SAMPLES')
-	# if not samples_row:
-	# 	[samples_row, sii] = is_present(metadata, '#GENES')
-	# samples = [re.sub('[\r\t\n]','',i) for i in samples_row.split('\t')[1:]]
 	if line:
 		split_i = line.split('\t')[1:]
 		for i, val in enumerate(split_i):
@@ -90,9 +85,7 @@ def extract_fasta_names(metadata, samples):
 	return location
 
 def get_centroids_fromUCLUST(gene_centroid_clusters_file_path, gis_unannotated):
-	#assuming that if cluster not in UniRef, none of the cluster members are either?!!!!! 
-	# The fix doesnt solve the issue when one cluster members, are distributed between several UniRef90 clusters?
-			#will be counted twice in Uniref90 adn artificial centroid. TO ASSUME OR NOT?
+
 	logging.debug('get_centroids_fromUCLUST')
 	
 	genes = [] #All unannotated genes
@@ -119,7 +112,7 @@ def get_centroids_fromUCLUST(gene_centroid_clusters_file_path, gis_unannotated):
 	return cluster_dict
 
 
-def get_centroids(gis_unannotated, metadata, samples, usearch_folder, uniref_gis, uclust_file, gi_dm, nprocesses, large_flag):
+def get_centroids(gis_unannotated, metadata, samples, usearch_folder, uniref_gis, uclust_file, gi_dm, nprocesses):
 	'''Returns the dict of all centroids containing clusters of gene IDs
 
 	Input:	gis_unannotated = {sample_id: [gene ids]}
@@ -144,7 +137,7 @@ def get_centroids(gis_unannotated, metadata, samples, usearch_folder, uniref_gis
 					centroids_fasta[gid] = file_fasta[gid]
 				except KeyError:
 					raise Exception('Unannotated gene '+gene+' not found in sample FASTA: '+location[sample])
-		centroid_gis = get_clusters(centroids_fasta, usearch_folder, nprocesses, large_flag) #all UniRef90_unknowns are clustered across samples
+		centroid_gis = get_clusters(centroids_fasta, usearch_folder, nprocesses) #all UniRef90_unknowns are clustered across samples
 	else:
 		centroid_gis = get_centroids_fromUCLUST(uclust_file, gis_unannotated)
 
@@ -161,7 +154,7 @@ def get_centroids(gis_unannotated, metadata, samples, usearch_folder, uniref_gis
 	return gc_dm
 
 
-def get_clusters(centroids_fasta, usearch_folder, nprocesses, large_flag): #ONLY FOR THE UNIREF UNANNOTATED
+def get_clusters(centroids_fasta, args, nprocesses): #ONLY FOR THE UNIREF UNANNOTATED
 	'''Returns the dict of unannotated gene centroids containing clusters of genes at 90% similarity
 
 	Input:	centroids_fasta = {UniRef90_unknown: [List of gene ids]}
@@ -177,10 +170,14 @@ def get_clusters(centroids_fasta, usearch_folder, nprocesses, large_flag): #ONLY
 
 	utilities.write_fasta(centroids_fasta, allgenes_file_path, True) #ensures all clustering happens to FAAs
 	
-	if not bool(large_flag):
-		annotate_genes.run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, 0.9, nprocesses)
+	clust_method = 'vsearch'
+	if args.usearch:
+		clust_method = args.usearch
+		annotate_genes.run_uclust(clust_method, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, 0.9, nprocesses)
 	else:
-		annotate_genes.run_vclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, 0.9, nprocesses)
+		if args.vsearch:
+			clust_method = args.usearch
+		annotate_genes.run_vclust(clust_method, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, 0.9, nprocesses)
 		
 	
 	centroid_gis = annotate_genes.get_clusters_dict(gene_centroid_clusters_file_path)
@@ -211,13 +208,7 @@ def get_centroids_table(all_centroids, metadata):
 	centroids_data_matrix = numpy.array(centroids_data_matrix)
 	norm_data_matrix = centroids_data_matrix/sum(centroids_data_matrix)
 	norm_data_matrix = norm_data_matrix*1e6
-	
-		# if len(centroids_data_matrix[centroid]) == 1: 
-		# 	#raise Exception('length of data row is one?')#if only one member in cluster
-		# 	centroids_data_matrix[centroid] = [i for i in centroids_data_matrix[centroid][0]]
-		# else:
-		# 	centroids_data_matrix[centroid] = list(centroids_data_matrix[centroid])#[0])
-	
+
 	gene_centroids_table_file_path = 'data_files/'+basename+'_gene_centroids_table.txt'
 	
 	with open(gene_centroids_table_file_path,'w') as foo:
@@ -267,9 +258,11 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata):
 	[niche_line, ind] = is_present(metadata, '#NICHE')
 	
 	if niche_line:
+		niche_flag = True
 		[centroid_prev_abund, all_alpha_prev, all_mean_abund] = get_niche_prevalence_abundance (centroids_data_matrix, centroids_list, niche_line)
-		return [centroid_prev_abund, all_alpha_prev, all_mean_abund, True]
+		return [centroid_prev_abund, all_alpha_prev, all_mean_abund, niche_flag]
 	else:
+		niche_flag = False
 		centroid_prev_abund = {}
 		all_prevalence = [] 
 		all_abund = []
@@ -285,7 +278,7 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata):
 
 		write_prev_abund_matrix(centroid_prev_abund, centroid_prev_abund_file_path)
 		
-		return [centroid_prev_abund, all_prevalence, all_abund, False]
+		return [centroid_prev_abund, all_prevalence, all_abund, niche_flag]
 
 def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_line):
 	'''Returns the dict of centroids with their prevalence and abundance
@@ -377,29 +370,21 @@ def get_important_niche_centroids(centroid_prev_abund, all_alpha_prev, all_alpha
 
 	imp_centroid_prev_abund_file_path = basename+'_imp_centroid_prev_abund.txt'
 	tshld_prev = {}
-	##This is weird when in a specific niche-things are highly expressed? Gut vs. vagina or skin?
-	#tshld_abund = tshld[0]*numpy.std(all_alpha_abund)/numpy.sqrt(len(all_alpha_abund))
+	
 	tshld_abund = numpy.percentile(all_alpha_abund, tshld[0])
-	#tshld_abund = numpy.mean(all_alpha_abund)-(tshld[0]*numpy.std(all_alpha_abund)/numpy.sqrt(len(all_alpha_abund)))
-
+	
 	logging.debug('get_important_niche_centroids: tshld_abund:'+str(tshld_abund))
-	#not good for small sample space? 10th percentile; need a better metric? z-score?
-	#Standard Error
+	
 	for niche in all_alpha_prev:
 		tshld_prev[niche] = 2*numpy.std(all_alpha_prev[niche])/numpy.sqrt(len(all_alpha_prev[niche]))#, tshlds['prev']) 
-		#tshld_prev[niche] = numpy.mean(all_alpha_prev[niche])-(tshld[0]*numpy.std(all_alpha_prev[niche])/numpy.sqrt(len(all_alpha_prev[niche])))#, tshlds['prev']) 
+	
 		logging.debug('get_important_niche_centroids: tshld_prev:'+str(niche)+':'+str(tshld_prev[niche]))
 
-	# tshld_abund = numpy.percentile(all_mean_abund, tshlds['abund'])
-
+	
 	imp_centroids = {}
 
 	for centroid in centroid_prev_abund:
-		##If max(mean(abundance in niche where centroid is present== >0.0)) is in the 90th percentile
-		#abund_check = (centroid_prev_abund[centroid]['abund'] - tshld_abund) > 200.0
 		abund_check = centroid_prev_abund[centroid]['abund'] >= tshld_abund
-		#If Alpha-prevalence of the centroid is higher than the niche-specific threshold in ANY of the niches;
-		#Note: SUM is used to implement the OR functionality
 		prev_check = sum([centroid_prev_abund[centroid]['a_prev'][niche]- tshld_prev[niche]> tshld[1] for niche in centroid_prev_abund[centroid]['a_prev']])
 		
 		if abund_check and prev_check:
@@ -425,7 +410,7 @@ def get_important_centroids(centroid_prev_abund, all_prevalence, all_abund, tshl
 	logging.debug('get_important_centroids')
 	imp_centroid_prev_abund_file_path = basename+'_imp_centroid_prev_abund.txt'
 	tshld_prev = 2*numpy.std(numpy.array(all_prevalence))/numpy.sqrt(len(all_prevalence))
-	# tshld_abund = tshld[0]*numpy.std(numpy.array(all_abund))/numpy.sqrt(len(all_abund))
+
 	tshld_abund = numpy.percentile(all_abund, tshld[0])
 	
 	imp_centroids = {}
@@ -449,16 +434,13 @@ def write_prev_abund_matrix(centroid_prev_abund, out_file):
 
 	Output: Writes the centroids dictionary to the output_filename'''
 	logging.debug('write_prev_abund_matrix')
-
 	
-	#Assumes the dictionary structure to be consistent and fixed
-	#dict_X = {key1: {subkey1: [value]}}
+
 	keys = []
 	for i in centroid_prev_abund:
 		keys = centroid_prev_abund[i].keys()
 		break
-	# keys = centroid_prev_abund.values()[0].keys()
-
+	
 	with open(out_file,'w') as foo:
 		foo.writelines(['Centroids\t' + str.join('\t', keys) + '\n'])
 		for centroid in centroid_prev_abund:
@@ -469,14 +451,13 @@ if __name__ == '__main__':
 	parser.add_argument('-i','--input_table', help='Gene abundance table with metadata', required=True)
 	parser.add_argument('-u','--usearch_folder', nargs = '?' , help='Path for USEARCH program; if not provided, assumed to be in path')
 	parser.add_argument('-o','--output_folder', help='Folder containing results', default='.')
-	parser.add_argument('--uclust_file', help='File containing UCLUST results')
+	parser.add_argument('--usearch', default=False, help='Path to USEARCH') #add to be in path?
+	parser.add_argument('--vsearch', default=False, help='Path to VSEARCH') #add to be in path?
 	parser.add_argument('--basename', help='BASENAME for all the output files')
 	parser.add_argument('--log_level',default='DEBUG', help='Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]')
 	parser.add_argument('--threads', default=1, help='Number of threads')
-	parser.add_argument('--tshld_abund', default=75, help='Threshold: val>=tshld_abund')
-	parser.add_argument('--tshld_prev', default=0.1, help='Threshold: val-2*SE >tshld_prev')
-	parser.add_argument('--large', default=False, help='For Large Datasets')
-
+	parser.add_argument('--tshld_abund', default=75, help='[X] Percentile Cutoff for Abundance; Default=75th')
+	parser.add_argument('--tshld_prev', default=0.1, help='Threshold: val-2*SE > tshld_prev')
 
 	args = parser.parse_args()
 	nprocesses = args.threads
@@ -501,12 +482,11 @@ if __name__ == '__main__':
 						datefmt='%m/%d/%Y %I:%M:%S %p')
 
 	[metadata, uniref_gis, gis_unannotated, samples, gis_dm]  = read_gene_table(input_table)
-	all_centroids = get_centroids(gis_unannotated, metadata, samples, args.usearch_folder, uniref_gis, uclust_file, gis_dm, nprocesses, args.large)
+	all_centroids = get_centroids(gis_unannotated, metadata, samples, args, uniref_gis, uclust_file, gis_dm, nprocesses, args.large)
 	[centroids_data_matrix, centroids_list] = get_centroids_table(all_centroids, metadata)
-	[centroid_prev_abund, all_prevalence, all_mean_abund, flag] = get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata)
+	[centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag] = get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata)
 
-	if flag:
-		#Niche-classification present
+	if niche_flag:
 		imp_centroids = get_important_niche_centroids(centroid_prev_abund, all_prevalence, all_mean_abund, tshld, output_folder)
 	else:
 		imp_centroids = get_important_centroids(centroid_prev_abund, all_prevalence, all_mean_abund, tshld, output_folder)

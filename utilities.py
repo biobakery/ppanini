@@ -31,7 +31,6 @@ def read_fasta(fasta_filename):
                     fasta_seq[name] +=  re.sub('[\r\t\n]','', line)
     return fasta_seq
 
-
 def pullgenes_fromcontigs(contig_file, gff3_file, fna_file, faa_file):
     '''Return dictionary of annotations for genes from each sample's contig_assembly
 
@@ -155,6 +154,7 @@ def create_folders(list_folders):
             os.mkdir(fname)
         except:
             pass
+
 def read_dict(gene_annotations_file):
     '''Reads tabulated file into a dictionary
 
@@ -169,7 +169,6 @@ def read_dict(gene_annotations_file):
             if not line.startswith('#'):
                 split_line = [re.sub('[\t\r\n]','', i).strip() for i in line.split('\t')]
                 dictX[split_line[0]] = split_line[1]
-    
     return dictX
 
 def write_dict(dictX, gene_annotations_file):
@@ -184,7 +183,4 @@ def write_dict(dictX, gene_annotations_file):
             foo.writelines(['\t'.join([i, dictX[i]])+'\n'])
 
 if __name__ == '__main__':
-    contig_file = sys.argv[1]
-    gff3_file = sys.argv[2]
-    output_file = sys.argv[3]
-    pullgenes_fromcontigs(contig_file, gff3_file, output_file)
+    pass

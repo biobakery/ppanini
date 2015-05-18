@@ -3,11 +3,14 @@ import sys
 import matplotlib
 import re
 import numpy
-from matplotlib import pyplot
 import pdb
 import time
 import numpy
 import argparse
+
+from matplotlib import pyplot
+
+numpy.seterr(divide='ignore', invalid='ignore')
 
 def parse_table(table_name):
 	table_obj = open(table_name)
@@ -53,7 +56,11 @@ def draw_cloud(cloud_points, data_points, labels, margins):
 
 	[c_genes_x_y, c_uniref_x_y] = cloud_points
 	[d_genes_x_y, d_uniref_x_y, d_uniref_go_x_y] = data_points
-
+	z= numpy.log(c_genes_x_y['y']+c_uniref_x_y['y'], dtype='float64')
+	z1= numpy.percentile(z, 90)
+	z2= numpy.percentile(z, 75)
+	z3= numpy.percentile(z, 50)
+	z4= numpy.percentile(z, 30)
 	pyplot.scatter(numpy.log(c_genes_x_y['x'], dtype='float64'), \
 				   numpy.log(c_genes_x_y['y'], dtype='float64'), \
 				   c='grey', \
@@ -101,8 +108,13 @@ def draw_cloud(cloud_points, data_points, labels, margins):
 	 			   zorder=3,
 	 			   edgecolors='none',\
 	 			   label='Prioritized UniRef90 and GO annotated')
-	pyplot.axhline(y=numpy.log(0.1+float(margins[0])), alpha=0.5, color='gray', label='abund>0.1+2SE')
-	pyplot.axvline(x=numpy.log(0.1+float(margins[1])), alpha=0.5, color='gray', label='prev>0.1+2SE')
+	pyplot.axhline(y=numpy.log(float(margins[0])), alpha=0.5, color='gray', label='abund>0.1+2SE')
+	# pyplot.axhline(y=z1, alpha=0.5, color='red', label='90th')
+	# pyplot.axhline(y=z2, alpha=0.5, color='yellow', label='75th')
+	# pyplot.axhline(y=z3, alpha=0.5, color='cyan', label='50th')
+	# pyplot.axhline(y=z4, alpha=0.5, color='magenta', label='30th')
+
+	pyplot.axvline(x=numpy.log(float(margins[1])), alpha=0.5, color='gray', label='prev>0.1+2SE')
 # ['Low priority', \
 # 				   'Low priority', \
 # 				   'Prioritized unannotated', \
@@ -113,6 +125,7 @@ def draw_cloud(cloud_points, data_points, labels, margins):
 				   framealpha=0.4, )	
 
 	pyplot.savefig(labels['filename'])
+	pyplot.savefig(labels['filename']+'.png')
 
 def get_go_mapping(uniref_table, inds, map_go_fname, out_fname):
 	uniref, uniref_go = {}, {}
@@ -159,14 +172,15 @@ def draw_prev_plot(genes_table, uniref_table, inds, labels, check):
 	pyplot.figure()
 	x= range(1, len(prev)+1)
 	#pyplot.ylim([min(prev), max(prev)])
-	pyplot.scatter(x, prev, marker='.')
+	pyplot.scatter(x, numpy.log(prev), marker='.')
 	pyplot.hold(True)
-	pyplot.axhline(y=float(0.1+float(check)), alpha=0.5, color='red', label='>0.1+2SE')
+	pyplot.axhline(numpy.log(float(check)), alpha=0.5, color='red', label='>0.1+2SE')
 	pyplot.legend(loc='upper left', fontsize='small')
 	pyplot.xlabel(labels['xlabel'])
 	pyplot.ylabel(labels['ylabel'])
 	pyplot.title(labels['title'])
 	pyplot.savefig(labels['filename'])
+	pyplot.savefig(labels['filename']+'.png')
 
 
 if __name__ == '__main__':
@@ -175,11 +189,12 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i','--input_table', help='Gene abundance table with metadata', required=True)
 	parser.add_argument('--original_table', help='Gene abundance table with metadata')
-	parser.add_argument('--abund_prev', default=False, help='Graph will be abundance_prevalence')
-	parser.add_argument('--prev', default=False, help='Graph will be prevalence across centroids')
-	parser.add_argument('--abund', default=False, help='Graph will be mean abundance across centroids')
+	parser.add_argument('--abund_prev', action='store_true', default=False, help='To draw Abundance Prevalence Cloud')
+	parser.add_argument('--prev', action='store_true', default=False, help='Graph will be prevalence across centroids')
+	parser.add_argument('--abund', action='store_true', default=False, help='Graph will be mean abundance across centroids')
 	parser.add_argument('-m','--mapper', help='GO to UniRef mapper')
-	parser.add_argument('--write_mapper', default=True, help='Gene to GO')
+	parser.add_argument('--write_mapper', action='store_true', default=False, help='Gene to GO table written')
+
 	args = parser.parse_args()
 	[genes_table_i, uniref_table_i, inds_i, keys_i] = parse_table(args.input_table)
 	if bool(args.write_mapper):
@@ -194,7 +209,9 @@ if __name__ == '__main__':
 			for gene in genes_table_i:
 				foo.writelines(gene+'\tNA\n')
 		os.system('rm '+args.input_table+'_GO_map.txt_tmp')
-
+	abund=  float(args.abund) #+200.0
+	prev = float(args.prev)+0.1
+	
 	if bool(args.abund_prev):	
 		[genes_table, uniref_table, inds, keys] = parse_table(args.original_table)
 		
@@ -222,10 +239,10 @@ if __name__ == '__main__':
 		# [uniref_i_x_y, uniref_go_x_y] = get_go_mapping(uniref_table_i, [alpha_is, abund_i], map_go_fname, args.input_table+'_GO_map.txt')
 		print (time.time()-t)/60
 		data_points[1] = uniref_i_x_y
-		data_points += [uniref_go_x_y]
-		
+		data_points += [uniref_go_x_y]	
 
-		draw_cloud(cloud_points, data_points, labels, [args.abund, args.prev])
+		draw_cloud(cloud_points, data_points, labels, [abund, prev])
+
 	if bool(args.prev):
 		name = args.input_table
 		title=name.split('/')[-1].split('.')[0]
@@ -233,7 +250,8 @@ if __name__ == '__main__':
 				  'ylabel': 'Alpha Prevalence', \
 				  'title': title, \
 				  'filename': name+'_prev.pdf'}
-		draw_prev_plot(genes_table, uniref_table, inds_i['alpha'], labels, args.prev)
+		draw_prev_plot(genes_table, uniref_table, inds_i['alpha'], labels, prev)
+
 	if bool(args.abund):
 		name = args.input_table
 		title=name.split('/')[-1].split('.')[0]
@@ -241,4 +259,4 @@ if __name__ == '__main__':
 				  'ylabel': 'Mean Abundance', \
 				  'title': title, \
 				  'filename': name+'_abund.pdf'}
-		draw_prev_plot(genes_table, uniref_table, inds_i['abund'], labels, args.abund)
+		draw_prev_plot(genes_table, uniref_table, inds_i['abund'], labels, abund)
