@@ -4,10 +4,15 @@ import pdb
 import re
 import argparse
 import numpy
-import logging
 
+'''Normalizes table given in first argument. Prints table as std.out'''
 
 if __name__ == '__main__':
+	help = ['-h', '--h', '--help']
+	if sys.argv[1] in help:
+		print 'Usage: python '+sys.argv[0]+' <input_table> > <normalized_table>'
+		sys.exit()
+		
 	foo = open(sys.argv[1])
 	metadata = []
 	genes_order = []
@@ -22,6 +27,5 @@ if __name__ == '__main__':
 	norm_dm = numpy.array(dm)
 	norm_dm = norm_dm/sum(norm_dm)
 	for i, gene in enumerate(genes_order):
-		#pdb.set_trace()
 		print '\t'.join([gene]+[str(j) for j in list(norm_dm[i])])
 
