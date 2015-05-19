@@ -9,13 +9,19 @@ import numpy
 import argparse
 
 from matplotlib import pyplot
-from src import create_fastas
+from ppanini.src import utilities
+
+'''Analysis of Genome Hits per gene showing how many genomes each gene is found in.'''
 
 def parse_table(m8_filename, fasta_filename):
-	fasta_dict = create_fastas.read_fasta(fasta_filename)
+	'''Parse the BLAST results to give gene hits to genomes
+	Input: filename of blast results
+	Output: table = {gene: [List of genomes]}'''
+
+	fasta_dict = utilities.read_fasta(fasta_filename)
+
 	for seq in fasta_dict:
 		fasta_dict[seq] = float(len(fasta_dict[seq]))
-
 	table = {}
 	foo = open(m8_filename)
 	for line in foo:
@@ -32,8 +38,10 @@ def parse_table(m8_filename, fasta_filename):
 				table[split_i[0]] += [sp]
 	return table
 
-
 def read_parsed(m8_filename):
+	'''Read parsed table for {gene: genomes}
+	Input: filename of blast results
+	Output: table = {gene: [List of genomes]}'''
 	table = {}
 	foo = open(m8_filename)
 
@@ -46,28 +54,21 @@ def read_parsed(m8_filename):
 	return table
 
 def plot_scatter(table, m8_filename):
+	'''Plot Scatter plot for genome hits per gene'''
 	labels = {'xlabel': 'Prioritized Centroids',\
 			  'ylabel':'No. of Genomes (Log10)', \
 			  'title':'Metagenome vs. Genome Prioritization',\
-			  'filename': m8_filename+'_prioritizationScatter.pdf',\
-			  'fname_split': m8_filename+'_prioritizationScatter_split.pdf'}	
-	# uniref = []
-	# unannotated = []
+			  'filename': m8_filename+'_prioritizationScatter.pdf'}	
+
 	all_genes = []
 	for gene in table:
 		all_genes +=[len(table[gene])/4189.0]
-		# if gene.startswith('UniRef90'):
-		# 	uniref +=[len(table[gene])/4189.0]
-		# else:
-		# 	unannotated += [len(table[gene])/4189.0]
-	# uniref.sort()
-	# unannotated.sort()
-	# all_genes = uniref+unannotated
+
 	all_genes.sort()
 	pyplot.figure()
-	pyplot.xlabel(labels['xlabel'])#'Alpha Prevalence_'+keys[i])
+	pyplot.xlabel(labels['xlabel'])
 	pyplot.ylabel(labels['ylabel'])
-	pyplot.title(labels['title']) #'Mean abundance')
+	pyplot.title(labels['title']) 
 	pyplot.scatter(numpy.arange(len(all_genes)), \
 				   numpy.log(all_genes), \
 				   c='grey', \
@@ -79,46 +80,18 @@ def plot_scatter(table, m8_filename):
 	pyplot.legend( loc=4, \
 				   fontsize='x-small', \
 				   framealpha=0.4, )	
-	#pyplot.axhline(y=1, alpha=0.5, color='gray', zorder=5, hold=True, label='y=1')
 	pyplot.savefig(labels['filename'])
 
-	# pyplot.figure()
-	# pyplot.xlabel(labels['xlabel'])#'Alpha Prevalence_'+keys[i])
-	# pyplot.ylabel(labels['ylabel'])
-	# pyplot.title(labels['title']) #'Mean abundance')
-
-	# pyplot.scatter(numpy.arange(len(uniref)), \
-	# 			   numpy.log(uniref), \
-	# 			   c='grey', \
-	# 			   alpha=0.1, \
-	# 			   linewidths=0.0, \
-	# 			   zorder=1, \
-	# 			   marker='o',\
-	# 			   label='UniRef90 Centroids')
-	# pyplot.hold(True)
-	# pyplot.scatter(numpy.arange(len(unannotated)), \
-	# 			   numpy.log(unannotated), \
-	# 			   c='red', \
-	# 			   alpha=0.1, \
-	# 			   linewidths=0.0, \
-	# 			   zorder=2, \
-	# 			   marker='o',\
-	# 			   label='Unannotated Centroids')
-	# pyplot.legend( loc=4, \
-	# 			   fontsize='x-small', \
-	# 			   framealpha=0.4, )	
-	# #pyplot.axhline(y=1, alpha=0.5, color='gray', zorder=5, hold=True, label='y=1')
-	# pyplot.savefig(labels['fname_split'])
-
 def plot_hexbin(table, m8_filename):
+	'''Plots HexBin plots for the genome hits per gene'''
 	labels = {'xlabel': 'Prioritized Centroids',\
 			  'ylabel':'No. of Genomes', \
 			  'title':'Metagenome vs. Genome Prioritization',\
 			  'filename': m8_filename+'_prioritizationHEXBIN.pdf'}
 	pyplot.figure()
-	pyplot.xlabel(labels['xlabel'])#'Alpha Prevalence_'+keys[i])
+	pyplot.xlabel(labels['xlabel'])
 	pyplot.ylabel(labels['ylabel'])
-	pyplot.title(labels['title']) #'Mean abundance')
+	pyplot.title(labels['title']) 
 
 	all_genes = []
 	for gene in table:
@@ -134,48 +107,38 @@ def plot_hexbin(table, m8_filename):
 	pyplot.savefig(labels['filename'])
 
 def plot_hist(table, m8_filename):
+	'''Plots histogram for the genome hits per gene'''
 	labels = {'ylabel': 'Centroids',\
 			  'xlabel':'Genomes', \
 			  'title':'Metagenome vs. Genome Prioritization',\
-			  'filename': m8_filename+'_prioritizationHIST.pdf',
-			  'fname_split':m8_filename+'_prioritizationHIST_split.pdf'}
+			  'filename': m8_filename+'_prioritizationHIST.pdf'}
+	
+	uniq_genomes = []
+	for gene in table:
+		for genome in table[gene]:
+			if genome not in uniq_genomes:
+				uniq_genomes +=[genome]
+
+	no_uniq_genomes = len(uniq_genomes)
+	
 	all_genes = []
 	for gene in table:
-		all_genes +=[len(table[gene])/4189.0]
+		all_genes +=[len(table[gene])/no_uniq_genomes]
 	
-	# uniref = []
-	# unannotated = []
-	# for gene in table:
-	# 	if gene.startswith('UniRef90'):
-	# 		uniref +=[len(table[gene])/4189.0]
-	# 	else:
-	# 		unannotated += [len(table[gene])/4189.0]
-	# uniref.sort()
-	# unannotated.sort()
-	# all_genes = uniref+unannotated
-	# all_genes.sort()
-
-	# pyplot.figure()
-	# pyplot.xlabel(labels['xlabel'])#'Alpha Prevalence_'+keys[i])
-	# pyplot.ylabel(labels['ylabel'])
-	# pyplot.title(labels['title']) #'Mean abundance')
-
-	# pyplot.hist([numpy.array(uniref), numpy.array(unannotated)], log=True, bins=30, edgecolor='white')
-	# pyplot.legend(['UniRef90 Centroids','Unannotated Centroids'])
-	# pyplot.savefig(labels['fname_split'])
+	print 'No. of unique genomes: '+str(no_uniq_genomes)
 
 	pyplot.figure()
-	pyplot.xlabel(labels['xlabel'])#'Alpha Prevalence_'+keys[i])
+	pyplot.xlabel(labels['xlabel'])
 	pyplot.ylabel(labels['ylabel'])
-	pyplot.title(labels['title']) #'Mean abundance')
+	pyplot.title(labels['title'])
 	pyplot.legend('All Centroids')
 	pyplot.hist(all_genes, log=True, bins=30, edgecolor='white')
 	pyplot.savefig(labels['filename'])
 
 	pyplot.figure()
-	pyplot.xlabel('Genomes Fraction')#'Alpha Prevalence_'+keys[i])
+	pyplot.xlabel('Genomes Fraction [Genome hits/Total no. of unique genomes in niche]')
 	pyplot.ylabel('Centroids coverage')
-	pyplot.title(labels['title']) #'Mean abundance')
+	pyplot.title(labels['title'])
 	pyplot.legend('All Centroids')
 	hist, bins = numpy.histogram(all_genes, bins=200)
 	offset = bins[1:]-bins[:-1]
@@ -183,11 +146,22 @@ def plot_hist(table, m8_filename):
 	pyplot.savefig(labels['filename']+'_cumsum.pdf')
 
 if __name__ == '__main__':
+	parser = argparse.ArgumentParser()
+	parser.add_argument('-i', '--input_file', help='Gene Genomes blast results', required=True)
+	parser.add_argument('--parsed', default=False, action='store_true', help='Input file is parsed')
+	parser.add_argument('--metagenome_fasta', help='Metagenome FASTA file')
+	parser.add_argument('--bypass_hist', default=False, action='store_true', help='Generates Histogram')
+	parser.add_argument('--bypass_scatter', default=False, action='store_true', help='Generates Scatterplot')
 
-	m8_filename = sys.argv[1]
+	args = parser.parse_args()
 
-	if sys.argv[2]=='--to_parse':
-		fasta_filename = sys.argv[3]
+	m8_filename = args.input_file
+
+	if not args.parsed:
+		try:
+			fasta_filename = args.metagenome_fasta
+		except:
+			raise Exception('Metagenome fasta not entered')
 		table = parse_table(m8_filename, fasta_filename)
 		with open(m8_filename+'_parsed.m8','w') as foo:
 			for i in table:
@@ -196,7 +170,7 @@ if __name__ == '__main__':
 	else:
 		table = read_parsed(m8_filename)
 
-
-	plot_scatter(table, m8_filename)
-	# plot_hexbin(table, m8_filename)
-	plot_hist(table, m8_filename)
+	if not args.bypass_scatter:
+		plot_scatter(table, m8_filename)
+	if not args.bypass_hist:
+		plot_hist(table, m8_filename)

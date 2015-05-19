@@ -115,6 +115,10 @@ def run_vclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gen
                                      --threads '+str(nprocesses))
 
 def get_clusters_dict(gene_centroid_clusters_file_path):
+	'''Return dict containing clusters
+	Input: filepath to centroid file
+	Output: centroid_gis (dict) {gene_centroid: [List of genes], }'''
+
 	cluster_txt = open(gene_centroid_clusters_file_path)
 	centroid_gis = {}
 	for line in cluster_txt:
@@ -128,12 +132,17 @@ def get_clusters_dict(gene_centroid_clusters_file_path):
 
 
 def get_annotations_dict(centroid_annotations, centroid_gis):
-	annotations_dict = {}
+	'''Returns annotations for all the genes and centroids
+	Input: centroid_annotations (dict) {centroid: annotation, ...}
+		   centroid_gis (dict) {centroid: [List of genes], ...}
+	Output: annotation_dict (dict) {gene: annotation, ...}'''
+
+	annotation_dict = {}
 	for centroid in centroid_annotations:
 		gis = centroid_gis[centroid]
 		for gi in gis:
-			annotations_dict[gi] = centroid_annotations[centroid]
-	return annotations_dict
+			annotation_dict[gi] = centroid_annotations[centroid]
+	return annotation_dict
 
 	
 if __name__ == '__main__':

@@ -12,6 +12,8 @@ import random
 from matplotlib import pyplot
 from matplotlib import colors
 
+'''Analysis of genomes in the niche giving a sense of what genomes are in the community'''
+
 numpy.seterr(divide='ignore', invalid='ignore')
 
 def read_parsed(m8_filename, go_table):
@@ -45,6 +47,7 @@ def read_go_map(m8_filename):
 	return table
 
 def plot_scatter(table, m8_filename):
+	'''Plots a scatter plot for genome hits over prioritized genes'''
 	labels = {'xlabel': 'No. of Prioritized genes',\
 			  'ylabel':'Frequency(No. of Genomes)', \
 			  'title':'Metagenome vs. Genome Prioritization',\
@@ -66,7 +69,7 @@ def plot_scatter(table, m8_filename):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-i', '--input_file', help='Gene Genomes blast results', required=True)
+	parser.add_argument('-i', '--input_file', help='Gene Genomes blast results parsed**', required=True)
 	parser.add_argument('--map', help='Gene to GO mapper', required=True)
 	parser.add_argument('--bypass_scatter', default=False, action='store_true', help='Sctter plot for genomes')
 	parser.add_argument('--bypass_stats', default=False, action='store_true', help='Write stats for genome gene hits')
@@ -77,7 +80,7 @@ if __name__ == '__main__':
 	go_map = read_go_map(args.map)
 	genomes = read_parsed(m8_filename, go_map)
 	all_values = []
-	
+
 	if not args.bypass_scatter:
 		plot_scatter(genomes, m8_filename)
 
