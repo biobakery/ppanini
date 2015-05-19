@@ -6,6 +6,11 @@ import pdb
 '''Takes the first col of first file, and extracts FASTA sequences from the second file'''
 
 if __name__ == '__main__':
+	help = ['-h', '--h', '--help']
+	if sys.argv[1] in help:
+		print 'Usage: python '+sys.argv[0]+' <imp_centroids_list> <fasta_file> > <imp_centroids_fasta_file>'
+		sys.exit()
+		
 	centroids_list = []
 	with open(sys.argv[1]) as centroids:
 		for line in centroids:
