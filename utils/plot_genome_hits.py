@@ -7,14 +7,15 @@ import pdb
 import time
 import numpy
 import argparse
+import random
 
 from matplotlib import pyplot
 from matplotlib import colors
-from src import create_fastas
 
 numpy.seterr(divide='ignore', invalid='ignore')
 
 def read_parsed(m8_filename, go_table):
+	'''Returns genomes dict {genome: {'UniRef90': #hits, 'UniRef90_NA': #hits, 'NA': #hits}}'''
 	table = {}
 	foo = open(m8_filename)
 	for line in foo:
@@ -34,6 +35,7 @@ def read_parsed(m8_filename, go_table):
 	return table
 
 def read_go_map(m8_filename):
+	'''Returns dict {gene: GO annotation}'''
 	table = {}
 	foo = open(m8_filename)
 
@@ -63,13 +65,23 @@ def plot_scatter(table, m8_filename):
 	pyplot.savefig(labels['filename'])
 
 if __name__ == '__main__':
+	parser = argparse.ArgumentParser()
+	parser.add_argument('-i', '--input_file', help='Gene Genomes blast results', required=True)
+	parser.add_argument('--map', help='Gene to GO mapper', required=True)
+	parser.add_argument('--bypass_scatter', default=False, action='store_true', help='Sctter plot for genomes')
+	parser.add_argument('--bypass_stats', default=False, action='store_true', help='Write stats for genome gene hits')
+	parser.add_argument('--bypass_graphlan_rings', default=False, action='store_true', help='Generates graphlan rings file')
+	args = parser.parse_args()
 
-	m8_filename = sys.argv[1]
-	go_map = read_go_map(sys.argv[2])
+	m8_filename = args.input_file
+	go_map = read_go_map(args.map)
 	genomes = read_parsed(m8_filename, go_map)
 	all_values = []
-	plot_scatter(genomes, m8_filename)
-	if sys.argv[3]=='--write_all':
+	
+	if not args.bypass_scatter:
+		plot_scatter(genomes, m8_filename)
+
+	if not args.bypass_stats:
 		with open(m8_filename+'_allstats.txt', 'w') as foo:
 			for gene in genomes:
 				x = genomes[gene].values()
@@ -77,34 +89,26 @@ if __name__ == '__main__':
 				foo.writelines([gene+'\t'+str(sum(x))+'\n'])
 	max_val = float(max(all_values))
 	
-	with open(sys.argv[1]+'_allrings.txt','w') as foo_rings:
-		foo_rings.writelines(['ring_internal_separator_thickness\t1\t1.0\n'])#ring_width\t5\t0.5\n']) #UniRe90
-		foo_rings.writelines(['ring_internal_separator_thickness\t2\t1.0\n'])#ring_width\t5\t0.5\n']) #UniRef90NA
-		foo_rings.writelines(['ring_internal_separator_thickness\t3\t1.0\n'])#ring_width\t5\t0.5\n']) #SRS
+	if not args.bypass_graphlan_rings:
+		##GRAPHLAN RINGS FILE
+		ref = numpy.arange(int(max_val)+1)
+		print ref #Reference
+		ref_i = 0
+		with open(sys.argv[1]+'_allrings.txt','w') as foo_rings:
+			foo_rings.writelines(['ring_internal_separator_thickness\t1\t1.0\n'])# #UniRe90+GO
+			foo_rings.writelines(['ring_internal_separator_thickness\t2\t1.0\n'])# #UniRef90NA
+			foo_rings.writelines(['ring_internal_separator_thickness\t3\t1.0\n']) #SRS
+			foo_rings.writelines(['ring_internal_separator_thickness\t4\t1.0\n'])#REFERENCE
 
-		for genome in genomes:
-			foo_rings.writelines([genome+'\tring_height\t1\t'+str(numpy.log(genomes[genome]['UniRef90']))+'\n'])
-			foo_rings.writelines([genome+'\tring_height\t2\t'+str(numpy.log(genomes[genome]['UniRef90_NA']))+'\n'])
-			foo_rings.writelines([genome+'\tring_height\t3\t'+str(numpy.log(genomes[genome]['NA']))+'\n'])
-			
-			foo_rings.writelines([genome+'\tring_color\t1\t#AAAA00\n'])#+str(genomes[genome]['UniRef90']/max_val)+'\n'])
-			foo_rings.writelines([genome+'\tring_color\t2\t#00AAAA\n'])#+str(genomes[genome]['UniRef90_NA']/max_val)+'\n'])
-			foo_rings.writelines([genome+'\tring_color\t3\t#AA00AA\n'])#+str(genomes[genome]['NA']/max_val)+'\n'])
-	
-	import matplotlib.patches as patches
-	# cdict = {'white':[(0.0,1.0,1.0),(1.0,1.0,1.0),(1.0,1.0,1.0)], '#AAAA00':[(0.0,1.0,1.0),(1.0,0.0,0.0),(1.0,0.0,0.0)]}
-	fig5 = pyplot.figure()
-	ax5 = fig5.add_subplot(111, aspect='equal')
-	all_values = numpy.array(all_values)
-	x=numpy.arange(100)
-	x=x/100.0
-	x_i = 0.01
-	for p in range(len(x)):
-		# print x[p]
-		ax5.add_patch(patches.Rectangle((x_i,0.01),0.01,0.05,alpha=x[p], facecolor='#AAAA00', edgecolor='none'))
-		ax5.add_patch(patches.Rectangle((x_i,0.10),0.01,0.05,alpha=x[p], facecolor='#00AAAA', edgecolor='none'))
-		ax5.add_patch(patches.Rectangle((x_i,0.20),0.01,0.05,alpha=x[p], facecolor='#AA00AA', edgecolor='none'))
-		x_i +=0.01
-	# pyplot.imshow([numpy.array(all_values)/max_val, numpy.array(all_values)/max_val], cmap=matplotlib.colors.LinearSegmentedColormap('cutom_XYZ', cdict, 256))
-	# pyplot.colorbar()
-	fig5.savefig(sys.argv[1]+'_cbar.pdf', dpi=300, bbox_inches='tight')
+			for genome in genomes:
+				while ref_i <= len(refs):
+					foo_rings.writelines([genome+'\tring_height\t4\t'+str(inds[check])+'\n'])	
+					foo_rings.writelines([genome+'\tring_color\t4\t#000000\n'])
+					ref_i += 1
+				foo_rings.writelines([genome+'\tring_height\t1\t'+str(numpy.log(genomes[genome]['UniRef90']))+'\n'])
+				foo_rings.writelines([genome+'\tring_height\t2\t'+str(numpy.log(genomes[genome]['UniRef90_NA']))+'\n'])
+				foo_rings.writelines([genome+'\tring_height\t3\t'+str(numpy.log(genomes[genome]['NA']))+'\n'])
+
+				foo_rings.writelines([genome+'\tring_color\t1\t#0000FF\n'])
+				foo_rings.writelines([genome+'\tring_color\t2\t#FF0000\n'])
+				foo_rings.writelines([genome+'\tring_color\t3\t#FFFF00\n'])
