@@ -12,6 +12,8 @@ from src import annotate_genes
 logger = logging.getLogger(__name__)
 
 basename = ''
+temp_folder = ''
+
 numpy.seterr(divide='ignore', invalid='ignore')
 
 def read_gene_table(gene_table_fname):
@@ -164,9 +166,9 @@ def get_clusters(centroids_fasta, args, nprocesses): #ONLY FOR THE UNIREF UNANNO
 
 	logging.debug('get_clusters')
 
-	allgenes_file_path = 'data_files/'+basename+'_centroids_for_clustering.fasta'
-	gene_centroids_file_path = 'data_files/'+basename+'_centroids.fasta'
-	gene_centroid_clusters_file_path = 'data_files/'+basename+'_clusters.uc'
+	allgenes_file_path = temp_folder+'/'+basename+'_centroids_for_clustering.fasta'
+	gene_centroids_file_path = temp_folder+'/'+basename+'_centroids.fasta'
+	gene_centroid_clusters_file_path = temp_folder+'/'+basename+'_clusters.uc'
 
 	utilities.write_fasta(centroids_fasta, allgenes_file_path, True) #ensures all clustering happens to FAAs
 	
@@ -209,7 +211,7 @@ def get_centroids_table(all_centroids, metadata):
 	norm_data_matrix = centroids_data_matrix/sum(centroids_data_matrix)
 	norm_data_matrix = norm_data_matrix*1e6
 
-	gene_centroids_table_file_path = 'data_files/'+basename+'_gene_centroids_table.txt'
+	gene_centroids_table_file_path = temp_folder+'/'+basename+'_gene_centroids_table.txt'
 	
 	with open(gene_centroids_table_file_path,'w') as foo:
 		foo.writelines(metadata[:-1])
@@ -253,7 +255,7 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata):
 	
 	logging.debug('get_prevalence_abundance')
 
-	centroid_prev_abund_file_path = 'data_files/'+basename+'_centroid_prev_abund.txt'
+	centroid_prev_abund_file_path = temp_folder+'/'+basename+'_centroid_prev_abund.txt'
 	
 	[niche_line, ind] = is_present(metadata, '#NICHE')
 	
@@ -295,7 +297,7 @@ def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_
 
 	logging.debug('get_niche_prevalence_abundance')
 	
-	centroid_prev_abund_file_path = 'data_files/'+basename+'_centroid_prev_abund.txt'
+	centroid_prev_abund_file_path = temp_folder+'/'+basename+'_centroid_prev_abund.txt'
 	
 	niches = {}
 	
@@ -448,9 +450,9 @@ def write_prev_abund_matrix(centroid_prev_abund, out_file):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-i','--input_table', help='Gene abundance table with metadata', required=True)
-	parser.add_argument('-u','--usearch_folder', nargs = '?' , help='Path for USEARCH program; if not provided, assumed to be in path')
-	parser.add_argument('-o','--output_folder', help='Folder containing results', default='.')
+	parser.add_argument('-i','--input_table', help='REQUIRED: Gene abundance table with metadata', required=True)
+	parser.add_argument('-o','--output_folder', help='Folder containing results', default=False)
+	parser.add_argument('--uc', default=False, help='UCLUST file containg centroids and clustered genes')
 	parser.add_argument('--usearch', default=False, help='Path to USEARCH') #add to be in path?
 	parser.add_argument('--vsearch', default=False, help='Path to VSEARCH') #add to be in path?
 	parser.add_argument('--basename', help='BASENAME for all the output files')
@@ -466,13 +468,19 @@ if __name__ == '__main__':
 
 	basename = args.basename
 	input_table = args.input_table
-	uclust_file = args.uclust_file
-	output_folder = args.output_folder
+	uclust_file = args.uc
 
 	if not basename:
 		basename = input_table.split('.')[0].split('/')[-1]
-	
-	utilities.create_folders(['data_files', args.output_folder])
+
+	if not args.output_folder:
+		output_folder = basename
+	else:
+		output_folder = args.output_folder
+
+	temp_folder = output_folder+'/'+basename+'_temp'
+
+	utilities.create_folders([tmp, output_folder])
 
 	log_file = output_folder+'/'+basename+'.log'
 	logging.basicConfig(filename=log_file, \

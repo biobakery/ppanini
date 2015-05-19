@@ -92,7 +92,7 @@ def read_abundance_tables(mapper, norm_flag):
               abundance_dict[sample][split_line[0].strip()] = float(split_line[2])/(float(split_line[1])-200.0) #avg. read length?
         else:
               abundance_dict[sample][split_line[0].strip()] = float(split_line[1]) #HUMAnN2
-  return abundance_dict
+    return abundance_dict
 
   
 if __name__ == '__main__':
