@@ -13,7 +13,6 @@ from src import quantify_genes
 from src import utilities
 from src import annotate_genes
 from src import write_ppanini_table
-from utils import utilities
 
 basename = ''
 logger = logging.getLogger(__name__)
