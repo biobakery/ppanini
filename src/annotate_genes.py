@@ -4,7 +4,7 @@ import numpy
 import re
 import argparse
 
-from src import utilities
+from . import utilities
 
 def parse_annotation_table(annotations_file, fasta_sequences, thld_ref):
 	'''Parses annotations result from RAPSEARCH/DIAMOND to ensure they pass threshold
@@ -21,7 +21,7 @@ def parse_annotation_table(annotations_file, fasta_sequences, thld_ref):
 	sample_annotations = {}
 	for line in foo:
 		if not line.startswith('#'):
-			#FILE_FORMAT: Seq_Name<\t>Seq_Length<\t>Mapped_Reads<\t>Unmapped_Reads
+			#FILE_FORMAT: Query_Seq<\t>Target_Seq<\t>Identity<\t>Aligned length
 			split_line = [re.sub('[\t\r\n]', '', i) for i in line.split('\t')]
 
 			query_length = float(len(fasta_sequences[split_line[0]]))
@@ -41,7 +41,6 @@ def parse_annotation_table(annotations_file, fasta_sequences, thld_ref):
 
 def run_diamond(query_file, db, out_fname, nprocesses):
 	'''Runs DIAMOND on query_file to produce results in out_fname
-
 	Input: query_file = path to query_fasta_file
 		   all_paths = {'uniref90': path_to_uniref90_index, 
                                             'uniref50': path_to_uniref50_index, 

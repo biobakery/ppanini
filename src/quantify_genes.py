@@ -7,7 +7,7 @@ import numpy
 import subprocess
 import multiprocessing
 
-import utilities
+from . import utilities
 
 def generate_abundance_viabwt2(assembly_x_withpath, reads_x, sample, out):
   '''Calculate Genes/Contigs abundance from Contig_assemblies and reads

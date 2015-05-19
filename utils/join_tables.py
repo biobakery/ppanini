@@ -9,79 +9,54 @@ def read_table(gene_table_fname):
 
 	Input: gene_table_fname = Filename of the gene_table
 
-	Output: metadata = [metadata strings]; Rows with # as first character in table
-			uniref_gis = {UniRef_XYZ: [list of gene ids]}
-			gis_unannotated = {sample_id: [gene ids]}
-			gene_ids = [List of all gene ids]
-			data_matrix = The abundance table [[0, 0,.],[0, 0,.],...]'''
+	Output: metadata = {'#KEY': [row split ]} 
+			genes = [] order of genes as they appear in the table
+			data_matrix = [['0','0','1', ...],...] matrix of the gene abundance in strings'''
 
 	gene_table = open(gene_table_fname) 
-	gtab_lines = gene_table.readlines()
-	samples = []
-	genes, metadata = {}, {}
-
+	genes = []
+	metadata = {}
+	data_matrix = []
 	
-	for line in gtab_lines:
-		#Metadata containing Sample names, Niche specifics and optionally fasta file locations
-	#	samples = []
+	for line in gene_table:
 		if line.startswith('#'):
 			split_i = line.split('\t')
 			metadata[split_i[0]]= [re.sub('[\r\t\n]','',i) for i in split_i[1:]]
-			samples = metadata[split_i[0]]	
-		if not line.startswith('#'):
+		else:
 			split_i = line.split('\t')
-			genes[split_i[0]] = [re.sub('[\r\t\n]','',i) for i in split_i[1:]]
-	return [metadata, samples, genes]
-
-def join(orig_table, add_table):
-	[metadata, samples, genes] = orig_table
-	[metadata_i, samples_i, genes_i] = add_table
-
-	metadata_final = []
-	for key in metadata:
-		metadata_final += ['\t'.join([key]+metadata[key]+metadata_i[key])]
-
-	samples_final = samples + samples_i
-	zeros_tba_o = len(samples_i)
-	zeros_tba_i = len(samples)
-	genes_final = {}
-	
-	for gene in genes:
-		genes_final[gene] = genes[gene] + ["0" for i in range(zeros_tba_o)]
-
-	for gene in genes_i:
-		tmp =["0" for i in range(zeros_tba_i)] + genes_i[gene]
-		genes_final[gene] = tmp
-	#pdb.set_trace()
-	return [metadata_final, samples_final, genes_final] 
-
-def print_table(metadata_final, genes_final):
-	for line in metadata_final:
-		print line.strip()
-	for gene in genes_final:
-		row = [gene]+genes_final[gene]
-		#print len(row)
-		print '\t'.join([gene]+genes_final[gene]).strip()
+			genes += [split_i[0]] 
+			data_matrix += [[re.sub('[\r\t\n]','',i) for i in split_i[1:]]]
+	return [metadata, genes, data_matrix]
 
 if __name__ == '__main__':
-	list_tables = []
-	t1 = time.time()
-	for i in range(1, len(sys.argv)):
-		#print sys.argv[i]
-		list_tables +=[read_table(sys.argv[i])]
-	t2 = time.time()
-	print 'Read tables '+str((t2-t1)/60)+' mins elapsed'
-	[metadata_final, samples_final, genes_final] = list_tables[0]
+	original_table = sys.argv[1]
+	[metadata_o, genes_o, data_matrix_o] = read_table(original_table)
 
-	for i in range(1, len(list_tables)):
-		[metadata_final, samples_final, genes_final] = join([metadata_final, samples_final, genes_final], list_tables[i])
-	t3 = time.time()
-	print 'Joined tables, now printing '+str((t3-t2)/60)+' mins elapsed'
-	print_table(metadata_final, genes_final)
+	for i in range(2, len(sys.argv)):
+		new_table = sys.argv[i]
+		print 'Adding '+new_table+' to original table'
 
+		[metadata, genes, data_matrix] = read_table(new_table)
+		
+		no_added_o = [len(metadata['#SAMPLES']), len(genes_o)]
+		o_row = ['0' for j in range(len(metadata['#SAMPLES']))]
 
+		no_added_i = [len(metadata_o['#SAMPLES']), len(genes)]
+		i_row = ['0' for j in range(len(metadata_o['#SAMPLES']))]
+		
+		for j, val in enumerate(data_matrix_o): #Adding cols to old table
+			data_matrix_o[j] = val+o_row
 
+		for j, val in enumerate(data_matrix): #Adding cols to new table for old table
+			data_matrix[j] = i_row+val
+		
+		data_matrix_o = data_matrix_o+data_matrix
+		genes_o = genes_o + genes
+		
+		for key in metadata: #Assumes all keys in metadata exist in metadata_o
+			metadata_o[key] += metadata[key]
 
-
-
-
+	for key in metadata_o:
+		print '\t'.join([key]+metadata_o[key])
+	for i, val in enumerate(genes_o):
+		print '\t'.join([val]+data_matrix_o[i])

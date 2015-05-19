@@ -17,7 +17,6 @@ def read_fasta(fasta_filename):
 
     fasta_file = open(fasta_filename)
     fasta_seq = {}
-
     name = ''
 
     for line in fasta_file:
@@ -32,23 +31,12 @@ def read_fasta(fasta_filename):
     return fasta_seq
 
 def pullgenes_fromcontigs(contig_file, gff3_file, fna_file, faa_file):
-    '''Return dictionary of annotations for genes from each sample's contig_assembly
+    '''Pulls genes from contigs using the coordinates from GFF3 file provided
 
-    Input: mapper = {sample:{'READS': path_to_reads_file, 
-                             'CONTIG_ASSEMBLIES': path_to_assemblies, 
-                             'FASTAS': path_to_fasta_file,
-                             'SAMS': path_to_sam_file,
-                             'BAMS': path_to_bam_file,
-                             'GFF3S': path_to_gff3_file,
-                             'NICHE': niche_metadata}, ...}
-               all_paths = {'uniref90': path_to_uniref90_index, 
-                                            'uniref50': path_to_uniref50_index, 
-                                            'umap90_50': path_to_uniref90_uniref50_mapping}
-               nprocesses = int, Number of processes
-
-    Output: [annotations_dict, gene_contig_mapper]
-    annotations_dict = {sample :{gene: UniRef annotation}}
-    gene_contig_mapper = {sample: {gene: contig}}'''
+    Input: contig_file: FASTA file containing contigs in FNA format.
+           gff3_file: File containing coordinates of genes in GFF3 format
+           fna_file: filepath for genes written in nucleotides sequences
+           faa_file: filepath for genes written in amino-acid sequences'''
 
     gene_contig_mapper = {}
     contig_gene_mapper = {}
@@ -94,7 +82,7 @@ def read_gff3(filename):
     with open(filename,'r') as foo:
         for line in foo:
             if re.match('(\w+)\t(\w+)\tgene\t(\w+)', line):
-                split_line = [re.sub('[\r\t\n]','', i).strip() for i in line.split('\t')]
+                split_line = [re.sub('[\r\t\n]', '', i).strip() for i in line.split('\t')]
                 gid = split_line[-1].split('=')[-1]
                 gene_contig_mapper[gid] = split_line[0]
                 gene_start_stop[gid] = [int(split_line[3]), int(split_line[4]), split_line[6]]
@@ -110,8 +98,8 @@ def read_gff3(filename):
 def write_fasta(seqs_dict, filename, to_translate):
     '''Writes dictionary of fasta sequences into text file
     Input: seqs_dict = {geneID: sequence}
-           filename = path_to_output_genes_fastafile
-    '''
+           filename = path_to_output_genes_fastafile'''
+
     with open(filename,'w') as foo:
 
         test = ''
@@ -124,7 +112,7 @@ def write_fasta(seqs_dict, filename, to_translate):
         if to_translate: # if not FAA already and to be translated
             for seq in seqs_dict:
                 len_seq = str(len(seqs_dict[seq]))
-                foo.writelines(['>'+seq+'|'+len_seq+'\n'])
+                foo.writelines(['>' + seq + '|' + len_seq + '\n'])
                 foo.writelines([Bio.Seq.translate(seqs_dict[seq], to_stop=True)+'\n'])
         else:
             ind = 1
@@ -132,10 +120,14 @@ def write_fasta(seqs_dict, filename, to_translate):
                 ind = 3 #amino acids * 3 nucleotides
             for seq in seqs_dict:
                 len_seq = str(len(seqs_dict[seq]*ind))
-                foo.writelines(['>'+seq+'|'+len_seq+'\n'])
-                foo.writelines([seqs_dict[seq]+'\n'])
+                foo.writelines(['>' + seq + '|' + len_seq + '\n'])
+                foo.writelines([seqs_dict[seq] + '\n'])
 
 def is_protein(sequence):
+    '''Returns True if the sequence is protein.
+    Input: (str) format sequence
+    Output: (bool) True if amino acids; False if nucleotides sequence'''
+
     format = False  #'FNA'
     try:
         Bio.Seq.translate(sequence)
@@ -167,15 +159,14 @@ def read_dict(gene_annotations_file):
     with open(gene_annotations_file) as foo:
         for line in foo:
             if not line.startswith('#'):
-                split_line = [re.sub('[\t\r\n]','', i).strip() for i in line.split('\t')]
+                split_line = [re.sub('[\t\r\n]', '', i).strip() for i in line.split('\t')]
                 dictX[split_line[0]] = split_line[1]
     return dictX
 
 def write_dict(dictX, gene_annotations_file):
     '''Writes dictionary of genes and their annotations into text file
     Input: dictX = {geneID: annotation}
-           gene_annotations_file = path_to_output_gene_annotations_table
-    '''
+           gene_annotations_file = path_to_output_gene_annotations_table'''
 
     with open(gene_annotations_file, 'w') as foo:
         foo.writelines('#GENEID\tANNOTATION')
