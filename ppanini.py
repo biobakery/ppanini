@@ -37,11 +37,11 @@ def read_gene_table(gene_table_fname):
 	for line in gene_table:
 		if line.startswith('#'):
 			metadata += [line]
-			[samples_row, sii] = is_present(metadata, '#SAMPLES')
+			[samples_row, sii] = utilities.is_present(metadata, '#SAMPLES')
 			if samples_row:
 				samples = [re.sub('[\r\t\n]','',i) for i in samples_row.split('\t')[1:]]
 			if not samples_row:
-				[samples_row, sii] = is_present(metadata, '#GENES')
+				[samples_row, sii] = utilities.is_present(metadata, '#GENES')
 		else:
 			split_i = line.split('\t')
 			annot = split_i[0].split('|') #geneID column split 
@@ -75,14 +75,14 @@ def extract_fasta_names(metadata, samples):
 	
 	location = {}
 	
-	[line, ind] = is_present(metadata, '#FASTAS')
+	[line, ind] = utilties.is_present(metadata, '#FAAS')
 
 	if line:
 		split_i = line.split('\t')[1:]
 		for i, val in enumerate(split_i):
 			location[re.sub('[\t\r\n]', '', samples[i])] = re.sub('[\t\n\r]', '', val)
 	else:
-		raise Exception("Missing #FASTAS metadata for sample names!")
+		raise Exception("Missing #FAAS metadata for sample names!")
 
 	return location
 
@@ -222,25 +222,7 @@ def get_centroids_table(all_centroids, metadata):
 
 	return [norm_data_matrix, centroids_list]
 
-def is_present(metadata, meta_type):
-	'''Returns True if meta_type is present in metadata extracted from mappert_file
 
-	Input: metadata = [metadata strings]; Rows with # as first character in table
-		   meta_type = Type of metadata that you are querying e.g. FASTAS, NICHE etc.
-
-	Output: [line, ind]
-			line = The corresponding line from metadata, [] if not present
-			ind = The index of the line in the metadata sequence, [] if not present'''
-	logging.debug('is_present')
-
-	line = []
-	ind = []
-	for i, val in enumerate(metadata):
-		if val.upper().startswith(meta_type):
-			line = val
-			ind = i
-			break
-	return [line, ind]
 
 def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata):
 	'''Returns the dict of centroids with their prevalence and abundance
@@ -257,7 +239,7 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata):
 
 	centroid_prev_abund_file_path = temp_folder+'/'+basename+'_centroid_prev_abund.txt'
 	
-	[niche_line, ind] = is_present(metadata, '#NICHE')
+	[niche_line, ind] = utilities.is_present(metadata, '#NICHE')
 	
 	if niche_line:
 		niche_flag = True
@@ -480,7 +462,7 @@ if __name__ == '__main__':
 
 	temp_folder = output_folder+'/'+basename+'_temp'
 
-	utilities.create_folders([tmp, output_folder])
+	utilities.create_folders([temp_folder, output_folder])
 
 	log_file = output_folder+'/'+basename+'.log'
 	logging.basicConfig(filename=log_file, \

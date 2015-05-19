@@ -164,13 +164,13 @@ optional arguments:
                         Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
 ```
 
-* ``mapper_file``: REQUIRED. Contains all information about which FAAS (Gene FAA format) corresponds to which SAMPLE and to which ABUNDANCE FILE; etc. Please see the demo input for more examples. All the possible options are: ['SAMS', 'BAMS', 'NICHE', 'GFF3S', 'ABUNDANCE_TABLES', 'ANNOTATION', 'READS', 'CONTIG_ASSEMBLIES', 'FAAS', 'FNAS', 'SAMPLES']
-* ``basename``: name prefix for all intermediate output files produced
-* ``bypass_abundance``: bool flag to bypass running samtools/bowtie2 to calculate the gene abundances
-* ``bypass_annotation``: bool flag to bypass running sequence homology search for the gene sequences against UniRef90/50.
-* ``bypass_write_table``: bool flag to bypass writing ppanini input table
-* ``usearch``: Runs USEARCH for clustering genes using the path provided, including the name. E.g. [/n/usr/bin/usearch]
-* ``vsearch``: Runs VSEARCH for clustering genes using the path provided, including the name. E.g. [/n/usr/bin/vsearch]
+* ``--mapper_file``: REQUIRED. Contains all information about which FAAS (Gene FAA format) corresponds to which SAMPLE and to which ABUNDANCE FILE; etc. Please see the demo input for more examples. All the possible options are: ['SAMS', 'BAMS', 'NICHE', 'GFF3S', 'ABUNDANCE_TABLES', 'ANNOTATION', 'READS', 'CONTIG_ASSEMBLIES', 'FAAS', 'FNAS', 'SAMPLES']
+* ``--basename``: name prefix for all intermediate output files produced
+* ``--bypass_abundance``: bool flag to bypass running samtools/bowtie2 to calculate the gene abundances
+* ``--bypass_annotation``: bool flag to bypass running sequence homology search for the gene sequences against UniRef90/50.
+* ``--bypass_write_table``: bool flag to bypass writing ppanini input table
+* ``--usearch``: Runs USEARCH for clustering genes using the path provided, including the name. E.g. [/n/usr/bin/usearch]
+* ``--vsearch``: Runs VSEARCH for clustering genes using the path provided, including the name. E.g. [/n/usr/bin/vsearch]
 * ``--diamond``: Runs DIAMOND for sequence-homology search against UniRef90 using the path provided, including the name. E.g. [/n/usr/bin/diamond]
 * ``--rapsearch``: Runs RAPSEARCH for sequence-homology search against UniRef90 using the path provided, including the name. E.g. [/n/usr/bin/rapsearch2]
 * ``--threads``: Number of threads to be used while clustering or sequence-homology search tool.

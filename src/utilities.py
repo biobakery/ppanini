@@ -173,5 +173,25 @@ def write_dict(dictX, gene_annotations_file):
         for i in dictX:
             foo.writelines(['\t'.join([i, dictX[i]])+'\n'])
 
+def is_present(metadata, meta_type):
+    '''Returns True if meta_type is present in metadata extracted from mappert_file
+
+    Input: metadata = [metadata strings]; Rows with # as first character in table
+           meta_type = Type of metadata that you are querying e.g. FASTAS, NICHE etc.
+
+    Output: [line, ind]
+            line = The corresponding line from metadata, [] if not present
+            ind = The index of the line in the metadata sequence, [] if not present'''
+    logging.debug('is_present')
+
+    line = []
+    ind = []
+    for i, val in enumerate(metadata):
+        if val.upper().startswith(meta_type):
+            line = val
+            ind = i
+            break
+    return [line, ind]
+
 if __name__ == '__main__':
     pass
