@@ -7,9 +7,12 @@ import pdb
 import time
 import numpy
 import argparse
+import ppanini
+import src
 
+#from ppanini import src
 from matplotlib import pyplot
-from ppanini.src import utilities
+from src import utilities
 
 '''Analysis of Genome Hits per gene showing how many genomes each gene is found in.'''
 
@@ -53,7 +56,7 @@ def read_parsed(m8_filename):
 			table[split_i[0]] = [split_i[1]]
 	return table
 
-def plot_scatter(table, m8_filename):
+def plot_scatter(table, m8_filename, no_uniq_genomes):
 	'''Plot Scatter plot for genome hits per gene'''
 	labels = {'xlabel': 'Prioritized Centroids',\
 			  'ylabel':'No. of Genomes (Log10)', \
@@ -62,7 +65,7 @@ def plot_scatter(table, m8_filename):
 
 	all_genes = []
 	for gene in table:
-		all_genes +=[len(table[gene])/4189.0]
+		all_genes +=[len(table[gene])/float(no_uniq_genomes)]
 
 	all_genes.sort()
 	pyplot.figure()
@@ -106,24 +109,16 @@ def plot_hexbin(table, m8_filename):
 	
 	pyplot.savefig(labels['filename'])
 
-def plot_hist(table, m8_filename):
+def plot_hist(table, m8_filename, no_uniq_genomes):
 	'''Plots histogram for the genome hits per gene'''
 	labels = {'ylabel': 'Centroids',\
 			  'xlabel':'Genomes', \
 			  'title':'Metagenome vs. Genome Prioritization',\
 			  'filename': m8_filename+'_prioritizationHIST.pdf'}
 	
-	uniq_genomes = []
-	for gene in table:
-		for genome in table[gene]:
-			if genome not in uniq_genomes:
-				uniq_genomes +=[genome]
-
-	no_uniq_genomes = len(uniq_genomes)
-	
 	all_genes = []
 	for gene in table:
-		all_genes +=[len(table[gene])/no_uniq_genomes]
+		all_genes +=[len(table[gene])/float(no_uniq_genomes)]
 	
 	print 'No. of unique genomes: '+str(no_uniq_genomes)
 
@@ -132,7 +127,7 @@ def plot_hist(table, m8_filename):
 	pyplot.ylabel(labels['ylabel'])
 	pyplot.title(labels['title'])
 	pyplot.legend('All Centroids')
-	pyplot.hist(all_genes, log=True, bins=30, edgecolor='white')
+	pyplot.hist(all_genes, log=True, bins=30, edgecolor='white', color='gray')
 	pyplot.savefig(labels['filename'])
 
 	pyplot.figure()
@@ -142,7 +137,7 @@ def plot_hist(table, m8_filename):
 	pyplot.legend('All Centroids')
 	hist, bins = numpy.histogram(all_genes, bins=200)
 	offset = bins[1:]-bins[:-1]
-	pyplot.plot(bins[:-1]+offset, numpy.cumsum(hist))
+	pyplot.plot(bins[:-1]+offset, numpy.cumsum(hist), color='gray')
 	pyplot.savefig(labels['filename']+'_cumsum.pdf')
 
 if __name__ == '__main__':
@@ -170,7 +165,15 @@ if __name__ == '__main__':
 	else:
 		table = read_parsed(m8_filename)
 
+	uniq_genomes = []
+	for gene in table:
+		for genome in table[gene]:
+			if genome not in uniq_genomes:
+				uniq_genomes +=[genome]
+
+	no_uniq_genomes = len(uniq_genomes)
+
 	if not args.bypass_scatter:
-		plot_scatter(table, m8_filename)
+		plot_scatter(table, m8_filename, no_uniq_genomes)
 	if not args.bypass_hist:
-		plot_hist(table, m8_filename)
+		plot_hist(table, m8_filename, no_uniq_genomes)
