@@ -84,6 +84,7 @@ def plot_scatter(table, m8_filename, no_uniq_genomes):
 				   fontsize='x-small', \
 				   framealpha=0.4, )	
 	pyplot.savefig(labels['filename'])
+	pyplot.savefig(labels['filename']+'.png')
 
 def plot_hexbin(table, m8_filename):
 	'''Plots HexBin plots for the genome hits per gene'''
@@ -129,6 +130,7 @@ def plot_hist(table, m8_filename, no_uniq_genomes):
 	pyplot.legend('All Centroids')
 	pyplot.hist(all_genes, log=True, bins=30, edgecolor='white', color='gray')
 	pyplot.savefig(labels['filename'])
+	pyplot.savefig(labels['filename']+'.png')
 
 	pyplot.figure()
 	pyplot.xlabel('Genomes Fraction [Genome hits/Total no. of unique genomes in niche]')
@@ -139,6 +141,7 @@ def plot_hist(table, m8_filename, no_uniq_genomes):
 	offset = bins[1:]-bins[:-1]
 	pyplot.plot(bins[:-1]+offset, numpy.cumsum(hist), color='gray')
 	pyplot.savefig(labels['filename']+'_cumsum.pdf')
+	pyplot.savefig(labels['filename']+'_cumsum.png')
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()

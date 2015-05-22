@@ -14,6 +14,7 @@ if __name__ == '__main__':
 		sys.exit()
 		
 	foo = open(sys.argv[1])
+	multiplier = float(sys.argv[2])
 	metadata = []
 	genes_order = []
 	dm = []
@@ -25,7 +26,7 @@ if __name__ == '__main__':
 			dm += [[float(i) for i in split_i[1:]]]
 			genes_order += [split_i[0].strip()]
 	norm_dm = numpy.array(dm)
-	norm_dm = norm_dm/sum(norm_dm)
+	norm_dm = norm_dm*multiplier/sum(norm_dm)
 	for i, gene in enumerate(genes_order):
 		print '\t'.join([gene]+[str(j) for j in list(norm_dm[i])])
 
