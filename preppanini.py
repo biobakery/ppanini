@@ -28,13 +28,15 @@ def parse_mapper(mapper_file):
 	?NICHE: optional metadata
 
 	Output: mapper_final = {sample:{'READS': path_to_reads_file, #Format_3
-	                                             'CONTIG_ASSEMBLIES': path_to_assemblies, #Format_3
-	                                             'FAAS/FNAS': path_to_fasta_file, #Format_1 or Format_2
-	                                             'SAMS': path_to_sam_file, #Format_2
-	                                             'BAMS': path_to_bam_file, #Format_1
-	                                             'GFF3S': path_to_gff3_file, #Format_3
-	                                             'NICHE': niche_metadata}, ...}'''
+												 'CONTIG_ASSEMBLIES': path_to_assemblies, #Format_3
+												 'FAAS/FNAS': path_to_fasta_file, #Format_1 or Format_2
+												 'SAMS': path_to_sam_file, #Format_2
+												 'BAMS': path_to_bam_file, #Format_1
+												 'GFF3S': path_to_gff3_file, #Format_3
+												 'NICHE': niche_metadata}, ...}'''
 	# #SAMPLE<\t>?READS<\t>?ASSEMBLIES<\t>?NICHE<\t>?FASTAS<\t>?GFF3S<\t>?SAMS<\t>?BAMS
+	logger.debug('Parsing Mapper file: '+mapper_file)
+
 	mapper = {}
 	mapper_foo = open(mapper_file)
 
@@ -46,7 +48,10 @@ def parse_mapper(mapper_file):
 			split_val_i = [re.sub('[\t\n\r]', '', i) for i in line.split('\t')]
 			mapper[split_val_i[0]] = {}
 			for i, val in enumerate(split_val_i):
-				mapper[split_val_i[0]][header[i]] = val
+				try:
+					mapper[split_val_i[0]][header[i]] = val
+				except:
+					pdb.set_trace()
 	flags = {}
 	for i in header:
 		flags[i] = True
@@ -77,7 +82,7 @@ if __name__ == '__main__':
 
 	args = parser.parse_args()
 	nprocesses = int(args.threads)
-	workflow = int(args.workflow)
+	#workflow = int(args.workflow)
 	mapper_file = args.mapper_file
 	basename = args.basename
 
@@ -100,36 +105,40 @@ if __name__ == '__main__':
 
 	paths_dict = {}
 
+
 	if flags['GFF3S']:
+		logger.debug('Pulling genes from contigs')
 		paths_dict['FASTAS'] = output_folder+'/tmp/fasta_files'
 		utilities.create_folders([paths_dict['FASTA_FILES']])
 		for sample in mapper:
 			mapper[sample]['FNAS'] = paths_dict['FASTA_FILES']+'/'+sample+'.fna'
 			mapper[sample]['FAAS'] = paths_dict['FASTA_FILES']+'/'+sample+'.faa'
-
 		for sample in mapper:
 				utilities.pullgenes_fromcontigs(mapper[sample]['CONTIG_ASSEMBLIES'], \
-											    mapper[sample]['GFF3S'], \
-											    mapper[sample]['FNAS'], \
+												mapper[sample]['GFF3S'], \
+												mapper[sample]['FNAS'], \
 												mapper[sample]['FAAS'])
 
-	if not bool(args.bypass_abundance) and not flags['ABUNDANCE_TABLES']:
-
+	if not args.bypass_abundance and not flags['ABUNDANCE_TABLES']:
+		logger.debug('Quantifying gene abundance in samples')
 		paths_dict['ABUNDANCE_TMP'] = output_folder+'/tmp/abundance_tmp'
 		paths_dict['ABUNDANCE_TABLES'] = output_folder+'/tmp/abundance_tables'
 		utilities.create_folders([paths_dict['ABUNDANCE_TMP'], paths_dict['ABUNDANCE_TABLES']])
 	
 		if flags['BAMS']:
+			logger.debug('Running SAMTOOLS on BAM FILES')
 			for sample in mapper:
 				mapper[sample]['ABUNDANCE_TABLES'] = quantify_genes.generate_abundance_viabam(mapper[sample]['BAMS'], \
 																							  sample, \
 																							  paths_dict)
 		elif flags['SAMS']:
+			logger.debug('Running SAMTOOLS on SAM FILES')
 			for sample in mapper:
 				mapper[sample]['ABUNDANCE_TABLES'] = quantify_genes.generate_abundance_viasam(mapper[sample]['SAMS'], \
 																							  sample, \
 																							  paths_dict)
 		elif flags['CONTIG_ASSEMBLIES']:
+			logger.debug('Running BOWTIE2 on READS against CONTIG_ASSEMBLIES')
 			for sample in mapper:
 				try:
 					mapper[sample]['ABUNDANCE_TABLES'] = quantify_genes.generate_abundance_viabam(mapper[sample]['FNAS'], \
@@ -137,11 +146,13 @@ if __name__ == '__main__':
 																							  sample, \
 																							  paths_dict)
 				except KeyError:
+					logger.debug('Gene fasta files not found; Please provide them as FNAs or GFF3 files to pull genes from contigs')
 					raise Exception('No FNAS found. Either provide in mapper or add GFF3s to pull from contigs')
 		else:
 			raise Exception('No Abundance information; See --bypass_abundance if no calculation required')		
 	
-	if not bool(args.bypass_annotation) and not flags['ANNOTATION']:
+	if not args.bypass_annotation and not flags['ANNOTATION']:
+		logger.debug('Running ANNOTATION MODULE')
 		paths_dict['ANNOTATION_TMP'] = output_folder+'/tmp/annotation_tmp'
 
 		whole_genome_catalog = paths_dict['ANNOTATION_TMP']+'/'+basename+'.fasta'
@@ -162,7 +173,8 @@ if __name__ == '__main__':
 
 		genome_catalog = '' #The catalog run against UniRef90
 		
-		if not bool(args.bypass_clust):
+		if not args.bypass_clust:
+			logger.debug('Running CLUSTERING before ANNOTATION')
 			clust_method = 'vsearch'
 			gene_centroids_file_path = paths_dict['ANNOTATION_TMP']+'/'+basename+'.centroids.fasta'
 			gene_centroid_clusters_file_path = paths_dict['ANNOTATION_TMP']+'/'+basename+'.uc'
@@ -178,13 +190,14 @@ if __name__ == '__main__':
 				if args.vsearch:
 					clust_method = args.vsearch #assumes vsearch in path if not provided
 				utilities.run_vclust(clust_method, \
-								 	 whole_genome_catalog, \
-								 	 gene_centroids_file_path, \
-								 	 gene_centroid_clusters_file_path, \
-								 	 0.9, \
-								 	 nprocesses)
+									 whole_genome_catalog, \
+									 gene_centroids_file_path, \
+									 gene_centroid_clusters_file_path, \
+									 0.9, \
+									 nprocesses)
 				genome_catalog = gene_centroids_file_path
 		else:
+			logger.debug('BYPASSING CLUSTERING')
 			genome_catalog = whole_genome_catalog
 
 		##Run UniRef now
@@ -198,7 +211,7 @@ if __name__ == '__main__':
 		else:
 			if args.diamond:
 				search_method = args.diamond
-		
+		logger.debug('Running SEARCH against UniRef')
 		annotate_genes.run_diamond(genome_catalog, args.uniref90, out_u90_fname, nprocesses)
 		centroid_sequences = utilities.read_fasta(genome_catalog)
 		[centroid_annotations90, diamond50_seqs] = annotate_genes.parse_annotation_table(u90_out_fname+'.m8', centroid_sequences, 90.0)
@@ -220,14 +233,17 @@ if __name__ == '__main__':
 			annotation_dict = annotate_genes.get_annotations_dict(centroid_annotations, centroid_gis)
 		else:
 			annotation_dict = centroid_annotations
-
+		logger.debug('Annotation DICT CREATED')
 		utilities.write_dict(annotation_dict, annotation_table)
 
-	if not bool(args.bypass_write_table):
+	if not args.bypass_write_table:
+		
+		logger.debug('Reading abundance tables')
 		if args.to_normalize:
 			abundance_dict = quantify_genes.read_abundance_tables(mapper, True)
 		else:
 			abundance_dict = quantify_genes.read_abundance_tables(mapper, False)
+		logger.debug('Abundance tables parsed')
 
 		try:
 			annotation_dict = annotation_dict
@@ -244,5 +260,7 @@ if __name__ == '__main__':
 				raise Exception('Annotations have not been performed\nAdd ANNOTATION to mapper file\n')
 			os.system('cat '+' '.join(paths_annots)+' > ' + annotation_table)
 			annotation_dict = utilities.read_dict(annotation_table)
-
+			logger.debug('Annotations parsed')
+		logger.debug('Writing PPANINI table')
+		# pdb.set_trace()
 		write_ppanini_table.generate_gene_table(abundance_dict, annotation_dict, flags['NICHE'], mapper, output_table)

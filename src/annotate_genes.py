@@ -3,8 +3,12 @@ import sys
 import numpy
 import re
 import argparse
+import logging
 
-from . import utilities
+from src import utilities
+
+
+logger = logging.getLogger(__name__)
 
 def parse_annotation_table(annotations_file, fasta_sequences, thld_ref):
 	'''Parses annotations result from RAPSEARCH/DIAMOND to ensure they pass threshold
@@ -16,6 +20,8 @@ def parse_annotation_table(annotations_file, fasta_sequences, thld_ref):
 	Output: [sample_annotations, search50_seqs]
 	where, sample_annotations = {sequence: UniRef annotation}
 		   diamond50_seqs = {sequence_header:  sequence} for all sequences that need to be redone'''
+
+	logger.debug('parse_annotation_table '+annotations_file)
 
 	foo = open(annotations_file)
 	sample_annotations = {}
@@ -43,12 +49,12 @@ def run_diamond(query_file, db, out_fname, nprocesses):
 	'''Runs DIAMOND on query_file to produce results in out_fname
 	Input: query_file = path to query_fasta_file
 		   all_paths = {'uniref90': path_to_uniref90_index, 
-                                            'uniref50': path_to_uniref50_index, 
-                                            'umap90_50': path_to_uniref90_uniref50_mapping}
-           out_fname = path of output_file to put the results in
-           nprocesses = Number of processes
-           db = DIAMOND preprocessed database'''
-
+						'uniref50': path_to_uniref50_index, 
+						'umap90_50': path_to_uniref90_uniref50_mapping}
+		   out_fname = path of output_file to put the results in
+		   nprocesses = Number of processes
+		   db = DIAMOND preprocessed database'''
+	logger.debug('run_diamond '+query_file)
 	os.system(all_paths['diamond']+'/diamond blastp -q ' + query_file + ' \
 													-d ' + db + ' \
 													-k 1 \
@@ -60,12 +66,13 @@ def run_rapsearch(query_file, db, out_fname, nprocesses):
 
 	Input: query_file = path to query_fasta_file
 		   all_paths = {'uniref90': path_to_uniref90_index, 
-                                            'uniref50': path_to_uniref50_index, 
-                                            'umap90_50': path_to_uniref90_uniref50_mapping}
-           out_fname = path of output_file to put the results in
-           nprocesses = Number of processes
-           db = RAPSEARCH2 preprocessed database'''
-    
+						'uniref50': path_to_uniref50_index, 
+						'umap90_50': path_to_uniref90_uniref50_mapping}
+		   out_fname = path of output_file to put the results in
+		   nprocesses = Number of processes
+		   db = RAPSEARCH2 preprocessed database'''
+
+	logger.debug('run_rapsearch '+query_file)
 	os.system(all_paths['rapsearch']+'/rapsearch -q ' + query_file + ' \
 												 -d ' + db + ' \
 												 -o ' + out_fname + ' \
@@ -83,51 +90,55 @@ def run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gen
 		   gene_centroid_clusters_file_path = path to file containing clustering results in
 		   id = %ID to cluster sequences at'''
 
+	logger.debug('run_uclust '+allgenes_file_path)
+
 	if not usearch_folder:
 		usearch_folder = 'usearch'
 	else:
 		usearch_folder = usearch_folder
-
 	os.system(usearch_folder + ' -cluster_fast ' + allgenes_file_path +' \
-								  		-id '+str(perc_id)+' \
-								        -centroids '+ gene_centroids_file_path + ' \
-								        -uc ' + gene_centroid_clusters_file_path+ '\
-								        -threads '+str(nprocesses))
+								 -id '+str(perc_id)+' \
+								 -centroids '+ gene_centroids_file_path + ' \
+								 -uc ' + gene_centroid_clusters_file_path+ '\
+								 -threads '+str(nprocesses))
 
 def run_vclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, perc_id, nprocesses):
-        '''Runs USEARCH UCLUST on query_file to produce results in out_fname
+	'''Runs USEARCH UCLUST on query_file to produce results in out_fname
 
-        Input: usearch_folder = path to folder containing USEARCH
-                   allgenes_file_path = path to input fasta file
-                   gene_centroids_file_path = path to place all the centroids produced in
-                   gene_centroid_clusters_file_path = path to file containing clustering results in
-                   id = %ID to cluster sequences at'''
+		Input: usearch_folder = path to folder containing USEARCH
+				   allgenes_file_path = path to input fasta file
+				   gene_centroids_file_path = path to place all the centroids produced in
+				   gene_centroid_clusters_file_path = path to file containing clustering results in
+				   id = %ID to cluster sequences at'''
+	logger.debug('run_vclust '+allgenes_file_path) 
 
-        if not usearch_folder:
-                usearch_folder = 'vsearch'
-        else:
-                usearch_folder = usearch_folder
+	if not usearch_folder:
+		usearch_folder = 'vsearch'
+	else:
+		usearch_folder = usearch_folder
 
-        os.system(usearch_folder + ' --cluster_fast ' + allgenes_file_path +' \
-                                     --id '+str(perc_id)+' \
-                                     --centroids '+ gene_centroids_file_path + ' \
-                                     --uc ' + gene_centroid_clusters_file_path+ '\
-                                     --threads '+str(nprocesses))
+	os.system(usearch_folder + ' --cluster_fast ' + allgenes_file_path +' \
+								 --id '+str(perc_id)+' \
+								 --centroids '+ gene_centroids_file_path + ' \
+								 --uc ' + gene_centroid_clusters_file_path+ '\
+								 --threads '+str(nprocesses))
 
 def get_clusters_dict(gene_centroid_clusters_file_path):
 	'''Return dict containing clusters
 	Input: filepath to centroid file
 	Output: centroid_gis (dict) {gene_centroid: [List of genes], }'''
 
+	logger.debug('get_clusters_dict '+gene_centroid_clusters_file_path)
+
 	cluster_txt = open(gene_centroid_clusters_file_path)
 	centroid_gis = {}
 	for line in cluster_txt:
 		if line.startswith('H'):
-			split_i = [re.sub('[\r\t\n]', '', i) for i in line.split('\t')]
+			split_i = [re.sub('[\r\t\n]', '', i) for i in line.split('\t')[-2:]]
 			try:
-				centroid_gis[split_i[-1]] += [split_i[-2]]
+				centroid_gis[split_i[1]] += [split_i[0]]
 			except KeyError:
-				centroid_gis[split_i[-1]] = [split_i[-2], split_i[-1]]
+				centroid_gis[split_i[1]] = [split_i[0], split_i[1]]
 	return centroid_gis
 
 
@@ -136,6 +147,8 @@ def get_annotations_dict(centroid_annotations, centroid_gis):
 	Input: centroid_annotations (dict) {centroid: annotation, ...}
 		   centroid_gis (dict) {centroid: [List of genes], ...}
 	Output: annotation_dict (dict) {gene: annotation, ...}'''
+	
+	logger.debug('get_annotations_dict')
 
 	annotation_dict = {}
 	for centroid in centroid_annotations:

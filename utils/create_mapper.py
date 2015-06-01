@@ -11,7 +11,7 @@ if __name__ == '__main__':
 	labels = ['SAMS', 'BAMS', 'GFF3S', 'ABUNDANCE_TABLES', 'ANNOTATION', 'READS', 'CONTIG_ASSEMBLIES', 'FAAS', 'FNAS']
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--assemblies', default=False, help='FOLDER containing ASSEMBLIES')
-	parser.add_argument('--reads', default=False, help='Folder containing READS files', default=4)
+	parser.add_argument('--reads', default=False, help='Folder containing READS files')
 	parser.add_argument('--gff3s', default=False, help='GFF3 Folder')
 	parser.add_argument('--sams', default=False, help='SAMS Folder')
 	parser.add_argument('--bams', default=False, help='SAMS Folder')
@@ -26,14 +26,13 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 	labels = {'SAMS':args.sams, \
 			  'BAMS':args.bams, \
-			  'NICHE':args.niche, \
 			  'GFF3S':args.gff3s, \
 			  'ABUNDANCE_TABLES':args.abund, \
-			  # 'ANNOTATION':args.annot, \
 			  'READS':args.reads, \
 			  'CONTIG_ASSEMBLIES':args.assemblies, \
 			  'FAAS':args.faas,\
 			  'FNAS': args.fnas}
+			  
 	samples = []
 	with open(args.samples) as foo:
 		for line in foo:
@@ -44,23 +43,19 @@ if __name__ == '__main__':
 
 	for sample in samples:
 		files[sample] = {}
+
 	keys = []
 	for i in labels:
 		if labels[i]:
 			keys += [i]
 			all_files[i] = os.listdir(labels[i])
 			for fname in all_files[i]:
-				sample = fname.rpartition('/')[0].split('.')[0].strip()
-				files[sample][i] = labels[i]+'/'+fname
-	# assemblies_folder = args.assemblies_folder
-	# gff3s_folder = args.gff3s_folder
-	# reads_folder = args.reads_folder
-	# assemblies = os.listdir(assemblies_folder)
-	#  #.scaffolds.fa
-	# reads = os.listdir(reads_folder)
-	# gff3s = os.listdir(gff3s_folder)
-	# samples = [i.split('.')[0] for i in gff3s] #.tar.bz2 or .tar.gz
-	# #.with_fasta.gff3
+				sample = fname.rpartition('/')[-1].split('.')[0].strip()
+				try:
+					files[sample][i] = labels[i]+'/'+fname
+				except:
+					pdb.set_trace()
+
 	annot_files = []
 	if args.annot:
 		annot_files = os.listdir(args.annot)
@@ -68,26 +63,19 @@ if __name__ == '__main__':
 	meta_line = '\n'
 	if args.niche:
 		meta_line ='\tNICHE\n' 
-		line_end = args.niche+'\n'
+		line_end = '\t'+args.niche+'\n'
 	with open(args.output_table, 'w') as foo:
-		if 
+		if annot_files:
+			print 'comes here'
+			meta_line = '\tANNOTATION'+meta_line
+		count = 0
 		foo.writelines([str.join('\t', ['#SAMPLES']+keys)+meta_line])
 		for sample in files:
-			foo.writelines(['\t'.join([sample]+[files[sample][i] for i in keys])+line_end])
-			# a = assemblies_folder+'/'+sample+'.scaffolds.fa'
-			# print sample
-			# print a
-			# if not os.path.exists(a):
-			# 	a = assemblies_folder+'/'+sample+'.scaffold.fa'
-			# if not os.path.exists(a):
-			# 	print a
-			# 	raise IOError('CANT FIND FILE')
-
-			# if sample+'.tar.gz' in reads:
-			# 	r = reads_folder+'/'+ sample+'.tar.gz'
-			# else:
-			# 	r = reads_folder+'/'+ sample+'.tar.bz2'
-
-			# g = gff3s_folder+'/'+sample+'.with_fasta.gff3'
-			# foo.writelines([str.join('\t', [sample, a, r, g, niche])+'\n'])
-
+			if annot_files:
+				if count < len(annot_files):
+					foo.writelines(['\t'.join([sample]+[files[sample][i] for i in keys])+'\t'+annot_files[count]+line_end])
+				else:
+					foo.writelines(['\t'.join([sample]+[files[sample][i] for i in keys])+'\t'+line_end])
+				count +=1
+			else:
+				foo.writelines(['\t'.join([sample]+[files[sample][i] for i in keys])+line_end])
