@@ -22,6 +22,7 @@ optional arguments:
                         REQUIRED: Gene abundance table with metadata
   -o OUTPUT_FOLDER, --output_folder OUTPUT_FOLDER
                         Folder containing results
+  --gene_catalog        file path to the genes catalog
   --uc UC               UCLUST file containg centroids and clustered genes
   --usearch USEARCH     Path to USEARCH
   --vsearch VSEARCH     Path to VSEARCH
@@ -49,19 +50,12 @@ geneID_XYZ|UniRef90_XYZ  0.09 0.00
 geneID_MNO|UniRef90_unknown  0.00 0.09
 ```
 
-* * **Metadata**: *Required*
-
-```
-#!text
-#FAAS	location_fasta_SAMPLE_X	location_fasta_SAMPLE_Y
-#SAMPLES SAMPLE_X	SAMPLE_Y
-```
-
 * * **Metadata**: *Optional*
 
 ```
 #!text
 #NICHES	N/A	NICHE_SAMPLE_X	NICHE_SAMPLE_Y
+#SAMPLES SAMPLE_X SAMPLE_Y
 ```
 
 * * * Each NICHE corresponds to the type of sample i.e. Human Stool, Skin, Soil, Rainforest etc. 
@@ -95,7 +89,6 @@ geneID_XYZ  0.25   0.05
 #GENEID   MEAN_ABUNDANCE  ALPHA_PREVALENCE_NICHEX ALPHA_PREVALENCE_NICHEY BETA_PREVALENCE
 geneID_XYZ  0.05  0.35  0.50   0.42 
 ```
-
 
 ##METHODOLOGY
 
