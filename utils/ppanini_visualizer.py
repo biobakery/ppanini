@@ -48,7 +48,7 @@ def split_x_y(table, inds):
 	uniref_x_y = split_table(uniref_table, inds)
 	return [genes_x_y, uniref_x_y]
 
-def draw_cloud(cloud_points, data_points, labels, margins):
+def draw_cloud(cloud_points, data_points, labels, margins, zord):
 	pyplot.figure()
 	pyplot.xlabel(labels['xlabel'])#'Alpha Prevalence_'+keys[i])
 	pyplot.ylabel(labels['ylabel'])
@@ -66,7 +66,7 @@ def draw_cloud(cloud_points, data_points, labels, margins):
 				   c='grey', \
 				   alpha=0.1, \
 				   linewidths=0.0, \
-				   zorder=1, \
+				   zorder=zord[0], \
 				   marker='o',\
 				   label='Low Priority')
 	pyplot.hold(True)
@@ -75,7 +75,7 @@ def draw_cloud(cloud_points, data_points, labels, margins):
 				   c='grey', \
 				   alpha=0.1,\
 				   linewidths =0.0, \
-				   zorder=1, \
+				   zorder=zord[0], \
 				   marker='o',
 				   label='Low Priority')
 	##WithoutGO/UniRef90
@@ -84,7 +84,7 @@ def draw_cloud(cloud_points, data_points, labels, margins):
 				   c='yellow', \
 				   alpha=0.5,\
 				   linewidths =0.0, \
-				   zorder=4, \
+				   zorder=zord[3], \
 				   marker= 'o', \
 				   edgecolors='none',\
 				   label='Prioritized unannotated')
@@ -95,7 +95,7 @@ def draw_cloud(cloud_points, data_points, labels, margins):
 				   c='Red', \
 				   alpha=0.5,\
 				   linewidths =0.0, \
-				   zorder=2, \
+				   zorder=zord[1], \
 				   marker='o', \
 				   edgecolors='none',\
 				   label='Prioritized UniRef90 annotated')
@@ -105,21 +105,14 @@ def draw_cloud(cloud_points, data_points, labels, margins):
 	 			   c='Blue', \
 	 			   alpha=0.5,\
 	 			   linewidths =0.0, \
-	 			   zorder=3,
+	 			   zorder=zord[2],
 	 			   edgecolors='none',\
 	 			   label='Prioritized UniRef90 and GO annotated')
 	pyplot.axhline(y=numpy.log(float(margins[0])), alpha=0.5, color='gray', label='abund>0.1+2SE')
-	# pyplot.axhline(y=z1, alpha=0.5, color='red', label='90th')
-	# pyplot.axhline(y=z2, alpha=0.5, color='yellow', label='75th')
-	# pyplot.axhline(y=z3, alpha=0.5, color='cyan', label='50th')
-	# pyplot.axhline(y=z4, alpha=0.5, color='magenta', label='30th')
+
 
 	pyplot.axvline(x=numpy.log(float(margins[1])), alpha=0.5, color='gray', label='prev>0.1+2SE')
-# ['Low priority', \
-# 				   'Low priority', \
-# 				   'Prioritized unannotated', \
-# 				   'Prioritized UniRef90 annotated', \
-# 				   'Prioritized UniRef90 and GO annotated'], \
+
 	pyplot.legend( loc=4, \
 				   fontsize='x-small', \
 				   framealpha=0.4, )	
@@ -190,29 +183,33 @@ if __name__ == '__main__':
 	parser.add_argument('-i','--input_table', help='Gene abundance table with metadata', required=True)
 	parser.add_argument('--original_table', help='Gene abundance table with metadata')
 	parser.add_argument('--abund_prev', action='store_true', default=False, help='To draw Abundance Prevalence Cloud')
-	parser.add_argument('--prev', action='store_true', default=False, help='Graph will be prevalence across centroids')
-	parser.add_argument('--abund', action='store_true', default=False, help='Graph will be mean abundance across centroids')
+	parser.add_argument('--prev', default=False, help='Graph will be prevalence across centroids')
+	parser.add_argument('--abund',default=False, help='Graph will be mean abundance across centroids')
 	parser.add_argument('-m','--mapper', help='GO to UniRef mapper')
 	parser.add_argument('--write_mapper', action='store_true', default=False, help='Gene to GO table written')
+	parser.add_argument('--zorder', default='1,2,3,4', help='Zorder [1,2,3,4] [Old, UniRef, UniRef/GO, NA]')
 
 	args = parser.parse_args()
+	zorder =  [int(i) for i in args.zorder.split(',')]
 	[genes_table_i, uniref_table_i, inds_i, keys_i] = parse_table(args.input_table)
-	if bool(args.write_mapper):
-		alpha_is = inds_i['alpha']
-		abund_i = inds_i['abund']
-		map_go_fname = args.mapper
-		[uniref_i_x_y, uniref_go_x_y] = get_go_mapping(uniref_table_i, [alpha_is, abund_i], map_go_fname, args.input_table+'_GO_map.txt_tmp')
-		r = open(args.input_table+'_GO_map.txt_tmp')
+	alpha_is = inds_i['alpha']
+	abund_i = inds_i['abund']
+	
+	map_go_fname = args.mapper
+	[uniref_i_x_y, uniref_go_x_y] = get_go_mapping(uniref_table_i, [alpha_is, abund_i], map_go_fname, args.input_table+'_GO_map.txt_tmp')
+		
+	if args.write_mapper:
+		# r = open(args.input_table+'_GO_map.txt_tmp')
 		with open(args.input_table+'_GO_map.txt','w') as foo:
-			for line in r:
-				foo.writelines(line)
+			# for line in r:
+			# 	foo.writelines(line)
 			for gene in genes_table_i:
 				foo.writelines(gene+'\tNA\n')
-		os.system('rm '+args.input_table+'_GO_map.txt_tmp')
+		# os.system('rm '+args.input_table+'_GO_map.txt_tmp')
 	abund=  float(args.abund) #+200.0
 	prev = float(args.prev)+0.1
 	
-	if bool(args.abund_prev):	
+	if args.abund_prev:	
 		[genes_table, uniref_table, inds, keys] = parse_table(args.original_table)
 		
 		genes_table_o, uniref_table_o = {}, {}
@@ -241,9 +238,9 @@ if __name__ == '__main__':
 		data_points[1] = uniref_i_x_y
 		data_points += [uniref_go_x_y]	
 
-		draw_cloud(cloud_points, data_points, labels, [abund, prev])
+		draw_cloud(cloud_points, data_points, labels, [abund, prev], zorder)
 
-	if bool(args.prev):
+	if args.prev:
 		name = args.input_table
 		title=name.split('/')[-1].split('.')[0]
 		labels = {'xlabel': 'Gene Centroids', \

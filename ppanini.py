@@ -472,7 +472,7 @@ if __name__ == '__main__':
 	parser.add_argument('--bypass_prev_abund', default=False, action='store_true', help='Bypass quantifying abundance and prevalence')
 
 	args = parser.parse_args()
-	nprocesses = args.threads
+	nprocesses = int(args.threads)
 
 	tshld = [float(args.tshld_abund), float(args.tshld_prev)]
 

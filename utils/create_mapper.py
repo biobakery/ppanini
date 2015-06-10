@@ -54,11 +54,13 @@ if __name__ == '__main__':
 				try:
 					files[sample][i] = labels[i]+'/'+fname
 				except:
-					pdb.set_trace()
+					print sample
+					pass
 
 	annot_files = []
 	if args.annot:
-		annot_files = os.listdir(args.annot)
+		x = os.listdir(args.annot)
+		annot_files = [args.annot+'/'+i for i in x]
 	line_end = '\n'
 	meta_line = '\n'
 	if args.niche:
