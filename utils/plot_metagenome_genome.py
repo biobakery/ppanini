@@ -7,7 +7,7 @@ import pdb
 import time
 import numpy
 import argparse
-import ppanini
+#from ppanini
 import src
 
 #from ppanini import src
@@ -146,7 +146,8 @@ def plot_hist(table, m8_filename, no_uniq_genomes):
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i', '--input_file', help='Gene Genomes blast results', required=True)
-	parser.add_argument('--parsed', default=False, action='store_true', help='Input file is parsed')
+	parser.add_argument('--bypass_parse', default=False, action='store_true', help='Input file is parsed')
+	parser.add_argument('--parse_only', default=False, action='store_true', help='To only parse')
 	parser.add_argument('--metagenome_fasta', help='Metagenome FASTA file')
 	parser.add_argument('--bypass_hist', default=False, action='store_true', help='Generates Histogram')
 	parser.add_argument('--bypass_scatter', default=False, action='store_true', help='Generates Scatterplot')
@@ -155,7 +156,7 @@ if __name__ == '__main__':
 
 	m8_filename = args.input_file
 
-	if not args.parsed:
+	if not args.bypass_parse:
 		try:
 			fasta_filename = args.metagenome_fasta
 		except:
@@ -167,7 +168,9 @@ if __name__ == '__main__':
 					foo.writelines('\t'.join([i, j])+'\n')
 	else:
 		table = read_parsed(m8_filename)
-
+	if args.parse_only:
+		sys.exit('Input files parsed: '+args.input_file)
+	
 	uniq_genomes = []
 	for gene in table:
 		for genome in table[gene]:

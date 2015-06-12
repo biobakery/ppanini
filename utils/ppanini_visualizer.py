@@ -199,13 +199,13 @@ if __name__ == '__main__':
 	[uniref_i_x_y, uniref_go_x_y] = get_go_mapping(uniref_table_i, [alpha_is, abund_i], map_go_fname, args.input_table+'_GO_map.txt_tmp')
 		
 	if args.write_mapper:
-		# r = open(args.input_table+'_GO_map.txt_tmp')
+		r = open(args.input_table+'_GO_map.txt_tmp')
 		with open(args.input_table+'_GO_map.txt','w') as foo:
-			# for line in r:
-			# 	foo.writelines(line)
+			for line in r:
+				foo.writelines(line)
 			for gene in genes_table_i:
 				foo.writelines(gene+'\tNA\n')
-		# os.system('rm '+args.input_table+'_GO_map.txt_tmp')
+		os.system('rm '+args.input_table+'_GO_map.txt_tmp')
 	abund=  float(args.abund) #+200.0
 	prev = float(args.prev)+0.1
 	
