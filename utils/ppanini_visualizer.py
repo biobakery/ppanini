@@ -124,13 +124,10 @@ def get_go_mapping(uniref_table, inds, map_go_fname, out_fname):
 	uniref, uniref_go = {}, {}
 	map = open(map_go_fname,'r')
 	mapper = {}
-	t= time.time()
 	for line in map:
 		split_line = line.split('\t')
 		for i in split_line[1:]:
 			mapper[re.sub('[\r\t\n]','',i)] = split_line[0]
-	t2=time.time()
-	print (t2-t)/60
 	with open(out_fname, 'w') as foo:
 		for gene in uniref_table:
 			if gene in mapper:
@@ -175,6 +172,40 @@ def draw_prev_plot(genes_table, uniref_table, inds, labels, check):
 	pyplot.savefig(labels['filename'])
 	pyplot.savefig(labels['filename']+'.png')
 
+def draw_hexbin(genes_table, uniref_x_y, go_x_y, labels, inds):
+	pyplot.subplot(2,2,1)
+	genes_x_y = split_table(genes_table, [inds['alpha'], inds['abund']])
+	
+	pyplot.hexbin(numpy.log(genes_x_y['x']), numpy.log(genes_x_y['y']), cmap='Blues', gridsize=10)
+	pyplot.title(labels['title']+'_Genes')
+	pyplot.xlabel(labels['xlabel'])
+	pyplot.ylabel(labels['ylabel'])
+	# pyplot.savefig(labels['filename']+'1.png')
+
+	pyplot.subplot(2,2,2)
+	
+	pyplot.hexbin(numpy.log(uniref_x_y['x']), numpy.log(uniref_x_y['y']), cmap='Blues', gridsize=10)
+	pyplot.title(labels['title']+'_UniRef')
+	pyplot.xlabel(labels['xlabel'])
+	pyplot.ylabel(labels['ylabel'])
+	# pyplot.savefig(labels['filename']+'2.png')
+
+	pyplot.subplot(2,2,3)
+
+	pyplot.hexbin(numpy.log(go_x_y['x']), numpy.log(go_x_y['y']), cmap='Blues', gridsize=10)
+	pyplot.title(labels['title']+'_GO')
+	pyplot.xlabel(labels['xlabel'])
+	pyplot.ylabel(labels['ylabel'])
+	
+	pyplot.subplot(2,2,4)
+	pyplot.hold(True)
+	pyplot.hexbin(numpy.log(go_x_y['x']), numpy.log(go_x_y['y']), cmap='Blues', gridsize=10, alpha=0.5)
+	pyplot.hexbin(numpy.log(uniref_x_y['x']), numpy.log(uniref_x_y['y']), cmap='Reds', gridsize=10, alpha=0.5)
+	pyplot.hexbin(numpy.log(genes_x_y['x']), numpy.log(genes_x_y['y']), cmap='Greys', gridsize=10, alpha=0.5)
+	# pyplot.savefig(labels['filename'])
+	pyplot.savefig(labels['filename']+'.png')
+
+
 
 if __name__ == '__main__':
 	##UniRef=red; Unannotated; blue
@@ -188,6 +219,7 @@ if __name__ == '__main__':
 	parser.add_argument('-m','--mapper', help='GO to UniRef mapper')
 	parser.add_argument('--write_mapper', action='store_true', default=False, help='Gene to GO table written')
 	parser.add_argument('--zorder', default='1,2,3,4', help='Zorder [1,2,3,4] [Old, UniRef, UniRef/GO, NA]')
+	parser.add_argument('--hexplot', default=False, action='store_true', help='Plot HEXBIN')
 
 	args = parser.parse_args()
 	zorder =  [int(i) for i in args.zorder.split(',')]
@@ -247,13 +279,22 @@ if __name__ == '__main__':
 				  'ylabel': 'Alpha Prevalence', \
 				  'title': title, \
 				  'filename': name+'_prev.pdf'}
-		draw_prev_plot(genes_table, uniref_table, inds_i['alpha'], labels, prev)
+		draw_prev_plot(genes_table_i, uniref_table_i, alpha_is, labels, prev)
 
-	if bool(args.abund):
+	if args.abund:
 		name = args.input_table
 		title=name.split('/')[-1].split('.')[0]
 		labels = {'xlabel': 'Gene Centroids', \
 				  'ylabel': 'Mean Abundance', \
 				  'title': title, \
 				  'filename': name+'_abund.pdf'}
-		draw_prev_plot(genes_table, uniref_table, inds_i['abund'], labels, abund)
+		draw_prev_plot(genes_table_i, uniref_table_i, abund_i, labels, abund)
+	if args.hexplot:
+		name = args.input_table
+		title=name.split('/')[-1].split('.')[0]
+		labels = {'xlabel': 'Gene Prevalence', \
+				  'ylabel': 'Mean Abundance', \
+				  'title': title, \
+				  'filename': name+'_hexbin.pdf'}
+		draw_hexbin(genes_table_i, uniref_i_x_y, uniref_go_x_y, labels, inds_i)
+
