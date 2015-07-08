@@ -9,6 +9,7 @@ import numpy
 import argparse
 import random
 
+from src import utilities
 from matplotlib import pyplot
 from matplotlib import colors
 
@@ -68,19 +69,28 @@ def plot_scatter(table, m8_filename):
 	pyplot.savefig(labels['filename'])
 	pyplot.savefig(labels['filename']+'.png')
 
+	
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i', '--input_file', help='Gene Genomes blast results parsed**', required=True)
 	parser.add_argument('--map', help='Gene to GO mapper from ppanini_visualizer', required=True)
-	parser.add_argument('--bypass_scatter', default=False, action='store_true', help='Sctter plot for genomes')
+	parser.add_argument('--bypass_scatter', default=False, action='store_true', help='Scatter plot for genomes')
 	parser.add_argument('--bypass_stats', default=False, action='store_true', help='Write stats for genome gene hits')
 	parser.add_argument('--bypass_graphlan_rings', default=False, action='store_true', help='Generates graphlan rings file')
+	parser.add_argument('--pangenome_size', default=False, help='Pangenome size mapping file')
+
 	args = parser.parse_args()
 
 	m8_filename = args.input_file
 	go_map = read_go_map(args.map)
-	genomes = read_parsed(m8_filename, go_map)
+	genomes = read_parsed(m8_filename, go_map) #genome: {Uniref90: , GO: , NA:}
 	all_values = []
+	
+	pgsize = utilities.read_dict_num(args.pangenome_size) 
+	pangenome = {}
+	for genome in pgsize:
+		name = '.'.join(genome.split('.')[:2])
+		pangenome[name] = pgsize[genome]
 
 	if not args.bypass_scatter:
 		plot_scatter(genomes, m8_filename)
@@ -113,15 +123,23 @@ if __name__ == '__main__':
 			foo_rings.writelines(['ring_internal_separator_thickness\t4\t1.0\n'])#REFERENCE
 
 			for genome in genomes:
+				if genome not in pangenome:
+					raise Exception('Genome '+genome+' not found in PANGENOME!!!')
+				pg = pangenome[genome]
+				print pg
 				if ref_i < len(ref):
 					foo_rings.writelines([genome+'\tring_height\t4\t'+str(ref[ref_i])+'\n'])	
 					foo_rings.writelines([genome+'\tring_color\t4\t#000000\n'])
 					ref_i += 1
 				# To remove ln(0) = -inf to --> 0
-				x=[numpy.log(genomes[genome]['UniRef90']), numpy.log(genomes[genome]['UniRef90_NA']), numpy.log(genomes[genome]['NA'])]
+				x=[genomes[genome]['UniRef90']*20.0/pg, \
+				   genomes[genome]['UniRef90_NA']*20.0/pg,\
+				   genomes[genome]['NA']*20.0/pg]
 				for i, val in enumerate(x):
-					if -1*numpy.inf==val:
+					if -1*numpy.inf==val or numpy.inf==val:
 						x[i] = 0
+					else:
+						x[i] = abs(x[i])
 				foo_rings.writelines([genome+'\tring_height\t1\t'+str(x[0])+'\n'])
 				foo_rings.writelines([genome+'\tring_height\t2\t'+str(x[1])+'\n'])
 				foo_rings.writelines([genome+'\tring_height\t3\t'+str(x[2])+'\n'])

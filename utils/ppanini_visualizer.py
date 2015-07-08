@@ -57,10 +57,6 @@ def draw_cloud(cloud_points, data_points, labels, margins, zord):
 	[c_genes_x_y, c_uniref_x_y] = cloud_points
 	[d_genes_x_y, d_uniref_x_y, d_uniref_go_x_y] = data_points
 	z= numpy.log(c_genes_x_y['y']+c_uniref_x_y['y'], dtype='float64')
-	z1= numpy.percentile(z, 90)
-	z2= numpy.percentile(z, 75)
-	z3= numpy.percentile(z, 50)
-	z4= numpy.percentile(z, 30)
 	pyplot.scatter(numpy.log(c_genes_x_y['x'], dtype='float64'), \
 				   numpy.log(c_genes_x_y['y'], dtype='float64'), \
 				   c='grey', \
@@ -108,6 +104,7 @@ def draw_cloud(cloud_points, data_points, labels, margins, zord):
 	 			   zorder=zord[2],
 	 			   edgecolors='none',\
 	 			   label='Prioritized UniRef90 and GO annotated')
+
 	pyplot.axhline(y=numpy.log(float(margins[0])), alpha=0.5, color='gray', label='abund>0.1+2SE')
 
 
@@ -205,21 +202,128 @@ def draw_hexbin(genes_table, uniref_x_y, go_x_y, labels, inds):
 	# pyplot.savefig(labels['filename'])
 	pyplot.savefig(labels['filename']+'.png')
 
+def calculate_priority(array_x):
+	abund = numpy.array(array_x['y'])/max(array_x['y'])
+	prev  = numpy.array(array_x['x'])/max(array_x['x'])
 
+	# abund_order = [float(i) for i in numpy.argsort(abund)]
+	# prev_order = [float(i) for i in numpy.argsort(prev)]
+
+	# abund_order = numpy.array(abund_order)
+	# prev_order = numpy.array(prev_order)
+
+	gp = abund
+	mp = [numpy.mean([abund[i], prev[i]]) for i in range(len(abund))]
+	# mp = [(abund_order[i]*prev_order[i])/(abund_order[i]+prev_order[i]) for i in range(len(abund_order))]
+	# gp = [float(i) for i in numpy.argsort(abund_order)]
+	# mp = [float(i) for i in numpy.argsort(mp)]
+	
+	return [gp, mp]
+
+
+def plot_priority(cloud_points, data_points, zord, labels):
+	'''Plots Metagenome vs. Genome Priority plots'''
+	pyplot.figure()
+	pyplot.xlabel(labels['xlabel'])#'Alpha Prevalence_'+keys[i])
+	pyplot.ylabel(labels['ylabel'])
+	pyplot.title(labels['title']) #'Mean abundance')
+
+	[c_genes_x_y, c_uniref_x_y] = cloud_points
+	[d_genes_x_y, d_uniref_x_y, d_uniref_go_x_y] = data_points
+
+	master_x_y = {'x':[], 'y':[]}
+	master_x_y['x'] += c_genes_x_y['x']
+	master_x_y['y'] += c_genes_x_y['y']
+	inds = [0, len(c_genes_x_y['x'])]
+	
+	master_x_y['x'] += c_uniref_x_y['x']
+	master_x_y['y'] += c_uniref_x_y['y']
+	inds += [len(inds), len(inds)+len(c_uniref_x_y['x'])]
+
+	master_x_y['x'] += d_genes_x_y['x']
+	master_x_y['y'] += d_genes_x_y['y']
+	inds += [len(inds), len(inds)+len(d_genes_x_y['x'])]
+
+	master_x_y['x'] += d_uniref_x_y['x']
+	master_x_y['y'] += d_uniref_x_y['y']
+	inds += [len(inds), len(inds)+len(d_uniref_x_y['x'])]
+
+	master_x_y['x'] += d_uniref_go_x_y['x']
+	master_x_y['y'] += d_uniref_go_x_y['y']
+	inds += [len(inds), len(inds)+len(d_uniref_go_x_y['x'])]
+
+	# pyplot.plot([0,1], [0,1], 'grey', label='y=x')
+	
+	[gp, mp] = calculate_priority(master_x_y)
+	pyplot.scatter(numpy.log(gp[inds[0]:inds[1]], dtype='float64'), \
+				   numpy.log(mp[inds[0]:inds[1]], dtype='float64'), \
+				   c='grey', \
+				   alpha=0.1, \
+				   linewidths=0.0, \
+				   zorder=zord[0], \
+				   marker='o',\
+				   label='Low Priority')
+	pyplot.hold(True)
+
+	pyplot.scatter(numpy.log(gp[inds[2]:inds[3]], dtype='float64'), \
+				   numpy.log(mp[inds[2]:inds[3]], dtype='float64'), \
+				   c='grey', \
+				   alpha=0.1,\
+				   linewidths =0.0, \
+				   zorder=zord[0], \
+				   marker='o',
+				   label='Low Priority')
+	##WithoutGO/UniRef90
+	pyplot.scatter(numpy.log(gp[inds[4]:inds[5]], dtype='float64'), \
+				   numpy.log(mp[inds[4]:inds[5]], dtype='float64'), \
+				   c='yellow', \
+				   alpha=0.5,\
+				   linewidths =0.0, \
+				   zorder=zord[3], \
+				   marker= 'o', \
+				   edgecolors='none',\
+				   label='Prioritized unannotated')
+	##WithUniRef90/WithoutGO
+	pyplot.scatter(numpy.log(gp[inds[6]:inds[7]], dtype='float64'), \
+				   numpy.log(mp[inds[6]:inds[7]], dtype='float64'), \
+				   c='Red', \
+				   alpha=0.5,\
+				   linewidths =0.0, \
+				   zorder=zord[1], \
+				   marker='o', \
+				   edgecolors='none',\
+				   label='Prioritized UniRef90 annotated')
+	##WITH UniRef AND GO
+	pyplot.scatter(numpy.log(gp[inds[8]:inds[9]], dtype='float64'), \
+	 			   numpy.log(mp[inds[8]:inds[9]], dtype='float64'), \
+	 			   c='Blue', \
+	 			   alpha=0.5,\
+	 			   linewidths =0.0, \
+	 			   zorder=zord[2],
+	 			   edgecolors='none',\
+	 			   label='Prioritized UniRef90 and GO annotated')
+	
+	pyplot.legend( loc=4, \
+				   fontsize='x-small', \
+				   framealpha=0.4, )	
+
+	pyplot.savefig(labels['filename'])
+	pyplot.savefig(labels['filename']+'.png')
 
 if __name__ == '__main__':
 	##UniRef=red; Unannotated; blue
 	## argv[1]= original map; argv[2]=selected
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i','--input_table', help='Gene abundance table with metadata', required=True)
-	parser.add_argument('--original_table', help='Gene abundance table with metadata')
-	parser.add_argument('--abund_prev', action='store_true', default=False, help='To draw Abundance Prevalence Cloud')
+	parser.add_argument('--original_table', default=False, help='Gene abundance table with metadata')
+	parser.add_argument('--bypass_cloud', action='store_true', default=False, help='To draw Abundance Prevalence Cloud')
 	parser.add_argument('--prev', default=False, help='Graph will be prevalence across centroids')
 	parser.add_argument('--abund',default=False, help='Graph will be mean abundance across centroids')
 	parser.add_argument('-m','--mapper', help='GO to UniRef mapper')
 	parser.add_argument('--write_mapper', action='store_true', default=False, help='Gene to GO table written')
 	parser.add_argument('--zorder', default='1,2,3,4', help='Zorder [1,2,3,4] [Old, UniRef, UniRef/GO, NA]')
 	parser.add_argument('--hexplot', default=False, action='store_true', help='Plot HEXBIN')
+	parser.add_argument('--bypass_priority', default=False, action='store_true', help='Generates Metagenome vs. Genome Priority plots')
 
 	args = parser.parse_args()
 	zorder =  [int(i) for i in args.zorder.split(',')]
@@ -241,7 +345,7 @@ if __name__ == '__main__':
 	abund=  float(args.abund) #+200.0
 	prev = float(args.prev)+0.1
 	
-	if args.abund_prev:	
+	if args.original_table:
 		[genes_table, uniref_table, inds, keys] = parse_table(args.original_table)
 		
 		genes_table_o, uniref_table_o = {}, {}
@@ -253,24 +357,25 @@ if __name__ == '__main__':
 			if gene not in uniref_table_i:
 				uniref_table_o[gene] = uniref_table[gene]
 		
-		## Abundance vs. Alpha Prevalence ##
-		
 		cloud_points = split_x_y([genes_table_o, uniref_table_o], \
 								 [alpha_is, abund_i])
 		data_points = split_x_y([genes_table_i, uniref_table_i], \
 								[alpha_is, abund_i])
-		print time.time()
-		t=time.time()
 		labels = {'xlabel': keys_i[alpha_is], \
 				  'ylabel': keys_i[abund_i], \
 				  'title': 'Mean Abundance vs. '+keys_i[alpha_is], \
 				  'filename': args.input_table+'_cloud.pdf'}
-		# [uniref_i_x_y, uniref_go_x_y] = get_go_mapping(uniref_table_i, [alpha_is, abund_i], map_go_fname, args.input_table+'_GO_map.txt')
-		print (time.time()-t)/60
 		data_points[1] = uniref_i_x_y
 		data_points += [uniref_go_x_y]	
 
-		draw_cloud(cloud_points, data_points, labels, [abund, prev], zorder)
+		if not args.bypass_cloud:
+			draw_cloud(cloud_points, data_points, labels, [abund, prev], zorder)
+		if not args.bypass_priority:
+			labels = {'xlabel': 'Genomic priority', \
+				  'ylabel': 'Metagenomic priority', \
+				  'title': 'Metagenomic vs. Genomic Priority', \
+				  'filename': args.input_table+'_mpgp.pdf'}
+			plot_priority(cloud_points, data_points, zorder, labels)
 
 	if args.prev:
 		name = args.input_table

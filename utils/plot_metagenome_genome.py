@@ -34,11 +34,12 @@ def parse_table(m8_filename, fasta_filename):
 		except:
 			raise Exception('Gene '+split_i[0]+' not found in fasta: '+fasta_filename)
 		if threshold > 90.0:
-			sp = split_i[1].split('|')[-3]
+			split_sp = split_i[1].split('|')
+			sp = [i for i in split_sp if 'g__' in i and '.s__' in i]
 			if split_i[0] not in table:
-				table[split_i[0]] = [sp]
+				table[split_i[0]] = sp
 			elif sp not in table[split_i[0]]:
-				table[split_i[0]] += [sp]
+				table[split_i[0]] += sp
 	return table
 
 def read_parsed(m8_filename):
@@ -152,6 +153,7 @@ if __name__ == '__main__':
 	parser.add_argument('--bypass_hist', default=False, action='store_true', help='Generates Histogram')
 	parser.add_argument('--bypass_scatter', default=False, action='store_true', help='Generates Scatterplot')
 
+
 	args = parser.parse_args()
 
 	m8_filename = args.input_file
@@ -168,9 +170,7 @@ if __name__ == '__main__':
 					foo.writelines('\t'.join([i, j])+'\n')
 	else:
 		table = read_parsed(m8_filename)
-	if args.parse_only:
-		sys.exit('Input files parsed: '+args.input_file)
-	
+
 	uniq_genomes = []
 	for gene in table:
 		for genome in table[gene]:
@@ -179,7 +179,14 @@ if __name__ == '__main__':
 
 	no_uniq_genomes = len(uniq_genomes)
 
+	print 'No. of unique genomes: '+str(uniq_genomes)
+
+	if args.parse_only:
+		sys.exit('Input files parsed: '+args.input_file)
+	
 	if not args.bypass_scatter:
 		plot_scatter(table, m8_filename, no_uniq_genomes)
 	if not args.bypass_hist:
 		plot_hist(table, m8_filename, no_uniq_genomes)
+
+
