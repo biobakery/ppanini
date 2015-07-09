@@ -29,6 +29,10 @@ def read_table(gene_table_fname):
 	return [metadata, genes, data_matrix]
 
 if __name__ == '__main__':
+	if sys.argv[1] == '-h':
+		print 'usage: python utils/join_tables.py <table1> <table2> ... > merged_table.txt'
+		sys.exit(0)
+
 	original_table = sys.argv[1]
 	[metadata_o, genes_o, data_matrix_o] = read_table(original_table)
 

@@ -191,9 +191,9 @@ optional arguments:
 
 ========================================================================================
 
-#TOOLS
+#VISUALIZATION
 
-##VISUALIZATION: ppanini_visualizer
+##Metagenomic vs. Genomic Priority plots
 
 ```
 #!cmd
@@ -220,3 +220,112 @@ optional arguments:
   --hexplot             Plot HEXBIN
   --bypass_priority     Generates Metagenome vs. Genome Priority plots
 ```
+
+##Histograms for metagenome hits
+
+```
+#!cmd
+usage: plot_metagenome_genome.py [-h] -i INPUT_FILE [--bypass_parse]
+                                 [--parse_only]
+                                 [--metagenome_fasta METAGENOME_FASTA]
+                                 [--bypass_hist] [--bypass_scatter]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INPUT_FILE, --input_file INPUT_FILE
+                        Gene Genomes blast results
+  --bypass_parse        Input file is parsed
+  --parse_only          To only parse
+  --metagenome_fasta METAGENOME_FASTA
+                        Metagenome FASTA file
+  --bypass_hist         Generates Histogram
+  --bypass_scatter      Generates Scatterplot
+```
+
+##GraPhlAn plots
+
+```
+#!cmd
+usage: plot_genome_hits.py [-h] -i INPUT_FILE --map MAP [--bypass_scatter]
+                           [--bypass_stats] [--bypass_graphlan_rings]
+                           [--pangenome_size PANGENOME_SIZE]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INPUT_FILE, --input_file INPUT_FILE
+                        Gene Genomes blast results parsed**
+  --map MAP             Gene to GO mapper from ppanini_visualizer
+  --bypass_scatter      Scatter plot for genomes
+  --bypass_stats        Write stats for genome gene hits
+  --bypass_graphlan_rings
+                        Generates graphlan rings file
+  --pangenome_size PANGENOME_SIZE
+                        Pangenome size mapping file
+```
+
+========================================================================================
+
+#TOOLS
+
+##Normalization
+
+```
+#!cmd
+Usage: python utils/normalize_table.py <input_table> > <normalized_table>
+```
+
+##Join tables
+
+```
+#!cmd
+usage: python utils/join_tables.py <table1> <table2> ... > merged_table.txt
+````
+
+##Centroids extraction from gene abundance table
+
+```
+#!cmd
+Usage: python utils/imp_centroids_prabXtract.py <imp_centroids_list> <centroids_abundance_matrix_file> > <imp_centroids_abundance_matrix_file>
+```
+
+##Centroids extraction from gene catalog fasta
+
+```
+#!cmd
+Usage: python utils/imp_centroids_extracter.py <imp_centroids_list> <fasta_file> <imp_centroids_fasta_file>
+```
+
+##Create mapper file for PREPPANINI
+
+```
+#!cmd
+usage: create_mapper.py [-h] [--assemblies ASSEMBLIES] [--reads READS]
+                        [--gff3s GFF3S] [--sams SAMS] [--bams BAMS]
+                        [--abund ABUND] [--annot ANNOT] [--faas FAAS]
+                        [--fnas FNAS] [--niche NICHE] --samples SAMPLES
+                        [-o OUTPUT_TABLE]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --assemblies ASSEMBLIES
+                        FOLDER containing ASSEMBLIES
+  --reads READS         Folder containing READS files
+  --gff3s GFF3S         GFF3 Folder
+  --sams SAMS           SAMS Folder
+  --bams BAMS           SAMS Folder
+  --abund ABUND         SAMS Folder
+  --annot ANNOT         SAMS Folder
+  --faas FAAS           SAMS Folder
+  --fnas FNAS           SAMS Folder
+  --niche NICHE         GFF3 Folder
+  --samples SAMPLES     GFF3 Folder
+  -o OUTPUT_TABLE, --output_table OUTPUT_TABLE
+                        Gene Table to write
+  ```
+
+  ##Write mapper
+
+  ```
+  #!cmd
+  usage: python write_mapper <uniref_ids> <map uniref_go_ids> > <uniref_ids_go_select>
+  ```

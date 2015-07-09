@@ -20,6 +20,9 @@ def get_go_mapping(uniref_table, map_go_fname):
 			print gene+'\tNA'
 
 if __name__ == '__main__':
+	if sys.argv[1] == '-h' or sys.argv[1] == '--help':
+		print 'usage: python write_mapper <uniref_ids> <map uniref_go_ids> > <uniref_ids_go_select>'
+		sys.exit(0)
 	input_table = sys.argv[1]
 	uniref_table = [re.sub('[\r\t\n]','', line).strip() for line in open(input_table)]
 	map_go_fname = sys.argv[2]
