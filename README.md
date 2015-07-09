@@ -11,16 +11,16 @@ PPANINI provides a computational pipeline to prioritize microbial genes based on
 ## **REQUIREMENTS**
 
 * PPANINI
-* * matplotlib
-* *  python 2.7
-* * Biopython
-* * Numpy 1.6.1??
+* * [matplotlib](http://matplotlib.org/)
+* * [Python 2.7](https://www.python.org/download/releases/2.7/)
+* * [Biopython](http://biopython.org/wiki/Download)
+* * [Numpy 1.6.*](http://www.numpy.org/)
 
 * PREPPANINI
-* bowtie2
-* samtools
-* usearch/vsearch
-* diamond/usearch/rapsearch2
+* [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
+* [samtools](http://samtools.sourceforge.net/)
+* [usearch](http://www.drive5.com/usearch/) **or** [vsearch](https://github.com/torognes/vsearch)
+* [diamond](http://omictools.com/diamond-s8955.html) **or** [usearch](http://www.drive5.com/usearch/)  **or** [rapsearch2](http://omics.informatics.indiana.edu/mg/RAPSearch2/)
 
 ## **INSTALLATION**
 
