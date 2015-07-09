@@ -138,7 +138,7 @@ geneID_XYZ  0.05  0.35  0.50   0.42
 
 =========================================================================
 
-# PREPROCESSING SCRIPTS
+# **PREPPANINI: Creating a PPANINI table**
 
 ```
 #!cmd
@@ -189,11 +189,11 @@ optional arguments:
 * ``--to-normalize``: bool flag [True when sequence length normalization is required. E.g. when samtools is being used to translate Hits to FPKM or CPM]; [False when normalization has already been performed and an abundance table is being read. E.g. HUMAnN2 gene abundance table]
 * ``--log_level``: level of debugging information to be provided; Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
 
-========================================================================================
+------------------------------------------------------------------------------------------------------------------------
 
-# VISUALIZATION
+# **VISUALIZATION**
 
-## Metagenomic vs. Genomic Priority plots
+## **Metagenomic vs. Genomic Priority plots**
 
 ```
 #!cmd
@@ -221,7 +221,7 @@ optional arguments:
   --bypass_priority     Generates Metagenome vs. Genome Priority plots
 ```
 
-## Histograms for metagenome hits
+## **Histograms for metagenome hits**
 
 ```
 #!cmd
@@ -242,7 +242,7 @@ optional arguments:
   --bypass_scatter      Generates Scatterplot
 ```
 
-## GraPhlAn plots
+## **GraPhlAn plots**
 
 ```
 #!cmd
@@ -263,11 +263,11 @@ optional arguments:
                         Pangenome size mapping file
 ```
 
-========================================================================================
+------------------------------------------------------------------------------------------------------------------------
 
-# TOOLS
+# **TOOLS**
 
-## Normalization
+## **Normalization**
 
 
 ```
@@ -275,7 +275,7 @@ optional arguments:
 Usage: python utils/normalize_table.py <input_table> > <normalized_table>
 ```
 
-## Join tables
+## **Join tables**
 
 
 ```
@@ -283,7 +283,7 @@ Usage: python utils/normalize_table.py <input_table> > <normalized_table>
 usage: python utils/join_tables.py <table1> <table2> ... > merged_table.txt
 ```
 
-## Centroids extraction from gene abundance table
+## **Centroids extraction from gene abundance table**
 
 
 ```
@@ -291,7 +291,7 @@ usage: python utils/join_tables.py <table1> <table2> ... > merged_table.txt
 Usage: python utils/imp_centroids_prabXtract.py <imp_centroids_list> <centroids_abundance_matrix_file> > <imp_centroids_abundance_matrix_file>
 ```
 
-##Centroids extraction from gene catalog fasta
+##**Centroids extraction from gene catalog fasta**
 
 
 ```
@@ -328,9 +328,10 @@ optional arguments:
                         Gene Table to write
 ```
 
-## Write mapper
+## **Write mapper**
 
 ```
   #!cmd
   usage: python write_mapper <uniref_ids> <map uniref_go_ids> > <uniref_ids_go_select>
 ```
+------------------------------------------------------------------------------------------------------------------------
