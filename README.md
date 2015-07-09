@@ -281,7 +281,7 @@ Usage: python utils/normalize_table.py <input_table> > <normalized_table>
 ```
 #!cmd
 usage: python utils/join_tables.py <table1> <table2> ... > merged_table.txt
-````
+```
 
 ## Centroids extraction from gene abundance table
 
