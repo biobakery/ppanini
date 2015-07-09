@@ -3,7 +3,6 @@ import sys
 import matplotlib
 import re
 import numpy
-import pdb
 import time
 import numpy
 import argparse
@@ -15,8 +14,12 @@ from src import utilities
 
 def parse_table(m8_filename, fasta_filename):
 	'''Parse the BLAST results to give gene hits to genomes
-	Input: filename of blast results
-	Output: table = {gene: [List of genomes]}'''
+	Input: 
+	m8_filename = filename of blast results
+	fasta_filename = filename of corresponding fasta file
+	
+	Output: 
+	table = {gene: [List of genomes]}'''
 
 	fasta_dict = utilities.read_fasta(fasta_filename)
 
@@ -41,8 +44,12 @@ def parse_table(m8_filename, fasta_filename):
 
 def read_parsed(m8_filename):
 	'''Read parsed table for {gene: genomes}
-	Input: filename of blast results
-	Output: table = {gene: [List of genomes]}'''
+	Input: 
+	m8_filename = filename of blast results
+
+	Output: 
+	table = {gene: [List of genomes]}'''
+
 	table = {}
 	foo = open(m8_filename)
 
@@ -55,7 +62,12 @@ def read_parsed(m8_filename):
 	return table
 
 def plot_scatter(table, m8_filename, no_uniq_genomes):
-	'''Plot Scatter plot for genome hits per gene'''
+	'''Plots Scatter plot for genome hits per gene
+	Input:
+	m8_filename = filename of blast results
+	table = {gene: [List of genomes]}
+	no_uniq_genomes = Number of Unique Genomes in Metagenomic niche'''
+
 	labels = {'xlabel': 'Prioritized Centroids',\
 			  'ylabel':'No. of Genomes (Log10)', \
 			  'title':'Metagenome vs. Genome Prioritization',\
@@ -85,7 +97,11 @@ def plot_scatter(table, m8_filename, no_uniq_genomes):
 	pyplot.savefig(labels['filename']+'.png')
 
 def plot_hexbin(table, m8_filename):
-	'''Plots HexBin plots for the genome hits per gene'''
+	'''Plots HexBin plots for the genome hits per gene
+	Input:
+	m8_filename = filename of blast results
+	table = {gene: [List of genomes]}'''
+
 	labels = {'xlabel': 'Prioritized Centroids',\
 			  'ylabel':'No. of Genomes', \
 			  'title':'Metagenome vs. Genome Prioritization',\
@@ -105,11 +121,15 @@ def plot_hexbin(table, m8_filename):
 				   bins='log', gridsize=30, mincnt=1, cmap=pyplot.cm.Spectral_r, zorder=1)
 	cb = pyplot.colorbar(image, spacing='uniform', extend='max')
 	
-	
 	pyplot.savefig(labels['filename'])
 
 def plot_hist(table, m8_filename, no_uniq_genomes):
-	'''Plots histogram for the genome hits per gene'''
+	'''Plots histogram for the genome hits per gene
+	Input:
+	m8_filename = filename of blast results
+	table = {gene: [List of genomes]}
+	no_uniq_genomes = Number of Unique Genomes in Metagenomic niche'''
+
 	labels = {'ylabel': 'Centroids',\
 			  'xlabel':'Genomes', \
 			  'title':'Metagenome vs. Genome Prioritization',\
@@ -118,8 +138,6 @@ def plot_hist(table, m8_filename, no_uniq_genomes):
 	all_genes = []
 	for gene in table:
 		all_genes +=[len(table[gene])/float(no_uniq_genomes)]
-	
-	print 'No. of unique genomes: '+str(no_uniq_genomes)
 
 	pyplot.figure()
 	pyplot.xlabel(labels['xlabel'])
@@ -149,7 +167,6 @@ if __name__ == '__main__':
 	parser.add_argument('--metagenome_fasta', help='Metagenome FASTA file')
 	parser.add_argument('--bypass_hist', default=False, action='store_true', help='Generates Histogram')
 	parser.add_argument('--bypass_scatter', default=False, action='store_true', help='Generates Scatterplot')
-
 
 	args = parser.parse_args()
 

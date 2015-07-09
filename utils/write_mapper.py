@@ -1,5 +1,4 @@
 import os
-import pdb
 import re
 import sys
 
@@ -20,7 +19,8 @@ def get_go_mapping(uniref_table, map_go_fname):
 			print gene+'\tNA'
 
 if __name__ == '__main__':
-	if sys.argv[1] == '-h' or sys.argv[1] == '--help':
+	cmd_h = ['-h', '--help']
+	if sys.argv[1] in cmd_h:
 		print 'usage: python write_mapper <uniref_ids> <map uniref_go_ids> > <uniref_ids_go_select>'
 		sys.exit(0)
 	input_table = sys.argv[1]

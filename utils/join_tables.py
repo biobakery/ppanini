@@ -1,7 +1,6 @@
 import os
 import sys
 import re
-import pdb
 import time
 
 def read_table(gene_table_fname):
@@ -29,7 +28,8 @@ def read_table(gene_table_fname):
 	return [metadata, genes, data_matrix]
 
 if __name__ == '__main__':
-	if sys.argv[1] == '-h':
+	cmd_h = ['-h', '--help']
+	if sys.argv[1] in cmd_h:
 		print 'usage: python utils/join_tables.py <table1> <table2> ... > merged_table.txt'
 		sys.exit(0)
 

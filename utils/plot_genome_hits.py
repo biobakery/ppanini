@@ -3,22 +3,29 @@ import sys
 import matplotlib
 import re
 import numpy
-import pdb
 import time
 import numpy
 import argparse
 import random
 
+from utils import plot_metagenome_genome
 from src import utilities
 from matplotlib import pyplot
 from matplotlib import colors
 
 '''Analysis of genomes in the niche giving a sense of what genomes are in the community'''
 
-# numpy.seterr(divide='ignore', invalid='ignore')
+numpy.seterr(divide='ignore', invalid='ignore')
 
-def read_parsed(m8_filename, go_table):
-	'''Returns genomes dict {genome: {'UniRef90': #hits, 'UniRef90_NA': #hits, 'NA': #hits}}'''
+def read_parsed_genome(m8_filename, go_table):
+	'''Returns genomes dict {genome: {'UniRef90': #hits, 'UniRef90_NA': #hits, 'NA': #hits}}
+	Input:
+	m8_filename = filename for parsed blast results
+	go_table = {uniref_id : GO_ID, ...}
+
+	Output:
+	table = {genome: {UniRef90: #hits, UniRef90_NA: #hits, NA: #hits}, ...}'''
+
 	table = {}
 	foo = open(m8_filename)
 	for line in foo:
@@ -37,18 +44,29 @@ def read_parsed(m8_filename, go_table):
 			table[split_i[1]][key] += 1
 	return table
 
-def read_go_map(m8_filename):
-	'''Returns dict {gene: GO annotation}'''
-	table = {}
-	foo = open(m8_filename)
+def read_go_map(filename):
+	'''Returns dict {gene: GO annotation}
+	Input:
+	filename = filename for Uniref90 to GO mapping
+
+	Output:
+	go_table = {uniref_id : GO_ID, ...}
+	'''
+	go_table = {}
+	foo = open(filename)
 
 	for line in foo:
 		split_i = [i.strip() for i in line.split('\t')]
-		table[split_i[0]] = split_i[1]
-	return table
+		go_table[split_i[0]] = split_i[1]
+
+	return go_table
 
 def plot_scatter(table, m8_filename):
-	'''Plots a scatter plot for genome hits over prioritized genes'''
+	'''Plots a scatter plot for genome hits over prioritized genes
+	Input:
+	table = {genome: {UniRef90: #hits, UniRef90_NA: #hits, NA: #hits}, ...}
+	m8_filename = filename for the output figure'''
+	
 	labels = {'xlabel': 'No. of Prioritized genes',\
 			  'ylabel':'Frequency(No. of Genomes)', \
 			  'title':'Metagenome vs. Genome Prioritization',\
@@ -75,15 +93,31 @@ if __name__ == '__main__':
 	parser.add_argument('-i', '--input_file', help='Gene Genomes blast results parsed**', required=True)
 	parser.add_argument('--map', help='Gene to GO mapper from ppanini_visualizer', required=True)
 	parser.add_argument('--bypass_scatter', default=False, action='store_true', help='Scatter plot for genomes')
-	parser.add_argument('--bypass_stats', default=False, action='store_true', help='Write stats for genome gene hits')
+	parser.add_argument('--bypass_write_stats', default=False, action='store_true', help='Write stats for genome gene hits')
 	parser.add_argument('--bypass_graphlan_rings', default=False, action='store_true', help='Generates graphlan rings file')
 	parser.add_argument('--pangenome_size', default=False, help='Pangenome size mapping file')
+	parser.add_argument('--metagenome_fasta', help='Metagenome FASTA file')
+	parser.add_argument('--bypass_parse', default=False, action='store_true', help='Input file is parsed')
 
 	args = parser.parse_args()
 
 	m8_filename = args.input_file
 	go_map = read_go_map(args.map)
-	genomes = read_parsed(m8_filename, go_map) #genome: {Uniref90: , GO: , NA:}
+	if not args.bypass_parse:
+		try:
+			fasta_filename = args.metagenome_fasta
+		except:
+			raise Exception('Metagenome fasta not entered')
+		table = plot_metagenome_genome.parse_table(m8_filename, fasta_filename)
+		with open(m8_filename+'_parsed.m8','w') as foo:
+			for i in table:
+				for j in table[i]:
+					foo.writelines('\t'.join([i, j])+'\n')
+		m8_filename = m8_filename+'_parsed.m8'
+		genomes = read_parsed_genome(m8_filename, go_map)
+	else:
+		genomes = read_parsed_genome(m8_filename, go_map) 
+
 	all_values = []
 	
 	pgsize = utilities.read_dict_num(args.pangenome_size) 
@@ -95,7 +129,7 @@ if __name__ == '__main__':
 	if not args.bypass_scatter:
 		plot_scatter(genomes, m8_filename)
 
-	if not args.bypass_stats:
+	if not args.bypass_write_stats:
 		with open(m8_filename+'_allstats.txt', 'w') as foo:
 			for gene in genomes:
 				x = genomes[gene].values()
@@ -106,13 +140,18 @@ if __name__ == '__main__':
 			for gene in genomes:
 				x = genomes[gene].values()
 				all_values += x
-				foo.writelines([gene+'\t'+str(genomes[gene]['UniRef90'])+'\t'+str(genomes[gene]['UniRef90_NA'])+'\t'+str(genomes[gene]['NA'])+'\n'])
+				foo.writelines([gene+'\t'+\
+								str(genomes[gene]['UniRef90'])+'\t'+\
+								str(genomes[gene]['UniRef90_NA'])+'\t'+\
+								str(genomes[gene]['NA'])+'\n'])
 
 	all_values = numpy.log(numpy.array(all_values))
 	max_val = int(max(all_values))
 	print max_val
+
+	##GRAPHLAN RINGS FILE
+
 	if not args.bypass_graphlan_rings:
-		##GRAPHLAN RINGS FILE
 		ref = numpy.arange(max_val+1)
 		print ref #Reference
 		ref_i = 0
@@ -131,15 +170,19 @@ if __name__ == '__main__':
 					foo_rings.writelines([genome+'\tring_height\t4\t'+str(ref[ref_i])+'\n'])	
 					foo_rings.writelines([genome+'\tring_color\t4\t#000000\n'])
 					ref_i += 1
-				# To remove ln(0) = -inf to --> 0
-				x=[genomes[genome]['UniRef90']*20.0/pg, \
-				   genomes[genome]['UniRef90_NA']*20.0/pg,\
-				   genomes[genome]['NA']*20.0/pg]
+				
+				factor = 20.0/pg
+				x=[genomes[genome]['UniRef90']*factor, \
+				   genomes[genome]['UniRef90_NA']*factor,\
+				   genomes[genome]['NA']*factor]
+
+				# To remove ln(0) = -inf to --> 0   
 				for i, val in enumerate(x):
 					if -1*numpy.inf==val or numpy.inf==val:
 						x[i] = 0
 					else:
 						x[i] = abs(x[i])
+
 				foo_rings.writelines([genome+'\tring_height\t1\t'+str(x[0])+'\n'])
 				foo_rings.writelines([genome+'\tring_height\t2\t'+str(x[1])+'\n'])
 				foo_rings.writelines([genome+'\tring_height\t3\t'+str(x[2])+'\n'])
