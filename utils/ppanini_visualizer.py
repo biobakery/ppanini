@@ -3,7 +3,6 @@ import sys
 import matplotlib
 import re
 import numpy
-import pdb
 import time
 import numpy
 import argparse
@@ -85,7 +84,6 @@ def draw_cloud(cloud_points, data_points, labels, margins, zord):
 				   edgecolors='none',\
 				   label='Prioritized unannotated')
 	##WithUniRef90/WithoutGO
-	#pdb.set_trace()
 	pyplot.scatter(numpy.log(d_uniref_x_y['x'], dtype='float64'), \
 				   numpy.log(d_uniref_x_y['y'], dtype='float64'), \
 				   c='Red', \
@@ -135,7 +133,6 @@ def get_go_mapping(uniref_table, inds, map_go_fname, out_fname):
 				uniref[gene] = uniref_table[gene]
 	uniref_x_y = split_table(uniref, inds)
 	uniref_go_x_y = split_table(uniref_go, inds)
-	#pdb.set_trace()
 	return [uniref_x_y, uniref_go_x_y]
 
 def draw_prev_plot(genes_table, uniref_table, inds, labels, check):

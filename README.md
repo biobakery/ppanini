@@ -189,9 +189,34 @@ optional arguments:
 * ``--to-normalize``: bool flag [True when sequence length normalization is required. E.g. when samtools is being used to translate Hits to FPKM or CPM]; [False when normalization has already been performed and an abundance table is being read. E.g. HUMAnN2 gene abundance table]
 * ``--log_level``: level of debugging information to be provided; Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
 
-
 ========================================================================================
 
-Alternate names
+#TOOLS
 
-* Annotation of Novel Genes via Integrated Re-assignment Approach (ANGIRA)
+##VISUALIZATION: ppanini_visualizer
+
+```
+#!cmd
+
+usage: ppanini_visualizer.py [-h] -i INPUT_TABLE
+                             [--original_table ORIGINAL_TABLE]
+                             [--bypass_cloud] [--prev PREV] [--abund ABUND]
+                             [-m MAPPER] [--write_mapper] [--zorder ZORDER]
+                             [--hexplot] [--bypass_priority]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INPUT_TABLE, --input_table INPUT_TABLE
+                        Gene abundance table with metadata
+  --original_table ORIGINAL_TABLE
+                        Gene abundance table with metadata
+  --bypass_cloud        To draw Abundance Prevalence Cloud
+  --prev PREV           Graph will be prevalence across centroids
+  --abund ABUND         Graph will be mean abundance across centroids
+  -m MAPPER, --mapper MAPPER
+                        GO to UniRef mapper
+  --write_mapper        Gene to GO table written
+  --zorder ZORDER       Zorder [1,2,3,4] [Old, UniRef, UniRef/GO, NA]
+  --hexplot             Plot HEXBIN
+  --bypass_priority     Generates Metagenome vs. Genome Priority plots
+```

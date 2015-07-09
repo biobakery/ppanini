@@ -7,10 +7,7 @@ import pdb
 import time
 import numpy
 import argparse
-#from ppanini
-import src
 
-#from ppanini import src
 from matplotlib import pyplot
 from src import utilities
 
