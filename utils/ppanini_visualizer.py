@@ -12,6 +12,16 @@ from matplotlib import pyplot
 numpy.seterr(divide='ignore', invalid='ignore')
 
 def parse_table(table_name):
+	'''Returns genes and uniref dicts from PPANINI output
+	Input: 
+	table_name =  filename of PPANINI output
+	
+	Output: 
+	genes_table = {gene_id: {'alpha': 0.002, 'beta': 0.001, 'abund': 100.00} , ...}
+	uniref_table = {uniref_id: {'alpha': 0.002, 'beta': 0.001, abund: 100.00}, ...} 
+	inds = {'alpha': index, 'beta': index, abund: index}
+	keys = ['alpha_xx', 'beta_xx', 'abund_xx']'''
+
 	table_obj = open(table_name)
 	table = table_obj.readlines()
 	genes_table, uniref_table = {}, {}
@@ -31,6 +41,14 @@ def parse_table(table_name):
 	return [genes_table, uniref_table, inds, keys]
 
 def split_table(genes_table, inds):
+	'''Splits gene_table into x, y coordinates of genes
+	Input:
+	genes_table = {gene_id : {'alpha': 0.001, 'beta': 0.001, 'abund': 100.00}, ...}
+	inds = {'alpha': index, 'beta': index, abund: index}
+
+	Output:
+	dict = {'x': [list of x coordinates], 'y': [list of y coordinates]}'''
+
 	x = inds[0]
 	y = inds[1]
 
@@ -41,6 +59,16 @@ def split_table(genes_table, inds):
 	return {'x': x_i, 'y': y_i}
 
 def split_x_y(table, inds):
+	'''Returns x and y coordinates for the uniref_ids and genes_ids separately
+	Input:
+	table = [genes_table = {gene_id : {'alpha': 0.001, 'beta': 0.001, 'abund': 100.00}, ...}, \
+			 uniref_table = {uniref_id: {'alpha': 0.002, 'beta': 0.001, abund: 100.00}, ...}]
+	inds = {'alpha': index, 'beta': index, abund: index}		 
+	
+	Output:
+	genes_x_y =  {'x': [list of x coordinates], 'y': [list of y coordinates]}
+	uniref_x_y = {'x': [list of x coordinates], 'y': [list of y coordinates]}'''
+
 	[genes_table, uniref_table] = table
 
 	genes_x_y = split_table(genes_table, inds)
@@ -48,6 +76,19 @@ def split_x_y(table, inds):
 	return [genes_x_y, uniref_x_y]
 
 def draw_cloud(cloud_points, data_points, labels, margins, zord):
+	'''Saves a figure of Mean abundance vs. Prevalence for all the gene centroids 
+	with important centroids highlighted
+
+	Input:
+	cloud_points = [c_genes_x_y = {'x': [list of x coordinates], 'y': [list of y coordinates]},\
+					c_uniref_x_y = {'x': [list of x coordinates], 'y': [list of y coordinates]}]
+	data_points = [d_genes_x_y = {'x': [list of x coordinates], 'y': [list of y coordinates]},\
+				   d_uniref_x_y = {'x': [list of x coordinates], 'y': [list of y coordinates]},\
+				   d_uniref_go_x_y = {'x': [list of x coordinates], 'y': [list of y coordinates]}]
+	labels = {'xlabel': '', 'ylabel': '', 'title': '', 'filename': ''}
+	margins = [abundance_threshold, prevalence_threshold]
+	zord = Order of plotting the UniRef_GO, UniRef_NA, NA and Unprioritized'''
+
 	pyplot.figure()
 	pyplot.xlabel(labels['xlabel'])#'Alpha Prevalence_'+keys[i])
 	pyplot.ylabel(labels['ylabel'])
@@ -55,7 +96,7 @@ def draw_cloud(cloud_points, data_points, labels, margins, zord):
 
 	[c_genes_x_y, c_uniref_x_y] = cloud_points
 	[d_genes_x_y, d_uniref_x_y, d_uniref_go_x_y] = data_points
-	z= numpy.log(c_genes_x_y['y']+c_uniref_x_y['y'], dtype='float64')
+	z = numpy.log(c_genes_x_y['y']+c_uniref_x_y['y'], dtype='float64')
 	pyplot.scatter(numpy.log(c_genes_x_y['x'], dtype='float64'), \
 				   numpy.log(c_genes_x_y['y'], dtype='float64'), \
 				   c='grey', \
@@ -116,6 +157,19 @@ def draw_cloud(cloud_points, data_points, labels, margins, zord):
 	pyplot.savefig(labels['filename']+'.png')
 
 def get_go_mapping(uniref_table, inds, map_go_fname, out_fname):
+	'''Writes the uniref to GO mapping to file AND 
+	Returns the x,y coordinates of UniRef_GO and UniRef_NA centroids
+
+	Input:
+	uniref_table = {uniref_id: {'alpha': 0.002, 'beta': 0.001, abund: 100.00}, ...}
+	inds = {'alpha': index, 'beta': index, abund: index}		 
+	map_go_fname = UniRef90 to GO mapping filename
+	out_fname = output_filename
+
+	Output:
+	uniref_x_y = {'x': [list of x coordinates], 'y': [list of y coordinates]}
+	uniref_go_x_y = {'x': [list of x coordinates], 'y': [list of y coordinates]}'''
+
 	uniref, uniref_go = {}, {}
 	map = open(map_go_fname,'r')
 	mapper = {}
@@ -136,26 +190,38 @@ def get_go_mapping(uniref_table, inds, map_go_fname, out_fname):
 	return [uniref_x_y, uniref_go_x_y]
 
 def draw_prev_plot(genes_table, uniref_table, inds, labels, check):
+	'''Draws and saves the sorted Prevalence or Abundance across gene centroids
+	Input:
+	genes_table = {gene_id: {'alpha': 0.002, 'beta': 0.001, abund: 100.00}, ...}
+	uniref_table = {uniref_id: {'alpha': 0.002, 'beta': 0.001, abund: 100.00}, ...}
+	inds = {'alpha': index, 'beta': index, abund: index}
+	labels = {'xlabel': '', 'ylabel': '', 'title': '', 'filename': ''}
+	check = DUBIOUS CHECK ??? '''
 	alpha_is = inds
 	prev = []
+	
 	for gene in genes_table:
 		prev +=[genes_table[gene][alpha_is]]
+	
 	for gene in uniref_table:
 		prev +=[uniref_table[gene][alpha_is]]
 	arr_prev = numpy.array(prev)
+	
 	if check:
 		prev_tmp = [i for i in prev if i>0]
 	else:
 		prev_tmp = prev
+	
 	tshld = 0.1+(2.0*float(numpy.std(numpy.array(prev_tmp)))/float(numpy.sqrt(len(prev_tmp))))
-	# print per_90
+	
 	arr_prev.sort()
 	prev = arr_prev
 	prev.sort()
-	#pdb.set_trace()
-	pyplot.figure()
+	
 	x= range(1, len(prev)+1)
-	#pyplot.ylim([min(prev), max(prev)])
+
+	pyplot.figure()
+	
 	pyplot.scatter(x, numpy.log(prev), marker='.')
 	pyplot.hold(True)
 	pyplot.axhline(numpy.log(float(check)), alpha=0.5, color='red', label='>0.1+2SE')
@@ -167,6 +233,15 @@ def draw_prev_plot(genes_table, uniref_table, inds, labels, check):
 	pyplot.savefig(labels['filename']+'.png')
 
 def draw_hexbin(genes_table, uniref_x_y, go_x_y, labels, inds):
+	'''Draws and saves the HEXBIN plot for Prevalence and Abundance across gene centroids
+	Input:
+	genes_table = {gene_id: {'alpha': 0.002, 'beta': 0.001, abund: 100.00}, ...}
+	uniref_x_y = {'x': [list of x coordinates], 'y': [list of y coordinates]}
+	uniref_go_x_y = {'x': [list of x coordinates], 'y': [list of y coordinates]}
+
+	inds = {'alpha': index, 'beta': index, abund: index}
+	labels = {'xlabel': '', 'ylabel': '', 'title': '', 'filename': ''}'''
+
 	pyplot.subplot(2,2,1)
 	genes_x_y = split_table(genes_table, [inds['alpha'], inds['abund']])
 	
@@ -174,7 +249,7 @@ def draw_hexbin(genes_table, uniref_x_y, go_x_y, labels, inds):
 	pyplot.title(labels['title']+'_Genes')
 	pyplot.xlabel(labels['xlabel'])
 	pyplot.ylabel(labels['ylabel'])
-	# pyplot.savefig(labels['filename']+'1.png')
+	pyplot.colorbar()
 
 	pyplot.subplot(2,2,2)
 	
@@ -182,7 +257,7 @@ def draw_hexbin(genes_table, uniref_x_y, go_x_y, labels, inds):
 	pyplot.title(labels['title']+'_UniRef')
 	pyplot.xlabel(labels['xlabel'])
 	pyplot.ylabel(labels['ylabel'])
-	# pyplot.savefig(labels['filename']+'2.png')
+	pyplot.colorbar()
 
 	pyplot.subplot(2,2,3)
 
@@ -190,16 +265,25 @@ def draw_hexbin(genes_table, uniref_x_y, go_x_y, labels, inds):
 	pyplot.title(labels['title']+'_GO')
 	pyplot.xlabel(labels['xlabel'])
 	pyplot.ylabel(labels['ylabel'])
+	pyplot.colorbar()
 	
 	pyplot.subplot(2,2,4)
 	pyplot.hold(True)
 	pyplot.hexbin(numpy.log(go_x_y['x']), numpy.log(go_x_y['y']), cmap='Blues', gridsize=10, alpha=0.5)
 	pyplot.hexbin(numpy.log(uniref_x_y['x']), numpy.log(uniref_x_y['y']), cmap='Reds', gridsize=10, alpha=0.5)
 	pyplot.hexbin(numpy.log(genes_x_y['x']), numpy.log(genes_x_y['y']), cmap='Greys', gridsize=10, alpha=0.5)
-	# pyplot.savefig(labels['filename'])
+
 	pyplot.savefig(labels['filename']+'.png')
 
 def calculate_priority(array_x):
+	'''Returns Metagenomic and Genomic priority for the gene lists on a scale of 0 to 1
+	Input:
+	array_x_y = {'x': [list of x coordinates], 'y': [list of y coordinates]}
+	
+	Output:
+	gp = Genomic Priority [0.5,0.1, 0.3, ...]
+	mp = Metagenomic Priority [0.9, 0.1, 0.2, ...]'''
+
 	abund = numpy.array(array_x['y'])/max(array_x['y'])
 	prev  = numpy.array(array_x['x'])/max(array_x['x'])
 
@@ -219,11 +303,15 @@ def calculate_priority(array_x):
 
 
 def plot_priority(cloud_points, data_points, zord, labels):
-	'''Plots Metagenome vs. Genome Priority plots'''
-	pyplot.figure()
-	pyplot.xlabel(labels['xlabel'])#'Alpha Prevalence_'+keys[i])
-	pyplot.ylabel(labels['ylabel'])
-	pyplot.title(labels['title']) #'Mean abundance')
+	'''Plots Metagenome vs. Genome Priority plots
+	
+	cloud_points = [c_genes_x_y = {'x': [list of x coordinates], 'y': [list of y coordinates]},\
+					c_uniref_x_y = {'x': [list of x coordinates], 'y': [list of y coordinates]}]
+	data_points = [d_genes_x_y = {'x': [list of x coordinates], 'y': [list of y coordinates]},\
+				   d_uniref_x_y = {'x': [list of x coordinates], 'y': [list of y coordinates]},\
+				   d_uniref_go_x_y = {'x': [list of x coordinates], 'y': [list of y coordinates]}]
+	labels = {'xlabel': '', 'ylabel': '', 'title': '', 'filename': ''}
+	zord = Order of plotting the UniRef_GO, UniRef_NA, NA and Unprioritized'''
 
 	[c_genes_x_y, c_uniref_x_y] = cloud_points
 	[d_genes_x_y, d_uniref_x_y, d_uniref_go_x_y] = data_points
@@ -248,10 +336,15 @@ def plot_priority(cloud_points, data_points, zord, labels):
 	master_x_y['x'] += d_uniref_go_x_y['x']
 	master_x_y['y'] += d_uniref_go_x_y['y']
 	inds += [len(inds), len(inds)+len(d_uniref_go_x_y['x'])]
-
-	# pyplot.plot([0,1], [0,1], 'grey', label='y=x')
 	
 	[gp, mp] = calculate_priority(master_x_y)
+
+
+	pyplot.figure()
+	pyplot.xlabel(labels['xlabel'])
+	pyplot.ylabel(labels['ylabel'])
+	pyplot.title(labels['title'])
+
 	pyplot.scatter(numpy.log(gp[inds[0]:inds[1]], dtype='float64'), \
 				   numpy.log(mp[inds[0]:inds[1]], dtype='float64'), \
 				   c='grey', \
@@ -339,7 +432,7 @@ if __name__ == '__main__':
 			for gene in genes_table_i:
 				foo.writelines(gene+'\tNA\n')
 		os.system('rm '+args.input_table+'_GO_map.txt_tmp')
-	abund=  float(args.abund) #+200.0
+	abund=  float(args.abund)
 	prev = float(args.prev)+0.1
 	
 	if args.original_table:
@@ -391,6 +484,7 @@ if __name__ == '__main__':
 				  'title': title, \
 				  'filename': name+'_abund.pdf'}
 		draw_prev_plot(genes_table_i, uniref_table_i, abund_i, labels, abund)
+
 	if args.hexplot:
 		name = args.input_table
 		title=name.split('/')[-1].split('.')[0]
