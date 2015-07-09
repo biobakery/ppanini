@@ -8,7 +8,7 @@ July 10, 2015
 
 PPANINI provides a computational pipeline to prioritize microbial genes based on their metagenomic properties (e.g. prevalence and abundance). The resulting prioritized list of gene candidates can then be analyzed further using our visualization tools.
 
-## **REQUIREMENTS***
+## **REQUIREMENTS**
 
 * PPANINI
 * * matplotlib
