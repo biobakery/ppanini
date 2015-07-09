@@ -27,6 +27,7 @@ def parse_table(table_name):
 	genes_table, uniref_table = {}, {}
 
 	keys = [re.sub('[\r\t\n]','',i) for i in table[0].split('\t')[1:]]
+	## only applicable for one alpha prevalence for NICHE <--should add multiple niche adaptability
 	alpha_is = [i for i in range(len(keys)) if 'alpha' in keys[i]][0]
 	beta_i = [i for i in range(len(keys)) if 'beta' in keys[i]][0]
 	abund_i = [i for i in range(len(keys)) if 'abund' in keys[i]][0]

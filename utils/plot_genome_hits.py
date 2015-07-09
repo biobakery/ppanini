@@ -66,7 +66,7 @@ def plot_scatter(table, m8_filename):
 	Input:
 	table = {genome: {UniRef90: #hits, UniRef90_NA: #hits, NA: #hits}, ...}
 	m8_filename = filename for the output figure'''
-	
+
 	labels = {'xlabel': 'No. of Prioritized genes',\
 			  'ylabel':'Frequency(No. of Genomes)', \
 			  'title':'Metagenome vs. Genome Prioritization',\
@@ -103,6 +103,7 @@ if __name__ == '__main__':
 
 	m8_filename = args.input_file
 	go_map = read_go_map(args.map)
+	
 	if not args.bypass_parse:
 		try:
 			fasta_filename = args.metagenome_fasta

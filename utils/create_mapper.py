@@ -6,6 +6,7 @@ import argparse
 import numpy
 import subprocess
 
+'''Creates a mapper table for PREPPANINI input'''
 
 if __name__ == '__main__':
 	labels = ['SAMS', 'BAMS', 'GFF3S', 'ABUNDANCE_TABLES', 'ANNOTATION', 'READS', 'CONTIG_ASSEMBLIES', 'FAAS', 'FNAS']
