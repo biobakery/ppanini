@@ -269,12 +269,14 @@ optional arguments:
 
 ##Normalization
 
+
 ```
 #!cmd
 Usage: python utils/normalize_table.py <input_table> > <normalized_table>
 ```
 
 ##Join tables
+
 
 ```
 #!cmd
@@ -283,6 +285,7 @@ usage: python utils/join_tables.py <table1> <table2> ... > merged_table.txt
 
 ##Centroids extraction from gene abundance table
 
+
 ```
 #!cmd
 Usage: python utils/imp_centroids_prabXtract.py <imp_centroids_list> <centroids_abundance_matrix_file> > <imp_centroids_abundance_matrix_file>
@@ -290,12 +293,14 @@ Usage: python utils/imp_centroids_prabXtract.py <imp_centroids_list> <centroids_
 
 ##Centroids extraction from gene catalog fasta
 
+
 ```
 #!cmd
 Usage: python utils/imp_centroids_extracter.py <imp_centroids_list> <fasta_file> <imp_centroids_fasta_file>
 ```
 
 ##Create mapper file for PREPPANINI
+
 
 ```
 #!cmd
@@ -324,6 +329,7 @@ optional arguments:
   ```
 
   ##Write mapper
+
 
   ```
   #!cmd
