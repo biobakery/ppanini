@@ -1,20 +1,59 @@
 Shafquat, Afrah
 
-shafquat@hsph.harvard.edu
+[shafquat@hsph.harvard.edu](mailto:shafquat@hsph.harvard.edu)
 
-November 18, 2014
+July 10, 2015
 
 #**PPANINI: Prioritization and Prediction of functional Annotations for Novel and Important genes via automated data Network Integration**
 
+PPANINI provides a computational pipeline to prioritize microbial genes based on their metagenomic properties (e.g. prevalence and abundance). The resulting prioritized list of gene candidates can then be analyzed further using our visualization tools.
+
+## **REQUIREMENTS***
+
+* PPANINI
+* * matplotlib
+* *  python 2.7
+* * Biopython
+* * Numpy 1.6.1??
+
+* PREPPANINI
+* bowtie2
+* samtools
+* usearch/vsearch
+* diamond/usearch/rapsearch2
+
+## **INSTALLATION**
+
+To install, execute the following command in your Terminal/Commmand prompt:
+
+```
+#!cmd
+hg clone http://bitbucket.org/biobakery/ppanini
+```
+
+The prerequisites for executing this command are: 
+
+* [Mercurial](https://mercurial.selenic.com/wiki/Download)
+
+Once cloned, run the following command:
+
+```
+#!cmd
+export PYTHONPATH=$PYTHONPATH:<INSERT PATH to PPANINI HERE>
+```
+
+
+## Running PPANINI
 
 ```
 #!python
 
-usage: ppanini.py [-h] -i INPUT_TABLE [-o OUTPUT_FOLDER] [--uc UC]
-                  [--usearch USEARCH] [--vsearch VSEARCH]
-                  [--basename BASENAME] [--log_level LOG_LEVEL]
-                  [--threads THREADS] [--tshld_abund TSHLD_ABUND]
-                  [--tshld_prev TSHLD_PREV]
+usage: ppanini.py [-h] -i INPUT_TABLE [-o OUTPUT_FOLDER]
+                  [--gene_catalog GENE_CATALOG] [--uc UC] [--usearch USEARCH]
+                  [--vsearch VSEARCH] [--basename BASENAME]
+                  [--log_level LOG_LEVEL] [--threads THREADS]
+                  [--tshld_abund TSHLD_ABUND] [--tshld_prev TSHLD_PREV]
+                  [--quad QUAD] [--bypass_prev_abund]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -22,7 +61,8 @@ optional arguments:
                         REQUIRED: Gene abundance table with metadata
   -o OUTPUT_FOLDER, --output_folder OUTPUT_FOLDER
                         Folder containing results
-  --gene_catalog        file path to the genes catalog
+  --gene_catalog GENE_CATALOG
+                        GENE CATALOG
   --uc UC               UCLUST file containg centroids and clustered genes
   --usearch USEARCH     Path to USEARCH
   --vsearch VSEARCH     Path to VSEARCH
@@ -34,6 +74,8 @@ optional arguments:
                         [X] Percentile Cutoff for Abundance; Default=75th
   --tshld_prev TSHLD_PREV
                         Threshold: val-2*SE > tshld_prev
+  --quad QUAD           Quadrant analysis
+  --bypass_prev_abund   Bypass quantifying abundance and prevalence
 ```
 
 
@@ -41,7 +83,7 @@ optional arguments:
 
 * ``-i or --input_table`` : Gene Abundance Table containing annotated gene abundance values in CPM or counts per million
 * * Such tables can be obtained using (i) HUMAnN2, (ii) preppanini.py or (iii) manually creating the table using samtools (idxstats) etc.
-* * See the mock gene table for an example. naan/input/mock_gene_table.tsv
+* * See the mock gene table for an example. ppanini/input/mock_gene_table.tsv
 
 ```
 #!text
@@ -63,6 +105,7 @@ geneID_MNO|UniRef90_unknown  0.00 0.09
 * * * In absence of niche data, only alpha-prevalence is calculated.
 
 * ``--output_folder``: folder containing all the output files
+* ``--gene_catalog``: File containing the entire genes catalog for the metagenomic niche
 * ``--uc``:  [Optional] File containing the clustering information for all the genes in input file
 * ``--basename``: name prefix for all intermediate output files produced
 * ``--log_level``: level of debugging information to be provided; Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
@@ -71,10 +114,13 @@ geneID_MNO|UniRef90_unknown  0.00 0.09
 * ``--vsearch``: Runs VSEARCH for clustering genes using the path provided, including the name. E.g. [/n/usr/bin/vsearch]
 * ``--tshld_abund``: Percentile threshold used to prioritize genes. Default value 75th percentile of the gene abundance observed.
 * ``--tshld_prev``: Prevalence cut-off used to prioritize genes. Default value 1/10 samples i.e. val - 2*Standard Error(distribution) > 0.1
+* ``--quad``: The quadrant of genes to prioritize {1: High Abundance, Low Prevalence; 2: High Abundance, High Prevalence; 3: Low Abundance, High Prevalence, 4: Low Abundance, Low Prevalence}
+* ``--bypass_abund_prev``: To bypass the calculation of important genes
+
 
 ## **OUTPUT**
 
-Returns a list of "important" uncharacterized genes.
+Returns a list of "important" genes.
 
 ```
 #!text
@@ -89,35 +135,6 @@ geneID_XYZ  0.25   0.05
 #GENEID   MEAN_ABUNDANCE  ALPHA_PREVALENCE_NICHEX ALPHA_PREVALENCE_NICHEY BETA_PREVALENCE
 geneID_XYZ  0.05  0.35  0.50   0.42 
 ```
-
-##METHODOLOGY
-
-1. Cluster centroids according to annotated UniRef90 IDs
-2. Cluster centroids annnotated UniRef90_unknown, using 90% sequence homology (USEARCH)
-3. Add all genes within the same sample that belong to a specific centroid (UniRef from STEP1 or o/w from STEP2) across samples
-4. Take the mean of gene centroid abundance for each gene centroid (where centroid is present; Criteria for presence= >0)
-5. Take the prevalence of each gene centroid as #no.samples the gene centroid is present in. (Criteria for presence= >0)
-6. If (mean gene abundance value > percentile(distribution, TSHLD_ABUND)) AND (gene_prevalene value -2*StandardError(distribution)> TSHLD_PREV); Gene is considered IMPORTANT
-7. Output the important genes in the results folder specified by user
-8. Dump all the intermediate files in the ``tmp`` folder.
-
-**For NICHE-SPECIFIC ANALYSIS**:
-* Instead of mean gene abundance, we use max(mean abundance) of gene observed across niches. Percentile is taken within all the max-mean abundances observed.
-* Instead of gene prevalence, we use alpha_prevalence of the gene in each niche, and if the gene satisfies the prevalence criteria described above in ANY of the niches, the gene is considered important. Distribution is of gene alpha prevalences observed per niche.
-
-#APPENDIX
-
-##RELEVANT DEFINITIONS
-
-* **Alpha-prevalence**: Prevalence of gene centroid in a specific niche of samples (i.e. HumanSkin, HumanStool, DesertSoil etc.) 
-* **Beta-prevalence**: Median of gene centroids's alpha_prevalence across niches.
-
-* **Important genes**
-* * Genes that are abundant in >=10th percentile of mean abundance across samples
-* * Genes that are prevalent in >=10th percentile of observed prevalence
-* * * In the case of **niche-specific analysis**, genes that are >=10th percentile of alpha_prevalence observed for each niche for ANY of the niches!
-* **Uncharacterized genes**: Genes that have UniRef90 annotations, but are below *** level of characterization acc. to GO Annotations
-* **Unannotated genes**: Genes that lack UniRef90 annotations
 
 =========================================================================
 

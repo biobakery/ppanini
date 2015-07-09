@@ -1,6 +1,5 @@
 import os
 import sys
-import pdb
 import re
 import argparse
 import numpy
@@ -298,24 +297,24 @@ def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_
 	
 	return [centroid_prev_abund, all_alpha_prev, all_alpha_abund]
 
-def quart_analysis(dictX, tshld_abund, tshld_prev, quart):
-	if quart == 2:
+def quad_analysis(dictX, tshld_abund, tshld_prev, quad):
+	if quad == 2:
 		abund_check = dictX['mean_abundance'] >= tshld_abund
 		prev_check = sum([dictX['alpha_prevalence'][niche]- tshld_prev[niche]>=tshld[1] for niche in dictX['alpha_prevalence']])
-	elif quart == 1:
+	elif quad == 1:
 		abund_check = dictX['mean_abundance'] >= tshld_abund
 		prev_check = sum([0<dictX['alpha_prevalence'][niche]- tshld_prev[niche]<=tshld[1] for niche in dictX['alpha_prevalence']])
-	elif quart == 3:
+	elif quad == 3:
 		abund_check = 0 < dictX['mean_abundance'] <=tshld_abund
 		prev_check = sum([dictX['alpha_prevalence'][niche]-tshld_prev[niche]>=tshld[1] for niche in dictX['alpha_prevalence']])
-	elif quart == 4 :
+	elif quad == 4 :
 		abund_check = 0 < dictX['mean_abundance'] <=tshld_abund
 		prev_check = sum([0<dictX['alpha_prevalence'][niche]-tshld_prev[niche]<=tshld[1] for niche in dictX['alpha_prevalence']])
 	else:
-		raise Exception('invalid quart')
+		raise Exception('invalid quad')
 	return abund_check and prev_check
 
-def get_important_niche_centroids(centroid_prev_abund, all_alpha_prev, all_alpha_abund, tshld, output_folder, quart):
+def get_important_niche_centroids(centroid_prev_abund, all_alpha_prev, all_alpha_abund, tshld, output_folder, quad):
 	'''Returns the dict of important gene centroids [>= 10th percentile of alpha_prevalence and mean abundance]
 
 	Input:	centroid_prev_abund = {centroid: {'mean_abundance': mean abundance, 'prevalence': prevalence}}
@@ -347,7 +346,7 @@ def get_important_niche_centroids(centroid_prev_abund, all_alpha_prev, all_alpha
 		# abund_check = centroid_prev_abund[centroid]['mean_abundance'] >= tshld_abund
 		# prev_check = sum([centroid_prev_abund[centroid]['alpha_prevalence'][niche]- tshld_prev[niche]> tshld[1] for niche in centroid_prev_abund[centroid]['alpha_prevalence']])
 		
-		if quart_analysis(centroid_prev_abund[centroid], tshld_abund, tshld_prev, quart):
+		if quad_analysis(centroid_prev_abund[centroid], tshld_abund, tshld_prev, quad):
 			imp_centroids[centroid]={'mean_abundance': centroid_prev_abund[centroid]['mean_abundance'], \
 									 'beta_prevalence': centroid_prev_abund[centroid]['beta_prevalence']}
 			for niche in centroid_prev_abund[centroid]['alpha_prevalence']:
@@ -468,7 +467,7 @@ if __name__ == '__main__':
 	parser.add_argument('--threads', default=1, help='Number of threads')
 	parser.add_argument('--tshld_abund', default=75, help='[X] Percentile Cutoff for Abundance; Default=75th')
 	parser.add_argument('--tshld_prev', default=0.1, help='Threshold: val-2*SE > tshld_prev')
-	parser.add_argument('--quart', default=2, help='Quadrant analysis')
+	parser.add_argument('--quad', default=2, help='Quadrant analysis')
 	parser.add_argument('--bypass_prev_abund', default=False, action='store_true', help='Bypass quantifying abundance and prevalence')
 
 	args = parser.parse_args()
@@ -507,6 +506,6 @@ if __name__ == '__main__':
 	else:
 		[centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag] = read_prevalence_abundance_table(input_table)
 	if niche_flag:
-		imp_centroids = get_important_niche_centroids(centroid_prev_abund, all_prevalence, all_mean_abund, tshld, output_folder, int(args.quart))
+		imp_centroids = get_important_niche_centroids(centroid_prev_abund, all_prevalence, all_mean_abund, tshld, output_folder, int(args.quad))
 	else:
 		imp_centroids = get_important_centroids(centroid_prev_abund, all_prevalence, all_mean_abund, tshld, output_folder)

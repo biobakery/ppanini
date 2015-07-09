@@ -1,7 +1,6 @@
 
 import os
 import sys
-import pdb
 import re
 import argparse
 import numpy
@@ -48,10 +47,7 @@ def parse_mapper(mapper_file):
 			split_val_i = [re.sub('[\t\n\r]', '', i) for i in line.split('\t')]
 			mapper[split_val_i[0]] = {}
 			for i, val in enumerate(split_val_i):
-				try:
-					mapper[split_val_i[0]][header[i]] = val
-				except:
-					pdb.set_trace()
+				mapper[split_val_i[0]][header[i]] = val
 	flags = {}
 	for i in header:
 		flags[i] = True
@@ -262,5 +258,4 @@ if __name__ == '__main__':
 			annotation_dict = utilities.read_dict(annotation_table)
 			logger.debug('Annotations parsed')
 		logger.debug('Writing PPANINI table')
-		# pdb.set_trace()
 		write_ppanini_table.generate_gene_table(abundance_dict, annotation_dict, flags['NICHE'], mapper, output_table)
