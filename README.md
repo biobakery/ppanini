@@ -8,21 +8,21 @@ July 10, 2015
 
 PPANINI provides a computational pipeline to prioritize microbial genes based on their metagenomic properties (e.g. prevalence and abundance). The resulting prioritized list of gene candidates can then be analyzed further using our visualization tools.
 
-## **REQUIREMENTS**
+## **1. REQUIREMENTS**
 
-* PPANINI
+* **PPANINI**
 * * [matplotlib](http://matplotlib.org/)
 * * [Python 2.7](https://www.python.org/download/releases/2.7/)
 * * [Biopython](http://biopython.org/wiki/Download)
 * * [Numpy 1.6.*](http://www.numpy.org/)
 
-* PREPPANINI
+* **PREPPANINI**
 * [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
 * [samtools](http://samtools.sourceforge.net/)
 * [usearch](http://www.drive5.com/usearch/) **or** [vsearch](https://github.com/torognes/vsearch)
 * [diamond](http://omictools.com/diamond-s8955.html) **or** [usearch](http://www.drive5.com/usearch/)  **or** [rapsearch2](http://omics.informatics.indiana.edu/mg/RAPSearch2/)
 
-## **INSTALLATION**
+## **2. INSTALLATION**
 
 To install, execute the following command in your Terminal/Commmand prompt:
 
@@ -43,7 +43,7 @@ export PYTHONPATH=$PYTHONPATH:<INSERT PATH to PPANINI HERE>
 ```
 
 
-## Running PPANINI
+## **3. Running PPANINI**
 
 ```
 #!python
@@ -79,7 +79,7 @@ optional arguments:
 ```
 
 
-## **INPUTS**
+## **3.1 INPUTS**
 
 * ``-i or --input_table`` : Gene Abundance Table containing annotated gene abundance values in CPM or counts per million
 * * Such tables can be obtained using (i) HUMAnN2, (ii) preppanini.py or (iii) manually creating the table using samtools (idxstats) etc.
@@ -118,7 +118,7 @@ geneID_MNO|UniRef90_unknown  0.00 0.09
 * ``--bypass_abund_prev``: To bypass the calculation of important genes
 
 
-## **OUTPUT**
+## **3.2 OUTPUT**
 
 Returns a list of "important" genes.
 
@@ -138,7 +138,7 @@ geneID_XYZ  0.05  0.35  0.50   0.42
 
 =========================================================================
 
-# **PREPPANINI: Creating a PPANINI table**
+# **4. PREPPANINI: Creating a PPANINI table**
 
 ```
 #!cmd
@@ -191,9 +191,9 @@ optional arguments:
 
 ------------------------------------------------------------------------------------------------------------------------
 
-# **VISUALIZATION**
+# **5. VISUALIZATION**
 
-## **Metagenomic vs. Genomic Priority plots**
+## **5.1 Metagenomic vs. Genomic Priority plots**
 
 ```
 #!cmd
@@ -221,7 +221,7 @@ optional arguments:
   --bypass_priority     Generates Metagenome vs. Genome Priority plots
 ```
 
-## **Histograms for metagenome hits**
+## **5.2 Histograms for metagenome hits**
 
 ```
 #!cmd
@@ -242,7 +242,7 @@ optional arguments:
   --bypass_scatter      Generates Scatterplot
 ```
 
-## **GraPhlAn plots**
+## **5.3 GraPhlAn plots**
 
 ```
 #!cmd
@@ -265,9 +265,9 @@ optional arguments:
 
 ------------------------------------------------------------------------------------------------------------------------
 
-# **TOOLS**
+# **6. TOOLS**
 
-## **Normalization**
+## **6.1 Normalization**
 
 
 ```
@@ -275,7 +275,7 @@ optional arguments:
 Usage: python utils/normalize_table.py <input_table> > <normalized_table>
 ```
 
-## **Join tables**
+## **6.2 Join tables**
 
 
 ```
@@ -283,7 +283,7 @@ Usage: python utils/normalize_table.py <input_table> > <normalized_table>
 usage: python utils/join_tables.py <table1> <table2> ... > merged_table.txt
 ```
 
-## **Centroids extraction from gene abundance table**
+## **6.3 Centroids extraction from gene abundance table**
 
 
 ```
@@ -291,7 +291,7 @@ usage: python utils/join_tables.py <table1> <table2> ... > merged_table.txt
 Usage: python utils/imp_centroids_prabXtract.py <imp_centroids_list> <centroids_abundance_matrix_file> > <imp_centroids_abundance_matrix_file>
 ```
 
-##**Centroids extraction from gene catalog fasta**
+##**6.4 Centroids extraction from gene catalog fasta**
 
 
 ```
@@ -299,7 +299,7 @@ Usage: python utils/imp_centroids_prabXtract.py <imp_centroids_list> <centroids_
 Usage: python utils/imp_centroids_extracter.py <imp_centroids_list> <fasta_file> <imp_centroids_fasta_file>
 ```
 
-## Create mapper file for PREPPANINI
+## **6.5 Create mapper file for PREPPANINI**
 
 
 ```
@@ -328,10 +328,11 @@ optional arguments:
                         Gene Table to write
 ```
 
-## **Write mapper**
+## **6.6 Write mapper**
 
 ```
-  #!cmd
-  usage: python write_mapper <uniref_ids> <map uniref_go_ids> > <uniref_ids_go_select>
+#!cmd
+usage: python write_mapper <uniref_ids> <map uniref_go_ids> > <uniref_ids_go_select>
 ```
+
 ------------------------------------------------------------------------------------------------------------------------
