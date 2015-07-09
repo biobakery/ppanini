@@ -328,8 +328,7 @@ optional arguments:
                         Gene Table to write
 ```
 
-  ## Write mapper
-
+## Write mapper
 
 ```
   #!cmd
