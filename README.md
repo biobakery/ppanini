@@ -138,7 +138,7 @@ geneID_XYZ  0.05  0.35  0.50   0.42
 
 =========================================================================
 
-#PREPROCESSING SCRIPTS
+# PREPROCESSING SCRIPTS
 
 ```
 #!cmd
@@ -191,9 +191,9 @@ optional arguments:
 
 ========================================================================================
 
-#VISUALIZATION
+# VISUALIZATION
 
-##Metagenomic vs. Genomic Priority plots
+## Metagenomic vs. Genomic Priority plots
 
 ```
 #!cmd
@@ -221,7 +221,7 @@ optional arguments:
   --bypass_priority     Generates Metagenome vs. Genome Priority plots
 ```
 
-##Histograms for metagenome hits
+## Histograms for metagenome hits
 
 ```
 #!cmd
@@ -242,7 +242,7 @@ optional arguments:
   --bypass_scatter      Generates Scatterplot
 ```
 
-##GraPhlAn plots
+## GraPhlAn plots
 
 ```
 #!cmd
@@ -265,9 +265,9 @@ optional arguments:
 
 ========================================================================================
 
-#TOOLS
+# TOOLS
 
-##Normalization
+## Normalization
 
 
 ```
@@ -275,7 +275,7 @@ optional arguments:
 Usage: python utils/normalize_table.py <input_table> > <normalized_table>
 ```
 
-##Join tables
+## Join tables
 
 
 ```
@@ -283,7 +283,7 @@ Usage: python utils/normalize_table.py <input_table> > <normalized_table>
 usage: python utils/join_tables.py <table1> <table2> ... > merged_table.txt
 ````
 
-##Centroids extraction from gene abundance table
+## Centroids extraction from gene abundance table
 
 
 ```
@@ -299,7 +299,7 @@ Usage: python utils/imp_centroids_prabXtract.py <imp_centroids_list> <centroids_
 Usage: python utils/imp_centroids_extracter.py <imp_centroids_list> <fasta_file> <imp_centroids_fasta_file>
 ```
 
-##Create mapper file for PREPPANINI
+## Create mapper file for PREPPANINI
 
 
 ```
@@ -328,7 +328,7 @@ optional arguments:
                         Gene Table to write
   ```
 
-  ##Write mapper
+  ## Write mapper
 
 
   ```
