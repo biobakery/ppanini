@@ -326,12 +326,12 @@ optional arguments:
   --samples SAMPLES     GFF3 Folder
   -o OUTPUT_TABLE, --output_table OUTPUT_TABLE
                         Gene Table to write
-  ```
+```
 
   ## Write mapper
 
 
-  ```
+```
   #!cmd
   usage: python write_mapper <uniref_ids> <map uniref_go_ids> > <uniref_ids_go_select>
-  ```
+```
