@@ -165,6 +165,7 @@ if __name__ == '__main__':
 	parser.add_argument('--bypass_parse', default=False, action='store_true', help='Input file is parsed')
 	parser.add_argument('--parse_only', default=False, action='store_true', help='To only parse')
 	parser.add_argument('--metagenome_fasta', help='Metagenome FASTA file')
+	parser.add_argument('--write_no_genomes',default=False, action='store_true', help='Write Gene to No. of genomes')
 	parser.add_argument('--bypass_hist', default=False, action='store_true', help='Generates Histogram')
 	parser.add_argument('--bypass_scatter', default=False, action='store_true', help='Generates Scatterplot')
 
@@ -184,6 +185,11 @@ if __name__ == '__main__':
 					foo.writelines('\t'.join([i, j])+'\n')
 	else:
 		table = read_parsed(m8_filename)
+	
+	if args.write_no_genomes:
+		with open(m8_filename+'_no_genomes.m8','w') as foo:
+			for i in table:
+				foo.writelines('\t'.join([i, str(len(table[i]))])+'\n')
 
 	uniq_genomes = []
 	for gene in table:
@@ -193,7 +199,7 @@ if __name__ == '__main__':
 
 	no_uniq_genomes = len(uniq_genomes)
 
-	print 'No. of unique genomes: '+str(uniq_genomes)
+	print 'No. of unique genomes: '+str(no_uniq_genomes)
 
 	if args.parse_only:
 		sys.exit('Input files parsed: '+args.input_file)

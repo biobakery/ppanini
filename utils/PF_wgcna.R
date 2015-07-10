@@ -7,7 +7,7 @@ setwd(workingDir);
 library(WGCNA);
 options(stringsAsFactors=FALSE);
 
-filename="input/PF_imp_table.normheadremcomma.csv"
+filename="PF/PF_imp_table.normheadremcomma.csv"
 inputData = read.csv(filename)
 dim(inputData);
 names(inputData);
@@ -76,7 +76,7 @@ save(MEs, moduleLabels, moduleColors, geneTree, file=paste(filename, "-autonetwo
 TOM = TOMsimilarityFromExpr(data.matrix(datExpr), power =12)
 
 unique(moduleColors)
-modules = c("blue", "turquoise", "yellow", "green")
+modules = c("blue", "turquoise", "yellow", "green", "magenta")
 probes = names(datExpr)
 inModule = is.finite(match(moduleColors, modules))
 modProbes = probes[inModule];

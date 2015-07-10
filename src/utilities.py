@@ -192,7 +192,7 @@ def read_dict_num(gene_annotations_file):
 	with open(gene_annotations_file) as foo:
 		for line in foo:
 			if not line.startswith('#'):
-				split_line = [re.sub('[\t\r\n]', '', i).strip() for i in line.split(' ')]
+				split_line = [re.sub('[\t\r\n]', '', i).strip() for i in line.split('\t')]
 				dictX[split_line[0]] = float(split_line[1])
 	return dictX
 
