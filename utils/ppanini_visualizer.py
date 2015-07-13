@@ -282,7 +282,7 @@ def draw_hexbin(genes_table, uniref_x_y, go_x_y, labels, inds):
 
 	pyplot.savefig(labels['filename']+'.png')
 
-def plot_priority(data_points, labels):
+def plot_priority(data_points, labels, to_sum):
 	'''Plots Metagenome vs. Genome Priority plots
 	
 	cloud_points = [c_genes_x_y = {'x': [list of x coordinates], 'y': [list of y coordinates]},\
@@ -294,36 +294,41 @@ def plot_priority(data_points, labels):
 	zord = Order of plotting the UniRef_GO, UniRef_NA, NA and Unprioritized'''
 
 	[uniref_i_x_y, uniref_go_x_y, genes_i_x_y] = data_points
-
+	
 	pyplot.figure()
 	pyplot.xlabel(labels['xlabel'])
 	pyplot.ylabel(labels['ylabel'])
 	pyplot.title(labels['title'])
 
-	if uniref_go_x_y['x']:
-		pyplot.subplot(2,2,1)
-		pyplot.hexbin(numpy.log(uniref_go_x_y['x']), numpy.log(uniref_go_x_y['y']), cmap='Blues', gridsize=10)
-		pyplot.title(labels['title']+'_GO')
-		pyplot.xlabel(labels['xlabel'])
-		pyplot.ylabel(labels['ylabel'])
+	if not to_sum:
+		
+		if uniref_go_x_y['x']:
+			pyplot.subplot(2,2,1)
+			pyplot.hexbin(numpy.log(uniref_go_x_y['x']), numpy.log(uniref_go_x_y['y']), cmap='Blues', gridsize=10)
+			pyplot.title(labels['title']+'_GO')
+			pyplot.xlabel(labels['xlabel'])
+			pyplot.ylabel(labels['ylabel'])
+			pyplot.colorbar()
+
+		if uniref_i_x_y['x']:
+			pyplot.subplot(2,2,2)
+			pyplot.hexbin(numpy.log(uniref_i_x_y['x']), numpy.log(uniref_i_x_y['y']), cmap='Blues', gridsize=10)
+			pyplot.title(labels['title']+'_UniRef')
+			pyplot.xlabel(labels['xlabel'])
+			pyplot.ylabel(labels['ylabel'])
+			pyplot.colorbar()
+
+		if genes_i_x_y['x']:
+			pyplot.subplot(2,2,3)
+			pyplot.hexbin(numpy.log(genes_i_x_y['x']), numpy.log(genes_i_x_y['y']), cmap='Blues', gridsize=10)
+			pyplot.title(labels['title']+'_Genes')
+			pyplot.xlabel(labels['xlabel'])
+			pyplot.ylabel(labels['ylabel'])
+			pyplot.colorbar()
+	else:
+		pyplot.hexbin(numpy.log(uniref_go_x_y['x']+uniref_i_x_y['x']+genes_i_x_y['x']), numpy.log(uniref_go_x_y['y']+uniref_i_x_y['y']+genes_i_x_y['y']), cmap='Blues', gridsize=10, label='Prioritized Centroids')
 		pyplot.colorbar()
 
-	if uniref_i_x_y['x']:
-		pyplot.subplot(2,2,2)
-		pyplot.hexbin(numpy.log(uniref_i_x_y['x']), numpy.log(uniref_i_x_y['y']), cmap='Blues', gridsize=10)
-		pyplot.title(labels['title']+'_UniRef')
-		pyplot.xlabel(labels['xlabel'])
-		pyplot.ylabel(labels['ylabel'])
-		pyplot.colorbar()
-
-	if genes_i_x_y['x']:
-		pyplot.subplot(2,2,3)
-		pyplot.hexbin(numpy.log(genes_i_x_y['x']), numpy.log(genes_i_x_y['y']), cmap='Blues', gridsize=10)
-		pyplot.title(labels['title']+'_Genes')
-		pyplot.xlabel(labels['xlabel'])
-		pyplot.ylabel(labels['ylabel'])
-		pyplot.colorbar()
-	
 	pyplot.legend( loc=4, \
 				   fontsize='x-small', \
 				   framealpha=0.4, )	
@@ -346,7 +351,8 @@ if __name__ == '__main__':
 	parser.add_argument('--hexplot', default=False, action='store_true', help='Plot HEXBIN')
 	parser.add_argument('--no_genomes', default=False, help='File containing Genes to No. of Genomes')
 	parser.add_argument('--bypass_priority', default=False, action='store_true', help='Generates Metagenome vs. Genome Priority plots')
-
+	parser.add_argument('--priority_sum', default=False, action='store_true', help='For priority, summation of priority plots or not?')
+	parser.add_argument('--genomes_threshold', default=1, help='For priority, summation of priority plots or not?')
 	args = parser.parse_args()
 	zorder =  [int(i) for i in args.zorder.split(',')]
 	[genes_table_i, uniref_table_i, inds_i, keys_i] = parse_table(args.input_table)
@@ -393,14 +399,15 @@ if __name__ == '__main__':
 		draw_cloud(cloud_points, data_points, labels, [abund, prev], zorder)
 	
 	if not args.bypass_priority:
+		genomes_threshold = int(args.genomes_threshold)
 		no_genomes = utilities.read_dict_num(args.no_genomes) # {genome: #no.genes, ...}
 		genes_table_x, uniref_table_x, uniref_go_table_x = {}, {}, {}
 		for gene in genes_table_i:
-			if gene in no_genomes and no_genomes[gene] <= 1:
+			if gene in no_genomes and no_genomes[gene] <= genomes_threshold:
 				genes_table_x[gene] = genes_table_i[gene]
 		
 		for gene in uniref_table_i:
-			if gene in no_genomes and no_genomes[gene] <= 1:
+			if gene in no_genomes and no_genomes[gene] <= genomes_threshold:
 				if gene in go_uniref_dict:
 					uniref_go_table_x[gene] = uniref_table_i[gene]
 				else:
@@ -413,8 +420,8 @@ if __name__ == '__main__':
 		labels = {'xlabel': 'Genomic priority', \
 				  'ylabel': 'Metagenomic priority', \
 				  'title': 'Metagenomic vs. Genomic Priority', \
-				  'filename': args.input_table+'_mpgp.pdf'}
-		plot_priority([uniref_i_x_y, uniref_go_x_y, genes_i_x_y], labels)
+				  'filename': args.input_table+'_mpgp'+str(args.genomes_threshold)+'.pdf'}
+		plot_priority([uniref_i_x_y, uniref_go_x_y, genes_i_x_y], labels, args.priority_sum)
 
 	if args.prev:
 		name = args.input_table

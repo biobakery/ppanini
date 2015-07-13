@@ -58,8 +58,12 @@ def run_diamond(query_file, db, out_fname, nprocesses):
 	os.system(all_paths['diamond']+'/diamond blastp -q ' + query_file + ' \
 													-d ' + db + ' \
 													-k 1 \
-													-o ' + out_fname + ' \
+													-a ' + out_fname + ' \
 													-p ' + str(nprocesses)) #check if command is correct.
+
+	os.system(all_paths['diamond']+'/diamond view -a ' + out_fname + '.daa \
+												  -o ' + out_fname + '.m8 \
+												  -p ' + str(nprocesses))
 
 def run_rapsearch(query_file, db, out_fname, nprocesses):
 	'''Runs RAPSEARCH2 on query_file to produce results in out_fname
