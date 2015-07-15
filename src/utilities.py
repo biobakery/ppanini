@@ -193,7 +193,12 @@ def read_dict_num(gene_annotations_file):
 		for line in foo:
 			if not line.startswith('#'):
 				split_line = [re.sub('[\t\r\n]', '', i).strip() for i in line.split('\t')]
-				dictX[split_line[0]] = float(split_line[1])
+				if len(split_line) <2:
+					split_line = [re.sub('[\t\r\n]', '', i).strip() for i in line.split(' ')]
+				try:
+					dictX[split_line[0]] = float(split_line[1])
+				except:
+					pdb.set_trace()
 	return dictX
 
 def write_dict(dictX, gene_annotations_file):

@@ -336,6 +336,20 @@ def plot_priority(data_points, labels, to_sum):
 	pyplot.savefig(labels['filename'])
 	pyplot.savefig(labels['filename']+'.png')
 
+def plot_lengthfilter(c_genes_x_y, d_genes_x_y, labels, x, zorder):
+	pyplot.hexbin(numpy.log(c_genes_x_y['x']+d_genes_x_y['x']), \
+				  numpy.log(c_genes_x_y['y']+d_genes_x_y['y']), \
+				  cmap='Blues', \
+				  gridsize=10, \
+				  label='Centroids >100')
+	pyplot.colorbar()
+	pyplot.legend( loc=4, \
+				   fontsize='x-small', \
+				   framealpha=0.4, )	
+
+	pyplot.savefig(labels['filename'])
+	pyplot.savefig(labels['filename']+'.png')
+
 if __name__ == '__main__':
 	##UniRef=red; Unannotated; blue
 	## argv[1]= original map; argv[2]=selected
@@ -351,8 +365,11 @@ if __name__ == '__main__':
 	parser.add_argument('--hexplot', default=False, action='store_true', help='Plot HEXBIN')
 	parser.add_argument('--no_genomes', default=False, help='File containing Genes to No. of Genomes')
 	parser.add_argument('--bypass_priority', default=False, action='store_true', help='Generates Metagenome vs. Genome Priority plots')
+	parser.add_argument('--bypass_length_filter', default=False, action='store_true', help='Generates Length filter plots')
+	parser.add_argument('--centroids_fasta', default=False, help='Gene centroids FASTA file')
 	parser.add_argument('--priority_sum', default=False, action='store_true', help='For priority, summation of priority plots or not?')
 	parser.add_argument('--genomes_threshold', default=1, help='For priority, summation of priority plots or not?')
+
 	args = parser.parse_args()
 	zorder =  [int(i) for i in args.zorder.split(',')]
 	[genes_table_i, uniref_table_i, inds_i, keys_i] = parse_table(args.input_table)
@@ -373,7 +390,7 @@ if __name__ == '__main__':
 	abund=  float(args.abund)
 	prev = float(args.prev)+0.1
 	
-	if not args.bypass_cloud:
+	if not args.bypass_cloud or not args.bypass_length_filter:
 		[genes_table, uniref_table, inds, keys] = parse_table(args.original_table)
 		genes_table_o, uniref_table_o = {}, {}
 		
@@ -385,21 +402,69 @@ if __name__ == '__main__':
 			if gene not in uniref_table_i:
 				uniref_table_o[gene] = uniref_table[gene]
 		
-		
-		cloud_points = split_x_y([genes_table_o, uniref_table_o], \
-								 [alpha_is, abund_i])
-		data_points = split_x_y([genes_table_i, uniref_table_i], \
-								[alpha_is, abund_i])
-		labels = {'xlabel': keys_i[alpha_is], \
-				  'ylabel': keys_i[abund_i], \
-				  'title': 'Mean Abundance vs. '+keys_i[alpha_is], \
-				  'filename': args.input_table+'_cloud.pdf'}
-		data_points[1] = uniref_i_x_y
-		data_points += [uniref_go_x_y]	
-		draw_cloud(cloud_points, data_points, labels, [abund, prev], zorder)
-	
+		if not args.bypass_cloud:
+			cloud_points = split_x_y([genes_table_o, uniref_table_o], \
+									 [alpha_is, abund_i])
+			data_points = split_x_y([genes_table_i, uniref_table_i], \
+									[alpha_is, abund_i])
+			labels = {'xlabel': keys_i[alpha_is], \
+					  'ylabel': keys_i[abund_i], \
+					  'title': 'Mean Abundance vs. '+keys_i[alpha_is], \
+					  'filename': args.input_table+'_cloud.pdf'}
+			data_points[1] = uniref_i_x_y
+			data_points += [uniref_go_x_y]
+			draw_cloud(cloud_points, data_points, labels, [abund, prev], zorder)
+		if not args.bypass_length_filter:
+			fasta_foo = utilities.read_fasta(args.centroids_fasta) 
+			fasta_len = {}
+			for gene in fasta_foo:
+				fasta_len[gene] = len(fasta_foo[gene])
+			genes_table_o_len, genes_table_i_len = {}, {}
+			uniref_table_o_len, uniref_table_i_len = {}, {}
+
+			for gene in genes_table_o:
+				if gene in fasta_len:
+					if fasta_len[gene] >50:
+						genes_table_o_len[gene] = genes_table_o[gene]
+				else:
+					print gene
+			for gene in genes_table_i:
+				if gene in fasta_len:
+					if fasta_len[gene] >50:
+						genes_table_i_len[gene] = genes_table_i[gene]
+				else:
+					print gene
+			# for gene in uniref_table_o:
+			# 	if gene in fasta_len:
+			# 		if fasta_len[gene] <=100:
+			# 			uniref_table_o_len[gene] = uniref_table_o[gene]
+			# 	else:
+			# 		print gene
+			# for gene in uniref_table_i:
+			# 	if gene in fasta_len:
+			# 		if fasta_len[gene] <=100:
+			# 			uniref_table_i_len[gene] = uniref_table_i[gene]
+			# 	else:
+			# 		print gene
+			cloud_points = split_table(genes_table_o_len, [alpha_is, abund_i])
+			data_points = split_table(genes_table_i_len, [alpha_is, abund_i])
+			
+			# cloud_points = split_x_y([genes_table_o_len, uniref_table_o_len], \
+			# 						 [alpha_is, abund_i])
+			# data_points = split_x_y([genes_table_i_len, uniref_table_i_len], \
+			# 						[alpha_is, abund_i])
+			labels = {'xlabel': keys_i[alpha_is], \
+					  'ylabel': keys_i[abund_i], \
+					  'title': 'Mean Abundance vs. '+keys_i[alpha_is], \
+					  'filename': args.input_table+'_cloud_length_filter.pdf'}
+			# data_points[1] = uniref_i_x_y
+			# data_points += [uniref_go_x_y]
+			plot_lengthfilter(cloud_points, data_points, labels, [abund, prev], zorder)
+
 	if not args.bypass_priority:
+
 		genomes_threshold = int(args.genomes_threshold)
+		
 		no_genomes = utilities.read_dict_num(args.no_genomes) # {genome: #no.genes, ...}
 		genes_table_x, uniref_table_x, uniref_go_table_x = {}, {}, {}
 		for gene in genes_table_i:

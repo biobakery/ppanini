@@ -1,3 +1,4 @@
+import pdb
 import os
 import sys
 import matplotlib
@@ -31,10 +32,13 @@ def read_parsed_genome(m8_filename, go_table):
 	for line in foo:
 		split_i = [i.strip() for i in line.split('\t')]
 		if 'UniRef90' in split_i[0]:
-			if 'NA' == go_table[split_i[0]]:
-				key = 'UniRef90'
-			else:
-				key = 'UniRef90_NA'
+			try:
+				if 'NA' == go_table[split_i[0]]:
+					key = 'UniRef90'
+				else:
+					key = 'UniRef90_NA'
+			except:
+				pdb.set_trace()
 		else:
 			key = 'NA'
 		try:
@@ -125,10 +129,11 @@ if __name__ == '__main__':
 	pangenome = {}
 	for genome in pgsize:
 		name = '.'.join(genome.split('.')[:2])
-		pangenome[name] = pgsize[genome]
+		pangenome[name] = pgsize[genome]	
 
 	if not args.bypass_scatter:
 		plot_scatter(genomes, m8_filename)
+
 
 	if not args.bypass_write_stats:
 		with open(m8_filename+'_allstats.txt', 'w') as foo:
@@ -146,44 +151,79 @@ if __name__ == '__main__':
 								str(genomes[gene]['UniRef90_NA'])+'\t'+\
 								str(genomes[gene]['NA'])+'\n'])
 
-	all_values = numpy.log(numpy.array(all_values))
-	max_val = int(max(all_values))
-	print max_val
+	# all_values = numpy.log(numpy.array(all_values))
+	# max_val = int(max(all_values))
+	# print max_val
 
 	##GRAPHLAN RINGS FILE
 
 	if not args.bypass_graphlan_rings:
-		ref = numpy.arange(max_val+1)
-		print ref #Reference
+		frac = {'UniRef90': {}, 'UniRef90_NA': {}, 'NA':{}}
+		for genome in genomes:
+				split_genome = genome.split('.')
+				g_ind = [i for i in range(len(split_genome)) if 'g__' in split_genome[i]][0]
+				tmp_genome = '.'.join(split_genome[g_ind:g_ind+2])
+				if tmp_genome not in pangenome:
+					pdb.set_trace()
+					raise Exception('Genome '+genome+' not found in PANGENOME!!!')
+				pg_i = pangenome[tmp_genome]
+				frac['UniRef90'][genome] = genomes[genome]['UniRef90']/float(pg_i)
+				frac['UniRef90_NA'][genome] = genomes[genome]['UniRef90_NA']/float(pg_i)
+				frac['NA'][genome] = genomes[genome]['NA']/float(pg_i)
+
+		u90_vals = [i for i in frac['UniRef90'].values() if not i == 0.0]
+		u90na_vals = [i for i in frac['UniRef90_NA'].values() if not i == 0.0]
+		na_vals = [i for i in frac['NA'].values() if not i == 0.0]
+
+		factor = {}
+		if u90_vals:
+			factor['UniRef90'] = numpy.average(u90_vals)
+		else:
+			factor['UniRef90'] = 1 
+		
+		if na_vals:
+			factor['UniRef90_NA'] = numpy.average(u90na_vals)
+		else:
+			factor['UniRef90_NA'] = 1 
+			
+		if na_vals:
+			factor['NA'] = numpy.average(na_vals)
+		else:
+			factor['NA'] = 1 
+		
+
+		genomes_frac = {}
+		for i in frac:
+			for genome in frac[i]:
+				if not genome in genomes_frac:
+					genomes_frac[genome] = {i: frac[i][genome]/factor[i]}
+				else:
+					genomes_frac[genome][i] = frac[i][genome]/factor[i]
+
+		# ref = numpy.arange(max_val+1)
+		# print ref #Reference
 		ref_i = 0
 		with open(m8_filename+'_allrings.txt','w') as foo_rings:
 			foo_rings.writelines(['ring_internal_separator_thickness\t1\t1.0\n'])# #UniRe90+GO
 			foo_rings.writelines(['ring_internal_separator_thickness\t2\t1.0\n'])# #UniRef90NA
 			foo_rings.writelines(['ring_internal_separator_thickness\t3\t1.0\n']) #SRS
-			foo_rings.writelines(['ring_internal_separator_thickness\t4\t1.0\n'])#REFERENCE
+			foo_rings.writelines(['ring_internal_separator_thickness\t4\t1.0\n'])#REFERENCE		
+			
+			ref = []
+			for genome in genomes_frac:
+				# x = [genomes_frac[genome]['UniRef90'], \
+				# 	 genomes_frac[genome]['UniRef90_NA'],\
+				# 	 genomes_frac[genome]['NA']]
 
-			for genome in genomes:
-				if genome not in pangenome:
-					raise Exception('Genome '+genome+' not found in PANGENOME!!!')
-				pg = pangenome[genome]
-				print pg
-				if ref_i < len(ref):
-					foo_rings.writelines([genome+'\tring_height\t4\t'+str(ref[ref_i])+'\n'])	
-					foo_rings.writelines([genome+'\tring_color\t4\t#000000\n'])
-					ref_i += 1
-				
-				factor = 20.0/pg
-				x=[genomes[genome]['UniRef90']*factor, \
-				   genomes[genome]['UniRef90_NA']*factor,\
-				   genomes[genome]['NA']*factor]
-
-				# To remove ln(0) = -inf to --> 0   
+				x = [numpy.log(genomes_frac[genome]['UniRef90']), \
+					 numpy.log(genomes_frac[genome]['UniRef90_NA']),\
+					 numpy.log(genomes_frac[genome]['NA'])]
 				for i, val in enumerate(x):
 					if -1*numpy.inf==val or numpy.inf==val:
 						x[i] = 0
 					else:
 						x[i] = abs(x[i])
-
+				ref +=x
 				foo_rings.writelines([genome+'\tring_height\t1\t'+str(x[0])+'\n'])
 				foo_rings.writelines([genome+'\tring_height\t2\t'+str(x[1])+'\n'])
 				foo_rings.writelines([genome+'\tring_height\t3\t'+str(x[2])+'\n'])
@@ -191,3 +231,13 @@ if __name__ == '__main__':
 				foo_rings.writelines([genome+'\tring_color\t1\t#0000FF\n'])
 				foo_rings.writelines([genome+'\tring_color\t2\t#FF0000\n'])
 				foo_rings.writelines([genome+'\tring_color\t3\t#FFFF00\n'])
+			max_val = max(ref)
+			# pdb.set_trace()
+			ref = numpy.arange(max_val+1)
+			print ref
+			for genome in genomes_frac:
+				foo_rings.writelines([genome+'\tring_height\t4\t'+str(ref[ref_i])+'\n'])	
+				foo_rings.writelines([genome+'\tring_color\t4\t#000000\n'])
+				ref_i +=1
+				if ref_i >= len(ref):
+					break
