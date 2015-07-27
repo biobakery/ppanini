@@ -113,8 +113,8 @@ def get_centroids(uniref_dm, gi_dm, args, uclust_file, gene_catalog, nprocesses)
 			except:
 				gc_dm[centroid] = gi_dm[gene]
 	
-	for centroid in uniref_gis:
-		gc_dm[centroid] = uniref_gis[centroid]
+	for centroid in uniref_dm:
+		gc_dm[centroid] = uniref_dm[centroid]
 	
 	return gc_dm
 

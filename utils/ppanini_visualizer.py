@@ -340,7 +340,7 @@ def plot_lengthfilter(c_genes_x_y, d_genes_x_y, labels, x, zorder):
 	pyplot.hexbin(numpy.log(c_genes_x_y['x']+d_genes_x_y['x']), \
 				  numpy.log(c_genes_x_y['y']+d_genes_x_y['y']), \
 				  cmap='Blues', \
-				  gridsize=10, \
+				  gridsize=25, \
 				  label='Centroids >100')
 	pyplot.colorbar()
 	pyplot.legend( loc=4, \
