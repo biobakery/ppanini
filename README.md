@@ -58,17 +58,18 @@ usage: ppanini.py [-h] -i INPUT_TABLE [-o OUTPUT_FOLDER]
                   [--tshld_abund TSHLD_ABUND] [--tshld_prev TSHLD_PREV]
                   [--quad QUAD] [--bypass_prev_abund]
 
-optional arguments:
-  -h, --help            show this help message and exit
+required arguments:
   -i INPUT_TABLE, --input_table INPUT_TABLE
                         REQUIRED: Gene abundance table with metadata
+optional arguments:
+  -h, --help            show this help message and exit
   -o OUTPUT_FOLDER, --output_folder OUTPUT_FOLDER
                         Folder containing results
   --gene_catalog GENE_CATALOG
-                        GENE CATALOG
-  --uc UC               UCLUST file containg centroids and clustered genes
-  --usearch USEARCH     Path to USEARCH
-  --vsearch VSEARCH     Path to VSEARCH
+                        GENE CATALOG (**REQUIRED** if uc file not provided)
+  --uc UC               UCLUST file containg centroids and clustered genes (**REQUIRED** if gene catalog not provided)
+  --usearch USEARCH     Path to USEARCH (**REQUIRED** if gene_catalog present; either USEARCH or VSEARCH)
+  --vsearch VSEARCH     Path to VSEARCH (**REQUIRED** if gene_catalog present; either USEARCH or VSEARCH; If none present, assumes VSEARCH in path)
   --basename BASENAME   BASENAME for all the output files
   --log_level LOG_LEVEL
                         Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
@@ -108,8 +109,8 @@ geneID_MNO|UniRef90_unknown  0.00 0.09
 * * * In absence of niche data, only alpha-prevalence is calculated.
 
 * ``--output_folder``: folder containing all the output files
-* ``--gene_catalog``: File containing the entire genes catalog for the metagenomic niche
-* ``--uc``:  [Optional] File containing the clustering information for all the genes in input file
+* ``--gene_catalog``: File containing the entire genes catalog for the metagenomic niche (**REQUIRED** if uc file not provided)
+* ``--uc``:  [Optional] File containing the clustering information for all the genes in input file (**REQUIRED** if gene_catalog not provided)
 * ``--basename``: name prefix for all intermediate output files produced
 * ``--log_level``: level of debugging information to be provided; Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
 * ``--threads``: Number of threads to be used while clustering
