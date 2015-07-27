@@ -7,7 +7,7 @@ setwd(workingDir);
 library(WGCNA);
 options(stringsAsFactors=FALSE);
 
-filename="PF/general/PF_imp_table.normheadremcomma.csv"
+filename="PF/PF_imp_table.normheadremcomma.csv"
 inputData = read.csv(filename)
 dim(inputData);
 names(inputData);
@@ -76,53 +76,38 @@ save(MEs, moduleLabels, moduleColors, geneTree, file=paste(filename, "-autonetwo
 TOM = TOMsimilarityFromExpr(data.matrix(datExpr), power =12)
 
 unique(moduleColors)
-
-modules = c("blue")
+modules = c("blue", "turquoise", "yellow", "green", "magenta")
 probes = names(datExpr)
 inModule = is.finite(match(moduleColors, modules))
 modProbes = probes[inModule];
 modTOM = TOM[inModule, inModule]
 dimnames(modTOM) = list(modProbes, modProbes)
-cyt = exportNetworkToCytoscape(modTOM, edgeFile = paste(paste(filename,"_CytoscapeInput-edges-", sep=""), paste(modules, collapse='-'),".txt", sep=""), nodeFile=paste(paste(filename, "_CytoscapeInput-nodes", sep=""), paste(modules, collapse="-"),".txt", sep=""), weighted=TRUE, threshold=0.02, nodeNames = modProbes, nodeAttr=moduleColors[inModule]);
-
-modules= c("turquoise")
-probes = names(datExpr)
-inModule = is.finite(match(moduleColors, modules))
-modProbes = probes[inModule];
-modTOM = TOM[inModule, inModule]
-dimnames(modTOM) = list(modProbes, modProbes)
-cyt = exportNetworkToCytoscape(modTOM, edgeFile = paste(paste(filename,"_CytoscapeInput-edges-", sep=""), paste(modules, collapse='-'),".txt", sep=""), nodeFile=paste(paste(filename, "_CytoscapeInput-nodes", sep=""), paste(modules, collapse="-"),".txt", sep=""), weighted=TRUE, threshold=0.02, nodeNames = modProbes, nodeAttr=moduleColors[inModule]);
-
-modules2 = c("brown", "black", "red")
-inModule = is.finite(match(moduleColors, modules2))
-modProbes = probes[inModule];
-modTOM = TOM[inModule, inModule]
-dimnames(modTOM) = list(modProbes, modProbes)
-cyt = exportNetworkToCytoscape(modTOM, edgeFile = paste(paste(filename,"_CytoscapeInput-edges-", sep=""), paste(modules2, collapse='-'),".txt", sep=""), nodeFile=paste(paste(filename, "_CytoscapeInput-nodes", sep=""), paste(modules2, collapse="-"),".txt", sep=""), weighted=TRUE, threshold=0.02, nodeNames = modProbes, nodeAttr=moduleColors[inModule]);
-
-modules3= c("grey", "purple", "pink")
-inModule = is.finite(match(moduleColors, modules3))
-modProbes = probes[inModule];
-modTOM = TOM[inModule, inModule]
-dimnames(modTOM) = list(modProbes, modProbes)
-cyt = exportNetworkToCytoscape(modTOM, edgeFile = paste(paste(filename,"_CytoscapeInput-edges-", sep=""), paste(modules3, collapse='-'),".txt", sep=""), nodeFile=paste(paste(filename, "_CytoscapeInput-nodes", sep=""), paste(modules3, collapse="-"),".txt", sep=""), weighted=TRUE, threshold=0.02, nodeNames = modProbes, nodeAttr=moduleColors[inModule]);
+cyt = exportNetworkToCytoscape(modTOM, edgeFile = paste("CytoscapeInput-edges-", paste(modules, collapse='-'),".txt", sep=""), nodeFile=paste("CytoscapeInput-nodes", paste(modules, collapse="-"),".txt", sep=""), weighted=TRUE, threshold=0.02, nodeNames = modProbes, nodeAttr=moduleColors[inModule]);
 
 
-modules4 = c("yellow", "green", "magenta")
-inModule = is.finite(match(moduleColors, modules4))
-modProbes = probes[inModule];
-modTOM = TOM[inModule, inModule]
-dimnames(modTOM) = list(modProbes, modProbes)
-cyt = exportNetworkToCytoscape(modTOM, edgeFile = paste(paste(filename,"_CytoscapeInput-edges-", sep=""), paste(modules4, collapse='-'),".txt", sep=""), nodeFile=paste(paste(filename, "_CytoscapeInput-nodes", sep=""), paste(modules4, collapse="-"),".txt", sep=""), weighted=TRUE, threshold=0.02, nodeNames = modProbes, nodeAttr=moduleColors[inModule]);
+# ##Loading clinical trait data_files
+# clinical_filename="data_files/FemaleLiver-Data/ClinicalTraits.csv" #custom
+# traitData = read.csv(clinical_filename)
+# dim(traitData)
+# names(traitData)
 
-nSelect = 400
-set.seed(10)
-select = sample(nGenes, size=nSelect);
-selectTOM = dissTOM[select, select];
-selectTree =hclust(as.dist(selectTOM), method="average")
-selectColors = moduleColors[select];
-pdf(paste(filename, "_NetworkheatmapPLOTselect.pdf", sep=""), width=9, height=9);
-plotDiss = selectTOM^7;
-diag(plotDiss) = NA;
-TOMplot(plotDiss, selectTree, selectColors, main="Network heatmap plot, selected genes")
-dev.off()
+# allTraits = traitData[, -c(31, 16)]; #custom
+# allTraits = allTraits[, c(2, 11:36)]; #custom
+# dim(allTraits)
+# names(allTraits)
+
+# femaleSamples = rownames(datExpr);
+# traitRows = match(femaleSamples, allTraits$Mice) #custom
+# datTraits = allTraits[traitRows, -1]
+# rownames(datTraits) = allTraits[traitRows, -1];
+
+# collectGarbage();
+# # Re-cluster samples
+# sampleTree2 = hclust(dist(datExpr), method="average")
+# # Convert traits to a color representation: white means low, red means high, grey means missing entry
+# traitColors = numbers2colors(datTraits, signed=FALSE)
+# # Plot the sample dendrogram and the colors underneath.
+# pdf(paste(filename, "_dendroAndColorsforTraitsHeatmap.pdf", sep=""), width=12, height=9)
+# plotDendroAndColors(sampleTree2, traitColors, groupLabels=names(datTraits), main="Sample dendrogram and trait heatmap")
+# dev.off()
+# save(datExpr, datTraits, file=paste(filename, "-dataInput.RData", sep=""))
