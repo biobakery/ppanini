@@ -424,28 +424,17 @@ if __name__ == '__main__':
 
 			for gene in genes_table_o:
 				if gene in fasta_len:
-					if fasta_len[gene] >50:
+					if fasta_len[gene] >40:
 						genes_table_o_len[gene] = genes_table_o[gene]
 				else:
 					print gene
 			for gene in genes_table_i:
 				if gene in fasta_len:
-					if fasta_len[gene] >50:
+					if fasta_len[gene] >40:
 						genes_table_i_len[gene] = genes_table_i[gene]
 				else:
 					print gene
-			# for gene in uniref_table_o:
-			# 	if gene in fasta_len:
-			# 		if fasta_len[gene] <=100:
-			# 			uniref_table_o_len[gene] = uniref_table_o[gene]
-			# 	else:
-			# 		print gene
-			# for gene in uniref_table_i:
-			# 	if gene in fasta_len:
-			# 		if fasta_len[gene] <=100:
-			# 			uniref_table_i_len[gene] = uniref_table_i[gene]
-			# 	else:
-			# 		print gene
+
 			cloud_points = split_table(genes_table_o_len, [alpha_is, abund_i])
 			data_points = split_table(genes_table_i_len, [alpha_is, abund_i])
 			

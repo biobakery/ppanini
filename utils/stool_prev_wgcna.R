@@ -7,7 +7,7 @@ setwd(workingDir);
 library(WGCNA);
 options(stringsAsFactors=FALSE);
 
-filename="PF/norm_pf_lcrisp_table.csv"
+filename="stool/prevotella/norm_stool_prevotella_table.csv"
 inputData = read.csv(filename)
 dim(inputData);
 names(inputData);
@@ -33,16 +33,18 @@ pdf(paste(filename, "outliers.pdf", sep=""), width=12, height=9)
 par(cex=0.6);
 par(mar=c(0,4,2,0))
 plot(sampleTree, main="Sample clustering to detect outliers", sub="", xlab="", cex.lab=1.5, cex.axis=1.5, cex.main=2)
-abline(h=300000, col="red")
+abline(h=90000, col="red")
 dev.off()
 #Removing samples: SRS017497
-clust = cutreeStatic(sampleTree, cutHeight=75000, minSize=10) #custom
+clust = cutreeStatic(sampleTree, cutHeight=90000, minSize=10) #custom
 table(clust)
 keepSamples = (clust==1)
 datExpr = datExpr0[keepSamples, ]
 nGenes = ncol(datExpr)
 nSamples = nrow(datExpr)
 
+gsg = goodSamplesGenes(datExpr, verbose=3);
+gsg$allOK
 if (!gsg$allOK)
 {
 	if (sum(!gsg$goodGenes)>0)
@@ -64,7 +66,7 @@ plot(sft$fitIndices[,1], sft$fitIndices[,5],xlab="Soft Threshold (power)",ylab="
 text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1, col="red")
 dev.off()
 
-net = blockwiseModules(data.matrix(datExpr), power=4, TOMType="unsigned", minModuleSize=30, reassignThreshold=0, mergeCutHeight=0.25, numericLabels=TRUE, pamRespectsDendro=FALSE, saveTOMs=TRUE, saveTOMFileBase= paste(filename, "PFTOM", sep=""), verbose=3)
+net = blockwiseModules(data.matrix(datExpr), power=10, TOMType="unsigned", minModuleSize=30, reassignThreshold=0, mergeCutHeight=0.25, numericLabels=TRUE, pamRespectsDendro=FALSE, saveTOMs=TRUE, saveTOMFileBase= paste(filename, "PFTOM", sep=""), verbose=3)
 pdf(paste(filename, "_dendroAndcolorsModulecolors.pdf", sep=""), width=12, height=9)
 mergedColors = labels2colors(net$colors)
 plotDendroAndColors(net$dendrograms[[1]], mergedColors[net$blockGenes[[1]]],
@@ -81,10 +83,10 @@ MEs = net$MEs;
 geneTree = net$dendrograms[[1]];
 save(MEs, moduleLabels, moduleColors, geneTree, file=paste(filename, "-autonetworkconstruction.RData", sep=""))
 
-TOM = TOMsimilarityFromExpr(data.matrix(datExpr), power =4)
+TOM = TOMsimilarityFromExpr(data.matrix(datExpr), power =10)
 
 unique(moduleColors)
-modules = c("tan")
+modules = c("red")
 probes = names(datExpr)
 inModule = is.finite(match(moduleColors, modules))
 modProbes = probes[inModule];

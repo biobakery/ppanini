@@ -6,6 +6,7 @@ import argparse
 import numpy
 
 '''Normalizes table given in first argument. Prints table as std.out'''
+numpy.seterr(divide='ignore', invalid='ignore')
 
 if __name__ == '__main__':
 	help = ['-h', '--h', '--help']
@@ -27,6 +28,10 @@ if __name__ == '__main__':
 			genes_order += [split_i[0].strip()]
 	norm_dm = numpy.array(dm)
 	norm_dm = norm_dm*multiplier/sum(norm_dm)
+	# pdb.set_trace()
+	for i in range(len(norm_dm)):
+		for j in range(len(norm_dm[i])):
+			norm_dm[i][j] = numpy.nan_to_num(norm_dm[i][j])
 	for i, gene in enumerate(genes_order):
 		print '\t'.join([gene]+[str(j) for j in list(norm_dm[i])])
 
