@@ -6,7 +6,7 @@ import numpy
 import time
 import numpy
 import argparse
-
+import pdb
 from matplotlib import pyplot
 from src import utilities
 
@@ -159,6 +159,91 @@ def plot_hist(table, m8_filename, no_uniq_genomes):
 	pyplot.savefig(labels['filename']+'_cumsum.pdf')
 	pyplot.savefig(labels['filename']+'_cumsum.png')
 
+def read_abund_prev(filename):
+	keys = {'abund':0, 'alpha':0,'beta':0}
+	abund = []
+	alpha = []
+	genes = []
+	with open(filename) as foo:
+		for line in foo:
+			split_line = [re.sub('[\r\t\n]','', i) for i in line.split('\t')]
+			if line.startswith('Centroids'):
+				for i, val in enumerate(split_line):
+					if 'abund' in val:
+						keys['abund'] = i
+					elif 'alpha' in val:
+						keys['alpha'] = i
+					elif 'beta' in val:
+						keys['beta'] = i
+			else:
+				# pdb.set_trace()
+				genes +=[split_line[0]]
+				abund +=[float(split_line[keys['abund']])]
+				alpha +=[float(split_line[keys['alpha']])]
+	abund_prev = {'genes': genes, 'abundance': abund, 'prevalence': alpha}
+	return abund_prev
+
+def plot_metagenomic_priority(abund_prev, table, no_uniq_genomes, filename):
+	mp_gp = {}
+	genes = abund_prev['genes']
+	abund = abund_prev['abundance']
+	alpha = abund_prev['prevalence']
+
+	abund = numpy.array(abund)/max(abund)
+	alpha = numpy.array(alpha)/max(alpha)
+	
+	gp = []
+	mp = []
+	for i in range(len(genes)):
+		gene = genes[i]
+		try:
+			gp += [len(table[gene])]
+		except:
+			gp += [0]
+		mp += [min((abund[i], alpha[i]))]
+	gp = numpy.array(gp)/float(no_uniq_genomes)
+	pyplot.figure()
+	pyplot.xlabel('Genomic Priority')
+	pyplot.ylabel('Metagenomic Priority')
+	pyplot.title('Metagenomic vs. Genomic Priority') 
+	pyplot.scatter(numpy.log(gp), \
+				   numpy.log(mp), \
+				   # c='grey', \
+				   alpha=0.1, \
+				   linewidths=0.0, \
+				   zorder=1, \
+				   marker='o',\
+				   label='All Centroids')
+	pyplot.savefig(filename+'_mp_gp.pdf')
+	pyplot.savefig(filename+'_mp_gp.png')
+	
+	pyplot.figure()
+	pyplot.xlabel('Genomic Priority')
+	pyplot.ylabel('Metagenomic Priority')
+	pyplot.title('Metagenomic vs. Genomic Priority') 
+	pyplot.scatter(gp, \
+				   mp, \
+				   # c='grey', \
+				   alpha=0.1, \
+				   linewidths=0.0, \
+				   zorder=1, \
+				   marker='o',\
+				   label='All Centroids')
+	pyplot.savefig(filename+'_nonlog_mp_gp.pdf')
+	pyplot.savefig(filename+'_nonlog_mp_gp.png')
+
+	pyplot.figure()
+	pyplot.xlabel('Genomic Priority')
+	pyplot.ylabel('Metagenomic Priority')
+	pyplot.title('Metagenomic vs. Genomic Priority') 
+	pyplot.hexbin(numpy.log(gp), \
+				   numpy.log(mp), \
+				   cmap='Blues',
+				   gridsize=10)
+	pyplot.colorbar()
+	pyplot.savefig(filename+'_hexplot_mp_gp.pdf')
+	pyplot.savefig(filename+'_hexplot_mp_gp.png')
+
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i', '--input_file', help='Gene Genomes blast results', required=True)
@@ -168,6 +253,8 @@ if __name__ == '__main__':
 	parser.add_argument('--write_no_genomes',default=False, action='store_true', help='Write Gene to No. of genomes')
 	parser.add_argument('--bypass_hist', default=False, action='store_true', help='Generates Histogram')
 	parser.add_argument('--bypass_scatter', default=False, action='store_true', help='Generates Scatterplot')
+	parser.add_argument('--abund_prev', default=False, help='Centroid prevalence and abundance')
+	parser.add_argument('--bypass_priority_scatter', default=False, action='store_true', help='Generates Scatterplot')
 
 	args = parser.parse_args()
 
@@ -190,7 +277,7 @@ if __name__ == '__main__':
 		with open(m8_filename+'_no_genomes.m8','w') as foo:
 			for i in table:
 				foo.writelines('\t'.join([i, str(len(table[i]))])+'\n')
-
+	
 	uniq_genomes = []
 	for gene in table:
 		for genome in table[gene]:
@@ -198,7 +285,9 @@ if __name__ == '__main__':
 				uniq_genomes +=[genome]
 
 	no_uniq_genomes = len(uniq_genomes)
-
+	if not args.bypass_priority_scatter:
+		abund_prev= read_abund_prev(args.abund_prev)
+		plot_metagenomic_priority(abund_prev, table, no_uniq_genomes, args.input_file)
 	print 'No. of unique genomes: '+str(no_uniq_genomes)
 
 	if args.parse_only:

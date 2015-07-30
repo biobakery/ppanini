@@ -33,10 +33,10 @@ pdf(paste(filename, "outliers.pdf", sep=""), width=12, height=9)
 par(cex=0.6);
 par(mar=c(0,4,2,0))
 plot(sampleTree, main="Sample clustering to detect outliers", sub="", xlab="", cex.lab=1.5, cex.axis=1.5, cex.main=2)
-abline(h=4e5, col="red")
+abline(h=5e5, col="red")
 dev.off()
 #Removing samples: SRS017497
-clust = cutreeStatic(sampleTree, cutHeight=4e5, minSize=10) #custom
+clust = cutreeStatic(sampleTree, cutHeight=5e5, minSize=10) #custom
 table(clust)
 keepSamples = (clust==1)
 datExpr = datExpr0[keepSamples, ]
@@ -66,7 +66,7 @@ plot(sft$fitIndices[,1], sft$fitIndices[,5],xlab="Soft Threshold (power)",ylab="
 text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1, col="red")
 dev.off()
 
-net = blockwiseModules(data.matrix(datExpr), power=10, TOMType="unsigned", minModuleSize=30, reassignThreshold=0, mergeCutHeight=0.25, numericLabels=TRUE, pamRespectsDendro=FALSE, saveTOMs=TRUE, saveTOMFileBase= paste(filename, "PFTOM", sep=""), verbose=3)
+net = blockwiseModules(data.matrix(datExpr), power=6, TOMType="unsigned", minModuleSize=30, reassignThreshold=0, mergeCutHeight=0.25, numericLabels=TRUE, pamRespectsDendro=FALSE, saveTOMs=TRUE, saveTOMFileBase= paste(filename, "PFTOM", sep=""), verbose=3)
 pdf(paste(filename, "_dendroAndcolorsModulecolors.pdf", sep=""), width=12, height=9)
 mergedColors = labels2colors(net$colors)
 plotDendroAndColors(net$dendrograms[[1]], mergedColors[net$blockGenes[[1]]],
@@ -83,10 +83,10 @@ MEs = net$MEs;
 geneTree = net$dendrograms[[1]];
 save(MEs, moduleLabels, moduleColors, geneTree, file=paste(filename, "-autonetworkconstruction.RData", sep=""))
 
-TOM = TOMsimilarityFromExpr(data.matrix(datExpr), power =10)
+TOM = TOMsimilarityFromExpr(data.matrix(datExpr), power =6)
 
 unique(moduleColors)
-modules = c("red")
+modules = c("turquoise")
 probes = names(datExpr)
 inModule = is.finite(match(moduleColors, modules))
 modProbes = probes[inModule];
@@ -95,7 +95,7 @@ dimnames(modTOM) = list(modProbes, modProbes)
 cyt = exportNetworkToCytoscape(modTOM, edgeFile = paste("CytoscapeInput-edges-", paste(modules, collapse='-'),".txt", sep=""), nodeFile=paste("CytoscapeInput-nodes", paste(modules, collapse="-"),".txt", sep=""), weighted=TRUE, threshold=0.02, nodeNames = modProbes, nodeAttr=moduleColors[inModule]);
 
 
-nSelect = 400
+nSelect = 159
 set.seed(10)
 dissTOM = 1-TOM
 select = sample(nGenes, size=nSelect);
