@@ -67,7 +67,7 @@ def pullgenes_fromcontigs(contig_file, gff3_file, fna_file, faa_file):
 					raise Exception('Circular DNA Detected')
 					new_stop_x = stop_x - len(contigs_fasta_dict[contig])+1
 					genes_fasta[gene] = contigs_fasta_dict[contig] + contigs_fasta_dict[contig][:new_stop_x]
-
+	
 	write_fasta(genes_fasta, fna_file, False) #FNA
 	write_fasta(genes_fasta, faa_file, True) #FAA
 
@@ -93,12 +93,10 @@ def read_gff3(filename):
 				gid = split_line[-1].split('=')[-1]
 				gene_contig_mapper[gid] = split_line[0]
 				gene_start_stop[gid] = [int(split_line[3]), int(split_line[4]), split_line[6]]
-
 				if split_line[0] in contig_gene_mapper:
 					contig_gene_mapper[split_line[0]] += [gid]
 				else:
 					contig_gene_mapper[split_line[0]] = [gid]
-
 	return [gene_contig_mapper, gene_start_stop, contig_gene_mapper]
 
 
@@ -106,7 +104,6 @@ def write_fasta(seqs_dict, filename, to_translate):
 	'''Writes dictionary of fasta sequences into text file
 	Input: seqs_dict = {geneID: sequence}
 		   filename = path_to_output_genes_fastafile'''
-
 	logger.debug('write_fasta to '+filename)
 
 	with open(filename,'w') as foo:
@@ -120,9 +117,10 @@ def write_fasta(seqs_dict, filename, to_translate):
 		
 		if to_translate: # if not FAA already and to be translated
 			for seq in seqs_dict:
-				len_seq = str(len(seqs_dict[seq]))
+				t_seq = Bio.Seq.translate(seqs_dict[seq], to_stop=True)
+				len_seq = str(len(t_seq)*3)
 				foo.writelines(['>' + seq + '|' + len_seq + '\n'])
-				foo.writelines([Bio.Seq.translate(seqs_dict[seq], to_stop=True)+'\n'])
+				foo.writelines([t_seq+'\n'])
 		else:
 			ind = 1
 			if format:

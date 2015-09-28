@@ -4,7 +4,7 @@ import numpy
 import re
 import argparse
 import logging
-
+import pdb
 from src import utilities
 
 
@@ -45,7 +45,7 @@ def parse_annotation_table(annotations_file, fasta_sequences, thld_ref):
 
 	return [sample_annotations, search50_seqs]
 
-def run_diamond(query_file, db, out_fname, nprocesses):
+def run_diamond(query_file, db, out_fname, nprocesses, all_paths):
 	'''Runs DIAMOND on query_file to produce results in out_fname
 	Input: query_file = path to query_fasta_file
 		   all_paths = {'uniref90': path_to_uniref90_index, 
@@ -55,17 +55,17 @@ def run_diamond(query_file, db, out_fname, nprocesses):
 		   nprocesses = Number of processes
 		   db = DIAMOND preprocessed database'''
 	logger.debug('run_diamond '+query_file)
-	os.system(all_paths['diamond']+'/diamond blastp -q ' + query_file + ' \
+	os.system(all_paths['diamond']+' blastp -q ' + query_file + ' \
 													-d ' + db + ' \
 													-k 1 \
 													-a ' + out_fname + ' \
 													-p ' + str(nprocesses)) #check if command is correct.
 
-	os.system(all_paths['diamond']+'/diamond view -a ' + out_fname + '.daa \
+	os.system(all_paths['diamond']+' view -a ' + out_fname + '.daa \
 												  -o ' + out_fname + '.m8 \
 												  -p ' + str(nprocesses))
 
-def run_rapsearch(query_file, db, out_fname, nprocesses):
+def run_rapsearch(query_file, db, out_fname, nprocesses, all_paths):
 	'''Runs RAPSEARCH2 on query_file to produce results in out_fname
 
 	Input: query_file = path to query_fasta_file
@@ -77,7 +77,7 @@ def run_rapsearch(query_file, db, out_fname, nprocesses):
 		   db = RAPSEARCH2 preprocessed database'''
 
 	logger.debug('run_rapsearch '+query_file)
-	os.system(all_paths['rapsearch']+'/rapsearch -q ' + query_file + ' \
+	os.system(all_paths['rapsearch']+' -q ' + query_file + ' \
 												 -d ' + db + ' \
 												 -o ' + out_fname + ' \
 												 -u 2 \
@@ -156,9 +156,12 @@ def get_annotations_dict(centroid_annotations, centroid_gis):
 
 	annotation_dict = {}
 	for centroid in centroid_annotations:
-		gis = centroid_gis[centroid]
-		for gi in gis:
-			annotation_dict[gi] = centroid_annotations[centroid]
+		try:
+			gis = centroid_gis[centroid]
+			for gi in gis:
+				annotation_dict[gi] = centroid_annotations[centroid]
+		except:
+			annotation_dict[centroid] = centroid_annotations[centroid]
 	return annotation_dict
 
 	

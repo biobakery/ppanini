@@ -1,4 +1,4 @@
-
+import pdb
 import os
 import sys
 import re
@@ -72,13 +72,11 @@ if __name__ == '__main__':
 	parser.add_argument('--rapsearch', default=False, help='Path to RAPSEARCH') #add to be in path??
 	parser.add_argument('--threads', help='Number of threads', default=1)
 	parser.add_argument('--uniref90', help='UniRef90 INDEX file')
-	parser.add_argument('--uniref50', help='UniRef50 INDEX file')
 	parser.add_argument('--to_normalize', default=False, action='store_true', help='Default HUMAnN2 table; if sam-idxstats table; enable')
 	parser.add_argument('--log_level',default='DEBUG', help='Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]')
 
 	args = parser.parse_args()
 	nprocesses = int(args.threads)
-	#workflow = int(args.workflow)
 	mapper_file = args.mapper_file
 	basename = args.basename
 
@@ -104,7 +102,7 @@ if __name__ == '__main__':
 
 	if flags['GFF3S']:
 		logger.debug('Pulling genes from contigs')
-		paths_dict['FASTAS'] = output_folder+'/tmp/fasta_files'
+		paths_dict['FASTA_FILES'] = output_folder+'/tmp/fasta_files'
 		utilities.create_folders([paths_dict['FASTA_FILES']])
 		for sample in mapper:
 			mapper[sample]['FNAS'] = paths_dict['FASTA_FILES']+'/'+sample+'.fna'
@@ -137,7 +135,7 @@ if __name__ == '__main__':
 			logger.debug('Running BOWTIE2 on READS against CONTIG_ASSEMBLIES')
 			for sample in mapper:
 				try:
-					mapper[sample]['ABUNDANCE_TABLES'] = quantify_genes.generate_abundance_viabam(mapper[sample]['FNAS'], \
+					mapper[sample]['ABUNDANCE_TABLES'] = quantify_genes.generate_abundance_viabwt2(mapper[sample]['FNAS'], \
 																							  mapper[sample]['READS'], \
 																							  sample, \
 																							  paths_dict)
@@ -176,7 +174,7 @@ if __name__ == '__main__':
 			gene_centroid_clusters_file_path = paths_dict['ANNOTATION_TMP']+'/'+basename+'.uc'
 			if args.usearch:
 				clust_method = args.usearch
-				utilities.run_uclust(clust_method, \
+				annotate_genes.run_uclust(clust_method, \
 									 whole_genome_catalog, \
 									 gene_centroids_file_path, \
 									 gene_centroid_clusters_file_path, \
@@ -185,47 +183,34 @@ if __name__ == '__main__':
 			else:
 				if args.vsearch:
 					clust_method = args.vsearch #assumes vsearch in path if not provided
-				utilities.run_vclust(clust_method, \
+				annotate_genes.run_vclust(clust_method, \
 									 whole_genome_catalog, \
 									 gene_centroids_file_path, \
 									 gene_centroid_clusters_file_path, \
 									 0.9, \
 									 nprocesses)
-				genome_catalog = gene_centroids_file_path
+			genome_catalog = gene_centroids_file_path
 		else:
 			logger.debug('BYPASSING CLUSTERING')
 			genome_catalog = whole_genome_catalog
 
 		##Run UniRef now
 		out_u90_fname = paths_dict['ANNOTATION_TMP']+'/'+basename+'.centroids.u90'
-		out_u50_fname = paths_dict['ANNOTATION_TMP']+'/'+basename+'.centroids.u50'
-		u50_gene_input = paths_dict['ANNOTATION_TMP']+'/'+basename+'.centroids.u50input.fasta'
 
-		search_method = 'diamond'
+		paths_dict['diamond'] = 'diamond'
 		if args.rapsearch:
-			search_method = args.rapsearch
-		else:
-			if args.diamond:
-				search_method = args.diamond
+			paths_dict['rapsearch'] = args.rapsearch
+		if args.diamond:
+			paths_dict['diamond'] = args.diamond
 		logger.debug('Running SEARCH against UniRef')
-		annotate_genes.run_diamond(genome_catalog, args.uniref90, out_u90_fname, nprocesses)
+		
+		annotate_genes.run_diamond(genome_catalog, args.uniref90, out_u90_fname, nprocesses, paths_dict)
 		centroid_sequences = utilities.read_fasta(genome_catalog)
-		[centroid_annotations90, diamond50_seqs] = annotate_genes.parse_annotation_table(u90_out_fname+'.m8', centroid_sequences, 90.0)
+		[centroid_annotations90, diamond50_seqs] = annotate_genes.parse_annotation_table(out_u90_fname+'.m8', centroid_sequences, 90.0)
 		centroid_annotations = centroid_annotations90
 
-		if not diamond50_seqs == {}:
-			utilities.write_fasta(diamond50_seqs, u50_gene_input, True)
-			annotate_genes.run_diamond(u50_gene_input, args.uniref50, u50_out_fname, nprocesses)
-			[centroid_annotations50, diamondukn_seqs] = annotate_genes.parse_annotation_table(u50_out_fname+'.m8', diamond50_seqs, 50.0)
-		
-		for gid in centroid_annotations50:
-			if gid not in centroid_annotations:
-				centroid_annotations[gid] = sample_annotations50[gid]
-			else:
-				raise Exception('GeneID for UniRef50 exists in UniRef90;\nSearching twice for the same gene;\nError in parse_annotation_table\n')
-		
 		if not args.bypass_clust:
-			centroid_gis = get_clusters_dict(gene_centroid_clusters_file_path)
+			centroid_gis = annotate_genes.get_clusters_dict(gene_centroid_clusters_file_path)
 			annotation_dict = annotate_genes.get_annotations_dict(centroid_annotations, centroid_gis)
 		else:
 			annotation_dict = centroid_annotations
@@ -236,9 +221,9 @@ if __name__ == '__main__':
 		
 		logger.debug('Reading abundance tables')
 		if args.to_normalize:
-			abundance_dict = quantify_genes.read_abundance_tables(mapper, True)
+			[abundance_dict, samples] = quantify_genes.read_abundance_tables(mapper, True)
 		else:
-			abundance_dict = quantify_genes.read_abundance_tables(mapper, False)
+			[abundance_dict, samples] = quantify_genes.read_abundance_tables(mapper, False)
 		logger.debug('Abundance tables parsed')
 
 		try:
@@ -258,4 +243,4 @@ if __name__ == '__main__':
 			annotation_dict = utilities.read_dict(annotation_table)
 			logger.debug('Annotations parsed')
 		logger.debug('Writing PPANINI table')
-		write_ppanini_table.generate_gene_table(abundance_dict, annotation_dict, flags['NICHE'], mapper, output_table)
+		write_ppanini_table.generate_gene_table(abundance_dict, annotation_dict, flags['NICHE'], mapper, output_table, samples)

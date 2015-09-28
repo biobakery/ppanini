@@ -32,6 +32,7 @@ def generate_abundance_viabwt2(assembly_x_withpath, reads_x, sample, out):
 									 bowtie2 -x ' + assembly_x_index + ' -U - --no-unal --very-sensitive | \
 									 samtools view -bS - > ' + assembly_x_bam)
 
+#	pdb.set_trace()
 	return generate_abundance_viabam(assembly_x_bam, sample, out)
 
 
@@ -102,12 +103,19 @@ def read_abundance_tables(mapper, norm_flag):
 				split_line = [re.sub('[\t\r\n]', '', i) for i in line.split('\t')]
 				#abundance_dict[sample][contig_name] = [number_mapped_reads, sequence_length]
 				if norm_flag:
-					abundance_dict[sample][split_line[0].strip()] = float(split_line[2])/(float(split_line[1])-200.0) #avg. read length?
+					abundance_dict[sample][split_line[0].strip()] = float(split_line[2])/abs(float(split_line[1])-200.0) #avg. read length?
 				else:
 					abundance_dict[sample][split_line[0].strip()] = float(split_line[1]) #HUMAnN
-		# pdb.set_trace()
-	# pdb.set_trace()
-	return abundance_dict
+	samples = abundance_dict.keys()
+	abundance_dict_mod = {}
+	for i, sample in enumerate(samples):
+		for gene in abundance_dict[sample]:
+			try:
+				abundance_dict_mod[gene][i] = abundance_dict[sample][gene]
+			except:
+				abundance_dict_mod[gene] = numpy.zeros(len(samples))
+				abundance_dict_mod[gene][i] = abundance_dict[sample][gene]
+	return [abundance_dict_mod, samples]
 
 	
 if __name__ == '__main__':
