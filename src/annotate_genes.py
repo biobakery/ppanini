@@ -79,7 +79,7 @@ def run_rapsearch(query_file, db, out_fname, nprocesses, all_paths):
 	logger.debug('run_rapsearch '+query_file)
 	os.system(all_paths['rapsearch']+' -q ' + query_file + ' \
 												 -d ' + db + ' \
-												 -o ' + out_fname + ' \
+												 -o ' + out_fname + '.m8 \
 												 -u 2 \
 												 -b 0 \
 												 -v 1 \

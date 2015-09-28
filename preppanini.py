@@ -169,7 +169,7 @@ if __name__ == '__main__':
 		
 		if not args.bypass_clust:
 			logger.debug('Running CLUSTERING before ANNOTATION')
-			clust_method = 'vsearch'
+			#clust_method = 'vsearch'
 			gene_centroids_file_path = paths_dict['ANNOTATION_TMP']+'/'+basename+'.centroids.fasta'
 			gene_centroid_clusters_file_path = paths_dict['ANNOTATION_TMP']+'/'+basename+'.uc'
 			if args.usearch:
@@ -180,8 +180,7 @@ if __name__ == '__main__':
 									 gene_centroid_clusters_file_path, \
 									 0.9, \
 									 nprocesses)
-			else:
-				if args.vsearch:
+			elif args.vsearch:
 					clust_method = args.vsearch #assumes vsearch in path if not provided
 				annotate_genes.run_vclust(clust_method, \
 									 whole_genome_catalog, \
@@ -189,6 +188,8 @@ if __name__ == '__main__':
 									 gene_centroid_clusters_file_path, \
 									 0.9, \
 									 nprocesses)
+			else:
+				raise Exception('No clustering software found: Please use --vsearch or --usearch to specify the path to software')
 			genome_catalog = gene_centroids_file_path
 		else:
 			logger.debug('BYPASSING CLUSTERING')
@@ -197,14 +198,18 @@ if __name__ == '__main__':
 		##Run UniRef now
 		out_u90_fname = paths_dict['ANNOTATION_TMP']+'/'+basename+'.centroids.u90'
 
-		paths_dict['diamond'] = 'diamond'
+		#paths_dict['diamond'] = 'diamond'
 		if args.rapsearch:
 			paths_dict['rapsearch'] = args.rapsearch
-		if args.diamond:
+			annotate_genes.run_rapsearch(genome_catalog, args.uniref90, out_u90_fname, nprocesses, paths_dict)
+		elif args.diamond:
 			paths_dict['diamond'] = args.diamond
+			annotate_genes.run_diamond(genome_catalog, args.uniref90, out_u90_fname, nprocesses, paths_dict)
+		else:
+			raise Exception('No similarity search software found: Please use --diamond or --rapsearch to specify the path to software')
 		logger.debug('Running SEARCH against UniRef')
 		
-		annotate_genes.run_diamond(genome_catalog, args.uniref90, out_u90_fname, nprocesses, paths_dict)
+		
 		centroid_sequences = utilities.read_fasta(genome_catalog)
 		[centroid_annotations90, diamond50_seqs] = annotate_genes.parse_annotation_table(out_u90_fname+'.m8', centroid_sequences, 90.0)
 		centroid_annotations = centroid_annotations90
