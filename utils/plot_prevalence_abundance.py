@@ -125,7 +125,7 @@ if __name__ == '__main__':
 
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i','--input_table', help='Genes with prevalence and abundance values', required=True)
-	parser.add_argument('-m', '--map_file', default=False, help='Mapping file of genes to color and zorder values')
+	parser.add_argument('-m', '--map_file', default=False, help='Mapping file of genes to color and zorder values', required=True)
 	parser.add_argument('--beta_flag', default=False, action="store_true",help='Beta_Prevalence against Abundance')
 	parser.add_argument('--margins', default=False, help='Add threshold margins: prevalence_threshold,abundance_threshold: e.g. 0.001,0.001')
 	parser.add_argument('--alpha', default=False, help='Transparency')
