@@ -39,40 +39,27 @@ def read_map(table_name):
 			split_i = [re.sub('[\r\t\n]','',i).strip() for i in line.split('\t')]
 			genes_cmap[split_i[0]] = {}
 			for i in keys:
-				genes_cmap[split_i[0]][i]= split_i[keys[i]]
+				genes_cmap[split_i[0]][i]= split_i[keys[i]]	
 	return genes_cmap
 
 
-def parse_table(table_name, beta_flag):
+def parse_table(table_name, cols):
 	table_obj = open(table_name)
 	genes_prab = {}
-	inds = []
+	keys = []
 	for line in table_obj:
+		split_i = [re.sub('[\r\t\n]','',i).strip() for i in line.split('\t')]
 		if line.startswith('#'):
-			keys = [re.sub('[\r\t\n]','',i).strip() for i in line.split('\t')[1:]]
-			try:
-				if not beta_flag:
-					alpha_i = [i for i, val in enumerate(keys) if 'alpha' in val][0] #need to add multiple alpha prevalence functionality
-					inds+=[alpha_i]
-				else:
-					beta_i = [i for i, val in enumerate(keys) if 'beta' in val][0]
-					inds+=[beta_i]
-				
-				abund_i = [i for i, val in enumerate(keys) if 'abund' in val][0]
-				inds+=[abund_i]
-			except:
-				raise Exception('No Metadata provided: Please insert Metadata row and insert # at the beginning\n \
-						The keywords for alpha_prevalence, beta_prevalence and mean_abundance are: alpha, beta, abund\n \
-						Atleast one of alpha or beta prevalence **AND** mean abundance should be present. See demo file for example.')
+			keys = [split_i[cols[0]], split_i[1]]
 		else:
-			split_i = [re.sub('[\r\t\n]','',i).strip() for i in line.split('\t')]
-			genes_prab[split_i[0]] = tuple([float(split_i[inds[0]]), float(split_i[inds[1]])]) #(prevalence, abundance) always <--
+			genes_prab[split_i[0]] = tuple([float(split_i[cols[0]]), float(split_i[cols[1]])]) #(prevalence, abundance) always <--
 
-	return genes_prab
+	return [genes_prab, keys]
 
 def populate_cmap(genes_cmap, genes_prab):
 	for gene in genes_prab:
 		if not gene in genes_cmap:
+			genes_cmap[gene]={}
 			genes_cmap[gene]['zorder'] = 1
 			genes_cmap[gene]['color'] = 'gray'
 		else:
@@ -81,6 +68,7 @@ def populate_cmap(genes_cmap, genes_prab):
 			if not 'color' in genes_cmap[gene]:
 				genes_cmap[gene]['color'] = 'gray'
 	return genes_cmap
+
 def split_cmap(genes_cmap, genes_prab):
 	zorder_dict = {}
 	color_dict = {}
@@ -101,9 +89,13 @@ def split_cmap(genes_cmap, genes_prab):
 			prevalence_dict[z] = {}
 			abundance_dict[z] = {}
 		color_dict[z][gene] = genes_cmap[gene]['color']
-		prevalence_dict[z][gene] = genes_prab[gene][0]
+		try:
+			prevalence_dict[z][gene] = genes_prab[gene][0]
+		except:
+			pdb.set_trace()
 		abundance_dict[z][gene] = genes_prab[gene][1]
 	return [zorder_dict, color_dict, prevalence_dict, abundance_dict]
+
 
 def plot_prev_abund(zorder_dict, color_dict, prevalence_dict, abundance_dict, labels, margins):
 	pyplot.figure()
@@ -112,6 +104,7 @@ def plot_prev_abund(zorder_dict, color_dict, prevalence_dict, abundance_dict, la
 	pyplot.title(labels['title']) #'Mean abundance')
 	
 	for i in zorder_dict:
+		print i
 		pyplot.scatter(numpy.log(prevalence_dict[i].values(), dtype='float64'), \
 				   numpy.log(abundance_dict[i].values(), dtype='float64'), \
 				   c=color_dict[i].values(), \
@@ -120,7 +113,7 @@ def plot_prev_abund(zorder_dict, color_dict, prevalence_dict, abundance_dict, la
 				   zorder=i, \
 				   marker='o')
 	if margins:
-		[prev_tshld, abund_tshld] = [ float(i) for i in margins.split(',')]
+		[prev_tshld, abund_tshld] = [float(i) for i in margins.split(',')]
 		pyplot.axvline(y=numpy.log(float(margins[0])), alpha=0.5, color='gray')
 		pyplot.axhline(x=numpy.log(float(margins[1])), alpha=0.5, color='gray')
 
@@ -146,12 +139,13 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i','--input_table', help='Genes with prevalence and abundance values', required=True)
 	parser.add_argument('-m', '--map_file', default=False, help='Mapping file of genes to color and zorder values', required=True)
-	parser.add_argument('--beta_flag', default=False, action="store_true",help='Beta_Prevalence against Abundance')
 	parser.add_argument('--margins', default=False, help='Add threshold margins: prevalence_threshold,abundance_threshold: e.g. 0.001,0.001')
 	parser.add_argument('--alpha', default=False, help='Transparency')
+	parser.add_argument('--cols', default='1,2', help='Columns to plot: x,y')
 	parser.add_argument('--xlabel', default=False, help='Custom xlabel')
 	parser.add_argument('--ylabel', default=False, help='Custom ylabel')
 	parser.add_argument('--title', default=False, help='Custom title')
+	parser.add_argument('--basename', default=False, help='Basename')
 	parser.add_argument('--hexplot', default=False, help='Plot hexplots instead of')
 	parser.add_argument('-o','--output_filename', default=False, help='filename for figure')
 	parser.add_argument('--format', default='pdf', help='Format of file')
@@ -161,23 +155,23 @@ if __name__ == '__main__':
 	
 	if args.basename:
 		basename = basename
-	
-	[genes_prab, ids] = parse_table(args.input_table)
-	
+	cols = [int(i) for i in args.cols.split(',')]
+	[genes_prab, ids] = parse_table(args.input_table, cols)
+
 	if args.map_file:
-		[genes_cmap, keys] = read_map(args.map_file)
+		genes_cmap = read_map(args.map_file)
 	else:
 		genes_cmap = {}
 
 	genes_cmap = populate_cmap(genes_cmap, genes_prab)
 
-	labels = {'xlabel': 'Prevalence'\
-			  'ylabel': 'Mean Abundance'\
-			  'title': 'Scatterplot: Prevalence and abundance',\
-			  'alpha': 0.1\
+	labels = {'xlabel': ids[0],\
+			  'ylabel': ids[1],\
+			  'title': 'Scatterplot',\
+			  'alpha': 0.1,\
 			  'filename': basename+'.'+args.format}
+
 	labels = populate_vars(labels, args)
 
-	plot_prev_abund(genes_prab, genes_cmap, labels, args.margins)
-
-
+	[zorder_dict, color_dict, prevalence_dict, abundance_dict] = split_cmap(genes_cmap, genes_prab)
+	plot_prev_abund(zorder_dict, color_dict, prevalence_dict, abundance_dict, labels, args.margins)

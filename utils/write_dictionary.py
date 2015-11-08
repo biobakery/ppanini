@@ -2,7 +2,7 @@ import os
 import sys
 import re
 
-def write_dict(dictX, keys, keys, gene_annotations_file):
+def write_dict(dictX, keys, gene_annotations_file):
 	'''Writes dictionary of genes and their annotations into text file
 	Input: dictX = {geneID: annotation}
 		   gene_annotations_file = path_to_output_gene_annotations_table'''
@@ -13,6 +13,6 @@ def write_dict(dictX, keys, keys, gene_annotations_file):
 			for i in dictX:
 				foo.writelines(['\t'.join([str(i), str(dictX[i])])+'\n'])
 		else:
-			foo.writelines('#ID'+'\t'.join(keys)+'\n')
+			foo.writelines('\t'.join(['#ID']+keys)+'\n')
 			for i in dictX:
 				foo.writelines(['\t'.join([str(i)] + [str(dictX[i][j]) for j in keys])+'\n'])

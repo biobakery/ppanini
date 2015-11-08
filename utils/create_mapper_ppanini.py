@@ -25,10 +25,10 @@ def read_go_table(map_go_fname):
 
 def get_go_mapping(genes, mapper):
 	go_genes = []
-	with open(out_fname, 'w') as foo:
-		for gene in genes:
-			if gene in mapper:
-				go_genes +=[gene]
+	for gene in genes:
+		if gene in mapper:
+			go_genes +=[gene]
+	print len(go_genes)
 	return go_genes
 
 def read_genes(input_table):
@@ -37,6 +37,7 @@ def read_genes(input_table):
 		for line in foo:
 			if not line.startswith('#'):
 				genes += [re.sub('[\r\t\n]','',line.split('\t')[0]).strip()]
+	print len(genes)
 	return genes
 
 def get_final_mapper(genes, go_mapper, labels):
@@ -50,10 +51,10 @@ def get_final_mapper(genes, go_mapper, labels):
 		else:
 			final_map[gene]= {'color': labels['color_unknown'],\
 							  'zorder': labels['zorder_unknown']}
-	for gene in mapper:
+	for gene in go_genes:
 		final_map[gene]= {'color': labels['color_go'],\
 							  'zorder': labels['zorder_go']}
-
+	print(len(final_map))
 	return final_map
 
 if __name__ == '__main__':
