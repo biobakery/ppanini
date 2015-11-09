@@ -16,6 +16,14 @@ from src import write_ppanini_table
 basename = ''
 logger = logging.getLogger(__name__)
 
+def check_user_options(args):
+	if not args.bypass_annotation: 
+		if not args.uniref90:
+			sys.exit("Please bypass annotation or provide uniref90 database path!")
+	elif args.uniref90:
+		sys.exit("bypass annotation or provide uniref90 database path!")
+	return
+		
 def parse_mapper(mapper_file):
 	'''Reads the mapper_file that contains all the paths and metadata for input
 
@@ -60,26 +68,26 @@ def parse_mapper(mapper_file):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-m', '--mapper_file', help='Mapper file containing paths to data', required=True)
+	parser.add_argument('-m', '--mapper-file', dest='mapper_file', help='Mapper file containing paths to data', required=True)
 	parser.add_argument('--basename', help='BASENAME for all the output files')
-	parser.add_argument('--bypass_abundance', default=False, action='store_true', help='Bypass quantifying abundance')
-	parser.add_argument('--bypass_annotation', default=False, action='store_true', help='Bypass annotating genes')
-	parser.add_argument('--bypass_clust', default=False, action='store_true', help='Bypass annotating genes')
-	parser.add_argument('--bypass_write_table', default=False, action='store_true', help='Bypass writing table')
+	parser.add_argument('--bypass-abundance', dest= 'bypass_abundance', default=False, action='store_true', help='Bypass quantifying abundance')
+	parser.add_argument('--bypass-annotation', dest= 'bypass_annotation', default=False, action='store_true', help='Bypass annotating genes')
+	parser.add_argument('--bypass-clust', dest='bypass_clust', default=False, action='store_true', help='Bypass annotating genes')
+	parser.add_argument('--bypass-write-table', dest= 'bypass_write_table', default=False, action='store_true', help='Bypass writing table')
 	parser.add_argument('--usearch', default=False, help='Path to USEARCH') #add to be in path?
 	parser.add_argument('--vsearch', default=False, help='Path to VSEARCH') #add to be in path?
 	parser.add_argument('--diamond', default=False, help='Path to DIAMOND') #add to be in path??
 	parser.add_argument('--rapsearch', default=False, help='Path to RAPSEARCH') #add to be in path??
 	parser.add_argument('--threads', help='Number of threads', default=1)
 	parser.add_argument('--uniref90', help='UniRef90 INDEX file')
-	parser.add_argument('--to_normalize', default=False, action='store_true', help='Default HUMAnN2 table; if sam-idxstats table; enable')
-	parser.add_argument('--log_level',default='DEBUG', help='Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]')
+	parser.add_argument('--to-normalize', dest='to_normalize', default=False, action='store_true', help='Default HUMAnN2 table; if sam-idxstats table; enable')
+	parser.add_argument('--log-level', dedt='log_level', default='DEBUG', help='Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]')
 
 	args = parser.parse_args()
 	nprocesses = int(args.threads)
 	mapper_file = args.mapper_file
 	basename = args.basename
-
+	check_user_options(args)
 	if not basename:
 		basename = mapper_file.split('.')[0].split('/')[-1]
 	
@@ -182,12 +190,12 @@ if __name__ == '__main__':
 									 nprocesses)
 			elif args.vsearch:
 					clust_method = args.vsearch #assumes vsearch in path if not provided
-				annotate_genes.run_vclust(clust_method, \
-									 whole_genome_catalog, \
-									 gene_centroids_file_path, \
-									 gene_centroid_clusters_file_path, \
-									 0.9, \
-									 nprocesses)
+					annotate_genes.run_vclust(clust_method, \
+											whole_genome_catalog, \
+											gene_centroids_file_path, \
+											gene_centroid_clusters_file_path, \
+											0.9, \
+											nprocesses)
 			else:
 				raise Exception('No clustering software found: Please use --vsearch or --usearch to specify the path to software')
 			genome_catalog = gene_centroids_file_path
