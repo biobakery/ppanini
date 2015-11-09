@@ -27,72 +27,58 @@ def parse_chocophlan_table(m8_filename):
 	for line in foo:
 		if not line.startswith('#'):
 			split_i = line.split('\t')
-			if '|' in split_i[1]:
-				split_sp = split_i[1].split('|')
-				sp = [i for i in split_sp if 'g__' in i and '.s__' in i]
-			else:
-				sp = [re.sub('[\r\t\n]','',i) for i in split_i[1].split('\t')]
+			sp = [re.sub('[\r\t\n]','',i) for i in split_i[1:]]
 			try:
-				if split_i[0] not in table:
-					table[split_i[0]] = sp
-					all_species += sp
-				elif sp[0] not in table[split_i[0]]:
-					table[split_i[0]] += sp
-					all_species += sp
+				table[split_i[0]] = sp
 			except:
-				pdb.set_trace()
+				table[split_i[0]] += sp
+			all_species += sp
 	no_uniq_genomes = len(set(all_species))
-	print str(no_uniq_genomes)+'here'
 	return [table, no_uniq_genomes]
 
 def parse_abundance_table(table_name, cols):
 	table_obj = open(table_name)
-	genes_prab = {}
-	keys = []
-	max1 = []
-	max2 = []
+	genes = []
+	prevalence = []
+	abundance = []
+
 	for line in table_obj:
 		split_i = [re.sub('[\r\t\n]','',i).strip() for i in line.split('\t')]
 		if line.startswith('#'):
 			keys = [split_i[cols[0]], split_i[1]]
 		else:
-			genes_prab[split_i[0]] = tuple([float(split_i[cols[0]]), float(split_i[cols[1]])]) #(prevalence, abundance) always <--
-			max1 += [float(split_i[cols[0]])]
-			max2 += [float(split_i[cols[1]])]
-	max_s = [max(max1), max(max2)]
-	return [genes_prab, keys, max_s]
+			genes += [split_i[0]]
+			prevalence +=[float(split_i[cols[0]])]
+			abundance +=[float(split_i[cols[1]])]
+	return [keys, genes, prevalence, abundance]
 
-def compute_priority(genes_prab, genes_genomes, no_uniq_genomes, max_s):
-	mp_gp = {}
-	# max_genomes = 0
-	# for gene in genes_prab:
-	# 	i =len(genes_genomes[gene])
-	# 	if i > max_genomes:
-	# 		max_genomes = i
-	# print i
-	for gene in genes_prab:
-		mp = min((genes_prab[gene][0]/max_s[0], genes_prab[gene][1]/max_s[1]))
+def compute_priority(genes, prevalence, abundance, genes_genomes, no_uniq_genomes):
+	mp = []
+	gp = []
+ 	max_prev = max(prevalence)
+ 	max_abund = max(abundance)
+	for i, gene in enumerate(genes):
+		mp += [min((prevalence[i]/max_prev, abundance[i]/max_abund))]
 		try:
-			gp = len(genes_genomes[gene])/float(no_uniq_genomes)
-			mp_gp[gene] = (mp, gp)
+			gp += [len(genes_genomes[gene])/float(no_uniq_genomes)]
 		except:
-			mp_gp[gene] = (mp, 0)
-	return mp_gp
+			gp += [0]
+	return [mp, gp]
 	
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-i1', '--input_prab', help='Prevalence/Abundance Table', required=True)
-	parser.add_argument('-i2', '--input_choco', help='Chocophlan parsed Table', required=True)
+	parser.add_argument('-i1', '--input_prab', help='Tabulated Genes Prevalence/Abundance Table', required=True)
+	parser.add_argument('-i2', '--input_choco', help='Tabulated genes to genomes table', required=True)
 	parser.add_argument('--cols', default='1,2', help='Columns to plot: x,y')
 	
 	args = parser.parse_args()
 	
 	cols = [int(i) for i in args.cols.split(',')]
 	[genes_genomes, no_uniq_genomes] = parse_chocophlan_table(args.input_choco)
-	[genes_prab, keys, max_s] = parse_abundance_table(args.input_prab, cols)
+	[keys, genes, prevalence, abundance] = parse_abundance_table(args.input_prab, cols)
 
-	mp_gp = compute_priority(genes_prab, genes_genomes, no_uniq_genomes, max_s)
+	[mp,gp] = compute_priority(genes, prevalence, abundance, genes_genomes, no_uniq_genomes)
 
 	print '\t'.join(['#ID','Metagenomic_Priority', 'Genomic_Priority'])
-	for gene in mp_gp:
-		print '\t'.join([gene]+[str(i) for i in mp_gp[gene]])
+	for i, gene in enumerate(genes):
+		print '\t'.join([gene, str(mp[i]), str(gp[i])])

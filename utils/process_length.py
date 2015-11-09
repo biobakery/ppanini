@@ -7,6 +7,8 @@ import matplotlib
 from matplotlib import pyplot
 from src import utilities
 
+'''Tmp file to parse results'''
+
 filename = sys.argv[1]
 fasta_foo = utilities.read_fasta(filename)
 

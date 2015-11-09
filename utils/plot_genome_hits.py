@@ -14,6 +14,8 @@ from src import utilities
 from matplotlib import pyplot
 from matplotlib import colors
 
+'''Tmp file to parse results'''
+
 '''Analysis of genomes in the niche giving a sense of what genomes are in the community'''
 
 numpy.seterr(divide='ignore', invalid='ignore')

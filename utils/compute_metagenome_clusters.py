@@ -10,6 +10,8 @@ import pdb
 from matplotlib import pyplot
 from src import utilities
 
+'''Tmp file to parse results'''
+
 def get_clusters_dict(gene_centroid_clusters_file_path):
 	'''Return dict containing clusters
 	Input: filepath to centroid file

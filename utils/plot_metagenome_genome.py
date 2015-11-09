@@ -10,6 +10,7 @@ import pdb
 from matplotlib import pyplot
 from src import utilities
 
+'''Tmp file to parse results'''
 '''Analysis of Genome Hits per gene showing how many genomes each gene is found in.'''
 
 def parse_table(m8_filename, fasta_filename):

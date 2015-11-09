@@ -11,6 +11,8 @@ import argparse
 from src import utilities
 from matplotlib import pyplot
 
+'''Tmp file to parse results'''
+
 numpy.seterr(divide='ignore', invalid='ignore')
 
 def read_go_table(map_go_fname):

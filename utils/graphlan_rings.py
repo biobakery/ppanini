@@ -2,6 +2,8 @@ import os
 import sys
 
 
+'''Tmp file to parse results'''
+
 foo = open(sys.argv[1])
 genomes = {}
 for line in foo:

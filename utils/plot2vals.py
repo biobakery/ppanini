@@ -60,11 +60,11 @@ def populate_cmap(genes_cmap, genes_prab):
 	for gene in genes_prab:
 		if not gene in genes_cmap:
 			genes_cmap[gene]={}
-			genes_cmap[gene]['zorder'] = 1
+			genes_cmap[gene]['zorder'] = 0
 			genes_cmap[gene]['color'] = 'gray'
 		else:
 			if not 'zorder' in genes_cmap[gene]:
-				genes_cmap[gene]['zorder'] = 1
+				genes_cmap[gene]['zorder'] = 0
 			if not 'color' in genes_cmap[gene]:
 				genes_cmap[gene]['color'] = 'gray'
 	return genes_cmap
@@ -97,25 +97,95 @@ def split_cmap(genes_cmap, genes_prab):
 	return [zorder_dict, color_dict, prevalence_dict, abundance_dict]
 
 
-def plot_prev_abund(zorder_dict, color_dict, prevalence_dict, abundance_dict, labels, margins):
+def plot_scatter(zorder_dict, color_dict, prevalence_dict, abundance_dict, labels):
 	pyplot.figure()
 	pyplot.xlabel(labels['xlabel'])#'Alpha Prevalence_'+keys[i])
 	pyplot.ylabel(labels['ylabel'])
 	pyplot.title(labels['title']) #'Mean abundance')
 	
+	margins = labels['margins']
+
 	for i in zorder_dict:
-		print i
+		print int(i)+1
 		pyplot.scatter(numpy.log(prevalence_dict[i].values(), dtype='float64'), \
 				   numpy.log(abundance_dict[i].values(), dtype='float64'), \
 				   c=color_dict[i].values(), \
 				   alpha=labels['alpha'], \
 				   linewidths=0.0, \
-				   zorder=i, \
-				   marker='o')
+				   s=labels['size'],\
+				   zorder=int(i)+1, \
+				   marker=labels['marker'])
 	if margins:
 		[prev_tshld, abund_tshld] = [float(i) for i in margins.split(',')]
 		pyplot.axvline(y=numpy.log(float(margins[0])), alpha=0.5, color='gray')
 		pyplot.axhline(x=numpy.log(float(margins[1])), alpha=0.5, color='gray')
+
+	pyplot.savefig(labels['filename'])
+	pyplot.savefig(labels['filename']+'.png')
+
+def plot_scatter_stratified(zorder_dict, color_dict, prevalence_dict, abundance_dict, labels):
+	
+	pyplot.figure()
+	ndims = [1,len(zorder_dict)]
+	if labels['ndims']:
+		ndims = [int(i) for i in labels['ndims'].split(',')]
+	inds = numpy.arange(ndims[1])
+	margins = labels['margins']
+	ii = 0
+	for i in zorder_dict:
+		ii +=1
+		pyplot.subplot(ndims[0],ii)
+		pyplot.xlabel(labels['xlabel'])#'Alpha Prevalence_'+keys[i])
+		pyplot.ylabel(labels['ylabel'])
+		pyplot.title(labels['title']) #'Mean abundance')
+		print int(i)+1
+		pyplot.scatter(numpy.log(prevalence_dict[i].values(), dtype='float64'), \
+				   numpy.log(abundance_dict[i].values(), dtype='float64'), \
+				   c=color_dict[i].values(), \
+				   alpha=labels['alpha'], \
+				   linewidths=0.0, \
+				   s=labels['size'],\
+				   zorder=int(i)+1, \
+				   marker=labels['marker'])
+		if margins:
+			[prev_tshld, abund_tshld] = [float(i) for i in margins.split(',')]
+			pyplot.axvline(y=numpy.log(float(margins[0])), alpha=0.5, color='gray')
+			pyplot.axhline(x=numpy.log(float(margins[1])), alpha=0.5, color='gray')
+
+	pyplot.savefig(labels['filename'])
+	pyplot.savefig(labels['filename']+'.png')
+
+def plot_hexplot(zorder_dict, color_dict, prevalence_dict, abundance_dict, labels):
+	'''Plots HexBin plots for the genome hits per gene
+	Input:
+	m8_filename = filename of blast results
+	table = {gene: [List of genomes]}'''
+	pyplot.figure()
+	ndims = [1,len(zorder_dict)]
+	if labels['ndims']:
+		ndims = [int(i) for i in labels['ndims'].split(',')]
+	inds = numpy.arange(ndims[1])
+	margins = labels['margins']
+	ii = 0
+	for i in zorder_dict:
+		ii +=1
+		pyplot.subplot(ndims[0],ndims[1],ii)
+		pyplot.xlabel(labels['xlabel'])#'Alpha Prevalence_'+keys[i])
+		pyplot.ylabel(labels['ylabel'])
+		pyplot.title(labels['title']+color_dict[i].values()[0]) #'Mean abundance')
+		print int(i)+1
+		image = pyplot.hexbin(numpy.log(prevalence_dict[i].values(), dtype='float64'), \
+				   numpy.log(abundance_dict[i].values(), dtype='float64'), \
+				   mincnt=1, \
+				   gridsize=25, \
+				   cmap=pyplot.cm.Spectral_r, \
+				   bins='log')
+		cb = pyplot.colorbar(image, spacing='uniform',extend='max')
+
+		if margins:
+			[prev_tshld, abund_tshld] = [float(i) for i in margins.split(',')]
+			pyplot.axvline(y=numpy.log(float(margins[0])), alpha=0.5, color='gray')
+			pyplot.axhline(x=numpy.log(float(margins[1])), alpha=0.5, color='gray')
 
 	pyplot.savefig(labels['filename'])
 	pyplot.savefig(labels['filename']+'.png')
@@ -131,7 +201,10 @@ def populate_vars(labels, args):
 		labels['alpha'] = float(args.alpha)
 	if args.output_filename:
 		labels['filename'] = args.output_filename+'.'+args.format
-
+	if args.marker:
+		labels['marker'] = args.marker
+	if args.size:
+		labels['size'] = int(args.size)
 	return labels
 		
 if __name__ == '__main__':
@@ -141,12 +214,16 @@ if __name__ == '__main__':
 	parser.add_argument('-m', '--map_file', default=False, help='Mapping file of genes to color and zorder values', required=True)
 	parser.add_argument('--margins', default=False, help='Add threshold margins: prevalence_threshold,abundance_threshold: e.g. 0.001,0.001')
 	parser.add_argument('--alpha', default=False, help='Transparency')
+	parser.add_argument('--dims', default=False, help='Dimensions of plot if stratified')
 	parser.add_argument('--cols', default='1,2', help='Columns to plot: x,y')
 	parser.add_argument('--xlabel', default=False, help='Custom xlabel')
+	parser.add_argument('--size', default=False, help='Size of markers')
+	parser.add_argument('--marker', default=False, help='Type of markers')
 	parser.add_argument('--ylabel', default=False, help='Custom ylabel')
 	parser.add_argument('--title', default=False, help='Custom title')
 	parser.add_argument('--basename', default=False, help='Basename')
-	parser.add_argument('--hexplot', default=False, help='Plot hexplots instead of')
+	parser.add_argument('--stratified', default=False, action='store_true',help='Stratified plots based on zorder')
+	parser.add_argument('--hexplot', default=False, action='store_true',help='Plot hexplots instead of scatterplot')
 	parser.add_argument('-o','--output_filename', default=False, help='filename for figure')
 	parser.add_argument('--format', default='pdf', help='Format of file')
 
@@ -169,9 +246,17 @@ if __name__ == '__main__':
 			  'ylabel': ids[1],\
 			  'title': 'Scatterplot',\
 			  'alpha': 0.1,\
-			  'filename': basename+'.'+args.format}
+			  'marker':'o',\
+			  'size':20,\
+			  'filename': basename+'.'+args.format,\
+			  'margins': args.margins,\
+			  'stratified':args.stratified,\
+			  'ndims': args.dims}
 
 	labels = populate_vars(labels, args)
 
 	[zorder_dict, color_dict, prevalence_dict, abundance_dict] = split_cmap(genes_cmap, genes_prab)
-	plot_prev_abund(zorder_dict, color_dict, prevalence_dict, abundance_dict, labels, args.margins)
+	if not args.hexplot:
+		plot_scatter(zorder_dict, color_dict, prevalence_dict, abundance_dict, labels)
+	else:
+		plot_hexplot(zorder_dict, color_dict, prevalence_dict, abundance_dict, labels)

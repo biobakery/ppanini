@@ -2,7 +2,7 @@ import os
 import sys
 import pdb
 import re
-
+'''Tmp file to parse results'''
 def read_lineage(filename):
 	lineage = {}
 	with open(filename) as foo:

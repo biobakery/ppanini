@@ -3,7 +3,7 @@ import re
 import pdb
 import sys
 import csv
-
+'''Tmp file to parse results'''
 def read_map(map_obj):
 	csv_map = csv.reader(open(map_obj), csv.excel_tab)
 	uniref_go = {}
