@@ -123,13 +123,13 @@ def plot_prev_abund(zorder_dict, color_dict, prevalence_dict, abundance_dict, la
 def populate_vars(labels, args):
 	if args.xlabel:
 		labels['xlabel'] = args.xlabel
-	if args.xlabel:
+	if args.ylabel:
 		labels['ylabel'] = args.ylabel
-	if args.xlabel:
+	if args.title:
 		labels['title'] = args.title
-	if args.xlabel:
+	if args.alpha:
 		labels['alpha'] = float(args.alpha)
-	if args.xlabel:
+	if args.output_filename:
 		labels['filename'] = args.output_filename+'.'+args.format
 
 	return labels

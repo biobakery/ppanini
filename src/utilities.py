@@ -207,7 +207,7 @@ def write_dict(dictX, gene_annotations_file):
 	logger.debug('write_dict to '+gene_annotations_file)
 
 	with open(gene_annotations_file, 'w') as foo:
-		foo.writelines('#GENEID\tANNOTATION')
+		foo.writelines('#GENEID\tANNOTATION\n')
 		for i in dictX:
 			foo.writelines(['\t'.join([i, dictX[i]])+'\n'])
 
