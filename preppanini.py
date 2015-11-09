@@ -81,7 +81,7 @@ if __name__ == '__main__':
 	parser.add_argument('--threads', help='Number of threads', default=1)
 	parser.add_argument('--uniref90', help='UniRef90 INDEX file')
 	parser.add_argument('--to-normalize', dest='to_normalize', default=False, action='store_true', help='Default HUMAnN2 table; if sam-idxstats table; enable')
-	parser.add_argument('--log-level', dedt='log_level', default='DEBUG', help='Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]')
+	parser.add_argument('--log-level', dest='log_level', default='DEBUG', help='Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]')
 
 	args = parser.parse_args()
 	nprocesses = int(args.threads)
