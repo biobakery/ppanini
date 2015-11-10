@@ -148,34 +148,32 @@ geneID_XYZ  0.05  0.35  0.50   0.42
 #!cmd
 
 usage: preppanini.py [-h] -m MAPPER_FILE [--basename BASENAME]
-                     [--bypass_abundance] [--bypass_annotation]
-                     [--bypass_clust] [--bypass_write_table]
-                     [--usearch USEARCH] [--vsearch VSEARCH]
-                     [--diamond DIAMOND] [--rapsearch RAPSEARCH]
-                     [--threads THREADS] [--uniref90 UNIREF90]
-                     [--uniref50 UNIREF50] [--to_normalize]
-                     [--log_level LOG_LEVEL]
+[--bypass-abundance] [--bypass-annotation]
+[--bypass-clust] [--bypass-write-table]
+[--usearch USEARCH] [--vsearch VSEARCH]
+[--diamond DIAMOND] [--rapsearch RAPSEARCH]
+[--threads THREADS] [--uniref90 UNIREF90]
+[--to-normalize] [--log-level LOG_LEVEL]
 
 optional arguments:
-  -h, --help            show this help message and exit
-  -m MAPPER_FILE, --mapper_file MAPPER_FILE
-                        Mapper file containing paths to data
-  --basename BASENAME   BASENAME for all the output files
-  --bypass_abundance    Bypass quantifying abundance
-  --bypass_annotation   Bypass annotating genes
-  --bypass_clust        Bypass annotating genes
-  --bypass_write_table  Bypass writing table
-  --usearch USEARCH     Path to USEARCH
-  --vsearch VSEARCH     Path to VSEARCH
-  --diamond DIAMOND     Path to DIAMOND
-  --rapsearch RAPSEARCH
-                        Path to RAPSEARCH
-  --threads THREADS     Number of threads
-  --uniref90 UNIREF90   UniRef90 INDEX file
-  --uniref50 UNIREF50   UniRef50 INDEX file
-  --to_normalize        Default HUMAnN2 table; if sam-idxstats table; enable
-  --log_level LOG_LEVEL
-                        Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
+-h, --help            show this help message and exit
+-m MAPPER_FILE, --mapper-file MAPPER_FILE
+Mapper file containing paths to data
+--basename BASENAME   BASENAME for all the output files
+--bypass-abundance    Bypass quantifying abundance
+--bypass-annotation   Bypass annotating genes
+--bypass-clust        Bypass annotating genes
+--bypass-write-table  Bypass writing table
+--usearch USEARCH     Path to USEARCH
+--vsearch VSEARCH     Path to VSEARCH
+--diamond DIAMOND     Path to DIAMOND
+--rapsearch RAPSEARCH
+Path to RAPSEARCH
+--threads THREADS     Number of threads
+--uniref90 UNIREF90   UniRef90 INDEX file
+--to-normalize        Default HUMAnN2 table; if sam-idxstats table; enable
+--log-level LOG_LEVEL
+Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
 ```
 
 * ``--mapper_file``: REQUIRED. Contains all information about which FAAS (Gene FAA format) corresponds to which SAMPLE and to which ABUNDANCE FILE; etc. Please see the demo input for more examples. All the possible options are: ['SAMS', 'BAMS', 'NICHE', 'GFF3S', 'ABUNDANCE_TABLES', 'ANNOTATION', 'READS', 'CONTIG_ASSEMBLIES', 'FAAS', 'FNAS', 'SAMPLES']
