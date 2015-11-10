@@ -231,7 +231,7 @@ if __name__ == '__main__':
 	basename = args.input_table.split('/')[-1].split('.')[0]
 	
 	if args.basename:
-		basename = basename
+		basename = args.basename
 	cols = [int(i) for i in args.cols.split(',')]
 	[genes_prab, ids] = parse_table(args.input_table, cols)
 

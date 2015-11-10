@@ -462,7 +462,7 @@ if __name__ == '__main__':
 	parser.add_argument('--uc', default=False, help='UCLUST file containg centroids and clustered genes')
 	parser.add_argument('--usearch', default=False, help='Path to USEARCH') #add to be in path?
 	parser.add_argument('--vsearch', default=False, help='Path to VSEARCH') #add to be in path?
-	parser.add_argument('--basename', help='BASENAME for all the output files')
+	parser.add_argument('--basename', default=False,help='BASENAME for all the output files')
 	parser.add_argument('--log_level',default='DEBUG', help='Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]')
 	parser.add_argument('--threads', default=1, help='Number of threads')
 	parser.add_argument('--tshld_abund', default=75, help='[X] Percentile Cutoff for Abundance; Default=75th')
