@@ -468,17 +468,17 @@ def read_prevalence_abundance_table(input_table):
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i','--input_table', help='REQUIRED: Gene abundance table with metadata', required=True)
-	parser.add_argument('-o','--output_folder', help='Folder containing results', default=False)
-	parser.add_argument('--gene_catalog', default=False, help='GENE CATALOG')
+	parser.add_argument('-o','--output-folder', dest = 'output_folder',  help='Folder containing results', default=False)
+	parser.add_argument('--gene-catalog', dest = 'gene_catalog', default=False, help='GENE CATALOG')
 	parser.add_argument('--uc', default=False, help='UCLUST file containg centroids and clustered genes')
 	parser.add_argument('--usearch', default=False, help='Path to USEARCH') #add to be in path?
 	parser.add_argument('--vsearch', default=False, help='Path to VSEARCH') #add to be in path?
 	parser.add_argument('--basename', default=False,help='BASENAME for all the output files')
-	parser.add_argument('--log_level',default='DEBUG', help='Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]')
+	parser.add_argument('--log-level', dest = log_level,  default='DEBUG', help='Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]')
 	parser.add_argument('--threads', default=1, help='Number of threads')
-	parser.add_argument('--tshld_abund', default=75, help='[X] Percentile Cutoff for Abundance; Default=75th')
-	parser.add_argument('--tshld_prev', default=75, help='Percentile cutoff for Prevalence')
-	parser.add_argument('--bypass_prev_abund', default=False, action='store_true', help='Bypass quantifying abundance and prevalence')
+	parser.add_argument('--tshld-abund', dest = 'tshld_abund', default=75, help='[X] Percentile Cutoff for Abundance; Default=75th')
+	parser.add_argument('--tshld-prev', dest = 'tshld_prev', default=75, help='Percentile cutoff for Prevalence')
+	parser.add_argument('--bypass-prev-abund', dest = 'bypass_prev_abund', default=False, action='store_true', help='Bypass quantifying abundance and prevalence')
 
 	args = parser.parse_args()
 	nprocesses = int(args.threads)
