@@ -187,7 +187,7 @@ def get_centroids_table(all_centroids, metadata):
 	return [norm_data_matrix, centroids_list]
 
 
-def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata):
+def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, beta):
 	'''Returns the dict of centroids with their prevalence and abundance
 
 	Input:	centroids_data_matrix = {gene_centroid: [Gene centroid abundance across samples]}
@@ -206,7 +206,7 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata):
 	
 	if niche_line:
 		niche_flag = True
-		[centroid_prev_abund, all_alpha_prev, all_mean_abund] = get_niche_prevalence_abundance (centroids_data_matrix, centroids_list, niche_line)
+		[centroid_prev_abund, all_alpha_prev, all_mean_abund] = get_niche_prevalence_abundance (centroids_data_matrix, centroids_list, niche_line, beta)
 		return [centroid_prev_abund, all_alpha_prev, all_mean_abund, niche_flag]
 	else:
 		niche_flag = False
@@ -239,7 +239,7 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata):
 		
 		return [centroid_prev_abund, all_prevalence, all_abund, niche_flag]
 
-def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_line):
+def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_line, beta):
 	'''Returns the dict of centroids with their prevalence and abundance
 
 	Input:	centroids_data_matrix = {gene_centroid: [Gene centroid abundance across samples]}
@@ -257,7 +257,6 @@ def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_
 	centroid_prev_abund_file_path = temp_folder+'/'+basename+'_centroid_prev_abund.txt'
 	
 	niches = {}
-	
 	split_i = [re.sub('[\r\t\n]', '', i) for i in niche_line.split('\t')[1:]]
 	for i, val in enumerate(split_i):
 		try:
@@ -323,9 +322,9 @@ def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_
 			dict_to_print[centroid]['ppanini_score_'+niche] = centroid_prev_abund[centroid]['ppanini_score'][niche]
 	write_prev_abund_matrix(dict_to_print, centroid_prev_abund_file_path)
 	
-	return [centroid_prev_abund, all_alpha_prev, all_alpha_abund]
+	return centroid_prev_abund
 
-def get_important_niche_centroids(centroid_prev_abund, all_alpha_prev, all_alpha_abund, tshld, output_folder):
+def get_important_niche_centroids(centroid_prev_abund, beta, tshld, output_folder):
 	'''Returns the dict of important gene centroids [>= 10th percentile of alpha_prevalence and mean abundance]
 
 	Input:	centroid_prev_abund = {centroid: {'mean_abundance': mean abundance, 'prevalence': prevalence}}
@@ -341,12 +340,12 @@ def get_important_niche_centroids(centroid_prev_abund, all_alpha_prev, all_alpha
 
 	imp_centroid_prev_abund_file_path = basename+'_imp_centroid_prev_abund.txt'
 	
-	tshld_prev = {}
-	ppanini_score = {}
 	
 	tshld_abund = tshld[0]
 	tshld_prev = tshld[1]
-	ppanini_score[niche] = beta*tshld_prev[niche] + (1-beta)*tshld_abund
+	
+	ppanini_score = beta*tshld_prev + (1-beta)*tshld_abund
+
 	logger.debug('get_important_niche_centroids: tshld_prev:'+str(tshld_prev))
 	logger.debug('get_important_niche_centroids: ppanini_score:'+str(ppanini_score))
 	logger.debug('get_important_niche_centroids: tshld_abund:'+str(tshld_abund))
@@ -367,7 +366,7 @@ def get_important_niche_centroids(centroid_prev_abund, all_alpha_prev, all_alpha
 	return imp_centroids
 
 
-def get_important_centroids(centroid_prev_abund, all_prevalence, all_abund, tshld, output_folder):
+def get_important_centroids(centroid_prev_abund, beta, tshld, output_folder):
 	'''Returns the dict of important gene centroids [value-2SE(prevalence and abundance) >0.1]
 
 	Input:	centroid_prev_abund = {centroid: {'mean_abundance': mean abundance, 'prevalence': prevalence}}
@@ -478,7 +477,8 @@ if __name__ == '__main__':
 	parser.add_argument('--threads', default=1, help='Number of threads')
 	parser.add_argument('--tshld-abund', dest = 'tshld_abund', default=75, help='[X] Percentile Cutoff for Abundance; Default=75th')
 	parser.add_argument('--tshld-prev', dest = 'tshld_prev', default=75, help='Percentile cutoff for Prevalence')
-	parser.add_argument('--bypass-prev-abund', dest = 'bypass_prev_abund', default=False, action='store_true', help='Bypass quantifying abundance and prevalence')
+	parser.add_argument('--beta', default=0.5, help='Beta parameter for weights on percentiles')
+	# parser.add_argument('--bypass-prev-abund', dest = 'bypass_prev_abund', default=False, action='store_true', help='Bypass quantifying abundance and prevalence')
 
 	args = parser.parse_args()
 	nprocesses = int(args.threads)
@@ -489,6 +489,8 @@ if __name__ == '__main__':
 	input_table = args.input_table
 	uclust_file = args.uc
 	gene_catalog = args.gene_catalog
+	
+	beta = args.beta
 
 	if not basename:
 		basename = input_table.split('.')[0].split('/')[-1]
@@ -508,14 +510,14 @@ if __name__ == '__main__':
 						level=getattr(logging, args.log_level), \
 						filemode='w', \
 						datefmt='%m/%d/%Y %I:%M:%S %p')
-	if not args.bypass_prev_abund:
-		[uniref_dm, gi_dm, metadata]= read_gene_table(input_table)
-		all_centroids = get_centroids(uniref_dm, gi_dm, args, uclust_file, gene_catalog, nprocesses)
-		[centroids_data_matrix, centroids_list] = get_centroids_table(all_centroids, metadata)
-		[centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag] = get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata)
-	else:
-		[centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag] = read_prevalence_abundance_table(input_table)
+	# if not args.bypass_prev_abund:
+	[uniref_dm, gi_dm, metadata]= read_gene_table(input_table)
+	all_centroids = get_centroids(uniref_dm, gi_dm, args, uclust_file, gene_catalog, nprocesses)
+	[centroids_data_matrix, centroids_list] = get_centroids_table(all_centroids, metadata)
+	[centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag] = get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, beta)
+	# else:
+	# 	[centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag] = read_prevalence_abundance_table(input_table, beta)
 	if niche_flag:
-		imp_centroids = get_important_niche_centroids(centroid_prev_abund, all_prevalence, all_mean_abund, tshld, output_folder, int(args.quad))
+		imp_centroids = get_important_niche_centroids(centroid_prev_abund, beta, tshld, output_folder)
 	else:
-		imp_centroids = get_important_centroids(centroid_prev_abund, all_prevalence, all_mean_abund, tshld, output_folder)
+		imp_centroids = get_important_centroids(centroid_prev_abund, beta, tshld, output_folder)
