@@ -1,5 +1,5 @@
-print(__doc__)
-    
+
+#print(__doc__)
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import svm, datasets
@@ -7,7 +7,11 @@ from sklearn.metrics import roc_curve, auc
 from sklearn.cross_validation import train_test_split
 from sklearn.preprocessing import label_binarize
 from sklearn.multiclass import OneVsRestClassifier
+
+import sys
+sys.path.append('/Users/rah/Documents/Hutlab/ppanini')
 import ppanini
+from src import config
  
 def evaluation_multi_roc():
     fpr = dict()
@@ -16,8 +20,9 @@ def evaluation_multi_roc():
     score = dict() 
     
     # list of truth about data or associations, here, is this an important gene?
-    config.input_table = '/n/hutlab12_nobackup/data/ppanini/DATA/PPANINI_INPUT/stool_ppanini.txt' 
+    #config.input_table = '/Users/rah/Documents/Hutlab/stool_ppanini.txt'#'/n/hutlab12_nobackup/data/ppanini/DATA/PPANINI_INPUT/stool_ppanini.txt' 
     truth = [1, 0, 1, 0, 0] # this an example for each gene if it's important use 1 otherwise 0
+    print config.input_table
     ppanini.run()
     for b in range(.2, 1.0, .1):
          
@@ -31,6 +36,7 @@ def evaluation_multi_roc():
         # a list of 1, for prioritized, and 0, for unprioritized genes  
         #score[b] = ppanini_score(b)
         ppanini.prioritize_centroids
+        continue
         # an example for scores
         score[b] = [.6, .25, .55, .15, .18] # 
         
@@ -84,3 +90,5 @@ def roc_plot(roc_info=None, figure_name='roc_plot_ppanini'):
     plt.savefig(figure_name + '.pdf')
     #plt.show()
     # return plt
+if __name__ == '__main__':
+    evaluation_multi_roc()

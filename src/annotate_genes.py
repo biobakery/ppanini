@@ -6,7 +6,7 @@ import argparse
 import logging
 import pdb
 from src import utilities
-
+from src import config
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +85,7 @@ def run_rapsearch(query_file, db, out_fname, nprocesses, all_paths):
 												 -v 1 \
 												 -z' + str(nprocesses))	
 
-def run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, perc_id, nprocesses):
+def run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, perc_id):
 	'''Runs USEARCH UCLUST on query_file to produce results in out_fname
 
 	Input: usearch_folder = path to folder containing USEARCH
@@ -106,7 +106,7 @@ def run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gen
 								 -uc ' + gene_centroid_clusters_file_path+ '\
 								 -threads '+str(nprocesses))
 
-def run_vclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, perc_id, nprocesses):
+def run_vclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, perc_id):
 	'''Runs USEARCH UCLUST on query_file to produce results in out_fname
 
 		Input: usearch_folder = path to folder containing USEARCH
@@ -125,7 +125,7 @@ def run_vclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gen
 								 --id '+str(perc_id)+' \
 								 --centroids '+ gene_centroids_file_path + ' \
 								 --uc ' + gene_centroid_clusters_file_path+ '\
-								 --threads '+str(nprocesses))
+								 --threads '+str(config.nprocesses))
 
 def get_clusters_dict(gene_centroid_clusters_file_path):
 	'''Return dict containing clusters

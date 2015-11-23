@@ -12,7 +12,6 @@ from src import config
 
 logger = logging.getLogger(__name__)
 
-temp_folder = config.temp_folder
 
 beta = 0.5
 
@@ -56,14 +55,14 @@ def read_gene_table(gene_table_fname):
 
 	return [uniref_dm, gis_dm, metadata]
 
-def get_centroids_fromUCLUST(gene_centroid_clusters_file_path, genes):
+def get_centroids_fromUCLUST(genes):
 	'''Returns the clusters dictionary
 
 	Input: gene_centroid_clusters_file_path = Filename of the centroids UC file
 		   genes = [List of genes that are unannotated with UniRef]
 
 	Output: cluster_dict = {CENTROIDS: [list of genes], ...}'''
-
+	gene_centroid_clusters_file_path = config.uclust_file
 	logger.debug('get_centroids_fromUCLUST: '+gene_centroids_file_path)
 
 	cluster_dict = {}
@@ -87,7 +86,7 @@ def get_centroids_fromUCLUST(gene_centroid_clusters_file_path, genes):
 
 	return cluster_dict
 
-def get_centroids(uniref_dm, gi_dm, uclust_file):
+def get_centroids(uniref_dm, gi_dm):
 	'''Returns the dict of all centroids containing clusters of gene IDs
 
 	Input:	uniref_dm = {UniRef_XYZ: numpy.array(abundance), ...}
@@ -103,10 +102,10 @@ def get_centroids(uniref_dm, gi_dm, uclust_file):
 
 	centroids_fasta = {}
 
-	if not uclust_file:
+	if not config.uclust_file:
 		centroid_gis = get_clusters() #all UniRef90_unknowns are clustered across samples
 	else:
-		centroid_gis = get_centroids_fromUCLUST(uclust_file, gi_dm.keys())
+		centroid_gis = get_centroids_fromUCLUST(gi_dm.keys())
 
 	gc_dm = {}
 	for centroid in centroid_gis:
@@ -134,8 +133,8 @@ def get_clusters(): #ONLY FOR THE UNIREF UNANNOTATED
 	logger.debug('get_clusters')
 
 	allgenes_file_path = config.gene_catalog
-	gene_centroids_file_path = temp_folder+'/'+basename+'_centroids.fasta'
-	gene_centroid_clusters_file_path = temp_folder+'/'+basename+'_clusters.uc'
+	gene_centroids_file_path = config.temp_folder+'/'+config.basename+'_centroids.fasta'
+	gene_centroid_clusters_file_path = config.temp_folder+'/'+config.basename+'_clusters.uc'
 	
 	clust_method = 'vsearch'
 
@@ -176,7 +175,7 @@ def get_centroids_table(all_centroids, metadata):
 	norm_data_matrix = centroids_data_matrix/sum(centroids_data_matrix)
 	norm_data_matrix = norm_data_matrix*1e6
 
-	gene_centroids_table_file_path = temp_folder+'/'+basename+'_gene_centroids_table.txt'
+	gene_centroids_table_file_path = config.temp_folder+'/'+basename+'_gene_centroids_table.txt'
 	
 	with open(gene_centroids_table_file_path,'w') as foo:
 		foo.writelines(metadata)
@@ -200,7 +199,7 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, be
 	
 	logger.debug('get_prevalence_abundance')
 
-	centroid_prev_abund_file_path = temp_folder+'/'+basename+'_centroid_prev_abund.txt'
+	centroid_prev_abund_file_path = config.temp_folder+'/'+basename+'_centroid_prev_abund.txt'
 	
 	[niche_line, ind] = utilities.is_present(metadata, '#NICHE')
 	
@@ -254,7 +253,7 @@ def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_
 
 	logger.debug('get_niche_prevalence_abundance')
 	
-	centroid_prev_abund_file_path = temp_folder+'/'+basename+'_centroid_prev_abund.txt'
+	centroid_prev_abund_file_path = config.temp_folder+'/'+basename+'_centroid_prev_abund.txt'
 	
 	niches = {}
 	split_i = [re.sub('[\r\t\n]', '', i) for i in niche_line.split('\t')[1:]]
@@ -488,28 +487,29 @@ def read_parameters():
 	
 	config.beta = args.beta
 
-	if not config.basename:
-		config.basename = input_table.split('.')[0].split('/')[-1]
-
-	if not args.output_folder:
-		config.output_folder = basename
-	else:
-		config.output_folder = args.output_folder
-
-	temp_folder = config.output_folder+'/'+basename+'_temp'
-
-	utilities.create_folders([temp_folder, config.output_folder])
-
-	log_file = config.output_folder+'/'+basename+'.log'
-	logging.basicConfig(filename=log_file, \
-						format='%(asctime)s - %(name)s - %(levelname)s: %(message)s', \
-						level=getattr(logging, args.log_level), \
-						filemode='w', \
-						datefmt='%m/%d/%Y %I:%M:%S %p')
 def run():
 	# if not args.bypass_prev_abund:
+	if config.basename =='':
+		config.basename = config.input_table.split('.')[0].split('/')[-1]
+		
+	if config.output_folder == '':
+		config.output_folder = "./"+config.basename
+	print config.basename
+	config.temp_folder = config.output_folder+'/'+config.basename+'_temp'
+
+	utilities.create_folders([config.temp_folder, config.output_folder])
+
+	log_file = config.output_folder+'/'+config.basename+'.log'
+	logging.basicConfig(filename=log_file, \
+						format='%(asctime)s - %(name)s - %(levelname)s: %(message)s', \
+						level=getattr(logging, config.log_level), \
+						filemode='w', \
+						datefmt='%m/%d/%Y %I:%M:%S %p')
+	
+	
+	print config.input_table
 	[uniref_dm, gi_dm, metadata]= read_gene_table(config.input_table)
-	all_centroids = get_centroids(uniref_dm, gi_dm, args, uclust_file)
+	all_centroids = get_centroids(uniref_dm, gi_dm)
 	[centroids_data_matrix, centroids_list] = get_centroids_table(all_centroids, metadata)
 	[centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag] = get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, config.beta)
 	# else:

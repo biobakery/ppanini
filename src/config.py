@@ -1,13 +1,13 @@
 
 #default values for user options
 
-input_table = None # required 
-output_folder = False
-gene_catalog =False 
+input_table = '/Users/rah/Documents/Hutlab/stool_ppanini.txt' #None # required 
+output_folder = ''
+gene_catalog = '' 
 uclust_file = False
 usearch = False
 vsearch = False
-basename = False
+basename = ""
 log_level = 'DEBUG'
 #threads = 1
 nprocesses = 1 
