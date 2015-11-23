@@ -5,7 +5,8 @@ import argparse
 import numpy
 import logging
 import scipy.stats
-
+sys.path.append('/n/hutlab12_nobackup/data/ppanini/ppanini')#'/Users/rah/Documents/Hutlab/ppanini')#
+import ppanini
 from src import utilities
 from src import annotate_genes
 from src import config
@@ -63,7 +64,7 @@ def get_centroids_fromUCLUST(genes):
 
 	Output: cluster_dict = {CENTROIDS: [list of genes], ...}'''
 	gene_centroid_clusters_file_path = config.uclust_file
-	logger.debug('get_centroids_fromUCLUST: '+gene_centroids_file_path)
+	logger.debug('get_centroids_fromUCLUST: '+gene_centroid_clusters_file_path)
 
 	cluster_dict = {}
 	genes_clustered = []
@@ -323,7 +324,7 @@ def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_
 	
 	return centroid_prev_abund
 
-def get_important_niche_centroids(centroid_prev_abund, beta, tshld, output_folder):
+def get_important_niche_centroids():
 	'''Returns the dict of important gene centroids [>= 10th percentile of alpha_prevalence and mean abundance]
 
 	Input:	centroid_prev_abund = {centroid: {'mean_abundance': mean abundance, 'prevalence': prevalence}}
@@ -336,7 +337,10 @@ def get_important_niche_centroids(centroid_prev_abund, beta, tshld, output_folde
 										'alpha_prevalence_NICHEX': alpha_prevalence for niche X, ...}}'''
 
 	logger.debug('get_important_niche_centroids')
-
+	centroid_prev_abund = config.centroid_prev_abund
+	beta = config.beta
+	tshld = config.tshld
+	output_folder = config.output_folder
 	imp_centroid_prev_abund_file_path = basename+'_imp_centroid_prev_abund.txt'
 	
 	
@@ -365,7 +369,7 @@ def get_important_niche_centroids(centroid_prev_abund, beta, tshld, output_folde
 	return imp_centroids
 
 
-def get_important_centroids(centroid_prev_abund, beta, tshld, output_folder):
+def get_important_centroids():
 	'''Returns the dict of important gene centroids [value-2SE(prevalence and abundance) >0.1]
 
 	Input:	centroid_prev_abund = {centroid: {'mean_abundance': mean abundance, 'prevalence': prevalence}}
@@ -374,10 +378,11 @@ def get_important_centroids(centroid_prev_abund, beta, tshld, output_folder):
 			output_folder = Location of the results folder
 
 	Output: imp_centroids = {centroid: {'mean_abundance': mean abundance, 'prevalence': prevalence}}'''
-
+	
 	logger.debug('get_important_centroids')
-
-	imp_centroid_prev_abund_file_path = basename+'_imp_centroid_prev_abund.txt'
+	beta = config.beta
+	centroid_prev_abund = config.centroid_prev_abund
+	imp_centroid_prev_abund_file_path = config.basename+'_imp_centroid_prev_abund.txt'
 	
 	tshld_prev = config.tshld_prev
 	tshld_abund = config.tshld_abund
@@ -392,7 +397,7 @@ def get_important_centroids(centroid_prev_abund, beta, tshld, output_folder):
 									 'prevalence': centroid_prev_abund[centroid]['prevalence'],\
 									 'ppanini_score': centroid_prev_abund[centroid]['ppanini_score']}
 	
-	write_prev_abund_matrix(imp_centroids, output_folder + '/' + imp_centroid_prev_abund_file_path)
+	write_prev_abund_matrix(imp_centroids, config.output_folder + '/' + imp_centroid_prev_abund_file_path)
 	
 	return imp_centroids
 
@@ -488,6 +493,8 @@ def read_parameters():
 	config.beta = args.beta
 
 def run():
+	if config.uclust_file == '' and config.gene_catalog == '':
+		sys.exit("At least one of --uc or --gene-catalog should be provided!!!")
 	# if not args.bypass_prev_abund:
 	if config.basename =='':
 		config.basename = config.input_table.split('.')[0].split('/')[-1]
@@ -517,9 +524,9 @@ def run():
 	config.niche_flag = niche_flag
 def  prioritize_centroids():
 	if config.niche_flag:
-		imp_centroids = get_important_niche_centroids(config.centroid_prev_abund, config.beta, config.tshld, config.output_folder)
+		imp_centroids = get_important_niche_centroids()
 	else:
-		imp_centroids = get_important_centroids(config.centroid_prev_abund, config.beta, config.tshld, config.output_folder)
+		imp_centroids = get_important_centroids()
 	
 
 if __name__ == '__main__':

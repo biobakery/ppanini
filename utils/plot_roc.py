@@ -1,6 +1,9 @@
 
 #print(__doc__)
+ 
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from sklearn import svm, datasets
 from sklearn.metrics import roc_curve, auc
@@ -9,7 +12,7 @@ from sklearn.preprocessing import label_binarize
 from sklearn.multiclass import OneVsRestClassifier
 
 import sys
-sys.path.append('/n/hutlab12_nobackup/data/ppanini/ppanini')
+sys.path.append('/n/hutlab12_nobackup/data/ppanini/ppanini')#/Users/rah/Documents/Hutlab/ppanini')#
 import ppanini
 from src import config
  
@@ -20,13 +23,17 @@ def evaluation_multi_roc():
     score = dict() 
     
     # list of truth about data or associations, here, is this an important gene?
-    #config.input_table = '/Users/rah/Documents/Hutlab/stool_ppanini.txt'#'/n/hutlab12_nobackup/data/ppanini/DATA/PPANINI_INPUT/stool_ppanini.txt' 
-    truth = [1, 0, 1, 0, 0] # this an example for each gene if it's important use 1 otherwise 0
+    config.input_table = '/n/hutlab12_nobackup/data/ppanini/DATA/PPANINI_INPUT/stool_ppanini.txt' #'/Users/rah/Documents/Hutlab/stool_ppanini.txt'#
+    config.uclust_file = '/Users/rah/Documents/Hutlab/stool_ppanini/stool_final_clusters.uc'
+    with open('/Users/rah/Documents/UniRef90_299_genes.txt') as f:
+        essantial_genes_uniref_id = f.readlines()
+    uniref_id_list = []
+    ground_truth = [1 if (uniref_id in essantial_genes_uniref_id) else 0 for uniref_id in uniref_id_list ] # this an example for each gene if it's important use 1 otherwise 0
     #print config.input_table
     ppanini.run()
-    for b in range(.2, 1.0, .1):
+    for beta in range(.2, 1.0, .1):
          
-        true[b] = truth 
+         
         
         # score of of each association, ppanini score here   
         
@@ -34,14 +41,18 @@ def evaluation_multi_roc():
         # Each gene has a score in the list in the same order as truth
         # get_important_centroids could be used by returning 
         # a list of 1, for prioritized, and 0, for unprioritized genes  
-        #score[b] = ppanini_score(b)
-        ppanini.prioritize_centroids
-        continue
+
+        config.beta = beta
+        prioritize_gene_results = ppanini.prioritize_centroids()
+        uniref_id_list = uniref_id_list[centroids]
+        ground_truth = [1 if (uniref_id in essantial_genes_uniref_id) else 0 for uniref_id in uniref_id_list ]
+        true[beta] = ground_truth
+        
         # an example for scores
-        score[b] = [.6, .25, .55, .15, .18] # 
+        score[beta] = [.6, .25, .55, .15, .18] # 
         
         fpr[new_method], tpr[new_method], _  = roc_curve( true[new_method], score[new_method], pos_label = 1)
-        roc_info.append([str(b),fpr[b], tpr[b]])
+        roc_info.append([str(beta),fpr[beta], tpr[beta]])
     
     roc_plot(roc_info)                              
 def roc_plot(roc_info=None, figure_name='roc_plot_ppanini'):
