@@ -516,7 +516,7 @@ def run():
 	config.all_mean_abund = all_mean_abund
 	config.niche_flag = niche_flag
 def  prioritize_centroids():
-	if niche_flag:
+	if config.niche_flag:
 		imp_centroids = get_important_niche_centroids(config.centroid_prev_abund, config.beta, config.tshld, config.output_folder)
 	else:
 		imp_centroids = get_important_centroids(config.centroid_prev_abund, config.beta, config.tshld, config.output_folder)

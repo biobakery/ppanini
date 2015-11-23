@@ -9,7 +9,7 @@ from sklearn.preprocessing import label_binarize
 from sklearn.multiclass import OneVsRestClassifier
 
 import sys
-sys.path.append('/Users/rah/Documents/Hutlab/ppanini')
+sys.path.append('/n/hutlab12_nobackup/data/ppanini/ppanini')
 import ppanini
 from src import config
  
@@ -22,7 +22,7 @@ def evaluation_multi_roc():
     # list of truth about data or associations, here, is this an important gene?
     #config.input_table = '/Users/rah/Documents/Hutlab/stool_ppanini.txt'#'/n/hutlab12_nobackup/data/ppanini/DATA/PPANINI_INPUT/stool_ppanini.txt' 
     truth = [1, 0, 1, 0, 0] # this an example for each gene if it's important use 1 otherwise 0
-    print config.input_table
+    #print config.input_table
     ppanini.run()
     for b in range(.2, 1.0, .1):
          
