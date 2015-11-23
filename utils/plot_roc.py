@@ -12,7 +12,7 @@ from sklearn.preprocessing import label_binarize
 from sklearn.multiclass import OneVsRestClassifier
 
 import sys
-sys.path.append('/n/hutlab12_nobackup/data/ppanini/ppanini')#/Users/rah/Documents/Hutlab/ppanini')#
+sys.path.append('/Users/rah/Documents/Hutlab/ppanini')#/n/hutlab12_nobackup/data/ppanini/ppanini')
 import ppanini
 from src import config
  
@@ -23,33 +23,25 @@ def evaluation_multi_roc():
     score = dict() 
     
     # list of truth about data or associations, here, is this an important gene?
-    config.input_table = '/n/hutlab12_nobackup/data/ppanini/DATA/PPANINI_INPUT/stool_ppanini.txt' #'/Users/rah/Documents/Hutlab/stool_ppanini.txt'#
+    config.input_table = '/Users/rah/Documents/Hutlab/stool_ppanini.txt'#'/n/hutlab12_nobackup/data/ppanini/DATA/PPANINI_INPUT/stool_ppanini.txt' 
     config.uclust_file = '/Users/rah/Documents/Hutlab/stool_ppanini/stool_final_clusters.uc'
+    
     with open('/Users/rah/Documents/UniRef90_299_genes.txt') as f:
-        essantial_genes_uniref_id = f.readlines()
+        essantial_genes_uniref_id = f.read().splitlines()
+    #print essantial_genes_uniref_id
     uniref_id_list = []
     ground_truth = [1 if (uniref_id in essantial_genes_uniref_id) else 0 for uniref_id in uniref_id_list ] # this an example for each gene if it's important use 1 otherwise 0
     #print config.input_table
     ppanini.run()
-    for beta in range(.2, 1.0, .1):
-         
-         
-        
-        # score of of each association, ppanini score here   
-        
-        # ppanini_score should be implemented an returns list of scores.
-        # Each gene has a score in the list in the same order as truth
-        # get_important_centroids could be used by returning 
-        # a list of 1, for prioritized, and 0, for unprioritized genes  
-
+    for beta in range(.2, 1.0, .1):          
         config.beta = beta
         prioritize_gene_results = ppanini.prioritize_centroids()
-        uniref_id_list = uniref_id_list[centroids]
+        uniref_id_list = config.centroid_prev_abund 
         ground_truth = [1 if (uniref_id in essantial_genes_uniref_id) else 0 for uniref_id in uniref_id_list ]
         true[beta] = ground_truth
-        
+        ppanini_score
         # an example for scores
-        score[beta] = [.6, .25, .55, .15, .18] # 
+        score[beta] = [prioritize_gene_results[centroid]['ppanini_score'] for centroid in uniref_id_list ] # 
         
         fpr[new_method], tpr[new_method], _  = roc_curve( true[new_method], score[new_method], pos_label = 1)
         roc_info.append([str(beta),fpr[beta], tpr[beta]])
