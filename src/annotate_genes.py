@@ -133,7 +133,6 @@ def get_clusters_dict(gene_centroid_clusters_file_path):
 	Output: centroid_gis (dict) {gene_centroid: [List of genes], }'''
 
 	logger.debug('get_clusters_dict '+gene_centroid_clusters_file_path)
-
 	cluster_txt = open(gene_centroid_clusters_file_path)
 	centroid_gis = {}
 	for line in cluster_txt:

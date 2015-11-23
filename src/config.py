@@ -4,10 +4,10 @@
 input_table = '/Users/rah/Documents/Hutlab/stool_ppanini.txt' #None # required 
 output_folder = ''
 gene_catalog = '' 
-uclust_file = False
+uclust_file = ''
 usearch = False
 vsearch = False
-basename = ""
+basename = ''
 log_level = 'DEBUG'
 #threads = 1
 nprocesses = 1 

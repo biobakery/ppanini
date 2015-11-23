@@ -102,7 +102,7 @@ def get_centroids(uniref_dm, gi_dm):
 
 	centroids_fasta = {}
 
-	if not config.uclust_file:
+	if config.uclust_file == '':
 		centroid_gis = get_clusters() #all UniRef90_unknowns are clustered across samples
 	else:
 		centroid_gis = get_centroids_fromUCLUST(gi_dm.keys())
@@ -466,12 +466,12 @@ def read_parameters():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i','--input_table', help='REQUIRED: Gene abundance table with metadata', required=True)
 	parser.add_argument('-o','--output-folder', dest = 'output_folder',  help='Folder containing results', default=False)
-	parser.add_argument('--gene-catalog', dest = 'gene_catalog', default=False, help='GENE CATALOG')
-	parser.add_argument('--uc', default=False, help='UCLUST file containg centroids and clustered genes')
-	parser.add_argument('--usearch', default=False, help='Path to USEARCH') #add to be in path?
-	parser.add_argument('--vsearch', default=False, help='Path to VSEARCH') #add to be in path?
-	parser.add_argument('--basename', default=False,help='BASENAME for all the output files')
-	parser.add_argument('--log-level', dest = log_level,  default='DEBUG', help='Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]')
+	parser.add_argument('--gene-catalog', dest = 'gene_catalog', default='', help='GENE CATALOG')
+	parser.add_argument('--uc', default='', help='UCLUST file containg centroids and clustered genes')
+	parser.add_argument('--usearch', default='', help='Path to USEARCH') #add to be in path?
+	parser.add_argument('--vsearch', default='', help='Path to VSEARCH') #add to be in path?
+	parser.add_argument('--basename', default='',help='BASENAME for all the output files')
+	parser.add_argument('--log-level', dest = 'log_level',  default='DEBUG', help='Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]')
 	parser.add_argument('--threads', default=1, type=int,help='Number of threads')
 	parser.add_argument('--tshld-abund', dest = 'tshld_abund', default=75, type = float,help='[X] Percentile Cutoff for Abundance; Default=75th')
 	parser.add_argument('--tshld-prev', dest = 'tshld_prev', default=75, type =float, help='Percentile cutoff for Prevalence')
@@ -491,10 +491,8 @@ def run():
 	# if not args.bypass_prev_abund:
 	if config.basename =='':
 		config.basename = config.input_table.split('.')[0].split('/')[-1]
-		
 	if config.output_folder == '':
-		config.output_folder = "./"+config.basename
-	print config.basename
+		config.output_folder = config.basename
 	config.temp_folder = config.output_folder+'/'+config.basename+'_temp'
 
 	utilities.create_folders([config.temp_folder, config.output_folder])
@@ -507,7 +505,6 @@ def run():
 						datefmt='%m/%d/%Y %I:%M:%S %p')
 	
 	
-	print config.input_table
 	[uniref_dm, gi_dm, metadata]= read_gene_table(config.input_table)
 	all_centroids = get_centroids(uniref_dm, gi_dm)
 	[centroids_data_matrix, centroids_list] = get_centroids_table(all_centroids, metadata)
