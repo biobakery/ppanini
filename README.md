@@ -52,34 +52,32 @@ export PYTHONPATH=$PYTHONPATH:<INSERT PATH to PPANINI HERE>
 #!python
 
 usage: ppanini.py [-h] -i INPUT_TABLE [-o OUTPUT_FOLDER]
-                  [--gene_catalog GENE_CATALOG] [--uc UC] [--usearch USEARCH]
+                  [--gene-catalog GENE_CATALOG] [--uc UC] [--usearch USEARCH]
                   [--vsearch VSEARCH] [--basename BASENAME]
-                  [--log_level LOG_LEVEL] [--threads THREADS]
-                  [--tshld_abund TSHLD_ABUND] [--tshld_prev TSHLD_PREV]
-                  [--quad QUAD] [--bypass_prev_abund]
-
+                  [--log-level LOG_LEVEL] [--threads THREADS]
+                  [--tshld-abund TSHLD_ABUND] [--tshld-prev TSHLD_PREV]
+                  [--beta BETA]
 required arguments:
   -i INPUT_TABLE, --input_table INPUT_TABLE
                         REQUIRED: Gene abundance table with metadata
 optional arguments:
   -h, --help            show this help message and exit
-  -o OUTPUT_FOLDER, --output_folder OUTPUT_FOLDER
+  -o OUTPUT_FOLDER, --output-folder OUTPUT_FOLDER
                         Folder containing results
-  --gene_catalog GENE_CATALOG
-                        GENE CATALOG (**REQUIRED** if uc file not provided)
-  --uc UC               UCLUST file containg centroids and clustered genes (**REQUIRED** if gene catalog not provided)
-  --usearch USEARCH     Path to USEARCH (**REQUIRED** if gene_catalog present; either USEARCH or VSEARCH)
-  --vsearch VSEARCH     Path to VSEARCH (**REQUIRED** if gene_catalog present; either USEARCH or VSEARCH; If none present, assumes VSEARCH in path)
+  --gene-catalog GENE_CATALOG
+                        GENE CATALOG
+  --uc UC               UCLUST file containg centroids and clustered genes
+  --usearch USEARCH     Path to USEARCH
+  --vsearch VSEARCH     Path to VSEARCH
   --basename BASENAME   BASENAME for all the output files
-  --log_level LOG_LEVEL
+  --log-level LOG_LEVEL
                         Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
   --threads THREADS     Number of threads
-  --tshld_abund TSHLD_ABUND
+  --tshld-abund TSHLD_ABUND
                         [X] Percentile Cutoff for Abundance; Default=75th
-  --tshld_prev TSHLD_PREV
-                        Threshold: val-2*SE > tshld_prev
-  --quad QUAD           Quadrant analysis
-  --bypass_prev_abund   Bypass quantifying abundance and prevalence
+  --tshld-prev TSHLD_PREV
+                        Percentile cutoff for Prevalence
+  --beta BETA           Beta parameter for weights on percentiles
 ```
 
 

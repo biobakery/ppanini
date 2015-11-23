@@ -466,16 +466,16 @@ def read_parameters():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i','--input_table', help='REQUIRED: Gene abundance table with metadata', required=True)
 	parser.add_argument('-o','--output-folder', dest = 'output_folder',  help='Folder containing results', default=False)
-	parser.add_argument('--gene-catalog', dest = 'gene_catalog', default='', help='GENE CATALOG')
-	parser.add_argument('--uc', default='', help='UCLUST file containg centroids and clustered genes')
-	parser.add_argument('--usearch', default='', help='Path to USEARCH') #add to be in path?
-	parser.add_argument('--vsearch', default='', help='Path to VSEARCH') #add to be in path?
-	parser.add_argument('--basename', default='',help='BASENAME for all the output files')
-	parser.add_argument('--log-level', dest = 'log_level',  default='DEBUG', help='Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]')
-	parser.add_argument('--threads', default=1, type=int,help='Number of threads')
-	parser.add_argument('--tshld-abund', dest = 'tshld_abund', default=75, type = float,help='[X] Percentile Cutoff for Abundance; Default=75th')
-	parser.add_argument('--tshld-prev', dest = 'tshld_prev', default=75, type =float, help='Percentile cutoff for Prevalence')
-	parser.add_argument('--beta', default=0.5, help='Beta parameter for weights on percentiles')
+	parser.add_argument('--gene-catalog', dest = 'gene_catalog', default=config.gene_catalog, help='GENE CATALOG')
+	parser.add_argument('--uc', default= config.uclust_file, help='UCLUST file containg centroids and clustered genes')
+	parser.add_argument('--usearch', default = config.usearch, help='Path to USEARCH') #add to be in path?
+	parser.add_argument('--vsearch', default = config.vsearch, help='Path to VSEARCH') #add to be in path?
+	parser.add_argument('--basename', default = config.basename, help='BASENAME for all the output files')
+	parser.add_argument('--log-level', dest = 'log_level',  default=config.log_level, help='Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]')
+	parser.add_argument('--threads', default= config.nprocesses, type=int,help='Number of threads')
+	parser.add_argument('--tshld-abund', dest = 'tshld_abund', default=config.tshld_abund, type = float,help='[X] Percentile Cutoff for Abundance; Default=75th')
+	parser.add_argument('--tshld-prev', dest = 'tshld_prev', default=config.tshld_prev, type =float, help='Percentile cutoff for Prevalence')
+	parser.add_argument('--beta', default=config.beta, help='Beta parameter for weights on percentiles')
 	# parser.add_argument('--bypass-prev-abund', dest = 'bypass_prev_abund', default=False, action='store_true', help='Bypass quantifying abundance and prevalence')
 
 	args = parser.parse_args()
