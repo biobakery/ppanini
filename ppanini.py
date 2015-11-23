@@ -8,11 +8,11 @@ import scipy.stats
 
 from src import utilities
 from src import annotate_genes
+from src import config
 
 logger = logging.getLogger(__name__)
 
-basename = ''
-temp_folder = ''
+temp_folder = config.temp_folder
 
 beta = 0.5
 
@@ -87,7 +87,7 @@ def get_centroids_fromUCLUST(gene_centroid_clusters_file_path, genes):
 
 	return cluster_dict
 
-def get_centroids(uniref_dm, gi_dm, args, uclust_file, gene_catalog, nprocesses):
+def get_centroids(uniref_dm, gi_dm, uclust_file):
 	'''Returns the dict of all centroids containing clusters of gene IDs
 
 	Input:	uniref_dm = {UniRef_XYZ: numpy.array(abundance), ...}
@@ -104,7 +104,7 @@ def get_centroids(uniref_dm, gi_dm, args, uclust_file, gene_catalog, nprocesses)
 	centroids_fasta = {}
 
 	if not uclust_file:
-		centroid_gis = get_clusters(gene_catalog, args, nprocesses) #all UniRef90_unknowns are clustered across samples
+		centroid_gis = get_clusters() #all UniRef90_unknowns are clustered across samples
 	else:
 		centroid_gis = get_centroids_fromUCLUST(uclust_file, gi_dm.keys())
 
@@ -122,7 +122,7 @@ def get_centroids(uniref_dm, gi_dm, args, uclust_file, gene_catalog, nprocesses)
 	return gc_dm
 
 
-def get_clusters(gene_catalog, args, nprocesses): #ONLY FOR THE UNIREF UNANNOTATED
+def get_clusters(): #ONLY FOR THE UNIREF UNANNOTATED
 	'''Returns the dict of unannotated gene centroids containing clusters of genes at 90% similarity
 
 	Input:	gene_catalog = path to all genes catalog}
@@ -133,19 +133,19 @@ def get_clusters(gene_catalog, args, nprocesses): #ONLY FOR THE UNIREF UNANNOTAT
 
 	logger.debug('get_clusters')
 
-	allgenes_file_path = gene_catalog
+	allgenes_file_path = config.gene_catalog
 	gene_centroids_file_path = temp_folder+'/'+basename+'_centroids.fasta'
 	gene_centroid_clusters_file_path = temp_folder+'/'+basename+'_clusters.uc'
 	
 	clust_method = 'vsearch'
 
-	if args.usearch:
-		clust_method = args.usearch
-		annotate_genes.run_uclust(clust_method, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, 0.9, nprocesses)
+	if config.usearch:
+		clust_method = config.usearch
+		annotate_genes.run_uclust(clust_method, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, 0.9)
 	else:
-		if args.vsearch:
-			clust_method = args.usearch
-		annotate_genes.run_vclust(clust_method, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, 0.9, nprocesses)
+		if config.vsearch:
+			clust_method = config.usearch
+		annotate_genes.run_vclust(clust_method, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, 0.9)
 		
 	
 	centroid_gis = annotate_genes.get_clusters_dict(gene_centroid_clusters_file_path)
@@ -341,12 +341,12 @@ def get_important_niche_centroids(centroid_prev_abund, beta, tshld, output_folde
 	imp_centroid_prev_abund_file_path = basename+'_imp_centroid_prev_abund.txt'
 	
 	
-	tshld_abund = tshld[0]
-	tshld_prev = tshld[1]
+	tshld_abund = config.tshld_abund
+	tshld_prev = config.tshld_prev
 	
 	ppanini_score = beta*tshld_prev + (1-beta)*tshld_abund
 
-	logger.debug('get_important_niche_centroids: tshld_prev:'+str(tshld_prev))
+	logger.debug('get_important_niche_centroids: tshld_prev:'+str(config.tshld_prev))
 	logger.debug('get_important_niche_centroids: ppanini_score:'+str(ppanini_score))
 	logger.debug('get_important_niche_centroids: tshld_abund:'+str(tshld_abund))
 	
@@ -380,8 +380,8 @@ def get_important_centroids(centroid_prev_abund, beta, tshld, output_folder):
 
 	imp_centroid_prev_abund_file_path = basename+'_imp_centroid_prev_abund.txt'
 	
-	tshld_prev = tshld[1]
-	tshld_abund = tshld[0]
+	tshld_prev = config.tshld_prev
+	tshld_abund = config.tshld_abund
 	ppanini_score = beta*tshld_prev+(1-beta)*tshld_abund
 	
 	imp_centroids = {}
@@ -463,8 +463,7 @@ def read_prevalence_abundance_table(input_table):
 				alphas_i = alphas_i[0]
 			baseline +=1
 	return [centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag]
-
-if __name__ == '__main__':
+def read_parameters():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i','--input_table', help='REQUIRED: Gene abundance table with metadata', required=True)
 	parser.add_argument('-o','--output-folder', dest = 'output_folder',  help='Folder containing results', default=False)
@@ -474,50 +473,60 @@ if __name__ == '__main__':
 	parser.add_argument('--vsearch', default=False, help='Path to VSEARCH') #add to be in path?
 	parser.add_argument('--basename', default=False,help='BASENAME for all the output files')
 	parser.add_argument('--log-level', dest = log_level,  default='DEBUG', help='Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]')
-	parser.add_argument('--threads', default=1, help='Number of threads')
-	parser.add_argument('--tshld-abund', dest = 'tshld_abund', default=75, help='[X] Percentile Cutoff for Abundance; Default=75th')
-	parser.add_argument('--tshld-prev', dest = 'tshld_prev', default=75, help='Percentile cutoff for Prevalence')
+	parser.add_argument('--threads', default=1, type=int,help='Number of threads')
+	parser.add_argument('--tshld-abund', dest = 'tshld_abund', default=75, type = float,help='[X] Percentile Cutoff for Abundance; Default=75th')
+	parser.add_argument('--tshld-prev', dest = 'tshld_prev', default=75, type =float, help='Percentile cutoff for Prevalence')
 	parser.add_argument('--beta', default=0.5, help='Beta parameter for weights on percentiles')
 	# parser.add_argument('--bypass-prev-abund', dest = 'bypass_prev_abund', default=False, action='store_true', help='Bypass quantifying abundance and prevalence')
 
 	args = parser.parse_args()
-	nprocesses = int(args.threads)
-
-	tshld = [float(args.tshld_abund), float(args.tshld_prev)]
-
-	basename = args.basename
-	input_table = args.input_table
-	uclust_file = args.uc
-	gene_catalog = args.gene_catalog
+	config.nprocesses = args.threads
+	config.basename = args.basename
+	config.input_table = args.input_table
+	config.uclust_file = args.uc
+	config.gene_catalog = args.gene_catalog
 	
-	beta = args.beta
+	config.beta = args.beta
 
-	if not basename:
-		basename = input_table.split('.')[0].split('/')[-1]
+	if not config.basename:
+		config.basename = input_table.split('.')[0].split('/')[-1]
 
 	if not args.output_folder:
-		output_folder = basename
+		config.output_folder = basename
 	else:
-		output_folder = args.output_folder
+		config.output_folder = args.output_folder
 
-	temp_folder = output_folder+'/'+basename+'_temp'
+	temp_folder = config.output_folder+'/'+basename+'_temp'
 
-	utilities.create_folders([temp_folder, output_folder])
+	utilities.create_folders([temp_folder, config.output_folder])
 
-	log_file = output_folder+'/'+basename+'.log'
+	log_file = config.output_folder+'/'+basename+'.log'
 	logging.basicConfig(filename=log_file, \
 						format='%(asctime)s - %(name)s - %(levelname)s: %(message)s', \
 						level=getattr(logging, args.log_level), \
 						filemode='w', \
 						datefmt='%m/%d/%Y %I:%M:%S %p')
+def run():
 	# if not args.bypass_prev_abund:
-	[uniref_dm, gi_dm, metadata]= read_gene_table(input_table)
-	all_centroids = get_centroids(uniref_dm, gi_dm, args, uclust_file, gene_catalog, nprocesses)
+	[uniref_dm, gi_dm, metadata]= read_gene_table(config.input_table)
+	all_centroids = get_centroids(uniref_dm, gi_dm, args, uclust_file)
 	[centroids_data_matrix, centroids_list] = get_centroids_table(all_centroids, metadata)
-	[centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag] = get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, beta)
+	[centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag] = get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, config.beta)
 	# else:
-	# 	[centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag] = read_prevalence_abundance_table(input_table, beta)
+	# 	[centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag] = read_prevalence_abundance_table(input_table, config.beta)
+	config.centroid_prev_abund = centroid_prev_abund
+	config.all_prevalence = all_prevalence
+	config.all_mean_abund = all_mean_abund
+	config.niche_flag = niche_flag
+def  prioritize_centroids():
 	if niche_flag:
-		imp_centroids = get_important_niche_centroids(centroid_prev_abund, beta, tshld, output_folder)
+		imp_centroids = get_important_niche_centroids(config.centroid_prev_abund, config.beta, config.tshld, config.output_folder)
 	else:
-		imp_centroids = get_important_centroids(centroid_prev_abund, beta, tshld, output_folder)
+		imp_centroids = get_important_centroids(config.centroid_prev_abund, config.beta, config.tshld, config.output_folder)
+	
+
+if __name__ == '__main__':
+	read_parameters()
+	run()
+	prioritize_centroids()
+	

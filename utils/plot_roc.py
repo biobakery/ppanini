@@ -7,6 +7,7 @@ from sklearn.metrics import roc_curve, auc
 from sklearn.cross_validation import train_test_split
 from sklearn.preprocessing import label_binarize
 from sklearn.multiclass import OneVsRestClassifier
+import ppanini
  
 def evaluation_multi_roc():
     fpr = dict()
@@ -14,8 +15,10 @@ def evaluation_multi_roc():
     true = dict()
     score = dict() 
     
-    # list of truth about data or associations, here, is this an important gene? 
+    # list of truth about data or associations, here, is this an important gene?
+    config.input_table = '/n/hutlab12_nobackup/data/ppanini/DATA/PPANINI_INPUT/stool_ppanini.txt' 
     truth = [1, 0, 1, 0, 0] # this an example for each gene if it's important use 1 otherwise 0
+    ppanini.run()
     for b in range(.2, 1.0, .1):
          
         true[b] = truth 
@@ -27,7 +30,7 @@ def evaluation_multi_roc():
         # get_important_centroids could be used by returning 
         # a list of 1, for prioritized, and 0, for unprioritized genes  
         #score[b] = ppanini_score(b)
-        
+        ppanini.prioritize_centroids
         # an example for scores
         score[b] = [.6, .25, .55, .15, .18] # 
         
