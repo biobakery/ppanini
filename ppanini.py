@@ -46,16 +46,18 @@ def read_gene_table(gene_table_fname):
 			data_row = numpy.array([float(i) for i in split_i[1:]])
 			#print 'data_row: ', data_row
 			if 'UniRef90_unknown' == u90_annot:
-				if 'UniRef50_unknown' == u50_annot:
-					try: #same name
-						gis_dm[annot[0]] += data_row
-					except:
-						gis_dm[annot[0]] = data_row
+				#if 'UniRef50_unknown' == u50_annot:
+				try: #same name
+					gis_dm[annot[0]] += data_row
+				except:
+					gis_dm[annot[0]] = data_row
+				'''
 				else: #same uniref90 id
 					try:
 						uniref_dm[u50_annot] += data_row
 					except KeyError:
 						uniref_dm[u50_annot] = data_row
+				'''
 			else: #same uniref90 id
 				try:
 					uniref_dm[u90_annot] += data_row
