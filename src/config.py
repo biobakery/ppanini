@@ -22,5 +22,6 @@ all_prevalence = None
 all_mean_abund = None
 niche_flag = None
 temp_folder = ''
+centroids_list = ''
 
 

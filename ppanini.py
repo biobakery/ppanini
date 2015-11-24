@@ -39,19 +39,28 @@ def read_gene_table(gene_table_fname):
 		else:
 			split_i = line.split('\t')
 			annot = split_i[0].split('|') #geneID column split 
+			print annot
 			u90_annot = [i for i in annot if 'UniRef90' in i][0]
-			
+			u50_annot = [i for i in annot if 'UniRef50' in i][0]
+			#print 'u50_annot: ',u50_annot
 			data_row = numpy.array([float(i) for i in split_i[1:]])
-			
+			#print 'data_row: ', data_row
 			if 'UniRef90_unknown' == u90_annot:
-				try: #same name
-					gis_dm[annot[0]] += data_row
-				except:
-					gis_dm[annot[0]] = data_row
+				if 'UniRef50_unknown' == u50_annot:
+					try: #same name
+						gis_dm[annot[0]] += data_row
+					except:
+						gis_dm[annot[0]] = data_row
+				else: #same uniref90 id
+					try:
+						uniref_dm[u50_annot] += data_row
+					except KeyError:
+						uniref_dm[u50_annot] = data_row
 			else: #same uniref90 id
 				try:
 					uniref_dm[u90_annot] += data_row
 				except KeyError:
+					#print "Data row",data_row
 					uniref_dm[u90_annot] = data_row		
 
 	return [uniref_dm, gis_dm, metadata]
@@ -176,7 +185,7 @@ def get_centroids_table(all_centroids, metadata):
 	norm_data_matrix = centroids_data_matrix/sum(centroids_data_matrix)
 	norm_data_matrix = norm_data_matrix*1e6
 
-	gene_centroids_table_file_path = config.temp_folder+'/'+basename+'_gene_centroids_table.txt'
+	gene_centroids_table_file_path = config.temp_folder+'/'+config.basename+'_gene_centroids_table.txt'
 	
 	with open(gene_centroids_table_file_path,'w') as foo:
 		foo.writelines(metadata)
@@ -200,7 +209,7 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, be
 	
 	logger.debug('get_prevalence_abundance')
 
-	centroid_prev_abund_file_path = config.temp_folder+'/'+basename+'_centroid_prev_abund.txt'
+	centroid_prev_abund_file_path = config.temp_folder+'/'+config.basename+'_centroid_prev_abund.txt'
 	
 	[niche_line, ind] = utilities.is_present(metadata, '#NICHE')
 	
@@ -213,19 +222,31 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, be
 		centroid_prev_abund = {}
 		all_prevalence = [] 
 		all_abund = []
-		
-		for centroid in centroids_data_matrix:
+		print centroids_data_matrix
+		for iter,centroid in enumerate(centroids_data_matrix):
+			'''
+			befor was
+			for centroid in centroids_data_matrix:
+			'''
 			#abund only where the gene is present in sample
+			print 'cenetroid_id', centroids_list[iter], 'cenroid', centroid
+			abund_i = [i for i in  centroid if i > 0]
+			'''
+			before was  
 			abund_i = [i for i in  centroids_data_matrix[centroid] if i > 0]
-			
-			abund_score = numpy.mean(numpy.array(abund_i))
+			'''
+			abund_score = numpy.mean(abund_i)
+			prev_score = float(sum(centroid > 0)/\
+						 float(len(centroid)))
+			''' before was 
 			prev_score = float(sum(numpy.array(centroids_data_matrix[centroid]) > 0)/\
 						 float(len(centroids_data_matrix[centroid])))
+						 '''
 
-			centroid_prev_abund[centroid] = {'mean_abundance': abund_score, \
+			centroid_prev_abund[centroids_list[iter]] = {'mean_abundance': abund_score, \
 											 'prevalence': prev_score}
 			
-			all_prevalence += [centroid_prev_abund[centroid]['prevalence']]
+			all_prevalence += [centroid_prev_abund[centroids_list[iter]]['prevalence']]
 			all_abund += abund_i
 		
 		all_prevalence = sorted(all_prevalence)
@@ -235,8 +256,9 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, be
 			p_score = beta*(scipy.stats.percentileofscore(all_prevalence, centroid_prev_abund[centroid]['prevalence']))+\
 				     (1-beta)*(scipy.stats.percentileofscore(all_abund, centroid_prev_abund[centroid]['mean_abundance']))
 			centroid_prev_abund[centroid]['ppanini_score'] = p_score
-		write_prev_abund_matrix(centroid_prev_abund, centroid_prev_abund_file_path)
 		
+		config.centroids_list = centroids_list
+		write_prev_abund_matrix(centroid_prev_abund, centroid_prev_abund_file_path)
 		return [centroid_prev_abund, all_prevalence, all_abund, niche_flag]
 
 def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_line, beta):
@@ -254,7 +276,7 @@ def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_
 
 	logger.debug('get_niche_prevalence_abundance')
 	
-	centroid_prev_abund_file_path = config.temp_folder+'/'+basename+'_centroid_prev_abund.txt'
+	centroid_prev_abund_file_path = config.temp_folder+'/'+config.basename+'_centroid_prev_abund.txt'
 	
 	niches = {}
 	split_i = [re.sub('[\r\t\n]', '', i) for i in niche_line.split('\t')[1:]]
@@ -527,7 +549,7 @@ def  prioritize_centroids():
 		imp_centroids = get_important_niche_centroids()
 	else:
 		imp_centroids = get_important_centroids()
-	
+	return imp_centroids
 
 if __name__ == '__main__':
 	read_parameters()

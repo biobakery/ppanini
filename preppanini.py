@@ -194,8 +194,7 @@ if __name__ == '__main__':
 											whole_genome_catalog, \
 											gene_centroids_file_path, \
 											gene_centroid_clusters_file_path, \
-											0.9, \
-											nprocesses)
+											0.9)
 			else:
 				raise Exception('No clustering software found: Please use --vsearch or --usearch to specify the path to software')
 			genome_catalog = gene_centroids_file_path
