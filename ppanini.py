@@ -122,10 +122,11 @@ def get_centroids(uniref_dm, gi_dm):
 	gc_dm = {}
 	for centroid in centroid_gis:
 		for gene in centroid_gis[centroid]:
-			try:
-				gc_dm[centroid] += gi_dm[gene]
-			except:
-				gc_dm[centroid] = gi_dm[gene]
+			if gene in gi_dm:
+				try:
+					gc_dm[centroid] += gi_dm[gene]
+				except:
+					gc_dm[centroid] = gi_dm[gene]
 	
 	for centroid in uniref_dm:
 		gc_dm[centroid] = uniref_dm[centroid]
