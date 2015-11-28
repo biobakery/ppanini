@@ -36,7 +36,7 @@ def read_gene_table(gene_table_fname):
 	for line in gene_table:
 		#if count == 35000:
 		#	break
-		count +=1
+		#count +=1
 		if line.startswith('#'):
 			metadata += [line]
 		else:

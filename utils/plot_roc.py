@@ -68,7 +68,10 @@ def evaluation_multi_roc():
         '''
         true[beta] = ground_truth
         #print  true[beta]
-        score[beta] =[config.centroid_prev_abund[gene_id]['ppanini_score']['GUT'] for gene_id in config.centroids_list ] # 
+        if config.niche_flag:
+            score[beta] =[config.centroid_prev_abund[gene_id]['ppanini_score'][config.centroid_prev_abund[gene_id]['ppanini_score'].keys()[0]] for gene_id in config.centroids_list ]
+        else:
+            score[beta] =[config.centroid_prev_abund[gene_id]['ppanini_score'] for gene_id in config.centroids_list ] # 
         # score[beta] =[beta*2/(i+1) for i in range(len(true[beta]))]
         #print score[beta]
         assert(len(true[beta])==len(score[beta])) 
