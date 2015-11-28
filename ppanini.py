@@ -32,14 +32,17 @@ def read_gene_table(gene_table_fname):
 	gene_table = open(gene_table_fname) 
 	metadata = []
 	uniref_dm, gis_dm = {}, {}
-	
+	count = 0
 	for line in gene_table:
+		#if count == 35000:
+		#	break
+		count +=1
 		if line.startswith('#'):
 			metadata += [line]
 		else:
 			split_i = line.split('\t')
 			annot = split_i[0].split('|') #geneID column split 
-			print annot
+			#print annot
 			u90_annot = [i for i in annot if 'UniRef90' in i][0]
 			u50_annot = [i for i in annot if 'UniRef50' in i][0]
 			#print 'u50_annot: ',u50_annot
@@ -215,24 +218,25 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, be
 	centroid_prev_abund_file_path = config.temp_folder+'/'+config.basename+'_centroid_prev_abund.txt'
 	
 	[niche_line, ind] = utilities.is_present(metadata, '#NICHE')
-	
+	#print niche_line
 	if niche_line:
 		niche_flag = True
-		[centroid_prev_abund, all_alpha_prev, all_mean_abund] = get_niche_prevalence_abundance (centroids_data_matrix, centroids_list, niche_line, beta)
-		return [centroid_prev_abund, all_alpha_prev, all_mean_abund, niche_flag]
+		centroid_prev_abund = get_niche_prevalence_abundance (centroids_data_matrix, centroids_list, niche_line, beta)
+		
+		#return centroid_prev_abund#[centroid_prev_abund, all_alpha_prev, all_mean_abund, niche_flag]
 	else:
 		niche_flag = False
 		centroid_prev_abund = {}
 		all_prevalence = [] 
 		all_abund = []
-		print centroids_data_matrix
-		for iter,centroid in enumerate(centroids_data_matrix):
+		#print centroids_data_matrix
+		for iter, centroid in enumerate(centroids_data_matrix):
 			'''
 			befor was
 			for centroid in centroids_data_matrix:
 			'''
 			#abund only where the gene is present in sample
-			print 'cenetroid_id', centroids_list[iter], 'cenroid', centroid
+			#print 'cenetroid_id', centroids_list[iter], 'cenroid', centroid
 			abund_i = [i for i in  centroid if i > 0]
 			'''
 			before was  
@@ -251,6 +255,8 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, be
 			
 			all_prevalence += [centroid_prev_abund[centroids_list[iter]]['prevalence']]
 			all_abund += abund_i
+			#config.all_prevalence = all_prevalence
+			#config.all_mean_abund = all_abund
 		
 		all_prevalence = sorted(all_prevalence)
 		all_abund = sorted(all_abund)
@@ -260,9 +266,10 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, be
 				     (1-beta)*(scipy.stats.percentileofscore(all_abund, centroid_prev_abund[centroid]['mean_abundance']))
 			centroid_prev_abund[centroid]['ppanini_score'] = p_score
 		
-		config.centroids_list = centroids_list
-		write_prev_abund_matrix(centroid_prev_abund, centroid_prev_abund_file_path)
-		return [centroid_prev_abund, all_prevalence, all_abund, niche_flag]
+	write_prev_abund_matrix(centroid_prev_abund, centroid_prev_abund_file_path)
+	
+	config.niche_flag = niche_flag
+	return centroid_prev_abund #[centroid_prev_abund, all_prevalence, all_abund, niche_flag]
 
 def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_line, beta):
 	'''Returns the dict of centroids with their prevalence and abundance
@@ -345,6 +352,8 @@ def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_
 		for niche in centroid_prev_abund[centroid]['alpha_prevalence']:
 			dict_to_print[centroid]['alpha_prevalence_'+niche] = centroid_prev_abund[centroid]['alpha_prevalence'][niche]
 			dict_to_print[centroid]['ppanini_score_'+niche] = centroid_prev_abund[centroid]['ppanini_score'][niche]
+	#config.all_prevalence = all_prevalence
+	#config.all_mean_abund = all_alpha_abund
 	write_prev_abund_matrix(dict_to_print, centroid_prev_abund_file_path)
 	
 	return centroid_prev_abund
@@ -366,7 +375,7 @@ def get_important_niche_centroids():
 	beta = config.beta
 	tshld = config.tshld
 	output_folder = config.output_folder
-	imp_centroid_prev_abund_file_path = basename+'_imp_centroid_prev_abund.txt'
+	imp_centroid_prev_abund_file_path = config.basename+'_imp_centroid_prev_abund.txt'
 	
 	
 	tshld_abund = config.tshld_abund
@@ -535,23 +544,39 @@ def run():
 						level=getattr(logging, config.log_level), \
 						filemode='w', \
 						datefmt='%m/%d/%Y %I:%M:%S %p')
-	
-	
+	if config.verbose =='DEBUG':
+		print "Reading the gene table..."
 	[uniref_dm, gi_dm, metadata]= read_gene_table(config.input_table)
+	if config.verbose =='DEBUG':
+		print "Reading the gene table is done!"
+	if config.verbose =='DEBUG':
+		print "Getting centroids..."
 	all_centroids = get_centroids(uniref_dm, gi_dm)
+	if config.verbose =='DEBUG':
+		print "Getting centroids is done!"
+	if config.verbose =='DEBUG':
+		print "Getting centroids table..."
 	[centroids_data_matrix, centroids_list] = get_centroids_table(all_centroids, metadata)
-	[centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag] = get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, config.beta)
+	config.centroids_list = centroids_list
+	if config.verbose =='DEBUG':
+		print "Getting centroids table is done!"
+	if config.verbose =='DEBUG':
+		print "Getting prevelance abundnace..."
+	centroid_prev_abund = get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, config.beta)
+	if config.verbose =='DEBUG':
+		print "Getting prevelance abundnace is done!"
 	# else:
 	# 	[centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag] = read_prevalence_abundance_table(input_table, config.beta)
 	config.centroid_prev_abund = centroid_prev_abund
-	config.all_prevalence = all_prevalence
-	config.all_mean_abund = all_mean_abund
-	config.niche_flag = niche_flag
 def  prioritize_centroids():
+	if config.verbose =='DEBUG':
+		print "Prioritize centroids..."
 	if config.niche_flag:
 		imp_centroids = get_important_niche_centroids()
 	else:
 		imp_centroids = get_important_centroids()
+	if config.verbose =='DEBUG':
+		print 'Prioritize centroids is done!'
 	return imp_centroids
 
 if __name__ == '__main__':
