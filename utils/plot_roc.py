@@ -43,7 +43,7 @@ def evaluation_multi_roc():
     #ground_truth = [1 if (uniref_id in essantial_genes_uniref_id) else 0 for uniref_id in uniref_id_list ] # this an example for each gene if it's important use 1 otherwise 0
     #print config.input_table
     if config.verbose =='DEBUG':
-        print "Start running!"
+        print "Start Evaluating PPANINI Score !!!"
     ppanini.run()
     for b in range(2, 10, 1):
         beta = float(b/10.0)          

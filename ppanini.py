@@ -34,9 +34,9 @@ def read_gene_table(gene_table_fname):
 	uniref_dm, gis_dm = {}, {}
 	count = 0
 	for line in gene_table:
-		#if count == 35000:
+		#if count == 1000:
 		#	break
-		#count +=1
+		count +=1
 		if line.startswith('#'):
 			metadata += [line]
 		else:
@@ -67,7 +67,8 @@ def read_gene_table(gene_table_fname):
 				except KeyError:
 					#print "Data row",data_row
 					uniref_dm[u90_annot] = data_row		
-
+	if config.verbose == 'DEBUG':
+		print ("Gene Table contains %s genes." % count)
 	return [uniref_dm, gis_dm, metadata]
 
 def get_centroids_fromUCLUST(genes):
@@ -544,22 +545,26 @@ def run():
 						level=getattr(logging, config.log_level), \
 						filemode='w', \
 						datefmt='%m/%d/%Y %I:%M:%S %p')
+	
 	if config.verbose =='DEBUG':
 		print "Reading the gene table..."
 	[uniref_dm, gi_dm, metadata]= read_gene_table(config.input_table)
 	if config.verbose =='DEBUG':
 		print "Reading the gene table is done!"
+	
 	if config.verbose =='DEBUG':
 		print "Getting centroids..."
 	all_centroids = get_centroids(uniref_dm, gi_dm)
 	if config.verbose =='DEBUG':
 		print "Getting centroids is done!"
+	
 	if config.verbose =='DEBUG':
 		print "Getting centroids table..."
 	[centroids_data_matrix, centroids_list] = get_centroids_table(all_centroids, metadata)
 	config.centroids_list = centroids_list
 	if config.verbose =='DEBUG':
 		print "Getting centroids table is done!"
+	
 	if config.verbose =='DEBUG':
 		print "Getting prevelance abundnace..."
 	centroid_prev_abund = get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, config.beta)
