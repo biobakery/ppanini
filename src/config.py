@@ -24,5 +24,6 @@ centroid_prev_abund = None
 niche_flag = None
 temp_folder = ''
 centroids_list = ''
+essantial_genes_uniref90_id = None
 
 

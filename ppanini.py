@@ -33,9 +33,10 @@ def read_gene_table(gene_table_fname):
 	metadata = []
 	uniref_dm, gis_dm = {}, {}
 	count = 0
+	flag =False
 	for line in gene_table:
-		#if count == 1000:
-		#	break
+		if count == 220000:
+			break
 		count +=1
 		if line.startswith('#'):
 			metadata += [line]
@@ -48,25 +49,31 @@ def read_gene_table(gene_table_fname):
 			#print 'u50_annot: ',u50_annot
 			data_row = numpy.array([float(i) for i in split_i[1:]])
 			#print 'data_row: ', data_row
-			if 'UniRef90_unknown' == u90_annot:
-				#if 'UniRef50_unknown' == u50_annot:
-				try: #same name
-					gis_dm[annot[0]] += data_row
-				except:
-					gis_dm[annot[0]] = data_row
-				'''
+			if flag or u90_annot in config. essantial_genes_uniref90_id:
+				flag = True
+				print "Wow"
+				#count +=1
+				if 'UniRef90_unknown' == u90_annot:
+					#if 'UniRef50_unknown' == u50_annot:
+					try: #same name
+						gis_dm[annot[0]] += data_row
+					except:
+						gis_dm[annot[0]] = data_row
+					'''
+					else: #same uniref90 id
+						try:
+							uniref_dm[u50_annot] += data_row
+						except KeyError:
+							uniref_dm[u50_annot] = data_row
+					'''
 				else: #same uniref90 id
 					try:
-						uniref_dm[u50_annot] += data_row
+						uniref_dm[u90_annot] += data_row
 					except KeyError:
-						uniref_dm[u50_annot] = data_row
-				'''
-			else: #same uniref90 id
-				try:
-					uniref_dm[u90_annot] += data_row
-				except KeyError:
-					#print "Data row",data_row
-					uniref_dm[u90_annot] = data_row		
+						#print "Data row",data_row
+						uniref_dm[u90_annot] = data_row	
+			else:
+				continue	
 	if config.verbose == 'DEBUG':
 		print ("Gene Table contains %s genes." % count)
 	return [uniref_dm, gis_dm, metadata]

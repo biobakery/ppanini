@@ -33,12 +33,14 @@ def evaluation_multi_roc():
     config.uclust_file = '/Users/rah/Documents/Hutlab/stool_ppanini/stool_final_clusters.uc'
     
     config.output_folder = 'myOutput2'
-    with open('/Users/rah/Documents/UniRef50_299_genes.txt') as f:
-        essantial_genes_uniref50_id = f.read().splitlines()
-    with open('/Users/rah/Documents/UniRef90_299_genes.txt') as f:
-        essantial_genes_uniref90_id = f.read().splitlines()
-    essantial_genes_uniref_id = essantial_genes_uniref90_id +essantial_genes_uniref50_id
-    #print essantial_genes_uniref_id
+    #with open('/Users/rah/Documents/UniRef50_299_genes.txt') as f:
+    #    essantial_genes_uniref50_id = f.read().splitlines()
+    with open('/Users/rah/Documents/Hutlab/UniRef90_output_299_gene.m8') as f:
+        lines = f.read().splitlines()
+    essantial_genes_uniref90_id = [line.split('\t')[1] for line in lines]
+    config.essantial_genes_uniref90_id = essantial_genes_uniref90_id
+    #essantial_genes_uniref_id = essantial_genes_uniref90_id +essantial_genes_uniref50_id
+    #print len(essantial_genes_uniref90_id)
     uniref_id_list = []
     #ground_truth = [1 if (uniref_id in essantial_genes_uniref_id) else 0 for uniref_id in uniref_id_list ] # this an example for each gene if it's important use 1 otherwise 0
     #print config.input_table
@@ -57,7 +59,7 @@ def evaluation_multi_roc():
         #print "Essential genes: ",essantial_genes_uniref_id
         #print "**********************************************************************"
         #print "Centroids list: ", config.centroids_list
-        ground_truth = [1 if gene_id  in essantial_genes_uniref_id else 0 for gene_id in config.centroids_list ]
+        ground_truth = [1 if gene_id  in essantial_genes_uniref90_id else 0 for gene_id in config.centroids_list ]
         '''ground_truth = []
         for gene_id in config.centroids_list:
             if gene_id in essantial_genes_uniref_id:
