@@ -270,8 +270,8 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, be
 		all_abund = sorted(all_abund)
 		
 		for centroid in centroid_prev_abund:
-			p_score = beta*(scipy.stats.percentileofscore(all_prevalence, centroid_prev_abund[centroid]['prevalence']))+\
-				     (1-beta)*(scipy.stats.percentileofscore(all_abund, centroid_prev_abund[centroid]['mean_abundance']))
+			p_score = 1/((1/(beta*(scipy.stats.percentileofscore(all_prevalence, centroid_prev_abund[centroid]['prevalence']))))+\
+				     (1/((1-beta)*(scipy.stats.percentileofscore(all_abund, centroid_prev_abund[centroid]['mean_abundance'])))))
 			centroid_prev_abund[centroid]['ppanini_score'] = p_score
 		
 	write_prev_abund_matrix(centroid_prev_abund, centroid_prev_abund_file_path)
@@ -349,8 +349,8 @@ def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_
 	for centroid in centroid_prev_abund:
 		p_score = {}
 		for niche in centroid_prev_abund[centroid]['alpha_prevalence']:
-			p_score[niche] = (beta)*scipy.stats.percentileofscore(all_alpha_prev[niche], centroid_prev_abund[centroid]['alpha_prevalence'][niche])+\
-															  (1-beta)*scipy.stats.percentileofscore(all_alpha_abund, centroid_prev_abund[centroid]['mean_abundance'])
+			p_score[niche] = 1/((1/((beta)*scipy.stats.percentileofscore(all_alpha_prev[niche], centroid_prev_abund[centroid]['alpha_prevalence'][niche])))+\
+															  (1/((1-beta)*scipy.stats.percentileofscore(all_alpha_abund, centroid_prev_abund[centroid]['mean_abundance']))))
 			centroid_prev_abund[centroid]['ppanini_score'] = p_score
 
 	dict_to_print = {}
@@ -389,7 +389,7 @@ def get_important_niche_centroids():
 	tshld_abund = config.tshld_abund
 	tshld_prev = config.tshld_prev
 	
-	ppanini_score = beta*tshld_prev + (1-beta)*tshld_abund
+	ppanini_score = 1/((1/(beta*tshld_prev)) + (1/((1-beta)*tshld_abund)))
 
 	logger.debug('get_important_niche_centroids: tshld_prev:'+str(config.tshld_prev))
 	logger.debug('get_important_niche_centroids: ppanini_score:'+str(ppanini_score))
@@ -428,7 +428,7 @@ def get_important_centroids():
 	
 	tshld_prev = config.tshld_prev
 	tshld_abund = config.tshld_abund
-	ppanini_score = beta*tshld_prev+(1-beta)*tshld_abund
+	ppanini_score =  1/((1/(beta*tshld_prev)) + (1/((1-beta)*tshld_abund)))
 	
 	imp_centroids = {}
 
