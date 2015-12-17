@@ -12,8 +12,11 @@ from sklearn.metrics import roc_curve, auc
 from sklearn.cross_validation import train_test_split
 from sklearn.preprocessing import label_binarize
 from sklearn.multiclass import OneVsRestClassifier
-
+import scipy.stats
+import math
+from scipy.stats import percentileofscore
 import sys
+
 sys.path.append('/Users/rah/Documents/Hutlab/ppanini')#/n/hutlab12_nobackup/data/ppanini/ppanini')
 import ppanini
 from src import config
@@ -35,10 +38,13 @@ def evaluation_multi_roc():
     config.output_folder = 'myOutput2'
     #with open('/Users/rah/Documents/UniRef50_299_genes.txt') as f:
     #    essantial_genes_uniref50_id = f.read().splitlines()
+    with open('/Users/rah/Documents/Hutlab/UniRef90_output_deg_p_gene.m8') as f:
+        lines = f.read().splitlines()
+    essantial_genes_uniref90_id_deg = [line.split('\t')[1] for line in lines]
     with open('/Users/rah/Documents/Hutlab/UniRef90_output_299_gene.m8') as f:
         lines = f.read().splitlines()
-    essantial_genes_uniref90_id = [line.split('\t')[1] for line in lines]
-    config.essantial_genes_uniref90_id = essantial_genes_uniref90_id
+    essantial_genes_uniref90_id_299 = [line.split('\t')[1] for line in lines]
+    #config.essantial_genes_uniref90_id = essantial_genes_uniref90_id
     #essantial_genes_uniref_id = essantial_genes_uniref90_id +essantial_genes_uniref50_id
     #print len(essantial_genes_uniref90_id)
     uniref_id_list = []
@@ -46,11 +52,34 @@ def evaluation_multi_roc():
     #print config.input_table
     if config.verbose =='DEBUG':
         print "Start Evaluating PPANINI Score !!!"
-    ppanini.run()
-    for b in range(2, 10, 1):
-        beta = float(b/10.0)          
+    #ppanini.run()
+    with open('/Users/rah/Documents/Hutlab/ppanini/myOutput2/stool_ppanini050715_imp_centroid_prev_abund.txt') as f:
+        lines2 = f.read().splitlines()
+    config.centroids_list = [line.split('\t')[0] for line in lines2]
+    prev = [line.split('\t')[2] for line in lines2]
+    abun = [line.split('\t')[3] for line in lines2]
+    n =10000
+    config.centroids_list = config.centroids_list[1:n]
+    #print config.centroids_list[0:200]
+    prev = prev[1:n]
+    prev = [float(val) for val in prev]
+    
+    sorted_prev = sorted(prev)
+    abun = abun[1:n]
+    abun = [float(val) for val in abun]
+    sorted_abun = sorted(abun)
+    #print prev[0:101]
+    #print abun[0:]
+    ground_truth = [1 if (gene_id  in essantial_genes_uniref90_id_299 and\
+                           gene_id in essantial_genes_uniref90_id_deg) else 0 for gene_id in config.centroids_list ]
+    for b in range(1, 10, 1):
+        beta = float(b/10.0)         
         config.beta = beta
-        prioritize_results = ppanini.prioritize_centroids()
+        #scipy.stats.rankdata()
+        score[beta] = [1/((1/((beta)*scipy.stats.percentileofscore(sorted_prev, prev[i])))+\
+                      (1/((1-beta)*scipy.stats.percentileofscore(sorted_abun, abun[i])))) for i in range(len(prev))]
+        #prioritize_results = ppanini.prioritize_centroids()
+        #print "prioritize_results", prioritize_results
         #print config.centroids_list
         #print prioritize_gene_results
         #uniref90_id_list = [id.split('|')[1] for id in config.centroid_prev_abund]
@@ -59,7 +88,7 @@ def evaluation_multi_roc():
         #print "Essential genes: ",essantial_genes_uniref_id
         #print "**********************************************************************"
         #print "Centroids list: ", config.centroids_list
-        ground_truth = [1 if gene_id  in essantial_genes_uniref90_id else 0 for gene_id in config.centroids_list ]
+        
         '''ground_truth = []
         for gene_id in config.centroids_list:
             if gene_id in essantial_genes_uniref_id:
@@ -69,13 +98,14 @@ def evaluation_multi_roc():
                 ground_truth.append(1)
         '''
         true[beta] = ground_truth
-        #print  true[beta]
-        if config.niche_flag:
+        #print "ground_truth", scipy.stats.rankdata(score[beta])
+        '''if config.niche_flag:
             score[beta] =[config.centroid_prev_abund[gene_id]['ppanini_score'][config.centroid_prev_abund[gene_id]['ppanini_score'].keys()[0]] for gene_id in config.centroids_list ]
         else:
             score[beta] =[config.centroid_prev_abund[gene_id]['ppanini_score'] for gene_id in config.centroids_list ] # 
+        '''
         # score[beta] =[beta*2/(i+1) for i in range(len(true[beta]))]
-        #print score[beta]
+        #print "score", score[beta]
         assert(len(true[beta])==len(score[beta])) 
         fpr[beta], tpr[beta], _  = roc_curve( true[beta], score[beta], pos_label = 1)
         roc_info.append([str(beta),fpr[beta], tpr[beta]])

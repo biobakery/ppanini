@@ -35,7 +35,7 @@ def read_gene_table(gene_table_fname):
 	count = 0
 	flag =False
 	for line in gene_table:
-		if count == 220000:
+		if count == 350000:
 			break
 		count +=1
 		if line.startswith('#'):
@@ -51,7 +51,7 @@ def read_gene_table(gene_table_fname):
 			#print 'data_row: ', data_row
 			if flag or u90_annot in config. essantial_genes_uniref90_id:
 				flag = True
-				print "Wow"
+				print 'Essential!'
 				#count +=1
 				if 'UniRef90_unknown' == u90_annot:
 					#if 'UniRef50_unknown' == u50_annot:
@@ -72,8 +72,7 @@ def read_gene_table(gene_table_fname):
 					except KeyError:
 						#print "Data row",data_row
 						uniref_dm[u90_annot] = data_row	
-			else:
-				continue	
+				
 	if config.verbose == 'DEBUG':
 		print ("Gene Table contains %s genes." % count)
 	return [uniref_dm, gis_dm, metadata]
@@ -574,7 +573,7 @@ def run():
 	
 	if config.verbose =='DEBUG':
 		print "Getting prevelance abundnace..."
-	centroid_prev_abund = get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, config.beta)
+	centroid_prev_abund = get_prevalence_abundance(centroids_data_matrix, centroids_list = centroids_list, metadata = metadata, beta = config.beta)
 	if config.verbose =='DEBUG':
 		print "Getting prevelance abundnace is done!"
 	# else:

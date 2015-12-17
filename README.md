@@ -1,8 +1,9 @@
-Shafquat, Afrah
+Afrah Shafquat and Gholamali Rahnavard
 
 [shafquat@hsph.harvard.edu](mailto:shafquat@hsph.harvard.edu)
+[rahnavar@hsph.harvard.edu](mailto:rahnavar@hsph.harvard.edu)
 
-July 10, 2015
+Dec 17, 2015
 
 #**PPANINI: Prioritization and Prediction of functional Annotations for Novel and Important genes via automated data Network Integration**
 
@@ -57,11 +58,11 @@ usage: ppanini.py [-h] -i INPUT_TABLE [-o OUTPUT_FOLDER]
                   [--log-level LOG_LEVEL] [--threads THREADS]
                   [--tshld-abund TSHLD_ABUND] [--tshld-prev TSHLD_PREV]
                   [--beta BETA]
-required arguments:
-  -i INPUT_TABLE, --input_table INPUT_TABLE
-                        REQUIRED: Gene abundance table with metadata
+
 optional arguments:
   -h, --help            show this help message and exit
+  -i INPUT_TABLE, --input_table INPUT_TABLE
+                        REQUIRED: Gene abundance table with metadata
   -o OUTPUT_FOLDER, --output-folder OUTPUT_FOLDER
                         Folder containing results
   --gene-catalog GENE_CATALOG
@@ -146,32 +147,32 @@ geneID_XYZ  0.05  0.35  0.50   0.42
 #!cmd
 
 usage: preppanini.py [-h] -m MAPPER_FILE [--basename BASENAME]
-[--bypass-abundance] [--bypass-annotation]
-[--bypass-clust] [--bypass-write-table]
-[--usearch USEARCH] [--vsearch VSEARCH]
-[--diamond DIAMOND] [--rapsearch RAPSEARCH]
-[--threads THREADS] [--uniref90 UNIREF90]
-[--to-normalize] [--log-level LOG_LEVEL]
+                     [--bypass-abundance] [--bypass-annotation]
+                     [--bypass-clust] [--bypass-write-table]
+                     [--usearch USEARCH] [--vsearch VSEARCH]
+                     [--diamond DIAMOND] [--rapsearch RAPSEARCH]
+                     [--threads THREADS] [--uniref90 UNIREF90]
+                     [--to-normalize] [--log-level LOG_LEVEL]
 
 optional arguments:
--h, --help            show this help message and exit
--m MAPPER_FILE, --mapper-file MAPPER_FILE
-Mapper file containing paths to data
---basename BASENAME   BASENAME for all the output files
---bypass-abundance    Bypass quantifying abundance
---bypass-annotation   Bypass annotating genes
---bypass-clust        Bypass annotating genes
---bypass-write-table  Bypass writing table
---usearch USEARCH     Path to USEARCH
---vsearch VSEARCH     Path to VSEARCH
---diamond DIAMOND     Path to DIAMOND
---rapsearch RAPSEARCH
-Path to RAPSEARCH
---threads THREADS     Number of threads
---uniref90 UNIREF90   UniRef90 INDEX file
---to-normalize        Default HUMAnN2 table; if sam-idxstats table; enable
---log-level LOG_LEVEL
-Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
+  -h, --help            show this help message and exit
+  -m MAPPER_FILE, --mapper-file MAPPER_FILE
+                        Mapper file containing paths to data
+  --basename BASENAME   BASENAME for all the output files
+  --bypass-abundance    Bypass quantifying abundance
+  --bypass-annotation   Bypass annotating genes
+  --bypass-clust        Bypass annotating genes
+  --bypass-write-table  Bypass writing table
+  --usearch USEARCH     Path to USEARCH
+  --vsearch VSEARCH     Path to VSEARCH
+  --diamond DIAMOND     Path to DIAMOND
+  --rapsearch RAPSEARCH
+                        Path to RAPSEARCH
+  --threads THREADS     Number of threads
+  --uniref90 UNIREF90   UniRef90 INDEX file
+  --to-normalize        Default HUMAnN2 table; if sam-idxstats table; enable
+  --log-level LOG_LEVEL
+                        Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
 ```
 
 * ``--mapper_file``: REQUIRED. Contains all information about which FAAS (Gene FAA format) corresponds to which SAMPLE and to which ABUNDANCE FILE; etc. Please see the demo input for more examples. All the possible options are: ['SAMS', 'BAMS', 'NICHE', 'GFF3S', 'ABUNDANCE_TABLES', 'ANNOTATION', 'READS', 'CONTIG_ASSEMBLIES', 'FAAS', 'FNAS', 'SAMPLES']
