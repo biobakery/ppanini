@@ -14,13 +14,10 @@ Citation
   Systematic approach to prioritization of 'important' microbial genes
   
 Developers:
-	Afrah Shafquat and Gholamali Rahnavard
+	[Gholamali Rahnavard](mailto:rahnavar@hsph.harvard.edu)
 	
-	[shafquat@hsph.harvard.edu](mailto:shafquat@hsph.harvard.edu)
-	[rahnavar@hsph.harvard.edu](mailto:rahnavar@hsph.harvard.edu)
+	[Afrah Shafquat](mailto:shafquat@hsph.harvard.edu)
 	
-
-Dec 17, 2015
 
 #**PPANINI: Prioritization and Prediction of functional Annotations for Novel and Important genes via automated data Network Integration**
 
