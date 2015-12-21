@@ -36,7 +36,7 @@ def evaluation_multi_roc():
     config.input_table = '/Users/rah/Documents/Hutlab/stool_ppanini050715.txt'#'/n/hutlab12_nobackup/data/ppanini/DATA/PPANINI_INPUT/stool_ppanini.txt' 
     config.uclust_file = '/Users/rah/Documents/Hutlab/stool_ppanini/stool_final_clusters.uc'
     
-    config.output_folder = 'myOutput2'
+    config.output_folder = '/Users/rah/Documents/Hutlab/ppanini/myOutput2'
     #with open('/Users/rah/Documents/UniRef50_299_genes.txt') as f:
     #    essantial_genes_uniref50_id = f.read().splitlines()
     with open('/Users/rah/Documents/Hutlab/UniRef90_output_deg_p_gene.m8') as f:
@@ -52,7 +52,7 @@ def evaluation_multi_roc():
     #ground_truth = [1 if (uniref_id in essantial_genes_uniref_id) else 0 for uniref_id in uniref_id_list ] # this an example for each gene if it's important use 1 otherwise 0
     #print config.input_table
     if config.verbose =='DEBUG':
-        print "Evaluating PPANINI Score !!!"
+        print "Evaluating PPANINI Score !"
     #ppanini.run()
     with open('/Users/rah/Documents/Hutlab/ppanini/myOutput2/stool_ppanini050715_imp_centroid_prev_abund.txt') as f:
         lines2 = f.read().splitlines()
@@ -60,7 +60,7 @@ def evaluation_multi_roc():
     prev = [line.split('\t')[2] for line in lines2]
     abun = [line.split('\t')[3] for line in lines2]
     ppanini_score = [line.split('\t')[1] for line in lines2]
-    n = 1000#len(ppanini_score)-1
+    n = 3000#len(ppanini_score)-1
     config.centroids_list = config.centroids_list[1:n]
     ppanini_score = ppanini_score[1:n]
     #print config.centroids_list[0:200]
@@ -76,9 +76,9 @@ def evaluation_multi_roc():
     ground_truth = [1 if (gene_id  in essantial_genes_uniref90_id_299_eco and\
                            gene_id in essantial_genes_uniref90_id_deg) else 0 for gene_id in config.centroids_list ]
     #print ground_truth
-    eval_file = open('/Users/rah/Documents/Hutlab/ppanini/eval_result.txt', 'w') 
+    eval_file = open(config.output_folder+'/eval_table.txt', 'w') 
     csvw = csv.writer(eval_file, csv.excel_tab, delimiter='\t')
-    csvw.writerow(["centroid", "ppanini score","prevalence", "abundance",  "is_essential"])
+    csvw.writerow(["centroid", "prevalence", "abundance",  "ppanini score","is_essential"])
     for i in range(len(config.centroids_list)):
         csvw.writerow([config.centroids_list[i], prev[i], abun[i], ppanini_score[i] ,ground_truth[i]])
     eval_file.close()
@@ -116,15 +116,13 @@ def evaluation_multi_roc():
         else:
             score[beta] =[config.centroid_prev_abund[gene_id]['ppanini_score'] for gene_id in config.centroids_list ] # 
         '''
-        # score[beta] =[beta*2/(i+1) for i in range(len(true[beta]))]
-        #print "score", score[beta]
         assert(len(true[beta])==len(score[beta])) 
         fpr[beta], tpr[beta], _  = roc_curve( true[beta], score[beta], pos_label = 1)
         roc_info.append([str(beta),fpr[beta], tpr[beta]])
         #print roc_info
         #break;
     try:
-        roc_plot(roc_info) 
+        roc_plot(roc_info, figure_name=config.output_folder+'/roc_plot_ppanini') 
     except ValueError:
         print "ValueError for roc plot"
     print "The evaluation is successfully done!"
