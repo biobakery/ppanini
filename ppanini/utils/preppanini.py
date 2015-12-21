@@ -8,10 +8,10 @@ import subprocess
 import multiprocessing
 import logging
 
-from . import quantify_genes
-from . import utilities
-from . import annotate_genes
-from . import write_ppanini_table
+from .. import quantify_genes
+from .. import utilities
+from .. import annotate_genes
+from .. import write_ppanini_table
 
 basename = ''
 logger = logging.getLogger(__name__)
@@ -66,7 +66,7 @@ def parse_mapper(mapper_file):
 	
 	return [mapper, flags]
 
-if __name__ == '__main__':
+def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-m', '--mapper-file', dest='mapper_file', help='Mapper file containing paths to data', required=True)
 	parser.add_argument('--basename', help='BASENAME for all the output files')
@@ -256,3 +256,6 @@ if __name__ == '__main__':
 			logger.debug('Annotations parsed')
 		logger.debug('Writing PPANINI table')
 		write_ppanini_table.generate_gene_table(abundance_dict, annotation_dict, flags['NICHE'], mapper, output_table, samples)
+
+if __name__ == '__main__':
+	main()
