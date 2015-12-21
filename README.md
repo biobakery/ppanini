@@ -82,7 +82,7 @@ optional arguments:
 
 ## **2.1 INPUTS**
 
-``-i or --input_table`` : Gene Abundance Table containing annotated gene abundance values in CPM or counts per million
+* ``-i or --input_table`` : Gene Abundance Table containing annotated gene abundance values in CPM or counts per million
 Such tables can be obtained using (i) ``HUMAnN2``, (ii) ``preppanini`` or (iii) manually creating the table using ``samtools`` (idxstats) etc.
 See the mock gene table for an example. ppanini/input/mock_gene_table.tsv
 
@@ -197,7 +197,7 @@ optional arguments:
 ```
 #!cmd
 
-usage: ppanini_visualizer.py [-h] -i INPUT_TABLE
+usage: ppanini_visualizer [-h] -i INPUT_TABLE
                              [--original-table ORIGINAL_TABLE]
                              [--bypass-cloud] [--prev PREV] [--abund ABUND]
                              [-m MAPPER] [--write-mapper] [--zorder ZORDER]
@@ -245,7 +245,7 @@ optional arguments:
 
 ```
 #!cmd
-usage: ppanini_plot_genome_hits.py [-h] -i INPUT_FILE --map MAP [--bypass_scatter]
+usage: ppanini_plot_genome_hits [-h] -i INPUT_FILE --map MAP [--bypass_scatter]
                            [--bypass-stats] [--bypass-graphlan-rings]
                            [--pangenome-size PANGENOME_SIZE]
 
@@ -347,6 +347,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 ------------------------------------------------------------------------------------------------------------------------
 
 # **Maintained by**
-	[Gholamali Rahnavard](mailto:rahnavar@hsph.harvard.edu) and 
-	[Afrah Shafquat](mailto:shafquat@hsph.harvard.edu)
+	
+[Gholamali Rahnavard](mailto:rahnavar@hsph.harvard.edu) and 
+[Afrah Shafquat](mailto:shafquat@hsph.harvard.edu)
 
