@@ -39,8 +39,17 @@ setup(
     entry_points={
         'console_scripts': [
             'ppanini = ppanini.ppanini:_main',
-            'prepannini = ppanini.utils.preppanini:main',
-            'ppanini_eval_roc = ppanini.utils.plot_roc:evaluation_multi_roc'
+            'preppanini = ppanini.utils.preppanini:main',
+            'ppanini_eval_roc = ppanini.utils.plot_roc:main',
+            'ppanini_visualizer = ppanini.utils.ppanini_visualizer:main',
+            'ppanini_plot_metagenome_genome = ppanini.utils.plot_metagenome_genome:main',
+            'ppanini_plot_genome_hits = ppanini.utils.plot_genome_hits:main',
+            'ppanini_normalize_table = ppanini.utils.normalize_table:main',
+            'ppanini_join_tables = ppanini.utils.join_tables:main',
+            'ppanini_imp_centroids_prabXtract = ppanini.utils.imp_centroids_prabXtract:main',
+            'ppanini_imp_centroids_extracter = ppanini.utils.imp_centroids_extracter:main',
+            'ppanini_create_mapper = ppanini.utils.create_mapper:main',
+            'ppanini_write_mapper = ppanini.utils.write_mapper:main'
         ]},
     test_suite= 'ppanini.tests.ppanini_test.main',
     zip_safe = False

@@ -26,8 +26,7 @@ def read_table(gene_table_fname):
 			genes += [split_i[0]] 
 			data_matrix += [[re.sub('[\r\t\n]','',i) for i in split_i[1:]]]
 	return [metadata, genes, data_matrix]
-
-if __name__ == '__main__':
+def main():
 	cmd_h = ['-h', '--help']
 	if sys.argv[1] in cmd_h:
 		print 'usage: python utils/join_tables.py <table1> <table2> ... > merged_table.txt'
@@ -64,3 +63,6 @@ if __name__ == '__main__':
 		print '\t'.join([key]+metadata_o[key])
 	for i, val in enumerate(genes_o):
 		print '\t'.join([val]+data_matrix_o[i])
+
+if __name__ == '__main__':
+	main()

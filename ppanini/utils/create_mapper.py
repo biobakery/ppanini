@@ -7,8 +7,7 @@ import numpy
 import subprocess
 
 '''Creates a mapper table for PREPPANINI input'''
-
-if __name__ == '__main__':
+def main():
 	labels = ['SAMS', 'BAMS', 'GFF3S', 'ABUNDANCE_TABLES', 'ANNOTATION', 'READS', 'CONTIG_ASSEMBLIES', 'FAAS', 'FNAS']
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--assemblies', default=False, help='FOLDER containing ASSEMBLIES')
@@ -82,3 +81,7 @@ if __name__ == '__main__':
 				count +=1
 			else:
 				foo.writelines(['\t'.join([sample]+[files[sample][i] for i in keys])+line_end])
+
+
+if __name__ == '__main__':
+	main()

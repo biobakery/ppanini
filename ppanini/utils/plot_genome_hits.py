@@ -94,8 +94,7 @@ def plot_scatter(table, m8_filename):
 	pyplot.savefig(labels['filename'])
 	pyplot.savefig(labels['filename']+'.png')
 
-	
-if __name__ == '__main__':
+def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i', '--input_file', help='Gene Genomes blast results parsed**', required=True)
 	parser.add_argument('--map', help='Gene to GO mapper from ppanini_visualizer', required=True)
@@ -244,3 +243,6 @@ if __name__ == '__main__':
 				ref_i +=1
 				if ref_i >= len(ref):
 					break
+	
+if __name__ == '__main__':
+	main()

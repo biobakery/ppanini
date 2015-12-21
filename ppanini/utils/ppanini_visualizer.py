@@ -352,7 +352,7 @@ def plot_lengthfilter(c_genes_x_y, d_genes_x_y, labels, x, zorder):
 	pyplot.savefig(labels['filename'])
 	pyplot.savefig(labels['filename']+'.png')
 
-if __name__ == '__main__':
+def main():
 	##UniRef=red; Unannotated; blue
 	## argv[1]= original map; argv[2]=selected
 	parser = argparse.ArgumentParser()
@@ -506,3 +506,6 @@ if __name__ == '__main__':
 				  'filename': name+'_hexbin.pdf'}
 		draw_hexbin(genes_table_i, uniref_i_x_y, uniref_go_x_y, labels, inds_i)
 
+if __name__ == '__main__':
+	main()
+	

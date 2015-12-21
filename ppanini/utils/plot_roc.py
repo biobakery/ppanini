@@ -22,7 +22,7 @@ import csv
 import ppanini
 from .. import config
  
-def evaluation_multi_roc():
+def main():
     fpr = dict()
     tpr = dict()
     true = dict()
@@ -175,4 +175,4 @@ def roc_plot(roc_info=None, figure_name='roc_plot_ppanini'):
     #plt.show()
     # return plt
 if __name__ == '__main__':
-    evaluation_multi_roc()
+    main()

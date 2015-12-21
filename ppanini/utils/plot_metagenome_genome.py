@@ -244,8 +244,7 @@ def plot_metagenomic_priority(abund_prev, table, no_uniq_genomes, filename):
 	pyplot.colorbar()
 	pyplot.savefig(filename+'_hexplot_mp_gp.pdf')
 	pyplot.savefig(filename+'_hexplot_mp_gp.png')
-
-if __name__ == '__main__':
+def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i', '--input_file', help='Gene Genomes blast results', required=True)
 	parser.add_argument('--bypass_parse', default=False, action='store_true', help='Input file is parsed')
@@ -298,5 +297,6 @@ if __name__ == '__main__':
 		plot_scatter(table, m8_filename, no_uniq_genomes)
 	if not args.bypass_hist:
 		plot_hist(table, m8_filename, no_uniq_genomes)
-
-
+	
+if __name__ == '__main__':
+	main()

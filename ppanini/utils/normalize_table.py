@@ -7,8 +7,7 @@ import numpy
 
 '''Normalizes table given in first argument. Prints table as std.out'''
 numpy.seterr(divide='ignore', invalid='ignore')
-
-if __name__ == '__main__':
+def main():
 	help = ['-h', '--h', '--help']
 	if sys.argv[1] in help:
 		print 'Usage: python '+sys.argv[0]+' <input_table> > <normalized_table>'
@@ -35,3 +34,5 @@ if __name__ == '__main__':
 	for i, gene in enumerate(genes_order):
 		print '\t'.join([gene]+[str(j) for j in list(norm_dm[i])])
 
+if __name__ == '__main__':
+	main()
