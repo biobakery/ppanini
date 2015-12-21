@@ -20,7 +20,7 @@ import csv
 
 #sys.path.append('/Users/rah/Documents/Hutlab/ppanini')#/n/hutlab12_nobackup/data/ppanini/ppanini')
 import ppanini
-from src import config
+from .. import config
  
 def evaluation_multi_roc():
     fpr = dict()
@@ -52,7 +52,7 @@ def evaluation_multi_roc():
     #ground_truth = [1 if (uniref_id in essantial_genes_uniref_id) else 0 for uniref_id in uniref_id_list ] # this an example for each gene if it's important use 1 otherwise 0
     #print config.input_table
     if config.verbose =='DEBUG':
-        print "Start Evaluating PPANINI Score !!!"
+        print "Evaluating PPANINI Score !!!"
     #ppanini.run()
     with open('/Users/rah/Documents/Hutlab/ppanini/myOutput2/stool_ppanini050715_imp_centroid_prev_abund.txt') as f:
         lines2 = f.read().splitlines()
@@ -60,8 +60,9 @@ def evaluation_multi_roc():
     prev = [line.split('\t')[2] for line in lines2]
     abun = [line.split('\t')[3] for line in lines2]
     ppanini_score = [line.split('\t')[1] for line in lines2]
-    n = len(ppanini_score)/10
+    n = 1000#len(ppanini_score)-1
     config.centroids_list = config.centroids_list[1:n]
+    ppanini_score = ppanini_score[1:n]
     #print config.centroids_list[0:200]
     prev = prev[1:n]
     prev = [float(val) for val in prev]
@@ -126,6 +127,7 @@ def evaluation_multi_roc():
         roc_plot(roc_info) 
     except ValueError:
         print "ValueError for roc plot"
+    print "The evaluation is successfully done!"
         
                                      
 def roc_plot(roc_info=None, figure_name='roc_plot_ppanini'):

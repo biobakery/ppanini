@@ -39,7 +39,8 @@ setup(
     entry_points={
         'console_scripts': [
             'ppanini = ppanini.ppanini:_main',
-            'prepannini = ppanini.utils.preppanini:main'
+            'prepannini = ppanini.utils.preppanini:main',
+            'ppanini_eval_roc = ppanini.utils.plot_roc:evaluation_multi_roc'
         ]},
     test_suite= 'ppanini.tests.ppanini_test.main',
     zip_safe = False
