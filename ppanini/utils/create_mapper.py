@@ -21,7 +21,7 @@ def main():
 	parser.add_argument('--fnas', default=False, help='SAMS Folder')
 	parser.add_argument('--niche',  default=False, help='GFF3 Folder')
 	parser.add_argument('--samples',  default=False, help='GFF3 Folder', required=True)
-	parser.add_argument('-o', '--output_table', help='Gene Table to write', default=sys.stdout)
+	parser.add_argument('-o', '--output-table', dest= 'output_table', help='Gene Table to write', default=sys.stdout)
 
 	args = parser.parse_args()
 	labels = {'SAMS':args.sams, \

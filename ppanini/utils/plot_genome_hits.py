@@ -98,12 +98,12 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i', '--input_file', help='Gene Genomes blast results parsed**', required=True)
 	parser.add_argument('--map', help='Gene to GO mapper from ppanini_visualizer', required=True)
-	parser.add_argument('--bypass_scatter', default=False, action='store_true', help='Scatter plot for genomes')
-	parser.add_argument('--bypass_write_stats', default=False, action='store_true', help='Write stats for genome gene hits')
-	parser.add_argument('--bypass_graphlan_rings', default=False, action='store_true', help='Generates graphlan rings file')
-	parser.add_argument('--pangenome_size', default=False, help='Pangenome size mapping file')
-	parser.add_argument('--metagenome_fasta', help='Metagenome FASTA file')
-	parser.add_argument('--bypass_parse', default=False, action='store_true', help='Input file is parsed')
+	parser.add_argument('--bypass-scatter', dest ='bypass_scatter' , default=False, action='store_true', help='Scatter plot for genomes')
+	parser.add_argument('--bypass-write-stats', dest = 'bypass_write_stats', default=False, action='store_true', help='Write stats for genome gene hits')
+	parser.add_argument('--bypass-graphlan-rings',dest = 'bypass_graphlan_rings', default=False, action='store_true', help='Generates graphlan rings file')
+	parser.add_argument('--pangenome-size', dest = 'pangenome_size', default=False, help='Pangenome size mapping file')
+	parser.add_argument('--metagenome-fasta', dest= 'metagenome_fasta', help='Metagenome FASTA file')
+	parser.add_argument('--bypass-parse', dest= 'bypass_parse', default=False, action='store_true', help='Input file is parsed')
 
 	args = parser.parse_args()
 

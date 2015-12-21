@@ -1,38 +1,28 @@
-Team:
- Gholamali Rahnavard, Afrah Shafquat, Bahar Sayoldin, Eric A. Franzosa, Curtis Huttenhower
+#**PPANINI: Prioritization and Prediction of functional Annotations for Novel and Important genes via automated data Network Integration**
+
+PPANINI provides a computational pipeline to prioritize microbial genes based on their metagenomic properties (e.g. prevalence and abundance). The resulting prioritized list of gene candidates can then be analyzed further using our visualization tools.
 
 Google Group
  ppanini-users: https://groups.google.com/forum/#!forum/ppanini-users
 
-License
- MIT License
-
 URL
  http://huttenhower.sph.harvard.edu/ppanini
 
-Citation
-  Systematic approach to prioritization of 'important' microbial genes, Gholamali Rahnavard, Afrah Shafquat, Bahar Sayoldin, Eric A. Franzosa, Curtis Huttenhower (under preparation)
-  
-Developers:
-	[Gholamali Rahnavard](mailto:rahnavar@hsph.harvard.edu) and 
-	[Afrah Shafquat](mailto:shafquat@hsph.harvard.edu)
-	
-
-#**PPANINI: Prioritization and Prediction of functional Annotations for Novel and Important genes via automated data Network Integration**
-
-PPANINI provides a computational pipeline to prioritize microbial genes based on their metagenomic properties (e.g. prevalence and abundance). The resulting prioritized list of gene candidates can then be analyzed further using our visualization tools.
+# **Citation**
+  **Systematic approach to prioritization of 'important' microbial genes**, Gholamali Rahnavard, Afrah Shafquat, Bahar Sayoldin, Eric A. Franzosa, Curtis Huttenhower (under preparation)
+  	
 
 # **1. SETUP**
 
 ## **1.1 REQUIREMENTS**
 
-* **PPANINI**
-* * [matplotlib](http://matplotlib.org/)
-* * [Python 2.7.*](https://www.python.org/download/releases/2.7/)
-* * [Biopython](http://biopython.org/wiki/Download)
-* * [Numpy 1.9.*](http://www.numpy.org/)
+### **PPANINI**
+* [matplotlib](http://matplotlib.org/)
+* [Python 2.7.*](https://www.python.org/download/releases/2.7/)
+* [Biopython](http://biopython.org/wiki/Download)
+* [Numpy 1.9.*](http://www.numpy.org/)
 
-* **PREPPANINI**
+### **PREPPANINI**
 * [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
 * [samtools](http://samtools.sourceforge.net/)
 * [usearch](http://www.drive5.com/usearch/) **or** [vsearch](https://github.com/torognes/vsearch)
@@ -45,18 +35,13 @@ To install, execute the following command in your Terminal/Commmand prompt:
 ```
 #!cmd
 hg clone http://bitbucket.org/biobakery/ppanini
+cd ppanini
+python setup.py install
 ```
 
 The prerequisites for executing this command are: 
 
 * [Mercurial](https://mercurial.selenic.com/wiki/Download)
-
-Once cloned, run the following command:
-
-```
-#!cmd
-export PYTHONPATH=$PYTHONPATH:<INSERT PATH to PPANINI HERE>
-```
 
 ------------------------------------------------------------------------------------------------------------------------------
 
@@ -65,7 +50,7 @@ export PYTHONPATH=$PYTHONPATH:<INSERT PATH to PPANINI HERE>
 ```
 #!python
 
-usage: ppanini.py [-h] -i INPUT_TABLE [-o OUTPUT_FOLDER]
+usage: ppanini [-h] -i INPUT_TABLE [-o OUTPUT_FOLDER]
                   [--gene-catalog GENE_CATALOG] [--uc UC] [--usearch USEARCH]
                   [--vsearch VSEARCH] [--basename BASENAME]
                   [--log-level LOG_LEVEL] [--threads THREADS]
@@ -97,9 +82,9 @@ optional arguments:
 
 ## **2.1 INPUTS**
 
-* ``-i or --input_table`` : Gene Abundance Table containing annotated gene abundance values in CPM or counts per million
-* * Such tables can be obtained using (i) HUMAnN2, (ii) preppanini.py or (iii) manually creating the table using samtools (idxstats) etc.
-* * See the mock gene table for an example. ppanini/input/mock_gene_table.tsv
+``-i or --input_table`` : Gene Abundance Table containing annotated gene abundance values in CPM or counts per million
+Such tables can be obtained using (i) ``HUMAnN2``, (ii) ``preppanini`` or (iii) manually creating the table using ``samtools`` (idxstats) etc.
+See the mock gene table for an example. ppanini/input/mock_gene_table.tsv
 
 ```
 #!text
@@ -108,7 +93,7 @@ geneID_XYZ|UniRef90_XYZ  0.09 0.00
 geneID_MNO|UniRef90_unknown  0.00 0.09
 ```
 
-* * **Metadata**: *Optional*
+**Metadata**: *Optional*
 
 ```
 #!text
@@ -116,9 +101,9 @@ geneID_MNO|UniRef90_unknown  0.00 0.09
 #SAMPLES SAMPLE_X SAMPLE_Y
 ```
 
-* * * Each NICHE corresponds to the type of sample i.e. Human Stool, Skin, Soil, Rainforest etc. 
-* * * This data is used to calculate the alpha- and beta- prevalence of the gene centroids i.e. prevalence within a specific niche and/or prevalence across different niches
-* * * In absence of niche data, only alpha-prevalence is calculated.
+Each NICHE corresponds to the type of sample i.e. Human Stool, Skin, Soil, Rainforest etc. 
+This data is used to calculate the alpha- and beta- prevalence of the gene centroids i.e. prevalence within a specific niche and/or prevalence across different niches
+In absence of niche data, only alpha-prevalence is calculated.
 
 * ``--output_folder``: folder containing all the output files
 * ``--gene_catalog``: File containing the entire genes catalog for the metagenomic niche (**REQUIRED** if uc file not provided)
@@ -159,7 +144,7 @@ geneID_XYZ  0.05  0.35  0.50   0.42
 ```
 #!cmd
 
-usage: preppanini.py [-h] -m MAPPER_FILE [--basename BASENAME]
+usage: preppanini [-h] -m MAPPER_FILE [--basename BASENAME]
                      [--bypass-abundance] [--bypass-annotation]
                      [--bypass-clust] [--bypass-write-table]
                      [--usearch USEARCH] [--vsearch VSEARCH]
@@ -213,18 +198,18 @@ optional arguments:
 #!cmd
 
 usage: ppanini_visualizer.py [-h] -i INPUT_TABLE
-                             [--original_table ORIGINAL_TABLE]
-                             [--bypass_cloud] [--prev PREV] [--abund ABUND]
-                             [-m MAPPER] [--write_mapper] [--zorder ZORDER]
-                             [--hexplot] [--bypass_priority]
+                             [--original-table ORIGINAL_TABLE]
+                             [--bypass-cloud] [--prev PREV] [--abund ABUND]
+                             [-m MAPPER] [--write-mapper] [--zorder ZORDER]
+                             [--hexplot] [--bypass-priority]
 
 optional arguments:
   -h, --help            show this help message and exit
   -i INPUT_TABLE, --input_table INPUT_TABLE
                         Gene abundance table with metadata
-  --original_table ORIGINAL_TABLE
+  --original-table ORIGINAL_TABLE
                         Gene abundance table with metadata
-  --bypass_cloud        To draw Abundance Prevalence Cloud
+  --bypass-cloud        To draw Abundance Prevalence Cloud
   --prev PREV           Graph will be prevalence across centroids
   --abund ABUND         Graph will be mean abundance across centroids
   -m MAPPER, --mapper MAPPER
@@ -232,48 +217,48 @@ optional arguments:
   --write_mapper        Gene to GO table written
   --zorder ZORDER       Zorder [1,2,3,4] [Old, UniRef, UniRef/GO, NA]
   --hexplot             Plot HEXBIN
-  --bypass_priority     Generates Metagenome vs. Genome Priority plots
+  --bypass-priority     Generates Metagenome vs. Genome Priority plots
 ```
 
 ## **4.2 Histograms for metagenome hits**
 
 ```
 #!cmd
-usage: plot_metagenome_genome.py [-h] -i INPUT_FILE [--bypass_parse]
-                                 [--parse_only]
-                                 [--metagenome_fasta METAGENOME_FASTA]
-                                 [--bypass_hist] [--bypass_scatter]
+usage: ppanini_plot_metagenome_genome [-h] -i INPUT_FILE [--bypass-parse]
+                                 [--parse-only]
+                                 [--metagenome-fasta METAGENOME_FASTA]
+                                 [--bypass-hist] [--bypass-scatter]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -i INPUT_FILE, --input_file INPUT_FILE
+  -i INPUT_FILE, --input-file INPUT_FILE
                         Gene Genomes blast results
-  --bypass_parse        Input file is parsed
-  --parse_only          To only parse
-  --metagenome_fasta METAGENOME_FASTA
+  --bypass-parse        Input file is parsed
+  --parse-only          To only parse
+  --metagenome-fasta METAGENOME_FASTA
                         Metagenome FASTA file
-  --bypass_hist         Generates Histogram
-  --bypass_scatter      Generates Scatterplot
+  --bypass-hist         Generates Histogram
+  --bypass-scatter      Generates Scatterplot
 ```
 
 ## **4.3 GraPhlAn plots**
 
 ```
 #!cmd
-usage: plot_genome_hits.py [-h] -i INPUT_FILE --map MAP [--bypass_scatter]
-                           [--bypass_stats] [--bypass_graphlan_rings]
-                           [--pangenome_size PANGENOME_SIZE]
+usage: ppanini_plot_genome_hits.py [-h] -i INPUT_FILE --map MAP [--bypass_scatter]
+                           [--bypass-stats] [--bypass-graphlan-rings]
+                           [--pangenome-size PANGENOME_SIZE]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -i INPUT_FILE, --input_file INPUT_FILE
+  -i INPUT_FILE, --input-file INPUT_FILE
                         Gene Genomes blast results parsed**
   --map MAP             Gene to GO mapper from ppanini_visualizer
-  --bypass_scatter      Scatter plot for genomes
-  --bypass_stats        Write stats for genome gene hits
-  --bypass_graphlan_rings
+  --bypass-scatter      Scatter plot for genomes
+  --bypass-stats        Write stats for genome gene hits
+  --bypass-graphlan-rings
                         Generates graphlan rings file
-  --pangenome_size PANGENOME_SIZE
+  --pangenome-size PANGENOME_SIZE
                         Pangenome size mapping file
 ```
 
@@ -286,7 +271,7 @@ optional arguments:
 
 ```
 #!cmd
-Usage: python utils/normalize_table.py <input_table> > <normalized_table>
+Usage: ppanini_normalize_table <input_table> > <normalized_table>
 ```
 
 ## **5.2 Join tables**
@@ -294,7 +279,7 @@ Usage: python utils/normalize_table.py <input_table> > <normalized_table>
 
 ```
 #!cmd
-usage: python utils/join_tables.py <table1> <table2> ... > merged_table.txt
+usage: ppanini_join_tables <table1> <table2> ... > merged_table.txt
 ```
 
 ## **5.3 Centroids extraction from gene abundance table**
@@ -302,7 +287,7 @@ usage: python utils/join_tables.py <table1> <table2> ... > merged_table.txt
 
 ```
 #!cmd
-Usage: python utils/imp_centroids_prabXtract.py <imp_centroids_list> <centroids_abundance_matrix_file> > <imp_centroids_abundance_matrix_file>
+Usage: ppanini_imp_centroids_prabXtract <imp_centroids_list> <centroids_abundance_matrix_file> > <imp_centroids_abundance_matrix_file>
 ```
 
 ##**5.4 Centroids extraction from gene catalog fasta**
@@ -310,7 +295,7 @@ Usage: python utils/imp_centroids_prabXtract.py <imp_centroids_list> <centroids_
 
 ```
 #!cmd
-Usage: python utils/imp_centroids_extracter.py <imp_centroids_list> <fasta_file> <imp_centroids_fasta_file>
+Usage: ppanini_imp_centroids_extracter <imp_centroids_list> <fasta_file> <imp_centroids_fasta_file>
 ```
 
 ## **5.5 Create mapper file for PREPPANINI**
@@ -318,7 +303,7 @@ Usage: python utils/imp_centroids_extracter.py <imp_centroids_list> <fasta_file>
 
 ```
 #!cmd
-usage: create_mapper.py [-h] [--assemblies ASSEMBLIES] [--reads READS]
+usage: ppanini_create_mapper [-h] [--assemblies ASSEMBLIES] [--reads READS]
                         [--gff3s GFF3S] [--sams SAMS] [--bams BAMS]
                         [--abund ABUND] [--annot ANNOT] [--faas FAAS]
                         [--fnas FNAS] [--niche NICHE] --samples SAMPLES
@@ -338,7 +323,7 @@ optional arguments:
   --fnas FNAS           SAMS Folder
   --niche NICHE         GFF3 Folder
   --samples SAMPLES     GFF3 Folder
-  -o OUTPUT_TABLE, --output_table OUTPUT_TABLE
+  -o OUTPUT_TABLE, --output-table OUTPUT_TABLE
                         Gene Table to write
 ```
 
@@ -346,11 +331,9 @@ optional arguments:
 
 ```
 #!cmd
-usage: python write_mapper <uniref_ids> <map uniref_go_ids> > <uniref_ids_go_select>
+usage: ppanini_write_mapper <uniref_ids> <map uniref_go_ids> > <uniref_ids_go_select>
 ```
-------------------------------------------------------------------------------------------------------------------------
-License
-==============================================
+# **License**
 
 This software is licensed under the MIT license.
 
@@ -361,3 +344,9 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+------------------------------------------------------------------------------------------------------------------------
+
+# **Maintained by**
+	[Gholamali Rahnavard](mailto:rahnavar@hsph.harvard.edu) and 
+	[Afrah Shafquat](mailto:shafquat@hsph.harvard.edu)
+
