@@ -8,7 +8,7 @@ import numpy
 import argparse
 import pdb
 from matplotlib import pyplot
-from src import utilities
+from . import utilities
 
 '''Analysis of Genome Hits per gene showing how many genomes each gene is found in.'''
 

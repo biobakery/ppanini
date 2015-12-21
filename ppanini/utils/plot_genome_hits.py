@@ -9,8 +9,9 @@ import numpy
 import argparse
 import random
 
+from . import utils
 from utils import plot_metagenome_genome
-from src import utilities
+from . import utilities
 from matplotlib import pyplot
 from matplotlib import colors
 

@@ -1,5 +1,5 @@
 Team:
- Afrah Shafquat, Gholamali Rahnavard, Eric A. Franzosa, Curtis Huttenhower
+ Gholamali Rahnavard, Afrah Shafquat, Bahar Sayoldin, Eric A. Franzosa, Curtis Huttenhower
 
 Google Group
  ppanini-users: https://groups.google.com/forum/#!forum/ppanini-users
@@ -11,11 +11,10 @@ URL
  http://huttenhower.sph.harvard.edu/ppanini
 
 Citation
-  Systematic approach to prioritization of 'important' microbial genes
+  Systematic approach to prioritization of 'important' microbial genes, Gholamali Rahnavard, Afrah Shafquat, Bahar Sayoldin, Eric A. Franzosa, Curtis Huttenhower (under preparation)
   
 Developers:
-	[Gholamali Rahnavard](mailto:rahnavar@hsph.harvard.edu)
-	
+	[Gholamali Rahnavard](mailto:rahnavar@hsph.harvard.edu) and 
 	[Afrah Shafquat](mailto:shafquat@hsph.harvard.edu)
 	
 

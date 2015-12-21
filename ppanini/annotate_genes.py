@@ -5,8 +5,8 @@ import re
 import argparse
 import logging
 import pdb
-from src import utilities
-from src import config
+from . import utilities
+from . import config
 
 logger = logging.getLogger(__name__)
 

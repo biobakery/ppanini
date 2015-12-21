@@ -8,7 +8,7 @@ import time
 import numpy
 import argparse
 
-from src import utilities
+from . import utilities
 from matplotlib import pyplot
 
 '''Tmp file to parse results'''

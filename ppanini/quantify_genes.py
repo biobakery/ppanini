@@ -8,7 +8,7 @@ import argparse
 import subprocess
 import multiprocessing
 
-from src import utilities
+from . import utilities
 
 logger = logging.getLogger(__name__)
 

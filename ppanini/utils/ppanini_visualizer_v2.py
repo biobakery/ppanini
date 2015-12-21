@@ -9,10 +9,11 @@ import numpy
 import logging
 import argparse
 
-from src import utilities
+from . import utilities
 from matplotlib import pyplot
 
 '''Tmp file to parse results'''
+
 
 numpy.seterr(divide='ignore', invalid='ignore')
 
@@ -75,7 +76,7 @@ def populate_cmap(genes_cmap, genes_prab):
 				genes_cmap[gene]['color'] = 'gray'
 	return genes_cmap
 
-def plot_prev_abund(genes_prab, genes_cmap, labels, margins):
+def plot_prev_abund(genes_prab, genes_cmap, labels):
 	genes = []
 	prev = []
 	abund = []
@@ -101,11 +102,6 @@ def plot_prev_abund(genes_prab, genes_cmap, labels, margins):
 				   linewidths=0.0, \
 				   zorder=zorder, \
 				   marker='o')
-	if margins:
-		[prev_tshld, abund_tshld] = [ float(i) for i in margins.split(',')]
-		pyplot.axvline(y=numpy.log(float(margins[0])), alpha=0.5, color='gray')
-		pyplot.axhline(x=numpy.log(float(margins[1])), alpha=0.5, color='gray')
-
 	pyplot.savefig(labels['filename'])
 	pyplot.savefig(labels['filename']+'.png')
 
@@ -126,10 +122,9 @@ def populate_vars(labels, args):
 if __name__ == '__main__':
 
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-i','--input_table', help='Genes with prevalence and abundance values', required=True)
-	parser.add_argument('-m', '--map_file', default=False, help='Mapping file of genes to color and zorder values', required=True)
+	parser.add_argument('-i','--input_table', help='Gene abundance table with metadata', required=True)
+	parser.add_argument('-m', '--map_file', default=False, help='Gene abundance table with metadata')
 	parser.add_argument('--beta_flag', default=False, action="store_true",help='Beta_Prevalence against Abundance')
-	parser.add_argument('--margins', default=False, help='Add threshold margins: prevalence_threshold,abundance_threshold: e.g. 0.001,0.001')
 	parser.add_argument('--alpha', default=False, help='Transparency')
 	parser.add_argument('--xlabel', default=False, help='Custom xlabel')
 	parser.add_argument('--ylabel', default=False, help='Custom ylabel')
@@ -152,13 +147,13 @@ if __name__ == '__main__':
 
 	genes_cmap = populate_cmap(genes_cmap, genes_prab)
 
-	labels = {'xlabel': 'Prevalence'\
-			  'ylabel': 'Mean Abundance'\
+	labels = {'xlabel': 'Prevalence',\
+			  'ylabel': 'Mean Abundance',\
 			  'title': 'Scatterplot: Prevalence and abundance',\
-			  'alpha': 0.1\
+			  'alpha': 0.1,\
 			  'filename': basename+'.'+args.format}
 	labels = populate_vars(labels, args)
 
-	plot_prev_abund(genes_prab, genes_cmap, labels, args.margins)
+	plot_prev_abund(genes_prab, genes_cmap, labels)
 
 

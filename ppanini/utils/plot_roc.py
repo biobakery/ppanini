@@ -18,7 +18,7 @@ from scipy.stats import percentileofscore
 import sys
 import csv
 
-sys.path.append('/Users/rah/Documents/Hutlab/ppanini')#/n/hutlab12_nobackup/data/ppanini/ppanini')
+#sys.path.append('/Users/rah/Documents/Hutlab/ppanini')#/n/hutlab12_nobackup/data/ppanini/ppanini')
 import ppanini
 from src import config
  
@@ -60,7 +60,7 @@ def evaluation_multi_roc():
     prev = [line.split('\t')[2] for line in lines2]
     abun = [line.split('\t')[3] for line in lines2]
     ppanini_score = [line.split('\t')[1] for line in lines2]
-    n =1000
+    n = len(ppanini_score)/10
     config.centroids_list = config.centroids_list[1:n]
     #print config.centroids_list[0:200]
     prev = prev[1:n]
@@ -74,16 +74,16 @@ def evaluation_multi_roc():
     #print abun[0:]
     ground_truth = [1 if (gene_id  in essantial_genes_uniref90_id_299_eco and\
                            gene_id in essantial_genes_uniref90_id_deg) else 0 for gene_id in config.centroids_list ]
-    print ground_truth
+    #print ground_truth
     eval_file = open('/Users/rah/Documents/Hutlab/ppanini/eval_result.txt', 'w') 
     csvw = csv.writer(eval_file, csv.excel_tab, delimiter='\t')
-    csvw.writerow(["centroid", "ppanini score","prevalence", "abundance",  "ground true"])
+    csvw.writerow(["centroid", "ppanini score","prevalence", "abundance",  "is_essential"])
     for i in range(len(config.centroids_list)):
         csvw.writerow([config.centroids_list[i], prev[i], abun[i], ppanini_score[i] ,ground_truth[i]])
     eval_file.close()
         
     
-    for b in range(1, 2, 1):
+    for b in range(1, 10, 1):
         beta = float(b/10.0)         
         config.beta = beta
         #scipy.stats.rankdata()
@@ -116,7 +116,7 @@ def evaluation_multi_roc():
             score[beta] =[config.centroid_prev_abund[gene_id]['ppanini_score'] for gene_id in config.centroids_list ] # 
         '''
         # score[beta] =[beta*2/(i+1) for i in range(len(true[beta]))]
-        print "score", score[beta]
+        #print "score", score[beta]
         assert(len(true[beta])==len(score[beta])) 
         fpr[beta], tpr[beta], _  = roc_curve( true[beta], score[beta], pos_label = 1)
         roc_info.append([str(beta),fpr[beta], tpr[beta]])

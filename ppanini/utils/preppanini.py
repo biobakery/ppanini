@@ -8,10 +8,10 @@ import subprocess
 import multiprocessing
 import logging
 
-from src import quantify_genes
-from src import utilities
-from src import annotate_genes
-from src import write_ppanini_table
+from . import quantify_genes
+from . import utilities
+from . import annotate_genes
+from . import write_ppanini_table
 
 basename = ''
 logger = logging.getLogger(__name__)

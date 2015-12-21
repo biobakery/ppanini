@@ -5,11 +5,10 @@ import argparse
 import numpy
 import logging
 import scipy.stats
-sys.path.append('/n/hutlab12_nobackup/data/ppanini/ppanini')#'/Users/rah/Documents/Hutlab/ppanini')#
-import ppanini
-from src import utilities
-from src import annotate_genes
-from src import config
+#import ppanini
+from . import utilities
+from . import annotate_genes
+from . import config
 
 logger = logging.getLogger(__name__)
 
@@ -589,9 +588,13 @@ def  prioritize_centroids():
 	if config.verbose =='DEBUG':
 		print 'Prioritize centroids is done!'
 	return imp_centroids
-
+def _main():
+   read_parameters()
+   run()
+   prioritize_centroids()	
+    
 if __name__ == '__main__':
-	read_parameters()
-	run()
-	prioritize_centroids()
+	_main()
+
+	
 	

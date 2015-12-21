@@ -8,7 +8,7 @@ import time
 import numpy
 import argparse
 import write_dictionary
-from src import utilities
+from . import utilities
 from matplotlib import pyplot
 
 '''To write the mapper for plot2vals'''

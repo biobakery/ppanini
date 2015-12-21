@@ -9,7 +9,7 @@ import numpy
 import logging
 import argparse
 
-from src import utilities
+from . import utilities
 from matplotlib import pyplot
 
 numpy.seterr(divide='ignore', invalid='ignore')
