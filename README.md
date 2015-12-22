@@ -30,19 +30,28 @@ URL
 * [diamond](http://omictools.com/diamond-s8955.html) **or** [usearch](http://www.drive5.com/usearch/)  **or** [rapsearch2](http://omics.informatics.indiana.edu/mg/RAPSearch2/)
 
 ## **1.2 INSTALLATION**
+Download and unpack the PPANINI software: [ppanini.tar](https://bitbucket.org/biobakery/ppanini/downloads/biobakery-ppanini-0.5.0.tar)
+```
+$ tar xvf ppanini.tar
+$ cd ppanini
+```
+Install the PPANINI software
+```
+$ python setup.py install
+```
 
-To install, execute the following command in your Terminal/Commmand prompt:
+or download the PPANINI software from the repository:
 
 ```
 #!cmd
 hg clone http://bitbucket.org/biobakery/ppanini
 cd ppanini
 python setup.py install
-```
 
 The prerequisites for executing this command are: 
 
-* [Mercurial](https://mercurial.selenic.com/wiki/Download)
+[Mercurial](https://mercurial.selenic.com/wiki/Download)
+```
 
 ------------------------------------------------------------------------------------------------------------------------------
 
