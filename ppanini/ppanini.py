@@ -5,7 +5,6 @@ import argparse
 import numpy
 import logging
 import scipy.stats
-#import ppanini
 from . import utilities
 from . import annotate_genes
 from . import config
@@ -235,7 +234,7 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, be
 		#print centroids_data_matrix
 		for iter, centroid in enumerate(centroids_data_matrix):
 			'''
-			befor was
+			before was
 			for centroid in centroids_data_matrix:
 			'''
 			#abund only where the gene is present in sample

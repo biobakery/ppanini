@@ -60,7 +60,7 @@ def main():
     prev = [line.split('\t')[2] for line in lines2]
     abun = [line.split('\t')[3] for line in lines2]
     ppanini_score = [line.split('\t')[1] for line in lines2]
-    n = 3000#len(ppanini_score)-1
+    n = 10000#len(ppanini_score)-1
     config.centroids_list = config.centroids_list[1:n]
     ppanini_score = ppanini_score[1:n]
     #print config.centroids_list[0:200]

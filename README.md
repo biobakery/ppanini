@@ -2,11 +2,11 @@
 
 PPANINI provides a computational pipeline to prioritize microbial genes based on their metagenomic properties (e.g. prevalence and abundance). The resulting prioritized list of gene candidates can then be analyzed further using our visualization tools.
 
-Google Group
- ppanini-users: https://groups.google.com/forum/#!forum/ppanini-users
+User Group
+	https://groups.google.com/forum/#!forum/ppanini-users
 
 URL
- http://huttenhower.sph.harvard.edu/ppanini
+	http://huttenhower.sph.harvard.edu/ppanini
 
 # **Citation**
   **Systematic approach to prioritization of 'important' microbial genes**, Gholamali Rahnavard, Afrah Shafquat, Bahar Sayoldin, Eric A. Franzosa, Curtis Huttenhower (under preparation)
