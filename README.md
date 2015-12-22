@@ -11,7 +11,8 @@ URL
 # **Citation**
   **Systematic approach to prioritization of 'important' microbial genes**, Gholamali Rahnavard, Afrah Shafquat, Bahar Sayoldin, Eric A. Franzosa, Curtis Huttenhower (under preparation)
   	
-
+# **PPANINI Workflow**
+![ppanini_workflow.png](https://bitbucket.org/repo/rnag7z/images/2352292104-ppanini_workflow.png)
 # **1. SETUP**
 
 ## **1.1 REQUIREMENTS**
@@ -350,4 +351,3 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	
 [Gholamali Rahnavard](mailto:rahnavar@hsph.harvard.edu) and 
 [Afrah Shafquat](mailto:shafquat@hsph.harvard.edu)
-
