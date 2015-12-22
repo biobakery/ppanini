@@ -12,7 +12,10 @@ URL
   **Systematic approach to prioritization of 'important' microbial genes**, Gholamali Rahnavard, Afrah Shafquat, Bahar Sayoldin, Eric A. Franzosa, Curtis Huttenhower (under preparation)
   	
 # **PPANINI Workflow**
-![ppanini_workflow.png](https://bitbucket.org/repo/rnag7z/images/2352292104-ppanini_workflow.png)
+![ppanini_workflow.png](https://bitbucket.org/repo/rnag7z/images/994033213-ppanini_workflow.png)
+
+------------------------------------------------------------------------------------------------------------------------------
+
 # **1. SETUP**
 
 ## **1.1 REQUIREMENTS**
@@ -28,7 +31,7 @@ URL
 * [samtools](http://samtools.sourceforge.net/)
 * [usearch](http://www.drive5.com/usearch/) **or** [vsearch](https://github.com/torognes/vsearch)
 * [diamond](http://omictools.com/diamond-s8955.html) **or** [usearch](http://www.drive5.com/usearch/)  **or** [rapsearch2](http://omics.informatics.indiana.edu/mg/RAPSearch2/)
-
+------------------------------------------------------------------------------------------------------------------------------
 ## **1.2 INSTALLATION**
 Download and unpack the PPANINI software: [ppanini.tar](https://bitbucket.org/biobakery/ppanini/downloads/biobakery-ppanini-0.5.0.tar)
 ```
