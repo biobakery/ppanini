@@ -2,11 +2,11 @@
 
 ----
 
- * Download the HUMAnN2 software ( [ppanini.tar](https://bitbucket.org/biobakery/ppanini/downloads/biobakery-ppanini-0.5.0.tar) ) then follow the [steps to install and run](#markdown-header-getting-started-with-ppanini).
+ * Download the PPANINI software ( [ppanini.tar](https://bitbucket.org/biobakery/ppanini/downloads/biobakery-ppanini-0.5.0.tar) ) then follow the [steps to install and run](#markdown-header-getting-started-with-ppanini).
 
  * For additional information, please see the [PPANINI User Manual](http://huttenhower.sph.harvard.edu/ppanini/manual).
 
- * Please direct questions to the [HUMAnN2 google group](https://groups.google.com/forum/#!forum/ppanini-users) (subscribe to receive PPANINI news).
+ * Please direct questions to the [PPANINI google group](https://groups.google.com/forum/#!forum/ppanini-users) (subscribe to receive PPANINI news).
 
  * If you use the HUMAnN2 software, please cite our manuscript: Systematic approach to prioritization of 'important' microbial genes**, Gholamali Rahnavard, Afrah Shafquat, Bahar Sayoldin, Eric A. Franzosa, Curtis Huttenhower (under preparation)
   	
