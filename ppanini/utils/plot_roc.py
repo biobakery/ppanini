@@ -60,7 +60,7 @@ def main():
     prev = [line.split('\t')[2] for line in lines2]
     abun = [line.split('\t')[3] for line in lines2]
     ppanini_score = [line.split('\t')[1] for line in lines2]
-    n = 10000#len(ppanini_score)-1
+    n = 1000000#len(ppanini_score)-1
     config.centroids_list = config.centroids_list[1:n]
     ppanini_score = ppanini_score[1:n]
     #print config.centroids_list[0:200]
@@ -73,8 +73,7 @@ def main():
     sorted_abun = sorted(abun)
     #print prev[0:101]
     #print abun[0:]
-    ground_truth = [1 if (gene_id  in essantial_genes_uniref90_id_299_eco and\
-                           gene_id in essantial_genes_uniref90_id_deg) else 0 for gene_id in config.centroids_list ]
+    ground_truth = [1 if (gene_id  in essantial_genes_uniref90_id_299_eco) else 0 for gene_id in config.centroids_list ]
     #print ground_truth
     eval_file = open(config.output_folder+'/eval_table.txt', 'w') 
     csvw = csv.writer(eval_file, csv.excel_tab, delimiter='\t')
@@ -84,7 +83,7 @@ def main():
     eval_file.close()
         
     
-    for b in range(1, 10, 1):
+    for b in range(5, 6, 1):
         beta = float(b/10.0)         
         config.beta = beta
         #scipy.stats.rankdata()
@@ -156,12 +155,12 @@ def roc_plot(roc_info=None, figure_name='roc_plot_ppanini'):
         roc_name += '_' + roc_info[i][0] 
         
     # Plot ROC curve
-    plt.figure(dpi= 300, figsize=(4, 4))
+    plt.figure(dpi= 300, figsize=(5, 5 ))
     for i in range(len(roc_info)):
         params = {'legend.fontsize': 6,
         'legend.linewidth': 2}
         plt.rcParams.update(params)
-        plt.plot(fpr[roc_info[i][0]], tpr[roc_info[i][0]],  label='{0} (area = {1:0.2f})'
+        plt.plot(fpr[roc_info[i][0]], tpr[roc_info[i][0]],  label='Beta = {0}  (area = {1:0.2f})'
                                        ''.format(str(roc_info[i][0]), roc_auc[roc_info[i][0]]))   
     plt.plot([0, 1], [0, 1], 'k--')
     plt.xlim([0.0, 1.0])
