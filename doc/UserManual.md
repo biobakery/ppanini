@@ -7,7 +7,6 @@ PPANINI provides a computational pipeline to prioritize microbial genes based on
 ## Contents ##
 
 * [PREPPANINI: Creating a PPANINI table](#markdown-header-preppanini)
-* [Workflows](#markdown-header-workflows)
 * [Requirements](#markdown-header-requirements)
     * [Software](#markdown-header-software)
     * [Other](#markdown-header-other)
