@@ -1,8 +1,7 @@
-# PPANINI #
-
+#**PPANINI: Prioritization and Prediction of functional Annotations for Novel and Important genes via automated data Network Integration**
 ----
 
- * Download the PPANINI software ( [ppanini.tar](https://bitbucket.org/biobakery/ppanini/downloads/biobakery-ppanini-0.6.0.tar) ) then follow the [steps to install and run](#markdown-header-getting-started-with-ppanini).
+ * Download the PPANINI software ([ppanini.tar](https://bitbucket.org/biobakery/ppanini/downloads/biobakery-ppanini-0.6.0.tar)) then follow the [steps to install and run](#markdown-header-getting-started-with-ppanini).
 
  * For additional information, please see the [PPANINI User Manual](http://huttenhower.sph.harvard.edu/ppanini/manual).
 
@@ -13,13 +12,7 @@
 
 ----
 
-
-#**PPANINI: Prioritization and Prediction of functional Annotations for Novel and Important genes via automated data Network Integration**
-
 PPANINI provides a computational pipeline to prioritize microbial genes based on their metagenomic properties (e.g. prevalence and abundance). The resulting prioritized list of gene candidates can then be analyzed further using our visualization tools.
-
-User Group
-	https://groups.google.com/forum/#!forum/ppanini-users
 
 # **PPANINI Workflow**
 ![ppanini_workflow.png](https://bitbucket.org/repo/rnag7z/images/994033213-ppanini_workflow.png)
