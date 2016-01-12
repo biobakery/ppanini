@@ -8,17 +8,17 @@ PPANINI provides a computational pipeline to prioritize microbial genes based on
 
 ## Contents ##
 
-* [PREPPANINI: Creating a PPANINI table](#markdown-header-preppanini:_creating_a_ppanini_table)
-* [VISUALIZATION](#markdown-header-visualization)
-    * [Metagenomic vs. Genomic Priority plots](#markdown-header-metagenomic_vs._genomic_priority_plots)
-    * [Histograms for metagenome hits](#markdown-header-histograms_for_metagenome_hits)
-    * [GraPhlAn plots](#markdown-header-graphlan_plots)
+* [PREPPANINI: Creating a PPANINI table](#markdown-header-preppanini-creating-a-ppanini-table)
+* [Visualization](#markdown-header-visualization)
+    * [Metagenomic vs. Genomic Priority plots](#markdown-header-metagenomic-vs-genomic-priority-plots)
+    * [Histograms for metagenome hits](#markdown-header-histograms-for-metagenome-hits)
+    * [GraPhlAn plots](#markdown-header-graphlan-plots)
 * [Tools](#markdown-header-tools)
     * [Normalization](#markdown-header-download-normalization)
-    * [Join tables](#markdown-header-join_tables)
-    * [Centroids extraction from gene abundance table](#markdown-header-centroids_extraction_from_gene_abundance_table)
-    * [Create mapper file for PREPPANINI](#markdown-header-create_mapper_file_for_preppanini)
-    * [Write mapper](#markdown-header-write_mapper)
+    * [Join tables](#markdown-header-join-tables)
+    * [Centroids extraction from gene abundance table](#markdown-header-centroids-extraction-from-gene-abundance-table)
+    * [Create mapper file for PREPPANINI](#markdown-header-create-mapper-file-for-preppanini)
+    * [Write mapper](#markdown-header-write-mapper)
 
 ## PREPPANINI: Creating a PPANINI table ##
 
