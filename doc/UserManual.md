@@ -8,23 +8,17 @@ PPANINI provides a computational pipeline to prioritize microbial genes based on
 
 ## Contents ##
 
-* [PREPPANINI: Creating a PPANINI table](#markdown-header-preppanini)
-* [Requirements](#markdown-header-requirements)
-    * [Software](#markdown-header-software)
-    * [Other](#markdown-header-other)
-* [Initial Installation](#markdown-header-initial-installation)
-    1. [Download PPANINI](#markdown-header-1-download-ppanini)
-    2. [Install PPANINI](#markdown-header-2-install-ppanioni)
-    3. [Test the install](#markdown-header-3-test-the-install)
-    4. [Try out a demo run](#markdown-header-4-try-out-a-demo-run)
-    5. [Download the databases](#markdown-header-5-download-the-databases)
-        * [Download the ChocoPhlAn database](#markdown-header-download-the-chocophlan-database)
-        * [Download the UniRef50 database](#markdown-header-download-the-uniref50-database)
-* [Visualization](#markdown-header-visualization)
-	* [Metagenomic vs. Genomic Priority plots[(#markdown-header-1-metagenomic_vs_genomic)
-	* [Histograms for metagenome hits](#markdown-header-2-histograms_for_metagenome_hits)
-	* [graphlan_plots](#markdown-header-3-graphlan-plots)
+* [PREPPANINI: Creating a PPANINI table](#markdown-header-preppanini:_creating_a_ppanini_table)
+* [VISUALIZATION](#markdown-header-visualization)
+    * [Metagenomic vs. Genomic Priority plots](#markdown-header-metagenomic_vs._genomic_priority_plots)
+    * [Histograms for metagenome hits](#markdown-header-histograms_for_metagenome_hits)
+    * [GraPhlAn plots](#markdown-header-graphlan_plots)
 * [Tools](#markdown-header-tools)
+    * [Normalization](#markdown-header-download-normalization)
+    * [Join tables](#markdown-header-join_tables)
+    * [Centroids extraction from gene abundance table](#markdown-header-centroids_extraction_from_gene_abundance_table)
+    * [Create mapper file for PREPPANINI](#markdown-header-create_mapper_file_for_preppanini)
+    * [Write mapper](#markdown-header-write_mapper)
 
 ## PREPPANINI: Creating a PPANINI table ##
 
@@ -151,7 +145,7 @@ optional arguments:
 
 ------------------------------------------------------------------------------------------------------------------------
 
-## TOOLS ##
+## Tools ##
 
 ### Normalization ###
 
@@ -220,20 +214,4 @@ optional arguments:
 #!cmd
 usage: ppanini_write_mapper <uniref_ids> <map uniref_go_ids> > <uniref_ids_go_select>
 ```
-# **License**
-
-This software is licensed under the MIT license.
-
-Copyright (c) 2015 Gholamali Rahnavard, Afrah Shafquat, Eric A. Franzosa, Curtis Huttenhower.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ------------------------------------------------------------------------------------------------------------------------
-
-# **Maintained by**
-	
-[Gholamali Rahnavard](mailto:rahnavar@hsph.harvard.edu) and 
-[Afrah Shafquat](mailto:shafquat@hsph.harvard.edu)
