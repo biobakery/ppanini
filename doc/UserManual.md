@@ -9,6 +9,8 @@ If you use the PPANINI software, please cite our manuscript:** Systematic approa
 ## Contents ##
 
 * [PREPPANINI: Creating a PPANINI table](#markdown-header-preppanini-creating-a-ppanini-table)
+    * [Requirements](#markdown-header-requirements)
+    * [How to run](#markdown-header-how-to-run)
 * [Visualization](#markdown-header-visualization)
     * [Metagenomic vs. Genomic Priority plots](#markdown-header-metagenomic-vs-genomic-priority-plots)
     * [Histograms for metagenome hits](#markdown-header-histograms-for-metagenome-hits)
@@ -21,7 +23,12 @@ If you use the PPANINI software, please cite our manuscript:** Systematic approa
     * [Write mapper](#markdown-header-write-mapper)
 
 ## PREPPANINI: Creating a PPANINI table ##
-
+#### Requirements ###
+* [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
+* [samtools](http://samtools.sourceforge.net/)
+* [usearch](http://www.drive5.com/usearch/) **or** [vsearch](https://github.com/torognes/vsearch)
+* [diamond](http://omictools.com/diamond-s8955.html) **or** [usearch](http://www.drive5.com/usearch/)  **or** [rapsearch2](http://omics.informatics.indiana.edu/mg/RAPSearch2/)
+### How to run
 ```
 #!cmd
 
@@ -71,7 +78,7 @@ optional arguments:
 
 ------------------------------------------------------------------------------------------------------------------------
 
-## VISUALIZATION ##
+## Visualization ##
 
 ### Metagenomic vs. Genomic Priority plots ###
 
