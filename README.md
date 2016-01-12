@@ -29,11 +29,6 @@ PPANINI provides a computational pipeline to prioritize microbial genes based on
 * [Biopython](http://biopython.org/wiki/Download)
 * [Numpy 1.9.*](http://www.numpy.org/)
 
-### **PREPPANINI**
-* [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
-* [samtools](http://samtools.sourceforge.net/)
-* [usearch](http://www.drive5.com/usearch/) **or** [vsearch](https://github.com/torognes/vsearch)
-* [diamond](http://omictools.com/diamond-s8955.html) **or** [usearch](http://www.drive5.com/usearch/)  **or** [rapsearch2](http://omics.informatics.indiana.edu/mg/RAPSearch2/)
 ------------------------------------------------------------------------------------------------------------------------------
 ## **INSTALLATION**
 Download and unpack the PPANINI software: [ppanini.tar](https://bitbucket.org/biobakery/ppanini/downloads/biobakery-ppanini-0.5.0.tar)
