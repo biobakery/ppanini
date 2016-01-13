@@ -45,9 +45,9 @@ or download the PPANINI software from the repository:
 
 ```
 #!cmd
-hg clone http://bitbucket.org/biobakery/ppanini
-cd ppanini
-python setup.py install
+$ hg clone http://bitbucket.org/biobakery/ppanini
+$ cd ppanini
+$ python setup.py install
 
 The prerequisites for executing this command are: 
 
