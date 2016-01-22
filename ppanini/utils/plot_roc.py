@@ -20,7 +20,7 @@ import csv
 
 #sys.path.append('/Users/rah/Documents/Hutlab/ppanini')#/n/hutlab12_nobackup/data/ppanini/ppanini')
 import ppanini
-from .. import config
+from ppanini import config
  
 def main():
     fpr = dict()
@@ -45,6 +45,7 @@ def main():
     with open('/Users/rah/Documents/Hutlab/UniRef90_output_299_gene.m8') as f:
         lines = f.read().splitlines()
     essantial_genes_uniref90_id_299_eco = [line.split('\t')[1] for line in lines]
+    essantial_genes = essantial_genes_uniref90_id_299_eco
     #config.essantial_genes_uniref90_id = essantial_genes_uniref90_id
     #essantial_genes_uniref_id = essantial_genes_uniref90_id +essantial_genes_uniref50_id
     #print len(essantial_genes_uniref90_id)
@@ -60,7 +61,7 @@ def main():
     prev = [line.split('\t')[2] for line in lines2]
     abun = [line.split('\t')[3] for line in lines2]
     ppanini_score = [line.split('\t')[1] for line in lines2]
-    n = 1000000#len(ppanini_score)-1
+    n = len(ppanini_score)-1
     config.centroids_list = config.centroids_list[1:n]
     ppanini_score = ppanini_score[1:n]
     #print config.centroids_list[0:200]
@@ -73,7 +74,7 @@ def main():
     sorted_abun = sorted(abun)
     #print prev[0:101]
     #print abun[0:]
-    ground_truth = [1 if (gene_id  in essantial_genes_uniref90_id_299_eco) else 0 for gene_id in config.centroids_list ]
+    ground_truth = [1 if (gene_id  in essantial_genes) else 0 for gene_id in config.centroids_list ]
     #print ground_truth
     eval_file = open(config.output_folder+'/eval_table.txt', 'w') 
     csvw = csv.writer(eval_file, csv.excel_tab, delimiter='\t')
@@ -83,9 +84,14 @@ def main():
     eval_file.close()
         
     
-    for b in range(5, 6, 1):
-        beta = float(b/10.0)         
+    for b in ["DEG", "ECO"]:#range(5, 6, 1):
+        beta =.5# float(b/10.0)         
         config.beta = beta
+        if b == "DEG":
+            essantial_genes = essantial_genes_uniref90_id_deg
+        else:
+            essantial_genes = essantial_genes_uniref90_id_299_eco
+        ground_truth = [1 if (gene_id  in essantial_genes) else 0 for gene_id in config.centroids_list ]
         #scipy.stats.rankdata()
         score[beta] = [1/((1/((beta)*scipy.stats.percentileofscore(sorted_prev, prev[i])))+\
                       (1/((1-beta)*scipy.stats.percentileofscore(sorted_abun, abun[i])))) for i in range(len(prev))]
@@ -115,9 +121,10 @@ def main():
         else:
             score[beta] =[config.centroid_prev_abund[gene_id]['ppanini_score'] for gene_id in config.centroids_list ] # 
         '''
+        legend_tag = b
         assert(len(true[beta])==len(score[beta])) 
         fpr[beta], tpr[beta], _  = roc_curve( true[beta], score[beta], pos_label = 1)
-        roc_info.append([str(beta),fpr[beta], tpr[beta]])
+        roc_info.append([str(legend_tag),fpr[beta], tpr[beta]])
         #print roc_info
         #break;
     try:
@@ -160,14 +167,16 @@ def roc_plot(roc_info=None, figure_name='roc_plot_ppanini'):
         params = {'legend.fontsize': 6,
         'legend.linewidth': 2}
         plt.rcParams.update(params)
-        plt.plot(fpr[roc_info[i][0]], tpr[roc_info[i][0]],  label='Beta = {0}  (area = {1:0.2f})'
+        plt.plot(fpr[roc_info[i][0]], tpr[roc_info[i][0]],  label='Essential Genes = {0}  (area = {1:0.2f})'
                                        ''.format(str(roc_info[i][0]), roc_auc[roc_info[i][0]]))   
     plt.plot([0, 1], [0, 1], 'k--')
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Receiver operating characteristic')
+    plt.xlabel('False Positive Rate', fontsize = 10)
+    plt.ylabel('True Positive Rate', fontsize = 10)
+    plt.xticks(fontsize = 8)
+    plt.yticks(fontsize = 8)
+    plt.title('Receiver operating characteristic', fontsize = 12)
     plt.legend(loc="lower right")
     plt.tight_layout()
     plt.savefig(figure_name + '.pdf')

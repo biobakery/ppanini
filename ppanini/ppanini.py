@@ -5,9 +5,14 @@ import argparse
 import numpy
 import logging
 import scipy.stats
-from . import utilities
-from . import annotate_genes
-from . import config
+try:
+    from . import utilities
+    from . import annotate_genes
+    from . import config
+except ImportError:
+    sys.exit("CRITICAL ERROR: Unable to find the PPANINI python package." +
+        " Please check your install.")
+
 
 logger = logging.getLogger(__name__)
 

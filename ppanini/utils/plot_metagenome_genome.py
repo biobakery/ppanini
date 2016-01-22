@@ -60,6 +60,7 @@ def read_parsed(m8_filename):
 			table[split_i[0]] += [split_i[1]]
 		except:
 			table[split_i[0]] = [split_i[1]]
+	print table 
 	return table
 
 def plot_scatter(table, m8_filename, no_uniq_genomes):
