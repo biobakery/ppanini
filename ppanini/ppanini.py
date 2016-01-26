@@ -47,8 +47,15 @@ def read_gene_table(gene_table_fname):
 			split_i = line.split('\t')
 			annot = split_i[0].split('|') #geneID column split 
 			#print annot
-			u90_annot = [i for i in annot if 'UniRef90' in i][0]
-			u50_annot = [i for i in annot if 'UniRef50' in i][0]
+			try:
+				u90_annot = [i for i in annot if 'UniRef90' in i][0]
+			except: #Incase Gene table is not annotated with UniRef90
+				u90_annot = 'UniRef90_unknown'
+
+			try:
+				u50_annot = [i for i in annot if 'UniRef50' in i][0]
+			except: #Incase Gene table is not annotated with UniRef50
+				u50_annot = 'UniRef50_unknown'
 			#print 'u50_annot: ',u50_annot
 			data_row = numpy.array([float(i) for i in split_i[1:]])
 			#print 'data_row: ', data_row
@@ -130,7 +137,7 @@ def get_centroids(uniref_dm, gi_dm, flag):
 			centroid_gis = get_centroids_fromUCLUST(gi_dm.keys())
 	else:
 		centroid_gis = gi_dm
-		
+
 	gc_dm = {}
 	for centroid in centroid_gis:
 		for gene in centroid_gis[centroid]:
