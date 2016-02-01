@@ -47,8 +47,15 @@ def read_gene_table(gene_table_fname):
 			split_i = line.split('\t')
 			annot = split_i[0].split('|') #geneID column split 
 			#print annot
-			u90_annot = [i for i in annot if 'UniRef90' in i][0]
-			u50_annot = [i for i in annot if 'UniRef50' in i][0]
+			try:
+				u90_annot = [i for i in annot if 'UniRef90' in i][0]
+			except: #Incase Gene table is not annotated with UniRef90
+				u90_annot = 'UniRef90_unknown'
+
+			try:
+				u50_annot = [i for i in annot if 'UniRef50' in i][0]
+			except: #Incase Gene table is not annotated with UniRef50
+				u50_annot = 'UniRef50_unknown'
 			#print 'u50_annot: ',u50_annot
 			data_row = numpy.array([float(i) for i in split_i[1:]])
 			#print 'data_row: ', data_row
@@ -108,7 +115,7 @@ def get_centroids_fromUCLUST(genes):
 
 	return cluster_dict
 
-def get_centroids(uniref_dm, gi_dm):
+def get_centroids(uniref_dm, gi_dm, flag):
 	'''Returns the dict of all centroids containing clusters of gene IDs
 
 	Input:	uniref_dm = {UniRef_XYZ: numpy.array(abundance), ...}
@@ -123,11 +130,13 @@ def get_centroids(uniref_dm, gi_dm):
 	logger.debug('get_centroids')
 
 	centroids_fasta = {}
-
-	if config.uclust_file == '':
-		centroid_gis = get_clusters() #all UniRef90_unknowns are clustered across samples
+	if not flag:
+		if config.uclust_file == '':
+			centroid_gis = get_clusters() #all UniRef90_unknowns are clustered across samples
+		else:
+			centroid_gis = get_centroids_fromUCLUST(gi_dm.keys())
 	else:
-		centroid_gis = get_centroids_fromUCLUST(gi_dm.keys())
+		centroid_gis = gi_dm
 
 	gc_dm = {}
 	for centroid in centroid_gis:
@@ -522,6 +531,7 @@ def read_parameters():
 	parser.add_argument('--tshld-abund', dest = 'tshld_abund', default=config.tshld_abund, type = float,help='[X] Percentile Cutoff for Abundance; Default=75th')
 	parser.add_argument('--tshld-prev', dest = 'tshld_prev', default=config.tshld_prev, type =float, help='Percentile cutoff for Prevalence')
 	parser.add_argument('--beta', default=config.beta, help='Beta parameter for weights on percentiles')
+	parser.add_argument('--bypass-clustering', dest = 'bypass_clustering', default=False, action='store_true', help='Bypass clustering')
 	# parser.add_argument('--bypass-prev-abund', dest = 'bypass_prev_abund', default=False, action='store_true', help='Bypass quantifying abundance and prevalence')
 
 	args = parser.parse_args()
@@ -534,7 +544,7 @@ def read_parameters():
 	config.beta = args.beta
 
 def run():
-	if config.uclust_file == '' and config.gene_catalog == '':
+	if config.uclust_file == '' and config.gene_catalog == '' and not args.bypass_clustering:
 		sys.exit("At least one of --uc or --gene-catalog should be provided!!!")
 	# if not args.bypass_prev_abund:
 	if config.basename =='':
@@ -560,7 +570,7 @@ def run():
 	
 	if config.verbose =='DEBUG':
 		print "Getting centroids..."
-	all_centroids = get_centroids(uniref_dm, gi_dm)
+	all_centroids = get_centroids(uniref_dm, gi_dm, args.bypass_clustering)
 	if config.verbose =='DEBUG':
 		print "Getting centroids is done!"
 	
