@@ -19,8 +19,8 @@ import sys
 import csv
 
 #sys.path.append('/Users/rah/Documents/Hutlab/ppanini')#/n/hutlab12_nobackup/data/ppanini/ppanini')
-import ppanini
-from ppanini import config
+
+from . import config
  
 def main():
     fpr = dict()

@@ -7,8 +7,11 @@ import time
 import numpy
 import argparse
 import pdb
-from matplotlib import pyplot
-from . import utilities
+import matplotlib.pyplot as plt
+from matplotlib import colors
+#from . import utils
+
+from .. import utilities
 
 '''Tmp file to parse results'''
 '''Analysis of Genome Hits per gene showing how many genomes each gene is found in.'''
@@ -60,7 +63,7 @@ def read_parsed(m8_filename):
 			table[split_i[0]] += [split_i[1]]
 		except:
 			table[split_i[0]] = [split_i[1]]
-	print table 
+	#print table 
 	return table
 
 def plot_scatter(table, m8_filename, no_uniq_genomes):
@@ -80,11 +83,11 @@ def plot_scatter(table, m8_filename, no_uniq_genomes):
 		all_genes +=[len(table[gene])/float(no_uniq_genomes)]
 
 	all_genes.sort()
-	pyplot.figure()
-	pyplot.xlabel(labels['xlabel'])
-	pyplot.ylabel(labels['ylabel'])
-	pyplot.title(labels['title']) 
-	pyplot.scatter(numpy.arange(len(all_genes)), \
+	plt.figure()
+	plt.xlabel(labels['xlabel'])
+	plt.ylabel(labels['ylabel'])
+	plt.title(labels['title']) 
+	plt.scatter(numpy.arange(len(all_genes)), \
 				   numpy.log(all_genes), \
 				   c='grey', \
 				   alpha=0.1, \
@@ -92,11 +95,12 @@ def plot_scatter(table, m8_filename, no_uniq_genomes):
 				   zorder=1, \
 				   marker='o',\
 				   label='All Centroids')
-	pyplot.legend( loc=4, \
+	'''plt.legend( loc=4, \
 				   fontsize='x-small', \
-				   framealpha=0.4, )	
-	pyplot.savefig(labels['filename'])
-	pyplot.savefig(labels['filename']+'.png')
+				   framealpha=0.4, )
+				   '''	
+	plt.savefig(labels['filename'])
+	plt.savefig(labels['filename']+'.png')
 
 def plot_hexbin(table, m8_filename):
 	'''Plots HexBin plots for the genome hits per gene
@@ -108,22 +112,22 @@ def plot_hexbin(table, m8_filename):
 			  'ylabel':'No. of Genomes', \
 			  'title':'Metagenome vs. Genome Prioritization',\
 			  'filename': m8_filename+'_prioritizationHEXBIN.pdf'}
-	pyplot.figure()
-	pyplot.xlabel(labels['xlabel'])
-	pyplot.ylabel(labels['ylabel'])
-	pyplot.title(labels['title']) 
+	plt.figure()
+	plt.xlabel(labels['xlabel'])
+	plt.ylabel(labels['ylabel'])
+	plt.title(labels['title']) 
 
 	all_genes = []
 	for gene in table:
 		all_genes +=[len(table[gene])/4189.0]
 	all_genes.sort()
-	pyplot.hold(True)
-	image = pyplot.hexbin(numpy.arange(len(all_genes)), \
+	plt.hold(True)
+	image = plt.hexbin(numpy.arange(len(all_genes)), \
 				   all_genes,\
-				   bins='log', gridsize=30, mincnt=1, cmap=pyplot.cm.Spectral_r, zorder=1)
-	cb = pyplot.colorbar(image, spacing='uniform', extend='max')
+				   bins='log', gridsize=30, mincnt=1, cmap= 'darkgoldenrod', zorder=1) 
+	cb = plt.colorbar(image, spacing='uniform', extend='max')
 	
-	pyplot.savefig(labels['filename'])
+	plt.savefig(labels['filename'])
 
 def plot_hist(table, m8_filename, no_uniq_genomes):
 	'''Plots histogram for the genome hits per gene
@@ -141,58 +145,71 @@ def plot_hist(table, m8_filename, no_uniq_genomes):
 	for gene in table:
 		all_genes +=[len(table[gene])/float(no_uniq_genomes)]
 
-	pyplot.figure()
-	pyplot.xlabel(labels['xlabel'])
-	pyplot.ylabel(labels['ylabel'])
-	pyplot.title(labels['title'])
-	pyplot.legend('All Centroids')
-	pyplot.hist(all_genes, log=True, bins=30, edgecolor='white', color='gray')
-	pyplot.savefig(labels['filename'])
-	pyplot.savefig(labels['filename']+'.png')
-
-	pyplot.figure()
-	pyplot.xlabel('Genomes Fraction [Genome hits/Total no. of unique genomes in niche]')
-	pyplot.ylabel('Centroids coverage')
-	pyplot.title(labels['title'])
-	pyplot.legend('All Centroids')
+	plt.figure()
+	plt.xlabel(labels['xlabel'])
+	plt.ylabel(labels['ylabel'])
+	plt.title(labels['title'])
+	plt.legend('All Centroids')
+	plt.hist(all_genes, log=True, bins=30, edgecolor='white', color='gray')
+	plt.savefig(labels['filename'])
+	plt.savefig(labels['filename']+'.png')
+	fig, axarr = plt.subplots()
+	#plt.figure()
+	#plt.xlabel('Genomes Fraction [Genome hits/Total no. of unique genomes in niche]')
+	#plt.ylabel('Centroids coverage')
+	#plt.title(labels['title'])
+	#plt.legend('All Centroids')
+	axarr.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+	axarr.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
+	axarr.yaxis.set_label_position('left') 
+	axarr.set_ylabel('Centroids coverage')
+	axarr.set_xlabel('Genomes Fraction [Genome hits/Total no. of unique genomes in niche]')
+	plt.title(labels['title'])
+	plt.legend('All Centroids') 
+	
+	
 	hist, bins = numpy.histogram(all_genes, bins=200)
 	offset = bins[1:]-bins[:-1]
-	pyplot.plot(bins[:-1]+offset, numpy.cumsum(hist), color='gray')
-	pyplot.savefig(labels['filename']+'_cumsum.pdf')
-	pyplot.savefig(labels['filename']+'_cumsum.png')
+	axarr.plot(bins[:-1]+offset, numpy.cumsum(hist), color='darkgoldenrod')
+	plt.savefig(labels['filename']+'_cumsum.pdf')
+	plt.savefig(labels['filename']+'_cumsum.png')
 
 def read_abund_prev(filename):
 	keys = {'abund':0, 'alpha':0,'beta':0}
 	abund = []
-	alpha = []
+	prev = []
 	genes = []
+	ppanini_score = []
 	with open(filename) as foo:
 		for line in foo:
 			split_line = [re.sub('[\r\t\n]','', i) for i in line.split('\t')]
-			if line.startswith('Centroids'):
+			if line.startswith('#'):
 				for i, val in enumerate(split_line):
-					if 'abund' in val:
-						keys['abund'] = i
-					elif 'alpha' in val:
-						keys['alpha'] = i
-					elif 'beta' in val:
-						keys['beta'] = i
+					if 'abundance' in val:
+						keys['abundance'] = i
+					elif 'prevalence' in val:
+						keys['prevalence'] = i
+					#elif 'beta' in val:
+					#	keys['beta'] = i
+					elif 'ppanini_score' in val:
+						keys['ppanini_score'] = i	
 			else:
 				# pdb.set_trace()
 				genes +=[split_line[0]]
-				abund +=[float(split_line[keys['abund']])]
-				alpha +=[float(split_line[keys['alpha']])]
-	abund_prev = {'genes': genes, 'abundance': abund, 'prevalence': alpha}
+				ppanini_score +=[float(split_line[keys['ppanini_score']])]
+				abund +=[float(split_line[keys['abundance']])]
+				prev +=[float(split_line[keys['prevalence']])]
+	abund_prev = {'genes': genes, 'ppanini_score':ppanini_score, 'abundance': abund, 'prevalence': prev}
 	return abund_prev
 
 def plot_metagenomic_priority(abund_prev, table, no_uniq_genomes, filename):
 	mp_gp = {}
 	genes = abund_prev['genes']
 	abund = abund_prev['abundance']
-	alpha = abund_prev['prevalence']
-
+	prev = abund_prev['prevalence']
+	ppanini_score = abund_prev['ppanini_score']
 	abund = numpy.array(abund)/max(abund)
-	alpha = numpy.array(alpha)/max(alpha)
+	prev = numpy.array(prev)/max(prev)
 	
 	gp = []
 	mp = []
@@ -202,49 +219,63 @@ def plot_metagenomic_priority(abund_prev, table, no_uniq_genomes, filename):
 			gp += [len(table[gene])]
 		except:
 			gp += [0]
-		mp += [min((abund[i], alpha[i]))]
+		#mp += [min((abund[i], alpha[i]))]
+		mp +=[ppanini_score[i]]
 	gp = numpy.array(gp)/float(no_uniq_genomes)
-	pyplot.figure()
-	pyplot.xlabel('Genomic Priority')
-	pyplot.ylabel('Metagenomic Priority')
-	pyplot.title('Metagenomic vs. Genomic Priority') 
-	pyplot.scatter(numpy.log(gp), \
+	fig, axarr = plt.subplots()
+	axarr.scatter(numpy.log(gp), \
 				   numpy.log(mp), \
-				   # c='grey', \
+				   c= 'darkgoldenrod', \
+				   ##'slategray'
 				   alpha=0.1, \
-				   linewidths=0.0, \
-				   zorder=1, \
+				   linewidths=0.01, \
+				   zorder=0, \
 				   marker='o',\
 				   label='All Centroids')
-	pyplot.savefig(filename+'_mp_gp.pdf')
-	pyplot.savefig(filename+'_mp_gp.png')
 	
-	pyplot.figure()
-	pyplot.xlabel('Genomic Priority')
-	pyplot.ylabel('Metagenomic Priority')
-	pyplot.title('Metagenomic vs. Genomic Priority') 
-	pyplot.scatter(gp, \
+	axarr.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+	axarr.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
+	axarr.yaxis.set_label_position('left') 
+	axarr.set_ylabel('Metagenomic Priority')
+	axarr.set_xlabel('Genomic Priority')
+	plt.title('Metagenomic vs. Genomic Priority') 
+	
+	plt.savefig(filename+'_mp_gp.pdf')
+	#plt.savefig(filename+'_mp_gp.png')
+	#plt.show()
+	
+	fig, axarr = plt.subplots()
+	axarr.scatter(gp, \
 				   mp, \
-				   # c='grey', \
+				   c='darkgoldenrod', \
 				   alpha=0.1, \
-				   linewidths=0.0, \
-				   zorder=1, \
+				   linewidths=0.02, \
+				   zorder=0, \
 				   marker='o',\
 				   label='All Centroids')
-	pyplot.savefig(filename+'_nonlog_mp_gp.pdf')
-	pyplot.savefig(filename+'_nonlog_mp_gp.png')
-
-	pyplot.figure()
-	pyplot.xlabel('Genomic Priority')
-	pyplot.ylabel('Metagenomic Priority')
-	pyplot.title('Metagenomic vs. Genomic Priority') 
-	pyplot.hexbin(numpy.log(gp), \
+	axarr.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+	axarr.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
+	axarr.yaxis.set_label_position('left') 
+	axarr.set_ylabel('Metagenomic Priority')
+	axarr.set_xlabel('Genomic Priority')
+	plt.title('Metagenomic vs. Genomic Priority') 
+	plt.tight_layout()
+	plt.savefig(filename+'_nonlog_mp_gp.pdf')
+	#plt.savefig(filename+'_nonlog_mp_gp.png')
+	#plt.show()
+	
+	plt.figure()
+	plt.xlabel('Genomic Priority')
+	plt.ylabel('Metagenomic Priority')
+	plt.title('Metagenomic vs. Genomic Priority') 
+	#colormap_r = ListedColormap(colormap.colors[::-1])
+	plt.hexbin(numpy.log(gp), \
 				   numpy.log(mp), \
-				   cmap='Blues',
+				   cmap='YlOrBr',#'Blues',
 				   gridsize=10)
-	pyplot.colorbar()
-	pyplot.savefig(filename+'_hexplot_mp_gp.pdf')
-	pyplot.savefig(filename+'_hexplot_mp_gp.png')
+	plt.colorbar()
+	plt.savefig(filename+'_hexplot_mp_gp.pdf')
+	#plt.savefig(filename+'_hexplot_mp_gp.png')
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i', '--input-file', dest='input_file',  help='Gene Genomes blast results', required=True)
@@ -278,19 +309,19 @@ def main():
 		with open(m8_filename+'_no_genomes.m8','w') as foo:
 			for i in table:
 				foo.writelines('\t'.join([i, str(len(table[i]))])+'\n')
-	
+	print"Total No. of genes:", len(table)
 	uniq_genomes = []
 	for gene in table:
 		for genome in table[gene]:
 			if genome not in uniq_genomes:
 				uniq_genomes +=[genome]
-
 	no_uniq_genomes = len(uniq_genomes)
+	print 'No. of unique genomes: '+str(no_uniq_genomes)
+	
 	if not args.bypass_priority_scatter:
 		abund_prev= read_abund_prev(args.abund_prev)
 		plot_metagenomic_priority(abund_prev, table, no_uniq_genomes, args.input_file)
-	print 'No. of unique genomes: '+str(no_uniq_genomes)
-
+	
 	if args.parse_only:
 		sys.exit('Input files parsed: '+args.input_file)
 	
