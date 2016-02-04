@@ -115,7 +115,7 @@ def get_centroids_fromUCLUST(genes):
 
 	return cluster_dict
 
-def get_centroids(uniref_dm, gi_dm, flag):
+def get_centroids(uniref_dm, gi_dm):
 	'''Returns the dict of all centroids containing clusters of gene IDs
 
 	Input:	uniref_dm = {UniRef_XYZ: numpy.array(abundance), ...}
@@ -130,7 +130,7 @@ def get_centroids(uniref_dm, gi_dm, flag):
 	logger.debug('get_centroids')
 
 	centroids_fasta = {}
-	if not flag:
+	if not config.bypass_clustering:
 		if config.uclust_file == '':
 			centroid_gis = get_clusters() #all UniRef90_unknowns are clustered across samples
 		else:
@@ -540,11 +540,11 @@ def read_parameters():
 	config.input_table = args.input_table
 	config.uclust_file = args.uc
 	config.gene_catalog = args.gene_catalog
-	
-	config.beta = args.beta
-
+	config.bypass_clustering = args.bypass_clustering
+    config.output_folder = args.output_folder
+    config.beta = args.beta
 def run():
-	if config.uclust_file == '' and config.gene_catalog == '' and not args.bypass_clustering:
+	if config.uclust_file == '' and config.gene_catalog == '' and not config.bypass_clustering:
 		sys.exit("At least one of --uc or --gene-catalog should be provided!!!")
 	# if not args.bypass_prev_abund:
 	if config.basename =='':
@@ -570,7 +570,7 @@ def run():
 	
 	if config.verbose =='DEBUG':
 		print "Getting centroids..."
-	all_centroids = get_centroids(uniref_dm, gi_dm, args.bypass_clustering)
+	all_centroids = get_centroids(uniref_dm, gi_dm)
 	if config.verbose =='DEBUG':
 		print "Getting centroids is done!"
 	

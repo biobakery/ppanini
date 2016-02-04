@@ -63,7 +63,7 @@ def read_parsed(m8_filename):
 			table[split_i[0]] += [split_i[1]]
 		except:
 			table[split_i[0]] = [split_i[1]]
-	#print table 
+	print"Total No. of genes:", len(table) 
 	return table
 
 def plot_scatter(table, m8_filename, no_uniq_genomes):
@@ -201,8 +201,103 @@ def read_abund_prev(filename):
 				prev +=[float(split_line[keys['prevalence']])]
 	abund_prev = {'genes': genes, 'ppanini_score':ppanini_score, 'abundance': abund, 'prevalence': prev}
 	return abund_prev
+def read_data(mg_file, ppanini_output_file):
+	metagenomic_table  = read_parsed(mg_file)
+	uniq_genomes = []
+	for gene in metagenomic_table:
+		for genome in metagenomic_table[gene]:
+			if genome not in uniq_genomes:
+				uniq_genomes +=[genome]
+	no_uniq_genomes = len(uniq_genomes)
+	print 'No. of unique genomes: '+str(no_uniq_genomes)
+	ppanini_output = read_abund_prev(ppanini_output_file)
+	return metagenomic_table, ppanini_output, no_uniq_genomes 
+def master_plot():
+    data_scale = 'none'
+    fig, axarr = plt.subplots(nrows=2, ncols=2, dpi=300)#, sharex=False, sharey=False)
+    fig.set_size_inches(10, 10)
+    metagenomic_table1, ppanini_output1, no_uniq_genomes1  = read_data('./PARSED_BLAST_RESULTS/stool_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/stool_table.txt')
+    scatter_plot_metagenomic_priority(axarr[0, 0], ppanini_output1, metagenomic_table1, no_uniq_genomes1, title = 'Stool', scale = data_scale)
+    
+    metagenomic_table2, ppanini_output2, no_uniq_genomes2 = read_data('./PARSED_BLAST_RESULTS/AN_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/AN_table.txt')
+    scatter_plot_metagenomic_priority(axarr[1, 1], ppanini_output2, metagenomic_table2, no_uniq_genomes2, title = 'Anterior nares', scale = data_scale)
+    
+    metagenomic_table3, ppanini_output3, no_uniq_genomes3 = read_data('./PARSED_BLAST_RESULTS/BM_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/BM_table.txt')
+    scatter_plot_metagenomic_priority(axarr[1, 0], ppanini_output3, metagenomic_table3, no_uniq_genomes3, title = 'Buccal mucosa', scale = data_scale)
+    
+    metagenomic_table4, ppanini_output4, no_uniq_genomes4 = read_data('./PARSED_BLAST_RESULTS/PF_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/PF_table.txt')
+    scatter_plot_metagenomic_priority(axarr[0, 1], ppanini_output4, metagenomic_table4, no_uniq_genomes4, title = 'Posterior fornix', scale = data_scale)
+    
+    # Add a colorbar
+    #fig.subplots_adjust(right=1.25)
+    '''cbar_ax = fig.add_axes([0.9, 0.037, 0.02, 0.863])
+    fig.colorbar(im, cax = cbar_ax)'''
+    #plt.axis('tight')
+    
+    #plt.margins(.75)
+    #plt.xlim(xmin=-.15, xmax =5)
+    #plt.ylim(xmin =1,ymin=1)
+    #plt.subplots_adjust(top=0.19, right=0.99)
+    
+    #axarr.set_autoscale_on(True)
+    #axarr.set_adjustable('box-forced')
+    plt.tight_layout()#pad=0.4, w_pad=0.5, h_pad=1.0
+    # Fine-tune figure; make subplots close to each other and hide x ticks for
+    # all but bottom plot.
+    #fig.subplots_adjust(hspace=0)
+    #plt.setp([a.get_xticklabels() for a in fig.axes[:-1]], visible=False)
+    #plt.setp([axarr], visible=False)
+    st = fig.suptitle('Metagenomic vs. Genomic Priority', fontsize=12, fontweight='bold', va='top')
+    
+    # shift subplots up:
+    st.set_y(0.95)
+    fig.subplots_adjust(top=.9)
+    fig.subplots_adjust()
+    
+    
+    plt.savefig('metagenomic_genomic_priority_sctterplot_'+'sclae_'+str(data_scale)+'.pdf', pad_inches = .05, dpi=300) 
+    fig, axarr = plt.subplots(nrows=2, ncols=2, dpi=300)#, sharex=False, sharey=False)
+    fig.set_size_inches(10, 10)
+    hexbin_plot_metagenomic_priority(axarr[0, 0], ppanini_output1, metagenomic_table1, no_uniq_genomes1, title = 'Stool', scale = data_scale)
+    
+    hexbin_plot_metagenomic_priority(axarr[1, 1], ppanini_output2, metagenomic_table2, no_uniq_genomes2, title = 'Anterior nares', scale = data_scale)
+    
+    hexbin_plot_metagenomic_priority(axarr[1, 0], ppanini_output3, metagenomic_table3, no_uniq_genomes3, title = 'Buccal mucosa', scale = data_scale)
+    
+    im= hexbin_plot_metagenomic_priority(axarr[0, 1], ppanini_output4, metagenomic_table4, no_uniq_genomes4, title = 'Posterior fornix', scale = data_scale)
+    
+    # Add a colorbar
+    #fig.subplots_adjust(right=1.25)
+    '''cbar_ax = fig.add_axes([0.9, 0.037, 0.02, 0.863])
+    fig.colorbar(im, cax = cbar_ax)'''
+    #plt.axis('tight')
+    
+    #plt.margins(.75)
+    #plt.xlim(xmin=-.15, xmax =5)
+    #plt.ylim(xmin =1,ymin=1)
+    #plt.subplots_adjust(top=0.19, right=0.99)
+    
+    #axarr.set_autoscale_on(True)
+    #axarr.set_adjustable('box-forced')
+    plt.tight_layout()#pad=0.4, w_pad=0.5, h_pad=1.0
+    # Fine-tune figure; make subplots close to each other and hide x ticks for
+    # all but bottom plot.
+    #fig.subplots_adjust(hspace=0)
+    #plt.setp([a.get_xticklabels() for a in fig.axes[:-1]], visible=False)
+    #plt.setp([axarr], visible=False)
+    st = fig.suptitle('Metagenomic vs. Genomic Priority', fontsize=12, fontweight='bold', va='top')
+    
+    # shift subplots up:
+    st.set_y(0.95)
+    fig.subplots_adjust(top=.9)
+    fig.subplots_adjust()
+    
+    
+    plt.savefig('metagenomic_genomic_priority_hexbitplot'+'sclae_'+str(data_scale)+'.pdf', pad_inches = .05, dpi=300) 
 
-def plot_metagenomic_priority(abund_prev, table, no_uniq_genomes, filename):
+def scatter_plot_metagenomic_priority(axe, abund_prev, table, no_uniq_genomes, title,scale = None):
+	if axe is None:
+		axe = plt.gca()
 	mp_gp = {}
 	genes = abund_prev['genes']
 	abund = abund_prev['abundance']
@@ -222,71 +317,100 @@ def plot_metagenomic_priority(abund_prev, table, no_uniq_genomes, filename):
 		#mp += [min((abund[i], alpha[i]))]
 		mp +=[ppanini_score[i]]
 	gp = numpy.array(gp)/float(no_uniq_genomes)
-	fig, axarr = plt.subplots()
-	axarr.scatter(numpy.log(gp), \
-				   numpy.log(mp), \
-				   c= 'darkgoldenrod', \
-				   ##'slategray'
-				   alpha=0.1, \
-				   linewidths=0.01, \
-				   zorder=0, \
-				   marker='o',\
-				   label='All Centroids')
+	if scale == 'log':
+		gp = numpy.log(gp)
+		mp = numpy.log(mp)
+	#fig, axe = plt.subplots()
+	def ncolors( n, colormap="jet" ):
+		"""utility for defining N evenly spaced colors across a color map"""
+		cmap = plt.get_cmap( colormap )
+		cmap_max = cmap.N
+		return [cmap( int( k * cmap_max / (n - 1) ) ) for k in range( n )]
+	my_color = ncolors(4)
+	#x_dic= {'Gut': '#b87333', 'Skin':'#ffff00', 'Oral':'#009fff', 'Vaginal':'#ff4d00'}
+	color_dic= {'Stool': my_color[0], 'Anterior nares':my_color[2], 'Buccal mucosa':my_color[1], 'Posterior fornix':my_color[3]}
+	axe.scatter(gp, \
+			   mp, \
+			   c= color_dic[title],\
+			   #'darkgoldenrod', \
+			   ##'slategray'
+			   alpha=0.1, \
+			   linewidths=0.01, \
+			   zorder=0, \
+			   marker='o',\
+			   label='All Centroids')
+	if scale == 'log':
+		axe.set_ylabel('Metagenomic Priority (log)', fontsize=10)
+		axe.set_xlabel('Genomic Priority (log)', fontsize=10)
+	else:
+		axe.set_ylabel('Metagenomic Priority', fontsize=10)
+		axe.set_xlabel('Genomic Priority')
+	axe.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+	axe.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
+	axe.yaxis.set_label_position('left') 
+	axe.set_title(title, fontsize=10, fontweight='bold')
+
+def hexbin_plot_metagenomic_priority(axe, abund_prev, table, no_uniq_genomes, title, scale = None):
+	if axe is None:
+		axe = plt.gca()
+	mp_gp = {}
+	genes = abund_prev['genes']
+	abund = abund_prev['abundance']
+	prev = abund_prev['prevalence']
+	ppanini_score = abund_prev['ppanini_score']
+	abund = numpy.array(abund)/max(abund)
+	prev = numpy.array(prev)/max(prev)
 	
-	axarr.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
-	axarr.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
-	axarr.yaxis.set_label_position('left') 
-	axarr.set_ylabel('Metagenomic Priority')
-	axarr.set_xlabel('Genomic Priority')
-	plt.title('Metagenomic vs. Genomic Priority') 
-	
-	plt.savefig(filename+'_mp_gp.pdf')
-	#plt.savefig(filename+'_mp_gp.png')
-	#plt.show()
-	
-	fig, axarr = plt.subplots()
-	axarr.scatter(gp, \
+	gp = []
+	mp = []
+	for i in range(len(genes)):
+		gene = genes[i]
+		try:
+			gp += [len(table[gene])]
+		except:
+			gp += [0]
+		#mp += [min((abund[i], alpha[i]))]
+		mp +=[ppanini_score[i]]
+	gp = numpy.array(gp)/float(no_uniq_genomes)
+	if scale == 'log':
+		gp = numpy.log(gp)
+		mp = numpy.log(mp)
+	def ncolors( n, colormap="jet" ):
+		"""utility for defining N evenly spaced colors across a color map"""
+		cmap = plt.get_cmap( colormap )
+		cmap_max = cmap.N
+		return [cmap( int( k * cmap_max / (n - 1) ) ) for k in range( n )]
+	my_color = ncolors(4)
+	#x_dic= {'Gut': '#b87333', 'Skin':'#ffff00', 'Oral':'#009fff', 'Vaginal':'#ff4d00'}
+	color_dic= {'Stool': my_color[0], 'Anterior nares':my_color[2], 'Buccal mucosa':my_color[1], 'Posterior fornix':my_color[3]}
+	im  = axe.hexbin(gp, \
 				   mp, \
-				   c='darkgoldenrod', \
-				   alpha=0.1, \
-				   linewidths=0.02, \
-				   zorder=0, \
-				   marker='o',\
-				   label='All Centroids')
-	axarr.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
-	axarr.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
-	axarr.yaxis.set_label_position('left') 
-	axarr.set_ylabel('Metagenomic Priority')
-	axarr.set_xlabel('Genomic Priority')
-	plt.title('Metagenomic vs. Genomic Priority') 
-	plt.tight_layout()
-	plt.savefig(filename+'_nonlog_mp_gp.pdf')
-	#plt.savefig(filename+'_nonlog_mp_gp.png')
-	#plt.show()
-	
-	plt.figure()
-	plt.xlabel('Genomic Priority')
-	plt.ylabel('Metagenomic Priority')
-	plt.title('Metagenomic vs. Genomic Priority') 
-	#colormap_r = ListedColormap(colormap.colors[::-1])
-	plt.hexbin(numpy.log(gp), \
-				   numpy.log(mp), \
 				   cmap='YlOrBr',#'Blues',
 				   gridsize=10)
-	plt.colorbar()
-	plt.savefig(filename+'_hexplot_mp_gp.pdf')
-	#plt.savefig(filename+'_hexplot_mp_gp.png')
+	if scale == 'log':
+		axe.set_ylabel('Metagenomic Priority (log)',  fontsize=10)
+		axe.set_xlabel('Genomic Priority (log)', fontsize=10)
+	else:
+		axe.set_ylabel('Metagenomic Priority', fontsize=10)
+		axe.set_xlabel('Genomic Priority', fontsize=10)
+	axe.set_title(title, fontsize=10, fontweight='bold')#, va='top')
+	axe.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+	axe.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
+	axe.yaxis.set_label_position('left') 
+	return im
 def main():
+	master_plot()
+	return
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-i', '--input-file', dest='input_file',  help='Gene Genomes blast results', required=True)
-	parser.add_argument('--bypass-parse', dest= 'bypass_parse' , default=False, action='store_true', help='Input file is parsed')
+	parser.add_argument('-i', '--input-file', dest='input_file',  help='Gene Genomes blast results', required=False)
+	parser.add_argument('--bypass-parse', dest= 'bypass_parse' , default=True, action='store_true', help='Input file is parsed')
 	parser.add_argument('--parse-only', dest= 'parse_only' , default=False, action='store_true', help='To only parse')
 	parser.add_argument('--metagenome-fasta',dest='metagenome_fasta'  ,help='Metagenome FASTA file')
 	parser.add_argument('--write-no-genomes',dest= 'write_no_genomes' ,default=False, action='store_true', help='Write Gene to No. of genomes')
 	parser.add_argument('--bypass-hist', dest= 'bypass_hist', default=False, action='store_true', help='Generates Histogram')
-	parser.add_argument('--bypass-scatter',dest= 'bypass_scatter' ,  default=False, action='store_true', help='Generates Scatterplot')
+	parser.add_argument('--bypass-scatter',dest= 'bypass_scatter' ,  default=True, action='store_true', help='Generates Scatterplot')
 	parser.add_argument('--abund-prev', dest= 'abund_prev' , default=False, help='Centroid prevalence and abundance')
-	parser.add_argument('--bypass-priority-scatter',dest= 'bypass_priority_scatter',  default=False, action='store_true', help='Generates Scatterplot')
+	parser.add_argument('--bypass-priority-scatter',dest= 'bypass_priority_scatter',  default=True, action='store_true', help='Generates Scatterplot')
 
 	args = parser.parse_args()
 
@@ -320,7 +444,7 @@ def main():
 	
 	if not args.bypass_priority_scatter:
 		abund_prev= read_abund_prev(args.abund_prev)
-		plot_metagenomic_priority(abund_prev, table, no_uniq_genomes, args.input_file)
+		master_plot(abund_prev, table, filename= args.input_file)#plot_metagenomic_priority(abund_prev, table, no_uniq_genomes, args.input_file)
 	
 	if args.parse_only:
 		sys.exit('Input files parsed: '+args.input_file)

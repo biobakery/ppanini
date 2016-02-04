@@ -27,10 +27,10 @@ setup(
         ],
     long_description=open('readme.md').read(),
     install_requires=[  
-        "Numpy >= 1.9.2",
-        "Scikit-learn  >= 0.14.1",
-        "Matplotlib >= 1.1.1",
-        "Biopython >= 1.66"
+        #"Numpy >= 1.9.2",
+        #"Scikit-learn  >= 0.14.1",
+        #"Matplotlib >= 1.1.1",
+        #"Biopython >= 1.66"
     ],
     packages=find_packages(),
     #cmdclass={'install': Install},

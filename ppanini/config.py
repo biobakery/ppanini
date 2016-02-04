@@ -1,7 +1,7 @@
 
 #default values for user options
 
-input_table = '/n/hutlab12_nobackup/data/ppanini/DATA/PPANINI_INPUT/stool_ppanini.txt'#'/Users/rah/Documents/Hutlab/stool_ppanini.txt' #None # required 
+input_table = ''#/n/hutlab12_nobackup/data/ppanini/DATA/PPANINI_INPUT/stool_ppanini.txt'#'/Users/rah/Documents/Hutlab/stool_ppanini.txt' #None # required 
 output_folder = ''
 gene_catalog = '' 
 uclust_file = ''
@@ -25,5 +25,6 @@ niche_flag = None
 temp_folder = ''
 centroids_list = ''
 essantial_genes_uniref90_id = None
+bypass_clustering = None
 
 

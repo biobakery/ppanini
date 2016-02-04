@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib
 from random import randint
 from scipy import random
+from sys import argv
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from sklearn import svm, datasets
@@ -20,14 +21,58 @@ import csv
 
 #sys.path.append('/Users/rah/Documents/Hutlab/ppanini')#/n/hutlab12_nobackup/data/ppanini/ppanini')
 
-from . import config
- 
+from .. import config
+from . import plot_metagenome_genome
 def main():
+    roc_info = [] 
+    config.output_folder = '/Users/rah/Documents/Hutlab/ppanini/myOutput2'
+    with open('/Users/rah/Documents/Hutlab/UniRef90_output_deg_p_gene.m8') as f:
+        lines = f.read().splitlines()
+    essential_genes_uniref90_id_deg = [line.split('\t')[1] for line in lines]
+    with open('/Users/rah/Documents/Hutlab/UniRef90_output_299_gene.m8') as f:
+        lines = f.read().splitlines()
+    essential_genes_uniref90_id_299_eco = [line.split('\t')[1] for line in lines]
+    essential_genes = essential_genes_uniref90_id_299_eco + essential_genes_uniref90_id_deg
+    try:
+        fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Documents/Hutlab/ppanini/myOutput2/stool_ppanini050715_imp_centroid_prev_abund.txt',\
+                                  essential_genes= essential_genes, beta =.5)     
+        roc_info.append(['Stool',fpr, tpr])
+    except ValueError:
+        print "ValueError for Stool roc calculation"  
+    
+    try:
+        fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Documents/Hutlab/ppanini/AN_final_gene_centroids_table/AN_final_gene_centroids_table_imp_centroid_prev_abund.txt',\
+                                  essential_genes= essential_genes, beta =.5)     
+        roc_info.append(['Anterior nares',fpr, tpr])
+    except ValueError:
+        print "ValueError for Anterior nares roc calculation" 
+    '''
+    try:
+        fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Documents/Hutlab/ppanini/PF_final_gene_centroids_table/PF_final_gene_centroids_table_imp_centroid_prev_abund.txt',\
+                                  essential_genes= essential_genes, beta =.5)     
+        roc_info.append(['Posterior fornix',fpr, tpr])
+    
+    except ValueError:
+        print "ValueError for Posterior fornix roc calculation"
+    '''
+    try:
+        fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Documents/Hutlab/ppanini/BM_final_gene_centroids_table/BM_final_gene_centroids_table_imp_centroid_prev_abund.txt',\
+                                  essential_genes= essential_genes, beta =.5)     
+        roc_info.append(['Buccal mucosa',fpr, tpr])      
+    except ValueError:
+        print "ValueError for Buccal mucosa roc calculation"
+      
+    try:
+        roc_plot(roc_info, figure_name=config.output_folder+'/roc_plot_ppanini') 
+    except ValueError:
+        print "ValueError for general roc plot"
+    print "The evaluation is successfully done!" 
+def get_fpr_tpr(input_ppanini, essential_genes, beta =.5):
     fpr = dict()
     tpr = dict()
     true = dict()
     score = dict()
-    roc_info = []
+    #roc_info = []
     # list of truth about data or associations, here, is this an important gene?
     '''
     config.input_table = '/Users/rah/Documents/Hutlab/output_ppanini.txt'#'/n/hutlab12_nobackup/data/ppanini/DATA/PPANINI_INPUT/stool_ppanini.txt' 
@@ -38,45 +83,49 @@ def main():
     
     config.output_folder = '/Users/rah/Documents/Hutlab/ppanini/myOutput2'
     #with open('/Users/rah/Documents/UniRef50_299_genes.txt') as f:
-    #    essantial_genes_uniref50_id = f.read().splitlines()
-    with open('/Users/rah/Documents/Hutlab/UniRef90_output_deg_p_gene.m8') as f:
-        lines = f.read().splitlines()
-    essantial_genes_uniref90_id_deg = [line.split('\t')[1] for line in lines]
-    with open('/Users/rah/Documents/Hutlab/UniRef90_output_299_gene.m8') as f:
-        lines = f.read().splitlines()
-    essantial_genes_uniref90_id_299_eco = [line.split('\t')[1] for line in lines]
-    essantial_genes = essantial_genes_uniref90_id_299_eco
-    #config.essantial_genes_uniref90_id = essantial_genes_uniref90_id
-    #essantial_genes_uniref_id = essantial_genes_uniref90_id +essantial_genes_uniref50_id
-    #print len(essantial_genes_uniref90_id)
+    #    essential_genes_uniref50_id = f.read().splitlines()
+    
+    #config.essential_genes_uniref90_id = essential_genes_uniref90_id
+    #essential_genes_uniref_id = essential_genes_uniref90_id +essential_genes_uniref50_id
+    #print len(essential_genes_uniref90_id)
     uniref_id_list = []
-    #ground_truth = [1 if (uniref_id in essantial_genes_uniref_id) else 0 for uniref_id in uniref_id_list ] # this an example for each gene if it's important use 1 otherwise 0
+    #ground_truth = [1 if (uniref_id in essential_genes_uniref_id) else 0 for uniref_id in uniref_id_list ] # this an example for each gene if it's important use 1 otherwise 0
     #print config.input_table
     if config.verbose =='DEBUG':
-        print "Evaluating PPANINI Score !"
+        print "PPANINI Score and ROC Plot!"
     #ppanini.run()
-    with open('/Users/rah/Documents/Hutlab/ppanini/myOutput2/stool_ppanini050715_imp_centroid_prev_abund.txt') as f:
+    '''try:
+        input_ppanini = str(sys.argv[1])
+    except ImportError:
+       input_ppanini  = '/Users/rah/Documents/Hutlab/ppanini/myOutput2/AN_final_centroid_prev_abund.txt '
+       #stool_ppanini050715_imp_centroid_prev_abund.txt'
+    '''
+    '''with open(input_ppanini) as f:
         lines2 = f.read().splitlines()
     config.centroids_list = [line.split('\t')[0] for line in lines2]
-    prev = [line.split('\t')[2] for line in lines2]
-    abun = [line.split('\t')[3] for line in lines2]
-    ppanini_score = [line.split('\t')[1] for line in lines2]
-    n = len(ppanini_score)-1
-    config.centroids_list = config.centroids_list[1:n]
-    ppanini_score = ppanini_score[1:n]
-    #print config.centroids_list[0:200]
-    prev = prev[1:n]
+    prev = [line.split('\t')[1] for line in lines2]
+    abun = [line.split('\t')[4] for line in lines2]
+    ppanini_score = [line.split('\t')[2] for line in lines2]
+    #ppanini_score = [0 for line in lines2]'''
+    ppanini_table = plot_metagenome_genome.read_abund_prev(input_ppanini)
+    #print ppanini_table['ppanini_score'][1:10]
+    
+    n = len(ppanini_table['genes'])-1
+    config.centroids_list = ppanini_table['genes'][0:n]#config.centroids_list[1:n]
+    ppanini_score = ppanini_table['ppanini_score'][0:n]#ppanini_score[1:n]
+    #print config.centroids_list[0:10]
+    prev = ppanini_table['prevalence'][0:n]#prev[1:n]
     prev = [float(val) for val in prev]
     
     sorted_prev = sorted(prev)
-    abun = abun[1:n]
+    abun = ppanini_table['abundance'][0:n]#abun[1:n]
     abun = [float(val) for val in abun]
     sorted_abun = sorted(abun)
     #print prev[0:101]
     #print abun[0:]
-    ground_truth = [1 if (gene_id  in essantial_genes) else 0 for gene_id in config.centroids_list ]
+    ground_truth = [1 if (gene_id  in essential_genes) else 0 for gene_id in config.centroids_list ]
     #print ground_truth
-    eval_file = open(config.output_folder+'/eval_table.txt', 'w') 
+    eval_file = open(config.output_folder+'/AN_eval_table.txt', 'w') 
     csvw = csv.writer(eval_file, csv.excel_tab, delimiter='\t')
     csvw.writerow(["centroid", "prevalence", "abundance",  "ppanini score","is_essential"])
     for i in range(len(config.centroids_list)):
@@ -84,54 +133,47 @@ def main():
     eval_file.close()
         
     
-    for b in ["DEG", "ECO"]:#range(5, 6, 1):
-        beta =.5# float(b/10.0)         
-        config.beta = beta
-        if b == "DEG":
-            essantial_genes = essantial_genes_uniref90_id_deg
+    #for b in ["DEG", "ECO"]:#range(5, 6, 1):
+    #beta = beta# float(b/10.0)         
+    #config.beta = beta
+    #if b == "DEG":
+    #    essential_genes = essential_genes_uniref90_id_deg
+    #else:
+    #    essential_genes = essential_genes_uniref90_id_299_eco
+    ground_truth = [1 if (gene_id  in essential_genes) else 0 for gene_id in config.centroids_list ]
+    #scipy.stats.rankdata()
+    score[beta] = ppanini_score#[1/((1/((beta)*scipy.stats.percentileofscore(sorted_prev, prev[i])))+\
+                  #(1/((1-beta)*scipy.stats.percentileofscore(sorted_abun, abun[i])))) for i in range(len(prev))]
+    #prioritize_results = ppanini.prioritize_centroids()
+    #print "prioritize_results", prioritize_results
+    #print config.centroids_list
+    #print prioritize_gene_results
+    #uniref90_id_list = [id.split('|')[1] for id in config.centroid_prev_abund]
+    #uniref50_id_list = [id.split('|')[2] for id in config.centroid_prev_abund] 
+    #prioritized_ids = config.centroids_list 
+    #print "Essential genes: ",essential_genes_uniref_id
+    #print "**********************************************************************"
+    #print "Centroids list: ", config.centroids_list
+    
+    '''ground_truth = []
+    for gene_id in config.centroids_list:
+        if gene_id in essential_genes_uniref_id:
+            print gene_id
+            ground_truth.append(0)
         else:
-            essantial_genes = essantial_genes_uniref90_id_299_eco
-        ground_truth = [1 if (gene_id  in essantial_genes) else 0 for gene_id in config.centroids_list ]
-        #scipy.stats.rankdata()
-        score[beta] = [1/((1/((beta)*scipy.stats.percentileofscore(sorted_prev, prev[i])))+\
-                      (1/((1-beta)*scipy.stats.percentileofscore(sorted_abun, abun[i])))) for i in range(len(prev))]
-        #prioritize_results = ppanini.prioritize_centroids()
-        #print "prioritize_results", prioritize_results
-        #print config.centroids_list
-        #print prioritize_gene_results
-        #uniref90_id_list = [id.split('|')[1] for id in config.centroid_prev_abund]
-        #uniref50_id_list = [id.split('|')[2] for id in config.centroid_prev_abund] 
-        #prioritized_ids = config.centroids_list 
-        #print "Essential genes: ",essantial_genes_uniref_id
-        #print "**********************************************************************"
-        #print "Centroids list: ", config.centroids_list
-        
-        '''ground_truth = []
-        for gene_id in config.centroids_list:
-            if gene_id in essantial_genes_uniref_id:
-                print gene_id
-                ground_truth.append(0)
-            else:
-                ground_truth.append(1)
-        '''
-        true[beta] = ground_truth
-        #print "ground_truth", scipy.stats.rankdata(score[beta])
-        '''if config.niche_flag:
-            score[beta] =[config.centroid_prev_abund[gene_id]['ppanini_score'][config.centroid_prev_abund[gene_id]['ppanini_score'].keys()[0]] for gene_id in config.centroids_list ]
-        else:
-            score[beta] =[config.centroid_prev_abund[gene_id]['ppanini_score'] for gene_id in config.centroids_list ] # 
-        '''
-        legend_tag = b
-        assert(len(true[beta])==len(score[beta])) 
-        fpr[beta], tpr[beta], _  = roc_curve( true[beta], score[beta], pos_label = 1)
-        roc_info.append([str(legend_tag),fpr[beta], tpr[beta]])
-        #print roc_info
-        #break;
-    try:
-        roc_plot(roc_info, figure_name=config.output_folder+'/roc_plot_ppanini') 
-    except ValueError:
-        print "ValueError for roc plot"
-    print "The evaluation is successfully done!"
+            ground_truth.append(1)
+    '''
+    true[beta] = ground_truth
+    #print "ground_truth", scipy.stats.rankdata(score[beta])
+    '''if config.niche_flag:
+        score[beta] =[config.centroid_prev_abund[gene_id]['ppanini_score'][config.centroid_prev_abund[gene_id]['ppanini_score'].keys()[0]] for gene_id in config.centroids_list ]
+    else:
+        score[beta] =[config.centroid_prev_abund[gene_id]['ppanini_score'] for gene_id in config.centroids_list ] # 
+    '''
+    #legend_tag = b
+    assert(len(true[beta])==len(score[beta])) 
+    fpr[beta], tpr[beta], _  = roc_curve( true[beta], score[beta], pos_label = 1)
+    return fpr[beta], tpr[beta]
         
                                      
 def roc_plot(roc_info=None, figure_name='roc_plot_ppanini'):
@@ -167,7 +209,7 @@ def roc_plot(roc_info=None, figure_name='roc_plot_ppanini'):
         params = {'legend.fontsize': 6,
         'legend.linewidth': 2}
         plt.rcParams.update(params)
-        plt.plot(fpr[roc_info[i][0]], tpr[roc_info[i][0]],  label='Essential Genes = {0}  (area = {1:0.2f})'
+        plt.plot(fpr[roc_info[i][0]], tpr[roc_info[i][0]],  label='Niche = {0}  (area = {1:0.2f})'
                                        ''.format(str(roc_info[i][0]), roc_auc[roc_info[i][0]]))   
     plt.plot([0, 1], [0, 1], 'k--')
     plt.xlim([0.0, 1.0])
