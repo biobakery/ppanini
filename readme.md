@@ -31,7 +31,7 @@ PPANINI provides a computational pipeline to prioritize microbial genes based on
 
 ------------------------------------------------------------------------------------------------------------------------------
 ## **INSTALLATION**
-Download and unpack the PPANINI software: [ppanini.tar.gz](https://bitbucket.org/biobakery/ppanini/downloads/biobakery-ppanini-0.6.0.tar)
+Download and unpack the PPANINI software: [ppanini.tar.gz](https://bitbucket.org/biobakery/ppanini/downloads/biobakery-ppanini-0.6.1.tar)
 ```
 $ tar -zxvf ppanini.tar.gz
 $ cd ppanini
