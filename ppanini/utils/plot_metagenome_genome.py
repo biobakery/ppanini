@@ -9,6 +9,8 @@ import argparse
 import pdb
 import matplotlib.pyplot as plt
 from matplotlib import colors
+from scipy.stats import gaussian_kde
+
 #from . import utils
 
 from .. import utilities
@@ -213,19 +215,19 @@ def read_data(mg_file, ppanini_output_file):
 	ppanini_output = read_abund_prev(ppanini_output_file)
 	return metagenomic_table, ppanini_output, no_uniq_genomes 
 def master_plot():
-    data_scale = 'none'
+    data_scale = 'log'
     fig, axarr = plt.subplots(nrows=2, ncols=2, dpi=300)#, sharex=False, sharey=False)
     fig.set_size_inches(10, 10)
-    metagenomic_table1, ppanini_output1, no_uniq_genomes1  = read_data('./PARSED_BLAST_RESULTS/stool_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/stool_table.txt')
+    metagenomic_table1, ppanini_output1, no_uniq_genomes1  = read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/stool_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/stool_table.txt')
     scatter_plot_metagenomic_priority(axarr[0, 0], ppanini_output1, metagenomic_table1, no_uniq_genomes1, title = 'Stool', scale = data_scale)
     
-    metagenomic_table2, ppanini_output2, no_uniq_genomes2 = read_data('./PARSED_BLAST_RESULTS/AN_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/AN_table.txt')
+    metagenomic_table2, ppanini_output2, no_uniq_genomes2 = read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/AN_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/AN_table.txt')
     scatter_plot_metagenomic_priority(axarr[1, 1], ppanini_output2, metagenomic_table2, no_uniq_genomes2, title = 'Anterior nares', scale = data_scale)
     
-    metagenomic_table3, ppanini_output3, no_uniq_genomes3 = read_data('./PARSED_BLAST_RESULTS/BM_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/BM_table.txt')
+    metagenomic_table3, ppanini_output3, no_uniq_genomes3 = read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/BM_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/BM_table.txt')
     scatter_plot_metagenomic_priority(axarr[1, 0], ppanini_output3, metagenomic_table3, no_uniq_genomes3, title = 'Buccal mucosa', scale = data_scale)
     
-    metagenomic_table4, ppanini_output4, no_uniq_genomes4 = read_data('./PARSED_BLAST_RESULTS/PF_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/PF_table.txt')
+    metagenomic_table4, ppanini_output4, no_uniq_genomes4 = read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/PF_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/PF_table.txt')
     scatter_plot_metagenomic_priority(axarr[0, 1], ppanini_output4, metagenomic_table4, no_uniq_genomes4, title = 'Posterior fornix', scale = data_scale)
     
     # Add a colorbar
@@ -295,14 +297,14 @@ def master_plot():
     
     plt.savefig('metagenomic_genomic_priority_hexbitplot'+'sclae_'+str(data_scale)+'.pdf', pad_inches = .05, dpi=300) 
 
-def scatter_plot_metagenomic_priority(axe, abund_prev, table, no_uniq_genomes, title,scale = None):
+def scatter_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes, title,scale = None):
 	if axe is None:
 		axe = plt.gca()
 	mp_gp = {}
-	genes = abund_prev['genes']
-	abund = abund_prev['abundance']
-	prev = abund_prev['prevalence']
-	ppanini_score = abund_prev['ppanini_score']
+	genes = ppanini_table['genes']
+	abund = ppanini_table['abundance']
+	prev = ppanini_table['prevalence']
+	ppanini_score = ppanini_table['ppanini_score']
 	abund = numpy.array(abund)/max(abund)
 	prev = numpy.array(prev)/max(prev)
 	
@@ -317,6 +319,8 @@ def scatter_plot_metagenomic_priority(axe, abund_prev, table, no_uniq_genomes, t
 		#mp += [min((abund[i], alpha[i]))]
 		mp +=[ppanini_score[i]]
 	gp = numpy.array(gp)/float(no_uniq_genomes)
+	gp = numpy.where(gp != 0.0, gp, 10**-30)
+	mp = numpy.where(mp != 0.0, mp, 10**-30)
 	if scale == 'log':
 		gp = numpy.log(gp)
 		mp = numpy.log(mp)
@@ -329,8 +333,30 @@ def scatter_plot_metagenomic_priority(axe, abund_prev, table, no_uniq_genomes, t
 	my_color = ncolors(4)
 	#x_dic= {'Gut': '#b87333', 'Skin':'#ffff00', 'Oral':'#009fff', 'Vaginal':'#ff4d00'}
 	color_dic= {'Stool': my_color[0], 'Anterior nares':my_color[2], 'Buccal mucosa':my_color[1], 'Posterior fornix':my_color[3]}
-	axe.scatter(gp, \
-			   mp, \
+	
+	# Calculate the point density
+	x = numpy.array(gp) 
+	y = numpy.array(mp)
+	xy = numpy.vstack([x,y])
+	z = gaussian_kde(xy)(xy)
+	
+	# Sort the points by density, so that the densest points are plotted last
+	idx = z.argsort()
+	#print idx, x, y
+	x, y, z = x[idx], y[idx], z[idx]
+	
+	#fig, ax = plt.subplots()
+	#ax.scatter(x, y, c=z, s=50, edgecolor='')
+	#plt.show()
+	#plt.hist2d(x, y, (50, 50), cmap=plt.cm.jet)
+	#plt.colorbar()
+	#plt.show()
+	
+	axe.scatter(x, \
+			   y, \
+			   #c=z,\
+			   s=100,\
+			   edgecolor='',\
 			   c= color_dic[title],\
 			   #'darkgoldenrod', \
 			   ##'slategray'
@@ -350,14 +376,14 @@ def scatter_plot_metagenomic_priority(axe, abund_prev, table, no_uniq_genomes, t
 	axe.yaxis.set_label_position('left') 
 	axe.set_title(title, fontsize=10, fontweight='bold')
 
-def hexbin_plot_metagenomic_priority(axe, abund_prev, table, no_uniq_genomes, title, scale = None):
+def hexbin_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes, title, scale = None):
 	if axe is None:
 		axe = plt.gca()
 	mp_gp = {}
-	genes = abund_prev['genes']
-	abund = abund_prev['abundance']
-	prev = abund_prev['prevalence']
-	ppanini_score = abund_prev['ppanini_score']
+	genes = ppanini_table['genes']
+	abund = ppanini_table['abundance']
+	prev = ppanini_table['prevalence']
+	ppanini_score = ppanini_table['ppanini_score']
 	abund = numpy.array(abund)/max(abund)
 	prev = numpy.array(prev)/max(prev)
 	
@@ -386,7 +412,7 @@ def hexbin_plot_metagenomic_priority(axe, abund_prev, table, no_uniq_genomes, ti
 	im  = axe.hexbin(gp, \
 				   mp, \
 				   cmap='YlOrBr',#'Blues',
-				   gridsize=10)
+				   gridsize=100)
 	if scale == 'log':
 		axe.set_ylabel('Metagenomic Priority (log)',  fontsize=10)
 		axe.set_xlabel('Genomic Priority (log)', fontsize=10)

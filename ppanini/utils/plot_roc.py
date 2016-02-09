@@ -18,11 +18,30 @@ import math
 from scipy.stats import percentileofscore
 import sys
 import csv
+from . import plot_metagenome_genome 
 
 #sys.path.append('/Users/rah/Documents/Hutlab/ppanini')#/n/hutlab12_nobackup/data/ppanini/ppanini')
 
 from .. import config
 from . import plot_metagenome_genome
+def fpr_tpr_genome(metagenomic_table, no_uniq_genomes, essential_genes):
+    # calculate genomic score 
+    gp = np.zeros(len(metagenomic_table))
+    uniq_genomes = []
+    genes = metagenomic_table.keys()#['gene']
+    #print metagenomic_table.values()[1:100]
+    for i in range(len(genes)):
+        gene = genes[i]
+        gp[i] += [len(metagenomic_table[gene])]
+        
+    gp = np.array(gp)/float(no_uniq_genomes)
+    #print gp 
+    ground_truth = [1 if (gene_id  in essential_genes) else 0 for gene_id in genes ]
+    #print ground_truth
+    fpr, tpr, _  = roc_curve( ground_truth, gp, pos_label = 1)
+    return fpr, tpr
+    
+    
 def main():
     roc_info = [] 
     config.output_folder = '/Users/rah/Documents/Hutlab/ppanini/myOutput2'
@@ -36,32 +55,61 @@ def main():
     try:
         fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Documents/Hutlab/ppanini/myOutput2/stool_ppanini050715_imp_centroid_prev_abund.txt',\
                                   essential_genes= essential_genes, beta =.5)     
-        roc_info.append(['Stool',fpr, tpr])
+        roc_info.append(['Stool - Metagenomic Priority',fpr, tpr])
     except ValueError:
         print "ValueError for Stool roc calculation"  
-    
+# Stool
+    try:
+        metagenomic_table1, ppanini_output1, no_uniq_genomes1  = plot_metagenome_genome.read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/stool_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/stool_table.txt')
+        #print  metagenomic_table1
+        fpr, tpr =fpr_tpr_genome(metagenomic_table1, no_uniq_genomes1, essential_genes)
+        roc_info.append(['Stool - Genomic Priority',fpr, tpr])
+    except ValueError:
+        print "ValueError for Stool - Genomic Priority  roc calculation"
+#Buccal mucosa    
+    try:
+        fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Documents/Hutlab/ppanini/BM_final_gene_centroids_table/BM_final_gene_centroids_table_imp_centroid_prev_abund.txt',\
+                                  essential_genes= essential_genes, beta =.5)     
+        roc_info.append(['Buccal mucosa - Metagenomic Priority',fpr, tpr])      
+    except ValueError:
+        print "ValueError for Buccal mucosa roc calculation"
+    try:
+        metagenomic_table3, ppanini_output3, no_uniq_genomes3 = plot_metagenome_genome.read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/BM_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/BM_table.txt')
+        fpr, tpr = fpr_tpr_genome(metagenomic_table3, no_uniq_genomes3, essential_genes)
+        roc_info.append(['Buccal mucosa - Genomic Priority',fpr, tpr])
+    except ValueError:
+        print "ValueError for Buccal mucosa  roc calculation"
+#Anterior nares
     try:
         fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Documents/Hutlab/ppanini/AN_final_gene_centroids_table/AN_final_gene_centroids_table_imp_centroid_prev_abund.txt',\
                                   essential_genes= essential_genes, beta =.5)     
-        roc_info.append(['Anterior nares',fpr, tpr])
+        roc_info.append(['Anterior nares - Metagenomic Priority',fpr, tpr])
     except ValueError:
         print "ValueError for Anterior nares roc calculation" 
-    '''
+    
+    try:
+        metagenomic_table2, ppanini_output2, no_uniq_genomes2 = plot_metagenome_genome.read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/AN_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/AN_table.txt')
+        fpr, tpr = fpr_tpr_genome(metagenomic_table2, no_uniq_genomes2, essential_genes)
+        roc_info.append(['Anterior nares - Genomic Priority',fpr, tpr])
+    except ValueError:
+        print "ValueError for Anterior nares  roc calculation"
+        
+    
+    '''try:
+        metagenomic_table4, ppanini_output4, no_uniq_genomes4 = plot_metagenome_genome.read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/PF_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/PF_table.txt')
+        fpr, tpr = fpr_tpr_genome(metagenomic_table4, no_uniq_genomes4,essential_genes)
+        roc_info.append(['Posterior fornix Genomic Priority',fpr, tpr])
+    
+    except ValueError:
+        print "ValueError for Posterior fornix  roc calculation"
     try:
         fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Documents/Hutlab/ppanini/PF_final_gene_centroids_table/PF_final_gene_centroids_table_imp_centroid_prev_abund.txt',\
                                   essential_genes= essential_genes, beta =.5)     
-        roc_info.append(['Posterior fornix',fpr, tpr])
+        roc_info.append(['Posterior fornix - Metagenomic Priority',fpr, tpr])
     
     except ValueError:
         print "ValueError for Posterior fornix roc calculation"
     '''
-    try:
-        fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Documents/Hutlab/ppanini/BM_final_gene_centroids_table/BM_final_gene_centroids_table_imp_centroid_prev_abund.txt',\
-                                  essential_genes= essential_genes, beta =.5)     
-        roc_info.append(['Buccal mucosa',fpr, tpr])      
-    except ValueError:
-        print "ValueError for Buccal mucosa roc calculation"
-      
     try:
         roc_plot(roc_info, figure_name=config.output_folder+'/roc_plot_ppanini') 
     except ValueError:
@@ -72,22 +120,12 @@ def get_fpr_tpr(input_ppanini, essential_genes, beta =.5):
     tpr = dict()
     true = dict()
     score = dict()
-    #roc_info = []
-    # list of truth about data or associations, here, is this an important gene?
-    '''
-    config.input_table = '/Users/rah/Documents/Hutlab/output_ppanini.txt'#'/n/hutlab12_nobackup/data/ppanini/DATA/PPANINI_INPUT/stool_ppanini.txt' 
-    config.uclust_file = '/Users/rah/Documents/Hutlab/output.uc'
-    '''
+    
     config.input_table = '/Users/rah/Documents/Hutlab/stool_ppanini050715.txt'#'/n/hutlab12_nobackup/data/ppanini/DATA/PPANINI_INPUT/stool_ppanini.txt' 
     config.uclust_file = '/Users/rah/Documents/Hutlab/stool_ppanini/stool_final_clusters.uc'
     
     config.output_folder = '/Users/rah/Documents/Hutlab/ppanini/myOutput2'
-    #with open('/Users/rah/Documents/UniRef50_299_genes.txt') as f:
-    #    essential_genes_uniref50_id = f.read().splitlines()
     
-    #config.essential_genes_uniref90_id = essential_genes_uniref90_id
-    #essential_genes_uniref_id = essential_genes_uniref90_id +essential_genes_uniref50_id
-    #print len(essential_genes_uniref90_id)
     uniref_id_list = []
     #ground_truth = [1 if (uniref_id in essential_genes_uniref_id) else 0 for uniref_id in uniref_id_list ] # this an example for each gene if it's important use 1 otherwise 0
     #print config.input_table
@@ -198,31 +236,35 @@ def roc_plot(roc_info=None, figure_name='roc_plot_ppanini'):
     roc_name = ''
     roc_auc = dict()
     for i in range(len(roc_info)):
+        # print ('Hi', (roc_info[i][1]))
         fpr[roc_info[i][0]] = roc_info[i][1]
+        # print ((roc_info[i][1])[0])
         tpr[roc_info[i][0]] = roc_info[i][2]
         roc_auc[roc_info[i][0]] = auc(fpr[roc_info[i][0]], tpr[roc_info[i][0]] )
         roc_name += '_' + roc_info[i][0] 
         
     # Plot ROC curve
-    plt.figure(dpi= 300, figsize=(5, 5 ))
+    fig, axe = plt.subplots(figsize=(5, 5 ), dpi=300)#, sharex=False, sharey=False)
+    #fig.set_size_inches(1, 10)
+    #plt.figure(dpi= 300, figsize=(4, 4))
     for i in range(len(roc_info)):
         params = {'legend.fontsize': 6,
         'legend.linewidth': 2}
         plt.rcParams.update(params)
-        plt.plot(fpr[roc_info[i][0]], tpr[roc_info[i][0]],  label='Niche = {0}  (area = {1:0.2f})'
+        axe.plot(fpr[roc_info[i][0]], tpr[roc_info[i][0]],  label='{0} (area = {1:0.2f})'
                                        ''.format(str(roc_info[i][0]), roc_auc[roc_info[i][0]]))   
-    plt.plot([0, 1], [0, 1], 'k--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate', fontsize = 10)
-    plt.ylabel('True Positive Rate', fontsize = 10)
-    plt.xticks(fontsize = 8)
-    plt.yticks(fontsize = 8)
-    plt.title('Receiver operating characteristic', fontsize = 12)
-    plt.legend(loc="lower right")
+    axe.plot([0, 1], [0, 1], 'k--')
+    axe.set_xlim([0.0, 1.0])
+    axe.set_ylim([0.0, 1.05])
+    axe.legend(loc="lower right")
+    axe.set_ylabel('True Positive Rate', fontsize = 10)
+    axe.set_xlabel('False Positive Rate', fontsize = 10)
+    axe.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
+    axe.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
+    axe.yaxis.set_label_position('left') 
+    axe.set_title('Receiver operating characteristic', fontsize=12, fontweight='bold')
+    # plt.savefig('./test/'+roc_name+'foo.pdf')
     plt.tight_layout()
     plt.savefig(figure_name + '.pdf')
-    #plt.show()
-    # return plt
 if __name__ == '__main__':
     main()
