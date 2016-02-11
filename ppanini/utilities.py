@@ -13,7 +13,7 @@ from Bio import Seq
 
 logger = logging.getLogger(__name__)
 def read_ppanini_imp_genes_table(filename):
-	keys = {'abund':0, 'alpha':0,'beta':0}
+	keys = {'ppanini_score':0, 'abundance':0, 'prevalence':0,'prevalence_beta':0}
 	abund = []
 	prev = []
 	genes = []
@@ -108,6 +108,17 @@ def read_parsed(m8_filename):
 			table[split_i[0]] = [split_i[1]]
 	print"Total No. of genes:", len(table) 
 	return table
+def read_data(mg_file, ppanini_output_file):
+	metagenomic_table  = read_parsed(mg_file)
+	uniq_genomes = []
+	for gene in metagenomic_table:
+		for genome in metagenomic_table[gene]:
+			if genome not in uniq_genomes:
+				uniq_genomes +=[genome]
+	no_uniq_genomes = len(uniq_genomes)
+	print 'No. of unique genomes: '+str(no_uniq_genomes)
+	ppanini_output = read_ppanini_imp_genes_table(ppanini_output_file)
+	return metagenomic_table, ppanini_output, no_uniq_genomes 
 def pullgenes_fromcontigs(contig_file, gff3_file, fna_file, faa_file):
 	'''Pulls genes from contigs using the coordinates from GFF3 file provided
 

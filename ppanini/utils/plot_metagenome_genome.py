@@ -14,8 +14,6 @@ from scipy.stats import gaussian_kde
 
 from .. import utilities
 
-'''Tmp file to parse results'''
-'''Analysis of Genome Hits per gene showing how many genomes each gene is found in.'''
 
 def plot_scatter(table, m8_filename, no_uniq_genomes):
 	'''Plots Scatter plot for genome hits per gene
@@ -125,31 +123,21 @@ def plot_hist(table, m8_filename, no_uniq_genomes):
 	plt.savefig(labels['filename']+'_cumsum.pdf')
 	plt.savefig(labels['filename']+'_cumsum.png')
 
-def read_data(mg_file, ppanini_output_file):
-	metagenomic_table  = read_parsed(mg_file)
-	uniq_genomes = []
-	for gene in metagenomic_table:
-		for genome in metagenomic_table[gene]:
-			if genome not in uniq_genomes:
-				uniq_genomes +=[genome]
-	no_uniq_genomes = len(uniq_genomes)
-	print 'No. of unique genomes: '+str(no_uniq_genomes)
-	ppanini_output = read_ppanini_imp_genes_table(ppanini_output_file)
-	return metagenomic_table, ppanini_output, no_uniq_genomes 
+
 def master_plot():
     data_scale = 'none'
     fig, axarr = plt.subplots(nrows=2, ncols=2, dpi=300)#, sharex=False, sharey=False)
     fig.set_size_inches(10, 10)
-    metagenomic_table1, ppanini_output1, no_uniq_genomes1  = read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/stool_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/stool_table.txt')
+    metagenomic_table1, ppanini_output1, no_uniq_genomes1  = utilities.read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/stool_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/stool_table.txt')
     scatter_plot_metagenomic_priority(axarr[0, 0], ppanini_output1, metagenomic_table1, no_uniq_genomes1, title = 'Stool', scale = data_scale)
     
-    metagenomic_table2, ppanini_output2, no_uniq_genomes2 = read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/AN_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/AN_table.txt')
+    metagenomic_table2, ppanini_output2, no_uniq_genomes2 = utilities.read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/AN_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/AN_table.txt')
     scatter_plot_metagenomic_priority(axarr[1, 1], ppanini_output2, metagenomic_table2, no_uniq_genomes2, title = 'Anterior nares', scale = data_scale)
     
-    metagenomic_table3, ppanini_output3, no_uniq_genomes3 = read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/BM_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/BM_table.txt')
+    metagenomic_table3, ppanini_output3, no_uniq_genomes3 = utilities.read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/BM_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/BM_table.txt')
     scatter_plot_metagenomic_priority(axarr[1, 0], ppanini_output3, metagenomic_table3, no_uniq_genomes3, title = 'Buccal mucosa', scale = data_scale)
     
-    metagenomic_table4, ppanini_output4, no_uniq_genomes4 = read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/PF_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/PF_table.txt')
+    metagenomic_table4, ppanini_output4, no_uniq_genomes4 = utilities.read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/PF_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/PF_table.txt')
     scatter_plot_metagenomic_priority(axarr[0, 1], ppanini_output4, metagenomic_table4, no_uniq_genomes4, title = 'Posterior fornix', scale = data_scale)
     
     # Add a colorbar
@@ -400,7 +388,7 @@ def main():
 	print 'No. of unique genomes: '+str(no_uniq_genomes)
 	
 	if not args.bypass_priority_scatter:
-		abund_prev= read_ppanini_imp_genes_table(args.abund_prev)
+		abund_prev= utilities.read_ppanini_imp_genes_table(args.abund_prev)
 		master_plot(abund_prev, table, filename= args.input_file)#plot_metagenomic_priority(abund_prev, table, no_uniq_genomes, args.input_file)
 	
 	if args.parse_only:

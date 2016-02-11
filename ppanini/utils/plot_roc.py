@@ -21,7 +21,7 @@ from scipy.stats import percentileofscore
 import sys
 import csv
 from . import plot_metagenome_genome 
-
+from .. import utilities
 #sys.path.append('/Users/rah/Documents/Hutlab/ppanini')#/n/hutlab12_nobackup/data/ppanini/ppanini')
 
 from .. import config
@@ -66,7 +66,7 @@ def main():
             print "ValueError for Stool roc calculation"  
     if plot_g:
         try:
-            metagenomic_table1, ppanini_output1, no_uniq_genomes1  = plot_metagenome_genome.read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/stool_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/stool_table.txt')
+            metagenomic_table1, ppanini_output1, no_uniq_genomes1  = utilities.read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/stool_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/stool_table.txt')
             #print  metagenomic_table1
             fpr, tpr =fpr_tpr_genome(metagenomic_table1, no_uniq_genomes1, essential_genes)
             roc_info.append(['Stool - Genomic Priority',fpr, tpr])
@@ -82,12 +82,13 @@ def main():
             print "ValueError for Buccal mucosa roc calculation"
     if plot_g:
         try:
-            metagenomic_table3, ppanini_output3, no_uniq_genomes3 = plot_metagenome_genome.read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/BM_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/BM_table.txt')
+            metagenomic_table3, ppanini_output3, no_uniq_genomes3 = utilities.read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/BM_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/BM_table.txt')
             fpr, tpr = fpr_tpr_genome(metagenomic_table3, no_uniq_genomes3, essential_genes)
             roc_info.append(['Buccal mucosa - Genomic Priority',fpr, tpr])
         except ValueError:
             print "ValueError for Buccal mucosa  roc calculation"
 #Anterior nares
+    
     if plot_mg:
         try:
             fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Documents/Hutlab/ppanini/output_tables/AN_table.txt',\
@@ -107,24 +108,30 @@ def main():
             roc_info.append(['Anterior nares - Metagenomic Priority Beta = .75',fpr, tpr])
         except ValueError:
             print "ValueError for Anterior nares roc calculation"
+            
+        try:
+            fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Documents/Hutlab/ppanini/output_tables/AN_table_from_gene_catalog.txt',\
+                                      essential_genes= essential_genes, beta =.25)     
+            roc_info.append(['Anterior nares - Metagenomic Priority from gene catlog',fpr, tpr])
+        except ValueError:
+            print "ValueError for Anterior nares gene-catalog roc calculation"
     if plot_g:
         try:
-            metagenomic_table2, ppanini_output2, no_uniq_genomes2 = plot_metagenome_genome.read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/AN_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/AN_table.txt')
+            metagenomic_table2, ppanini_output2, no_uniq_genomes2 = utilities.read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/AN_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/AN_table.txt')
             fpr, tpr = fpr_tpr_genome(metagenomic_table2, no_uniq_genomes2, essential_genes)
             roc_info.append(['Anterior nares - Genomic Priority',fpr, tpr])
         except ValueError:
             print "ValueError for Anterior nares  roc calculation"
-            
-    
     '''
     if plot_mg:
         try:
-            metagenomic_table4, ppanini_output4, no_uniq_genomes4 = plot_metagenome_genome.read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/PF_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/PF_table.txt')
+            metagenomic_table4, ppanini_output4, no_uniq_genomes4 = utilities.read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/PF_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/PF_table.txt')
             fpr, tpr = fpr_tpr_genome(metagenomic_table4, no_uniq_genomes4,essential_genes)
             roc_info.append(['Posterior fornix Genomic Priority',fpr, tpr])
         
         except ValueError:
             print "ValueError for Posterior fornix  roc calculation"
+    
     if plot_g:
         try:
             fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Documents/Hutlab/ppanini/PF_final_gene_centroids_table/PF_final_gene_centroids_table_imp_centroid_prev_abund.txt',\
@@ -169,7 +176,7 @@ def get_fpr_tpr(input_ppanini, essential_genes, beta =.5):
     abun = [line.split('\t')[4] for line in lines2]
     ppanini_score = [line.split('\t')[2] for line in lines2]
     #ppanini_score = [0 for line in lines2]'''
-    ppanini_table = plot_metagenome_genome.read_ppanini_imp_genes_table(input_ppanini)
+    ppanini_table = utilities.read_ppanini_imp_genes_table(input_ppanini)
     #print ppanini_table['ppanini_score'][1:10]
     
     n = len(ppanini_table['genes'])-1
