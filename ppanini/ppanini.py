@@ -304,8 +304,8 @@ def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_
 
 	logger.debug('get_niche_prevalence_abundance')
 	
-	centroid_prev_abund_file_path = config.temp_folder+'/'+config.basename+'_centroid_prev_abund.txt'
-	
+	all_centroid_prev_abund_file_path = config.temp_folder+'/'+config.basename+'_centroid_prev_abund_dict_all.txt'
+	centroid_prev_abund_file_path = config.temp_folder+'/'+config.basename+'_centroid_prev_abund_ppanini_score_all.txt'
 	niches = {}
 	split_i = [re.sub('[\r\t\n]', '', i) for i in niche_line.split('\t')[1:]]
 	for i, val in enumerate(split_i):
@@ -362,7 +362,7 @@ def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_
 			p_score[niche] = 1/((1/((beta)*scipy.stats.percentileofscore(all_alpha_prev[niche], centroid_prev_abund[centroid]['alpha_prevalence'][niche])))+\
 															  (1/((1-beta)*scipy.stats.percentileofscore(all_alpha_abund, centroid_prev_abund[centroid]['mean_abundance']))))
 			centroid_prev_abund[centroid]['ppanini_score'] = p_score
-
+        
 	dict_to_print = {}
 	for centroid in centroid_prev_abund:
 		dict_to_print[centroid] = {'beta_prevalence': centroid_prev_abund[centroid]['beta_prevalence'], \
@@ -372,8 +372,8 @@ def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_
 			dict_to_print[centroid]['ppanini_score_'+niche] = centroid_prev_abund[centroid]['ppanini_score'][niche]
 	#config.all_prevalence = all_prevalence
 	#config.all_mean_abund = all_alpha_abund
+	write_prev_abund_matrix(dict_to_print, all_centroid_prev_abund_file_path)
 	write_prev_abund_matrix(dict_to_print, centroid_prev_abund_file_path)
-	
 	return centroid_prev_abund
 
 def get_important_niche_centroids():
