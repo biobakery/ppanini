@@ -2,9 +2,8 @@ import os
 import sys
 import matplotlib
 import re
-import numpy
 import time
-import numpy
+import numpy as np
 import argparse
 import pdb
 import matplotlib.pyplot as plt
@@ -17,56 +16,6 @@ from .. import utilities
 
 '''Tmp file to parse results'''
 '''Analysis of Genome Hits per gene showing how many genomes each gene is found in.'''
-
-def parse_table(m8_filename, fasta_filename):
-	'''Parse the BLAST results to give gene hits to genomes
-	Input: 
-	m8_filename = filename of blast results
-	fasta_filename = filename of corresponding fasta file
-	
-	Output: 
-	table = {gene: [List of genomes]}'''
-
-	fasta_dict = utilities.read_fasta(fasta_filename)
-
-	for seq in fasta_dict:
-		fasta_dict[seq] = float(len(fasta_dict[seq]))
-	table = {}
-	foo = open(m8_filename)
-	for line in foo:
-		split_i = line.split('\t')
-		try:
-			threshold = float(split_i[2])*float(split_i[3])/fasta_dict[split_i[0]]
-		except:
-			raise Exception('Gene '+split_i[0]+' not found in fasta: '+fasta_filename)
-		if threshold > 90.0:
-			split_sp = split_i[1].split('|')
-			sp = [i for i in split_sp if 'g__' in i and '.s__' in i]
-			if split_i[0] not in table:
-				table[split_i[0]] = sp
-			elif sp not in table[split_i[0]]:
-				table[split_i[0]] += sp
-	return table
-
-def read_parsed(m8_filename):
-	'''Read parsed table for {gene: genomes}
-	Input: 
-	m8_filename = filename of blast results
-
-	Output: 
-	table = {gene: [List of genomes]}'''
-
-	table = {}
-	foo = open(m8_filename)
-
-	for line in foo:
-		split_i = [i.strip() for i in line.split('\t')]
-		try:
-			table[split_i[0]] += [split_i[1]]
-		except:
-			table[split_i[0]] = [split_i[1]]
-	print"Total No. of genes:", len(table) 
-	return table
 
 def plot_scatter(table, m8_filename, no_uniq_genomes):
 	'''Plots Scatter plot for genome hits per gene
@@ -89,8 +38,8 @@ def plot_scatter(table, m8_filename, no_uniq_genomes):
 	plt.xlabel(labels['xlabel'])
 	plt.ylabel(labels['ylabel'])
 	plt.title(labels['title']) 
-	plt.scatter(numpy.arange(len(all_genes)), \
-				   numpy.log(all_genes), \
+	plt.scatter(np.arange(len(all_genes)), \
+				   np.log(all_genes), \
 				   c='grey', \
 				   alpha=0.1, \
 				   linewidths=0.0, \
@@ -124,7 +73,7 @@ def plot_hexbin(table, m8_filename):
 		all_genes +=[len(table[gene])/4189.0]
 	all_genes.sort()
 	plt.hold(True)
-	image = plt.hexbin(numpy.arange(len(all_genes)), \
+	image = plt.hexbin(np.arange(len(all_genes)), \
 				   all_genes,\
 				   bins='log', gridsize=30, mincnt=1, cmap= 'darkgoldenrod', zorder=1) 
 	cb = plt.colorbar(image, spacing='uniform', extend='max')
@@ -170,39 +119,12 @@ def plot_hist(table, m8_filename, no_uniq_genomes):
 	plt.legend('All Centroids') 
 	
 	
-	hist, bins = numpy.histogram(all_genes, bins=200)
+	hist, bins = np.histogram(all_genes, bins=200)
 	offset = bins[1:]-bins[:-1]
-	axarr.plot(bins[:-1]+offset, numpy.cumsum(hist), color='darkgoldenrod')
+	axarr.plot(bins[:-1]+offset, np.cumsum(hist), color='darkgoldenrod')
 	plt.savefig(labels['filename']+'_cumsum.pdf')
 	plt.savefig(labels['filename']+'_cumsum.png')
 
-def read_abund_prev(filename):
-	keys = {'abund':0, 'alpha':0,'beta':0}
-	abund = []
-	prev = []
-	genes = []
-	ppanini_score = []
-	with open(filename) as foo:
-		for line in foo:
-			split_line = [re.sub('[\r\t\n]','', i) for i in line.split('\t')]
-			if line.startswith('#'):
-				for i, val in enumerate(split_line):
-					if 'abundance' in val:
-						keys['abundance'] = i
-					elif 'prevalence' in val:
-						keys['prevalence'] = i
-					#elif 'beta' in val:
-					#	keys['beta'] = i
-					elif 'ppanini_score' in val:
-						keys['ppanini_score'] = i	
-			else:
-				# pdb.set_trace()
-				genes +=[split_line[0]]
-				ppanini_score +=[float(split_line[keys['ppanini_score']])]
-				abund +=[float(split_line[keys['abundance']])]
-				prev +=[float(split_line[keys['prevalence']])]
-	abund_prev = {'genes': genes, 'ppanini_score':ppanini_score, 'abundance': abund, 'prevalence': prev}
-	return abund_prev
 def read_data(mg_file, ppanini_output_file):
 	metagenomic_table  = read_parsed(mg_file)
 	uniq_genomes = []
@@ -212,10 +134,10 @@ def read_data(mg_file, ppanini_output_file):
 				uniq_genomes +=[genome]
 	no_uniq_genomes = len(uniq_genomes)
 	print 'No. of unique genomes: '+str(no_uniq_genomes)
-	ppanini_output = read_abund_prev(ppanini_output_file)
+	ppanini_output = read_ppanini_imp_genes_table(ppanini_output_file)
 	return metagenomic_table, ppanini_output, no_uniq_genomes 
 def master_plot():
-    data_scale = 'log'
+    data_scale = 'none'
     fig, axarr = plt.subplots(nrows=2, ncols=2, dpi=300)#, sharex=False, sharey=False)
     fig.set_size_inches(10, 10)
     metagenomic_table1, ppanini_output1, no_uniq_genomes1  = read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/stool_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/stool_table.txt')
@@ -305,8 +227,8 @@ def scatter_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes
 	abund = ppanini_table['abundance']
 	prev = ppanini_table['prevalence']
 	ppanini_score = ppanini_table['ppanini_score']
-	abund = numpy.array(abund)/max(abund)
-	prev = numpy.array(prev)/max(prev)
+	abund = np.array(abund)/max(abund)
+	prev = np.array(prev)/max(prev)
 	
 	gp = []
 	mp = []
@@ -318,12 +240,12 @@ def scatter_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes
 			gp += [0]
 		#mp += [min((abund[i], alpha[i]))]
 		mp +=[ppanini_score[i]]
-	gp = numpy.array(gp)/float(no_uniq_genomes)
-	gp = numpy.where(gp != 0.0, gp, 10**-30)
-	mp = numpy.where(mp != 0.0, mp, 10**-30)
+	gp = np.array(gp)/float(no_uniq_genomes)
+	gp = np.where(gp != 0.0, gp, 10**-30)
+	mp = np.where(mp != 0.0, mp, 10**-30)
 	if scale == 'log':
-		gp = numpy.log(gp)
-		mp = numpy.log(mp)
+		gp = np.log(gp)
+		mp = np.log(mp)
 	#fig, axe = plt.subplots()
 	def ncolors( n, colormap="jet" ):
 		"""utility for defining N evenly spaced colors across a color map"""
@@ -335,9 +257,9 @@ def scatter_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes
 	color_dic= {'Stool': my_color[0], 'Anterior nares':my_color[2], 'Buccal mucosa':my_color[1], 'Posterior fornix':my_color[3]}
 	
 	# Calculate the point density
-	x = numpy.array(gp) 
-	y = numpy.array(mp)
-	xy = numpy.vstack([x,y])
+	x = np.array(gp) 
+	y = np.array(mp)
+	xy = np.vstack([x,y])
 	z = gaussian_kde(xy)(xy)
 	
 	# Sort the points by density, so that the densest points are plotted last
@@ -365,6 +287,15 @@ def scatter_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes
 			   zorder=0, \
 			   marker='o',\
 			   label='All Centroids')
+	def density_estimation(m1, m2):
+	    X, Y = np.mgrid[-8:0:100j, 2.9:3.25:100j]                                                     
+	    positions = np.vstack([X.ravel(), Y.ravel()])                                                       
+	    values = np.vstack([m1, m2])                                                                        
+	    kernel = gaussian_kde(values)                                                                 
+	    Z = np.reshape(kernel(positions).T, X.shape)
+	    return X, Y, Z
+	X, Y, Z = density_estimation(gp, mp)
+	axe.contour(X, Y, Z)
 	if scale == 'log':
 		axe.set_ylabel('Metagenomic Priority (log)', fontsize=10)
 		axe.set_xlabel('Genomic Priority (log)', fontsize=10)
@@ -384,8 +315,8 @@ def hexbin_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes,
 	abund = ppanini_table['abundance']
 	prev = ppanini_table['prevalence']
 	ppanini_score = ppanini_table['ppanini_score']
-	abund = numpy.array(abund)/max(abund)
-	prev = numpy.array(prev)/max(prev)
+	abund = np.array(abund)/max(abund)
+	prev = np.array(prev)/max(prev)
 	
 	gp = []
 	mp = []
@@ -397,10 +328,10 @@ def hexbin_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes,
 			gp += [0]
 		#mp += [min((abund[i], alpha[i]))]
 		mp +=[ppanini_score[i]]
-	gp = numpy.array(gp)/float(no_uniq_genomes)
+	gp = np.array(gp)/float(no_uniq_genomes)
 	if scale == 'log':
-		gp = numpy.log(gp)
-		mp = numpy.log(mp)
+		gp = np.log(gp)
+		mp = np.log(mp)
 	def ncolors( n, colormap="jet" ):
 		"""utility for defining N evenly spaced colors across a color map"""
 		cmap = plt.get_cmap( colormap )
@@ -469,7 +400,7 @@ def main():
 	print 'No. of unique genomes: '+str(no_uniq_genomes)
 	
 	if not args.bypass_priority_scatter:
-		abund_prev= read_abund_prev(args.abund_prev)
+		abund_prev= read_ppanini_imp_genes_table(args.abund_prev)
 		master_plot(abund_prev, table, filename= args.input_file)#plot_metagenomic_priority(abund_prev, table, no_uniq_genomes, args.input_file)
 	
 	if args.parse_only:

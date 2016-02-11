@@ -12,7 +12,33 @@ import multiprocessing
 from Bio import Seq
 
 logger = logging.getLogger(__name__)
-
+def read_ppanini_imp_genes_table(filename):
+	keys = {'abund':0, 'alpha':0,'beta':0}
+	abund = []
+	prev = []
+	genes = []
+	ppanini_score = []
+	with open(filename) as foo:
+		for line in foo:
+			split_line = [re.sub('[\r\t\n]','', i) for i in line.split('\t')]
+			if line.startswith('#'):
+				for i, val in enumerate(split_line):
+					if 'abundance' in val:
+						keys['abundance'] = i
+					elif 'prevalence' in val:
+						keys['prevalence'] = i
+					#elif 'beta' in val:
+					#	keys['beta'] = i
+					elif 'ppanini_score' in val:
+						keys['ppanini_score'] = i	
+			else:
+				# pdb.set_trace()
+				genes +=[split_line[0]]
+				ppanini_score +=[float(split_line[keys['ppanini_score']])]
+				abund +=[float(split_line[keys['abundance']])]
+				prev +=[float(split_line[keys['prevalence']])]
+	ppanini_table = {'genes': genes, 'ppanini_score':ppanini_score, 'abundance': abund, 'prevalence': prev}
+	return ppanini_table
 def read_fasta(fasta_filename):
 	'''Reads a fasta_file and returns a fasta dict
 	Input: fasta_filename = path_to_fasta_file
@@ -33,7 +59,55 @@ def read_fasta(fasta_filename):
 				else:
 					fasta_seq[name] +=  re.sub('[\r\t\n]','', line)
 	return fasta_seq
+def parse_table(m8_filename, fasta_filename):
+	'''Parse the BLAST results to give gene hits to genomes
+	Input: 
+	m8_filename = filename of blast results
+	fasta_filename = filename of corresponding fasta file
+	
+	Output: 
+	table = {gene: [List of genomes]}'''
 
+	fasta_dict = utilities.read_fasta(fasta_filename)
+
+	for seq in fasta_dict:
+		fasta_dict[seq] = float(len(fasta_dict[seq]))
+	table = {}
+	foo = open(m8_filename)
+	for line in foo:
+		split_i = line.split('\t')
+		try:
+			threshold = float(split_i[2])*float(split_i[3])/fasta_dict[split_i[0]]
+		except:
+			raise Exception('Gene '+split_i[0]+' not found in fasta: '+fasta_filename)
+		if threshold > 90.0:
+			split_sp = split_i[1].split('|')
+			sp = [i for i in split_sp if 'g__' in i and '.s__' in i]
+			if split_i[0] not in table:
+				table[split_i[0]] = sp
+			elif sp not in table[split_i[0]]:
+				table[split_i[0]] += sp
+	return table
+
+def read_parsed(m8_filename):
+	'''Read parsed table for {gene: genomes}
+	Input: 
+	m8_filename = filename of blast results
+
+	Output: 
+	table = {gene: [List of genomes]}'''
+
+	table = {}
+	foo = open(m8_filename)
+
+	for line in foo:
+		split_i = [i.strip() for i in line.split('\t')]
+		try:
+			table[split_i[0]] += [split_i[1]]
+		except:
+			table[split_i[0]] = [split_i[1]]
+	print"Total No. of genes:", len(table) 
+	return table
 def pullgenes_fromcontigs(contig_file, gff3_file, fna_file, faa_file):
 	'''Pulls genes from contigs using the coordinates from GFF3 file provided
 

@@ -1,10 +1,12 @@
 import os
 import sys
+import subprocess
 import re
 import argparse
 import numpy
 import logging
 import scipy.stats
+from os.path import basename
 try:
     from . import utilities
     from . import annotate_genes
@@ -170,12 +172,12 @@ def get_clusters(): #ONLY FOR THE UNIREF UNANNOTATED
 	
 	clust_method = 'vsearch'
 
-	if config.usearch:
+	if config.usearch != '':
 		clust_method = config.usearch
 		annotate_genes.run_uclust(clust_method, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, 0.9)
 	else:
-		if config.vsearch:
-			clust_method = config.usearch
+		if config.vsearch != '':
+			clust_method = config.vsearch
 		annotate_genes.run_vclust(clust_method, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, 0.9)
 		
 	
@@ -543,53 +545,77 @@ def read_parameters():
     config.uclust_file = args.uc
     config.gene_catalog = args.gene_catalog 
     config.bypass_clustering = args.bypass_clustering
+    config.vsearch = args.vsearch
+    config.usearch = args.usearch
     
 def run():
-	if config.uclust_file == '' and config.gene_catalog == '' and not config.bypass_clustering:
-		sys.exit("At least one of --uc or --gene-catalog should be provided!!!")
-	# if not args.bypass_prev_abund:
-	if config.basename =='':
-		config.basename = config.input_table.split('.')[0].split('/')[-1]
-	if config.output_folder == '':
-		config.output_folder = config.basename
-	config.temp_folder = config.output_folder+'/'+config.basename+'_temp'
+    if config.uclust_file == '' and config.gene_catalog == '' and not config.bypass_clustering:
+    	sys.exit("At least one of --uc or --gene-catalog should be provided!!!")
+    if config.gene_catalog != '' and (config.usearch == '' and config.vsearch == ''):
+        try:
+            subprocess.call(["usearch", "--version"])
+            print "The program will use usearch if you wnat to use vsearch then provide it with --vsearch"
+        except OSError as e:
+            try:
+                subprocess.call(["usearch", "--version"])
+                print "The program will use vsearch if you want to use usearch then provide it with --usearch"
+            except:
+                sys.exit("At least one of --usearch or --vsearch  with a path should be provided when gene-catalog is used!!!")
 
-	utilities.create_folders([config.temp_folder, config.output_folder])
-
-	log_file = config.output_folder+'/'+config.basename+'.log'
-	logging.basicConfig(filename=log_file, \
-						format='%(asctime)s - %(name)s - %(levelname)s: %(message)s', \
-						level=getattr(logging, config.log_level), \
-						filemode='w', \
-						datefmt='%m/%d/%Y %I:%M:%S %p')
-	
-	if config.verbose =='DEBUG':
-		print "Reading the gene table..."
-	[uniref_dm, gi_dm, metadata]= read_gene_table(config.input_table)
-	if config.verbose =='DEBUG':
-		print "Reading the gene table is done!"
-	
-	if config.verbose =='DEBUG':
-		print "Getting centroids..."
-	all_centroids = get_centroids(uniref_dm, gi_dm)
-	if config.verbose =='DEBUG':
-		print "Getting centroids is done!"
-	
-	if config.verbose =='DEBUG':
-		print "Getting centroids table..."
-	[centroids_data_matrix, centroids_list] = get_centroids_table(all_centroids, metadata)
-	config.centroids_list = centroids_list
-	if config.verbose =='DEBUG':
-		print "Getting centroids table is done!"
-	
-	if config.verbose =='DEBUG':
-		print "Getting prevelance abundnace..."
-	centroid_prev_abund = get_prevalence_abundance(centroids_data_matrix, centroids_list = centroids_list, metadata = metadata, beta = config.beta)
-	if config.verbose =='DEBUG':
-		print "Getting prevelance abundnace is done!"
-	# else:
-	# 	[centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag] = read_prevalence_abundance_table(input_table, config.beta)
-	config.centroid_prev_abund = centroid_prev_abund
+    # if not args.bypass_prev_abund:
+    if config.basename =='':
+        #print config.input_table.split('.')[0]
+        #print config.input_table.split('.')[0].split('/')[-1]
+        config.basename = basename(config.input_table).split('.')[0]
+        print config.basename
+    if config.output_folder == '':
+    	config.output_folder = config.basename
+    try:
+        os.stat(config.output_folder)
+    except:
+        os.mkdir(config.output_folder)
+    config.temp_folder = config.output_folder+'/temp'#+config.basename+'_temp'
+    try:
+        os.stat(config.temp_folder)
+    except:
+        os.mkdir(config.temp_folder)
+        
+    utilities.create_folders([config.temp_folder, config.output_folder])
+    
+    log_file = config.output_folder+'/'+config.basename+'.log'
+    logging.basicConfig(filename=log_file, \
+    					format='%(asctime)s - %(name)s - %(levelname)s: %(message)s', \
+    					level=getattr(logging, config.log_level), \
+    					filemode='w', \
+    					datefmt='%m/%d/%Y %I:%M:%S %p')
+    
+    if config.verbose =='DEBUG':
+    	print "Reading the gene table..."
+    [uniref_dm, gi_dm, metadata]= read_gene_table(config.input_table)
+    if config.verbose =='DEBUG':
+    	print "Reading the gene table is done!"
+    
+    if config.verbose =='DEBUG':
+    	print "Getting centroids..."
+    all_centroids = get_centroids(uniref_dm, gi_dm)
+    if config.verbose =='DEBUG':
+    	print "Getting centroids is done!"
+    
+    if config.verbose =='DEBUG':
+    	print "Getting centroids table..."
+    [centroids_data_matrix, centroids_list] = get_centroids_table(all_centroids, metadata)
+    config.centroids_list = centroids_list
+    if config.verbose =='DEBUG':
+    	print "Getting centroids table is done!"
+    
+    if config.verbose =='DEBUG':
+    	print "Getting prevelance abundnace..."
+    centroid_prev_abund = get_prevalence_abundance(centroids_data_matrix, centroids_list = centroids_list, metadata = metadata, beta = config.beta)
+    if config.verbose =='DEBUG':
+    	print "Getting prevelance abundnace is done!"
+    # else:
+    # 	[centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag] = read_prevalence_abundance_table(input_table, config.beta)
+    config.centroid_prev_abund = centroid_prev_abund
 def  prioritize_centroids():
 	if config.verbose =='DEBUG':
 		print "Prioritize centroids..."
