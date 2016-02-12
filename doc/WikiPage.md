@@ -3,7 +3,7 @@
 
  * Download the PPANINI software ([ppanini.tar.gz](https://bitbucket.org/biobakery/ppanini/downloads/biobakery-ppanini-0.6.0.tar.gz)) then follow the [steps to install and run](#markdown-header-getting-started-with-ppanini).
 
- * For additional information, please see the [PPANINI User Manual](http://huttenhower.sph.harvard.edu/ppanini/manual).
+ * For additional information, please see the [PPANINI User Manual](http://bitbucket.org/biobakery/ppanini).
 
  * Please direct questions to the [PPANINI google group](https://groups.google.com/forum/#!forum/ppanini-users) (subscribe to receive PPANINI news).
 
