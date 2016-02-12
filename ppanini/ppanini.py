@@ -572,7 +572,7 @@ def run():
 
     config.temp_folder = config.output_folder+'/temp'#+config.basename+'_temp'
 
-    utilities.create_folders([config.temp_folder, config.output_folder])
+    utilities.create_folders([config.output_folder, config.temp_folder])
     
     log_file = config.output_folder+'/'+config.basename+'.log'
     logging.basicConfig(filename=log_file, \
