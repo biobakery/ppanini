@@ -7,7 +7,7 @@ except ImportError:
 
 setup(
     name="ppanini",
-    version="0.6.0",
+    version="0.6.1",
     license="MIT",
     description="PPANINI: Prioritization and Prediction of functional Annotations for Novel and Important genes via automated data Network Integration.",
     author="Gholamali Rahnavard, Afrah Shafquat, Eric A. Franzosa, and Curtis Huttenhower",
