@@ -1,4 +1,4 @@
-#**PPANINI: Prioritization and Prediction of functional Annotations for Novel and Important genes via automated data Network Integration**
+#PPANINI: Prioritization and Prediction of functional Annotations for Novel and Important genes via automated data Network Integration#
 ----
 
  * Download the PPANINI software ([ppanini.tar.gz](https://bitbucket.org/biobakery/ppanini/downloads/biobakery-ppanini-0.6.0.tar.gz)) then follow the [steps to install and run](#markdown-header-getting-started-with-ppanini).
@@ -14,11 +14,17 @@
 
 PPANINI provides a computational pipeline to prioritize microbial genes based on their metagenomic properties (e.g. prevalence and abundance). The resulting prioritized list of gene candidates can then be analyzed further using our visualization tools.
 
-#**PPANINI Workflow**
+#PPANINI Workflow#
 ![ppanini_workflow.png](https://bitbucket.org/repo/rnag7z/images/994033213-ppanini_workflow.png)
 
-------------------------------------------------------------------------------------------------------------------------------
+----
 #Communities from Human Microbiome Project (HMP) to start with#
 [An abundances table for genes from stool bodysite samples](https://www.dropbox.com/s/drxvgs42iyvk5k0/stool_gene_centroids_table.txt?dl=0)  with a [UCLUST file containing centroids are provided](https://www.dropbox.com/s/b8ufu3ryiyuo3ax/stool_gene_clusters.uc?dl=0)
 
-[An abundances table for genes from Anterior nares bodysite samples](https://www.dropbox.com/s/lnpef7hixuimm62/AN_gene_table.txt?dl=0) with a [gene catalog fasta file](https://www.dropbox.com/s/2mohfte3lkplqsy/AN_centroids_for_clustering.fasta?dl=0)  
+[An abundances table for genes from Anterior nares bodysite samples](https://www.dropbox.com/s/lnpef7hixuimm62/AN_gene_table.txt?dl=0) with a [gene catalog fasta file](https://www.dropbox.com/s/2mohfte3lkplqsy/AN_centroids_for_clustering.fasta?dl=0)
+
+----
+# PPANINI Evaluation#
+An evaluation of PPANINI using stool sample against union of two essentail gense sets using ROC plot.
+
+![roc_plot_ppanini_union_of_essential_gene_datasets.png](https://bitbucket.org/repo/49y6o9/images/2596343311-roc_plot_ppanini_union_of_essential_gene_datasets.png)
