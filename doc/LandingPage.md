@@ -17,10 +17,17 @@ PPANINI provides a computational pipeline to prioritize microbial genes based on
 
 ----
 #Communities from Human Microbiome Project (HMP) to start with#
-[An abundances table] for genes from stool bodysite samples(https://www.dropbox.com/s/drxvgs42iyvk5k0/stool_gene_centroids_table.txt?dl=0)  with a [UCLUST file] containing centroids are provided(https://www.dropbox.com/s/b8ufu3ryiyuo3ax/stool_gene_clusters.uc?dl=0)
+[An abundances table](https://www.dropbox.com/s/drxvgs42iyvk5k0/stool_gene_centroids_table.txt?dl=0) for genes from stool bodysite samples with a [UCLUST file](https://www.dropbox.com/s/b8ufu3ryiyuo3ax/stool_gene_clusters.uc?dl=0) containing centroids of genes. 
 
-[An abundances table] for genes from Anterior nares bodysite samples (https://www.dropbox.com/s/lnpef7hixuimm62/AN_gene_table.txt?dl=0) with a [gene catalog fasta file](https://www.dropbox.com/s/2mohfte3lkplqsy/AN_centroids_for_clustering.fasta?dl=0)
+[An abundances table](https://www.dropbox.com/s/lnpef7hixuimm62/AN_gene_table.txt?dl=0) for genes from Anterior nares bodysite samples  with a [gene catalog fasta file](https://www.dropbox.com/s/2mohfte3lkplqsy/AN_centroids_for_clustering.fasta?dl=0)
 
+*Simple Demo*
+input 
+Download [Gene abaundances table](https://www.dropbox.com/s/utrjt28sxn16glu/genetable.txt?dl=0)
+Download [FASTA file](https://www.dropbox.com/s/2bgyid79rf97lg0/samples.fasta?dl=0) for clustering unannotated genes
+```
+ppanini -i Mock_FASTA/mockgenetable.txt --gene-catalog Mock_FASTA/all.fasta -o OUTPUT --vsearch ./vsearch/vsearch-1.1.3-osx-x86_64
+```
 ----
 # PPANINI Evaluation#
 An evaluation of PPANINI using stool sample against union of two essentail gense sets using ROC plot.
