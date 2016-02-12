@@ -562,7 +562,6 @@ def run():
             except:
                 sys.exit("At least one of --usearch or --vsearch  with a path should be provided when gene-catalog is used!!!")
 
-    # if not args.bypass_prev_abund:
     if config.basename =='':
         #print config.input_table.split('.')[0]
         #print config.input_table.split('.')[0].split('/')[-1]
@@ -570,16 +569,9 @@ def run():
         print config.basename
     if config.output_folder == '':
     	config.output_folder = config.basename
-    try:
-        os.stat(config.output_folder)
-    except:
-        os.mkdir(config.output_folder)
+
     config.temp_folder = config.output_folder+'/temp'#+config.basename+'_temp'
-    try:
-        os.stat(config.temp_folder)
-    except:
-        os.mkdir(config.temp_folder)
-        
+
     utilities.create_folders([config.temp_folder, config.output_folder])
     
     log_file = config.output_folder+'/'+config.basename+'.log'

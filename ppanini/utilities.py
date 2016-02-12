@@ -236,12 +236,13 @@ def create_folders(list_folders):
 	Output: Folders created'''
 
 	logger.debug('create_folders '+'\t'.join(list_folders))
-
+	
 	for fname in list_folders:
 		try:
-			os.mkdir(fname)
+			os.stat(fname)
 		except:
-			pass
+		    os.mkdir(fname)
+		
 
 def read_dict(gene_annotations_file):
 	'''Reads tabulated file into a dictionary
@@ -294,7 +295,7 @@ def write_dict(dictX, gene_annotations_file):
 	with open(gene_annotations_file, 'w') as foo:
 		foo.writelines('#GENEID\tANNOTATION\n')
 		for i in dictX:
-			foo.writelines(['\t'.join([i, dictX[i]])+'\n'])
+			foo.writelines(['\t'.join([i, dictX[i] ])+'\n'])
 
 def is_present(metadata, meta_type):
 	'''Returns True if meta_type is present in metadata extracted from mappert_file
