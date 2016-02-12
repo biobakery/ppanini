@@ -26,7 +26,7 @@ PPANINI provides a computational pipeline to prioritize microbial genes based on
 Download [Gene abaundances table](https://www.dropbox.com/s/utrjt28sxn16glu/genetable.txt?dl=0)
 Download [FASTA file](https://www.dropbox.com/s/2bgyid79rf97lg0/samples.fasta?dl=0) for clustering unannotated genes
 
-*Commond to run*
+*Running Command*
 ```
 ppanini -i mockgenetable.txt --gene-catalog samples.fasta -o OUTPUT --vsearch /path/to/vsearch
 ```
