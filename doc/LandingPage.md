@@ -1,9 +1,9 @@
 #**PPANINI: Prioritization and Prediction of functional Annotations for Novel and Important genes via automated data Network Integration**
 ----
 
- * Download the PPANINI software ([ppanini.tar.gz](https://bitbucket.org/biobakery/ppanini/downloads/biobakery-ppanini-0.6.0.tar.gz)) then follow the [steps to install and run](#markdown-header-getting-started-with-ppanini).
+ * Download the PPANINI software ([ppanini.tar.gz](https://bitbucket.org/biobakery/ppanini/downloads/biobakery-ppanini-0.6.0.tar.gz)) then follow the [steps to install and run](https://bitbucket.org/biobakery/ppanini/).
 
- * For additional information, please see the [PPANINI User Manual](http://huttenhower.sph.harvard.edu/ppanini/manual).
+ * For additional information, please see the [PPANINI User Manual](https://bitbucket.org/biobakery/ppanini/src/459f5754559787eced3bcd45d20a3841558c781b/doc/UserManual.md?at=default&fileviewer=file-view-default).
 
  * Please direct questions to the [PPANINI google group](https://groups.google.com/forum/#!forum/ppanini-users) (subscribe to receive PPANINI news).
 
@@ -19,6 +19,6 @@ PPANINI provides a computational pipeline to prioritize microbial genes based on
 
 ------------------------------------------------------------------------------------------------------------------------------
 # Communities from Human Microbiome Project (HMP) for demo
-An abundance table for genes from stool sample with a UCLUST file containing centroids are provided for demo. Also an abundance table for genes from Anterior nares bodysite samples with a gene catalog file containing are provides. 
+An abundance table for genes from [stool](stool_gene_centroids_table.txt) sample with a [UCLUST](https://www.dropbox.com/s/b8ufu3ryiyuo3ax/stool_gene_clusters.uc?dl=0) file containing centroids are provided for demo. Also an abundance table for genes from [anterior nares](https://www.dropbox.com/s/lnpef7hixuimm62/AN_gene_table.txt?dl=0)  bodysite samples with a [gene catalog](https://www.dropbox.com/s/2mohfte3lkplqsy/AN_centroids_for_clustering.fasta?dl=0) file containing are provides. 
 
 
