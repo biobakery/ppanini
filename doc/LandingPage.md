@@ -2,12 +2,9 @@
 PPANINI provides a computational pipeline to prioritize microbial genes based on their metagenomic properties (e.g. prevalence and abundance). The resulting prioritized list of gene candidates can then be analyzed further using our visualization tools.
 ----
 
- * Download the PPANINI software ([ppanini.tar.gz](https://bitbucket.org/biobakery/ppanini/downloads/biobakery-ppanini-0.6.0.tar.gz)) then follow the [steps to install and run](#markdown-header-getting-started-with-ppanini).
-
- * For additional information, please see the [PPANINI User Manual](https://bitbucket.org/biobakery/ppanini/).
-
+ * Download the PPANINI software ([ppanini.tar.gz](https://bitbucket.org/biobakery/ppanini/downloads/biobakery-ppanini-0.6.0.tar.gz)) then follow the [steps to install and run](https://bitbucket.org/biobakery/ppanini/).
+ * For additional information, please see the [PPANINI User Manual](https://bitbucket.org/biobakery/ppanini/). [PPANINI wiki page](https://bitbucket.org/biobakery/biobakery/wiki/PPANINI) provides a tutorial for a quick start. 
  * Please direct questions to the [PPANINI google group](https://groups.google.com/forum/#!forum/ppanini-users) (subscribe to receive PPANINI news).
-
  * If you use the PPANINI software, please cite our manuscript: **Systematic approach to prioritization of 'important' microbial genes**, Gholamali Rahnavard, Afrah Shafquat, Bahar Sayoldin, Eric A. Franzosa, Curtis Huttenhower (under preparation).
   	
 
