@@ -17,9 +17,9 @@ PPANINI provides a computational pipeline to prioritize microbial genes based on
 
 ----
 #Communities from Human Microbiome Project (HMP) to start with#
-[An abundances table for genes from stool bodysite samples](https://www.dropbox.com/s/drxvgs42iyvk5k0/stool_gene_centroids_table.txt?dl=0)  with a [UCLUST file containing centroids are provided](https://www.dropbox.com/s/b8ufu3ryiyuo3ax/stool_gene_clusters.uc?dl=0)
+[An abundances table] for genes from stool bodysite samples(https://www.dropbox.com/s/drxvgs42iyvk5k0/stool_gene_centroids_table.txt?dl=0)  with a [UCLUST file] containing centroids are provided(https://www.dropbox.com/s/b8ufu3ryiyuo3ax/stool_gene_clusters.uc?dl=0)
 
-[An abundances table for genes from Anterior nares bodysite samples](https://www.dropbox.com/s/lnpef7hixuimm62/AN_gene_table.txt?dl=0) with a [gene catalog fasta file](https://www.dropbox.com/s/2mohfte3lkplqsy/AN_centroids_for_clustering.fasta?dl=0)
+[An abundances table] for genes from Anterior nares bodysite samples (https://www.dropbox.com/s/lnpef7hixuimm62/AN_gene_table.txt?dl=0) with a [gene catalog fasta file](https://www.dropbox.com/s/2mohfte3lkplqsy/AN_centroids_for_clustering.fasta?dl=0)
 
 ----
 # PPANINI Evaluation#
