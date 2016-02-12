@@ -27,4 +27,4 @@ PPANINI provides a computational pipeline to prioritize microbial genes based on
 # PPANINI Evaluation#
 An evaluation of PPANINI using stool sample against union of two essentail gense sets using ROC plot.
 
-![roc_plot_ppanini_union_of_essential_gene_datasets.png](https://bitbucket.org/repo/49y6o9/images/2596343311-roc_plot_ppanini_union_of_essential_gene_datasets.png)
+![roc_plot_ppanini_union_of_essential_gene_datasets.png](https://bitbucket.org/repo/49y6o9/images/3568610095-roc_plot_ppanini_union_of_essential_gene_datasets.png)
