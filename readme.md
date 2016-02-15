@@ -39,7 +39,7 @@ PPANINI provides a computational pipeline to prioritize microbial genes based on
 ------------------------------------------------------------------------------------------------------------------------------
 # PPANINI #
 ## PPANINI Workflow ##
-![ppanini_workflow.png](https://bitbucket.org/repo/rnag7z/images/994033213-ppanini_workflow.png)
+![ppanini_workflow.png](https://bitbucket.org/repo/rnag7z/images/3722133193-ppanini_workflow.png)
 
 ## REQUIREMENTS ##
 * [matplotlib](http://matplotlib.org/)
