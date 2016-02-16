@@ -14,23 +14,40 @@ PPANINI provides a computational pipeline to prioritize microbial genes based on
 ----
 #Demo#
 ##Communities from Human Microbiome Project (HMP) to start with##
-[An abundances table](https://www.dropbox.com/s/drxvgs42iyvk5k0/stool_gene_centroids_table.txt?dl=0) for genes from stool bodysite samples with a [UCLUST file](https://www.dropbox.com/s/b8ufu3ryiyuo3ax/stool_gene_clusters.uc?dl=0) containing centroids of genes. 
 
-[An abundances table](https://www.dropbox.com/s/lnpef7hixuimm62/AN_gene_table.txt?dl=0) for genes from Anterior nares bodysite samples  with a [gene catalog fasta file](https://www.dropbox.com/s/2mohfte3lkplqsy/AN_centroids_for_clustering.fasta?dl=0)
+[A genes abundances table](https://www.dropbox.com/s/drxvgs42iyvk5k0/stool_gene_centroids_table.txt?dl=0) for 93 stool samples with a
+[UCLUST file](https://www.dropbox.com/s/b8ufu3ryiyuo3ax/stool_gene_clusters.uc?dl=0) containing centroids of genes. The UCLUST file is used to collapse unannotated
+genes into artifical clusters. This step could be bypassed.
+```
+ppanini -i stool_gene_centroids_table.txt --uc stool_gene_clusters.uc -o OUTPUT 
+
+for bypassing clustering unannotated genes:
+ppanini -i stool_gene_centroids_table.txt --bypass-clustering -o OUTPUT 
+```
+The output is a table of prioritized important genes with their prevelance, abundances, and ppanini score.
+
+[An genes abundances table](https://www.dropbox.com/s/lnpef7hixuimm62/AN_gene_table.txt?dl=0) for 70 Anterior nares samples with a 
+[gene catalog fasta file](https://www.dropbox.com/s/2mohfte3lkplqsy/AN_centroids_for_clustering.fasta?dl=0) which is used to cluster unannoted genes.
+```
+ppanini -i AN_gene_table.txt --gene-catalog AN_centroids_for_clustering.fasta -o OUTPUT 
+
+for bypassing clustering unannotated genes:
+ppanini -i AN_gene_table.txt --bypass-clustering -o OUTPUT 
+```
 
 ##Simple Demo##
 
-*input*
+###input###
 
 Download [Gene abaundances table](https://www.dropbox.com/s/utrjt28sxn16glu/genetable.txt?dl=0)
 Download [FASTA file](https://www.dropbox.com/s/2bgyid79rf97lg0/samples.fasta?dl=0) for clustering unannotated genes
 
-*Running Command*
+###Running Command###
 ```
 ppanini -i mockgenetable.txt --gene-catalog samples.fasta -o OUTPUT --vsearch /path/to/vsearch
 ```
 
-*Output*
+###Output###
 
 [List](https://www.dropbox.com/s/c1q7zw90uuekx2k/genetable_imp_centroid_prev_abund.txt?dl=0) of importnat genes(centroids)
 
