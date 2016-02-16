@@ -10,7 +10,7 @@ PPANINI provides a computational pipeline to prioritize microbial genes based on
 
 ----
 #PPANINI Workflow#
-![ppanini_workflow.png](https://bitbucket.org/repo/rnag7z/images/3722133193-ppanini_workflow.png)
+![ppanini_workflow.png](https://bitbucket.org/repo/rnag7z/images/5336251-ppanini_workflow.png)
 ----
 #Demo#
 ##Communities from Human Microbiome Project (HMP) to start with##
