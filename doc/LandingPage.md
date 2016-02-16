@@ -36,23 +36,24 @@ $ppanini -i AN_gene_table.txt --bypass-clustering -o OUTPUT
 ```
 
 ##Simple Demo##
-
 ###input###
-
 Download [Gene abaundances table](https://www.dropbox.com/s/utrjt28sxn16glu/genetable.txt?dl=0)
 Download [FASTA file](https://www.dropbox.com/s/2bgyid79rf97lg0/samples.fasta?dl=0) for clustering unannotated genes
 
 ###Running Command###
 ```
-ppanini -i mockgenetable.txt --gene-catalog samples.fasta -o OUTPUT --vsearch /path/to/vsearch
+$ppanini -i genetable.txt --gene-catalog samples.fasta -o OUTPUT --vsearch /path/to/vsearch
+
+or clustring step could be bypassed by:
+$ppanini -i genetable.txt -o OUTPUT 
 ```
 
 ###Output###
-
-[List](https://www.dropbox.com/s/c1q7zw90uuekx2k/genetable_imp_centroid_prev_abund.txt?dl=0) of importnat genes(centroids)
+[List](https://www.dropbox.com/s/c1q7zw90uuekx2k/genetable_imp_centroid_prev_abund.txt?dl=0) of importnat genes(centroids) with prevelence, abundance, and ppanini score is the output. 
 
 ----
 # PPANINI Evaluation#
-An evaluation of PPANINI using stool sample against union of two essentail gense sets using ROC plot.
+An evaluation of PPANINI in terms of sensitivity and specificity has been used. Stool samples from HMP datasets are used to find prioritized important genes and a union of two essential genes sets is used as golden standard for the ROC plot. 
+The result shows PPANINI prioritized important genes very well (AUC= .87) even we used a specific gene set as golden standard. 
 
 ![roc_plot_ppanini_union_of_essential_gene_datasets.png](https://bitbucket.org/repo/49y6o9/images/3568610095-roc_plot_ppanini_union_of_essential_gene_datasets.png)
