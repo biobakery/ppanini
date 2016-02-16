@@ -37,15 +37,14 @@ $ppanini -i AN_gene_table.txt --bypass-clustering -o OUTPUT
 
 ##Simple Demo##
 ###input###
-Download [Gene abaundances table](https://www.dropbox.com/s/utrjt28sxn16glu/genetable.txt?dl=0)
-Download [FASTA file](https://www.dropbox.com/s/2bgyid79rf97lg0/samples.fasta?dl=0) for clustering unannotated genes
+Download [Gene abaundances table](https://www.dropbox.com/s/utrjt28sxn16glu/genetable.txt?dl=0) and a [FASTA file](https://www.dropbox.com/s/2bgyid79rf97lg0/samples.fasta?dl=0) for clustering unannotated genes
 
 ###Running Command###
 ```
 $ppanini -i genetable.txt --gene-catalog samples.fasta -o OUTPUT --vsearch /path/to/vsearch
 
 or clustring step could be bypassed by:
-$ppanini -i genetable.txt -o OUTPUT 
+$ppanini -i genetable.txt --bypass-clustering -o OUTPUT 
 ```
 
 ###Output###
