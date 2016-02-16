@@ -19,20 +19,20 @@ PPANINI provides a computational pipeline to prioritize microbial genes based on
 [UCLUST file](https://www.dropbox.com/s/b8ufu3ryiyuo3ax/stool_gene_clusters.uc?dl=0) containing centroids of genes. The UCLUST file is used to collapse unannotated
 genes into artifical clusters. This step could be bypassed.
 ```
-ppanini -i stool_gene_centroids_table.txt --uc stool_gene_clusters.uc -o OUTPUT 
+$ppanini -i stool_gene_centroids_table.txt --uc stool_gene_clusters.uc -o OUTPUT 
 
 for bypassing clustering unannotated genes:
-ppanini -i stool_gene_centroids_table.txt --bypass-clustering -o OUTPUT 
+$ppanini -i stool_gene_centroids_table.txt --bypass-clustering -o OUTPUT 
 ```
 The output is a table of prioritized important genes with their prevelance, abundances, and ppanini score.
 
 [An genes abundances table](https://www.dropbox.com/s/lnpef7hixuimm62/AN_gene_table.txt?dl=0) for 70 Anterior nares samples with a 
 [gene catalog fasta file](https://www.dropbox.com/s/2mohfte3lkplqsy/AN_centroids_for_clustering.fasta?dl=0) which is used to cluster unannoted genes.
 ```
-ppanini -i AN_gene_table.txt --gene-catalog AN_centroids_for_clustering.fasta -o OUTPUT 
+$ppanini -i AN_gene_table.txt --gene-catalog AN_centroids_for_clustering.fasta -o OUTPUT 
 
 for bypassing clustering unannotated genes:
-ppanini -i AN_gene_table.txt --bypass-clustering -o OUTPUT 
+$ppanini -i AN_gene_table.txt --bypass-clustering -o OUTPUT 
 ```
 
 ##Simple Demo##
@@ -55,4 +55,4 @@ ppanini -i mockgenetable.txt --gene-catalog samples.fasta -o OUTPUT --vsearch /p
 # PPANINI Evaluation#
 An evaluation of PPANINI using stool sample against union of two essentail gense sets using ROC plot.
 
-<center>![roc_plot_ppanini_union_of_essential_gene_datasets.png](https://bitbucket.org/repo/49y6o9/images/3568610095-roc_plot_ppanini_union_of_essential_gene_datasets.png)</center>
+![roc_plot_ppanini_union_of_essential_gene_datasets.png](https://bitbucket.org/repo/49y6o9/images/3568610095-roc_plot_ppanini_union_of_essential_gene_datasets.png)
