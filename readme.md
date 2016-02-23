@@ -26,16 +26,7 @@ PPANINI provides a computational pipeline to prioritize microbial genes based on
 * [PREPPANINI: Creating a PPANINI table](#markdown-header-preppanini-creating-a-ppanini-table)
     * [Requirements](#markdown-header-requirements)
     * [How to run](#markdown-header-how-to-run)
-* [Visualization](#markdown-header-visualization)
-    * [Metagenomic vs. Genomic Priority plots](#markdown-header-metagenomic-vs-genomic-priority-plots)
-    * [Histograms for metagenome hits](#markdown-header-histograms-for-metagenome-hits)
-    * [GraPhlAn plots](#markdown-header-graphlan-plots)
-* [Tools](#markdown-header-tools)
-    * [Normalization](#markdown-header-normalization)
-    * [Join tables](#markdown-header-join-tables)
-    * [Centroids extraction from gene abundance table](#markdown-header-centroids-extraction-from-gene-abundance-table)
-    * [Create mapper file for PREPPANINI](#markdown-header-create-mapper-file-for-preppanini)
-    * [Write mapper](#markdown-header-write-mapper)
+
 ------------------------------------------------------------------------------------------------------------------------------
 # PPANINI #
 ## PPANINI Workflow ##
