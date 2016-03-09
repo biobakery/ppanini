@@ -9,6 +9,7 @@ import pdb
 import matplotlib.pyplot as plt
 from matplotlib import colors
 from scipy.stats import gaussian_kde
+import matplotlib.cm as cm
 
 #from . import utils
 
@@ -40,7 +41,7 @@ def plot_scatter(table, m8_filename, no_uniq_genomes):
 				   np.log(all_genes), \
 				   c='grey', \
 				   alpha=0.1, \
-				   linewidths=0.0, \
+				   linewidths=0.1, \
 				   zorder=1, \
 				   marker='o',\
 				   label='All Centroids')
@@ -125,7 +126,7 @@ def plot_hist(table, m8_filename, no_uniq_genomes):
 
 
 def master_plot():
-    data_scale = 'none'
+    data_scale = 'sqrt'
     fig, axarr = plt.subplots(nrows=2, ncols=2, dpi=300)#, sharex=False, sharey=False)
     fig.set_size_inches(10, 10)
     metagenomic_table1, ppanini_output1, no_uniq_genomes1  = utilities.read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/stool_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/stool_table.txt')
@@ -167,7 +168,7 @@ def master_plot():
     fig.subplots_adjust()
     
     
-    plt.savefig('metagenomic_genomic_priority_sctterplot_'+'sclae_'+str(data_scale)+'.pdf', pad_inches = .05, dpi=300) 
+    plt.savefig('all_metagenomic_genomic_priority_sctterplot_'+'sclae_'+str(data_scale)+'.pdf', pad_inches = .05, dpi=300) 
     fig, axarr = plt.subplots(nrows=2, ncols=2, dpi=300)#, sharex=False, sharey=False)
     fig.set_size_inches(10, 10)
     hexbin_plot_metagenomic_priority(axarr[0, 0], ppanini_output1, metagenomic_table1, no_uniq_genomes1, title = 'Stool', scale = data_scale)
@@ -205,21 +206,23 @@ def master_plot():
     fig.subplots_adjust()
     
     
-    plt.savefig('metagenomic_genomic_priority_hexbitplot'+'sclae_'+str(data_scale)+'.pdf', pad_inches = .05, dpi=300) 
+    plt.savefig('all_metagenomic_genomic_priority_hexbitplot'+'sclae_'+str(data_scale)+'.pdf', pad_inches = .05, dpi=300) 
 
-def scatter_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes, title,scale = None):
+def scatter_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes, title, scale = None):
 	if axe is None:
 		axe = plt.gca()
-	mp_gp = {}
+	#mp_gp = {}
 	genes = ppanini_table['genes']
-	abund = ppanini_table['abundance']
-	prev = ppanini_table['prevalence']
+	#abund = ppanini_table['abundance']
+	#prev = ppanini_table['prevalence']
 	ppanini_score = ppanini_table['ppanini_score']
-	abund = np.array(abund)/max(abund)
-	prev = np.array(prev)/max(prev)
+	#abund = np.array(abund)/max(abund)
+	#prev = np.array(prev)/max(prev)
 	
 	gp = []
 	mp = []
+	temp_gp = []
+	temp_mp = []
 	for i in range(len(genes)):
 		gene = genes[i]
 		try:
@@ -229,11 +232,26 @@ def scatter_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes
 		#mp += [min((abund[i], alpha[i]))]
 		mp +=[ppanini_score[i]]
 	gp = np.array(gp)/float(no_uniq_genomes)
-	gp = np.where(gp != 0.0, gp, 10**-30)
-	mp = np.where(mp != 0.0, mp, 10**-30)
+	#gp = np.where(gp != 0.0, gp, 10**-3)
+	#gp[gp == 0] = np.nan
+	#mp = np.where(mp != 0.0, mp, 10**-3)
+	#mp[mp == 0] = np.nan
+	for i in range(len(gp)):
+		if np.isnan(gp[i]) or np.isnan(mp[i]) or gp[i]==0 or mp[i]==0 :
+			continue
+		temp_gp += [gp[i]]
+		temp_mp += [mp[i]]
+	
+	gp = np.array(temp_gp) 
+	mp = np.array(temp_mp)
 	if scale == 'log':
 		gp = np.log(gp)
 		mp = np.log(mp)
+	elif scale == 'sqrt':
+		gp = np.sqrt(gp)
+		mp = np.sqrt(mp)
+	
+			
 	#fig, axe = plt.subplots()
 	def ncolors( n, colormap="jet" ):
 		"""utility for defining N evenly spaced colors across a color map"""
@@ -264,10 +282,12 @@ def scatter_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes
 	
 	axe.scatter(x, \
 			   y, \
-			   #c=z,\
-			   s=100,\
-			   edgecolor='',\
-			   c= color_dic[title],\
+			   c=z,\
+			   s=50,\
+			   #c= color_dic[title],\
+			   #cmap='jet', \
+			   #edgecolor='',\
+			   #cmap= color_dic[title],\
 			   #'darkgoldenrod', \
 			   ##'slategray'
 			   alpha=0.1, \
@@ -276,17 +296,23 @@ def scatter_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes
 			   marker='o',\
 			   label='All Centroids')
 	def density_estimation(m1, m2):
-	    X, Y = np.mgrid[-8:0:100j, 2.9:3.25:100j]                                                     
-	    positions = np.vstack([X.ravel(), Y.ravel()])                                                       
-	    values = np.vstack([m1, m2])                                                                        
-	    kernel = gaussian_kde(values)                                                                 
-	    Z = np.reshape(kernel(positions).T, X.shape)
-	    return X, Y, Z
+		values = np.vstack([m1, m2])
+		kernel = gaussian_kde(values)                                                                 
+		sf = kernel.scotts_factor()
+		bwx = sf * np.std(m1)
+		bwy = sf * np.std(m2)
+		X, Y = np.mgrid[(np.min(m1)-3*bwx):(np.max(m1)+3*bwx):100j, (np.min(m2)-3*bwy):(np.max(m2)+3*bwy):100j]                                                     
+		positions = np.vstack([X.ravel(), Y.ravel()])                                                       
+		Z = np.reshape(kernel(positions).T, X.shape)
+		return X, Y, Z
 	X, Y, Z = density_estimation(gp, mp)
 	axe.contour(X, Y, Z)
 	if scale == 'log':
 		axe.set_ylabel('Metagenomic Priority (log)', fontsize=10)
 		axe.set_xlabel('Genomic Priority (log)', fontsize=10)
+	elif scale == 'sqrt':
+		axe.set_ylabel('Metagenomic Priority (sqrt)', fontsize=10)
+		axe.set_xlabel('Genomic Priority (sqrt)', fontsize=10)
 	else:
 		axe.set_ylabel('Metagenomic Priority', fontsize=10)
 		axe.set_xlabel('Genomic Priority')
@@ -298,13 +324,13 @@ def scatter_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes
 def hexbin_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes, title, scale = None):
 	if axe is None:
 		axe = plt.gca()
-	mp_gp = {}
+	#mp_gp = {}
 	genes = ppanini_table['genes']
-	abund = ppanini_table['abundance']
-	prev = ppanini_table['prevalence']
+	#abund = ppanini_table['abundance']
+	#prev = ppanini_table['prevalence']
 	ppanini_score = ppanini_table['ppanini_score']
-	abund = np.array(abund)/max(abund)
-	prev = np.array(prev)/max(prev)
+	#abund = np.array(abund)/max(abund)
+	#prev = np.array(prev)/max(prev)
 	
 	gp = []
 	mp = []
@@ -331,7 +357,7 @@ def hexbin_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes,
 	im  = axe.hexbin(gp, \
 				   mp, \
 				   cmap='YlOrBr',#'Blues',
-				   gridsize=100)
+				   gridsize=10)
 	if scale == 'log':
 		axe.set_ylabel('Metagenomic Priority (log)',  fontsize=10)
 		axe.set_xlabel('Genomic Priority (log)', fontsize=10)
