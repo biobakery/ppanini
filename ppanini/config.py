@@ -10,7 +10,6 @@ vsearch = ''
 basename = ''
 log_level = 'DEBUG'
 verbose = 'DEBUG'
-#threads = 1
 nprocesses = 1 
 tshld_abund = 75
 tshld_prev = 75
@@ -25,6 +24,4 @@ niche_flag = None
 temp_folder = ''
 centroids_list = ''
 essantial_genes_uniref90_id = None
-bypass_clustering = None
-
-
+bypass_clustering = False
