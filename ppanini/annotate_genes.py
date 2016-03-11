@@ -45,7 +45,7 @@ def parse_annotation_table(annotations_file, fasta_sequences, thld_ref):
 
 	return [sample_annotations, search50_seqs]
 
-def run_diamond(query_file, db, out_fname, nprocesses, all_paths):
+def run_diamond(query_file, db, out_fname, all_paths):
 	'''Runs DIAMOND on query_file to produce results in out_fname
 	Input: query_file = path to query_fasta_file
 		   all_paths = {'uniref90': path_to_uniref90_index, 
@@ -59,11 +59,11 @@ def run_diamond(query_file, db, out_fname, nprocesses, all_paths):
 													-d ' + db + ' \
 													-k 1 \
 													-a ' + out_fname + ' \
-													-p ' + str(nprocesses)) #check if command is correct.
+													-p ' + str(config.nprocesses)) #check if command is correct.
 
 	os.system(all_paths['diamond']+' view -a ' + out_fname + '.daa \
 												  -o ' + out_fname + '.m8 \
-												  -p ' + str(nprocesses))
+												  -p ' + str(config.nprocesses))
 
 def run_rapsearch(query_file, db, out_fname, nprocesses, all_paths):
 	'''Runs RAPSEARCH2 on query_file to produce results in out_fname
@@ -83,7 +83,7 @@ def run_rapsearch(query_file, db, out_fname, nprocesses, all_paths):
 												 -u 2 \
 												 -b 0 \
 												 -v 1 \
-												 -z' + str(nprocesses))	
+												 -z' + str(config.nprocesses))	
 
 def run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, perc_id):
 	'''Runs USEARCH UCLUST on query_file to produce results in out_fname
@@ -104,7 +104,7 @@ def run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gen
 								 -id '+str(perc_id)+' \
 								 -centroids '+ gene_centroids_file_path + ' \
 								 -uc ' + gene_centroid_clusters_file_path+ '\
-								 -threads '+str(nprocesses))
+								 -threads '+str(config.nprocesses))
 
 def run_vclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, perc_id):
 	'''Runs USEARCH UCLUST on query_file to produce results in out_fname
