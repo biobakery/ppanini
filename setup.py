@@ -49,7 +49,8 @@ setup(
             'ppanini_imp_centroids_prabXtract = ppanini.utils.imp_centroids_prabXtract:main',
             'ppanini_imp_centroids_extracter = ppanini.utils.imp_centroids_extracter:main',
             'ppanini_create_mapper = ppanini.utils.create_mapper:main',
-            'ppanini_write_mapper = ppanini.utils.write_mapper:main'
+            'ppanini_write_mapper = ppanini.utils.write_mapper:main',
+            'ppanini_test = tests.ppanini_test:main'
         ]},
     test_suite= 'ppanini.tests.ppanini_test.main',
     zip_safe = False

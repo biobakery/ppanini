@@ -5,7 +5,7 @@ import tempfile
 import os
 import logging
 
-from ppanini.tests import var
+from tests import var
 
 
 class TestPPANINIBasicFunctions(unittest.TestCase):
