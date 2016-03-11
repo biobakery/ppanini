@@ -2,7 +2,7 @@ import os
 import sys
 import unittest
 import importlib
-
+import ppanini
 
 py_version = [2 , 7]
 
@@ -13,7 +13,7 @@ if (sys.version_info[0] != py_version[0] or sys.version_info[1] != py_version[1]
 			 "\nCurrent version: Python "+str(sys.version_info))	
 
 try:
-	import tests
+	from ppanini import tests
 except:
 	sys.exit("CRITICAL ERROR: Unable to find the PPANINI python package.\nPlease check your install")
 

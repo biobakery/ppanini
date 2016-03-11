@@ -7,26 +7,25 @@ import numpy
 import logging
 import scipy.stats
 from os.path import basename
-try:
-    from . import utilities
-    from . import annotate_genes
-    from . import config
-except ImportError:
-    sys.exit("CRITICAL ERROR: Unable to find the PPANINI python package." +
-        " Please check your install.")
 
+try:
+    from ppanini import utilities
+    from ppanini import annotate_genes
+    from ppanini import config
+except ImportError,e:
+    sys.exit("CRITICAL ERROR: Unable to find the PPANINI python package." +
+        " Please check your install."+str(e))
 
 logger = logging.getLogger(__name__)
 
-
-beta = 0.5
+#beta = 0.5
 
 numpy.seterr(divide='ignore', invalid='ignore')
 
-def read_gene_table(gene_table_fname):
+def read_gene_table():
 	'''Returns the different elements from the gene table
 
-	Input: gene_table_fname = Filename of the gene_table
+	config.input_table = Filename of the gene_table
 
 	Output: metadata = [metadata strings]; Rows with # as first character in table
 			uniref_dm = {UniRef_XYZ: numpy.array(abundance), ...}
@@ -34,36 +33,30 @@ def read_gene_table(gene_table_fname):
 	
 	logger.debug('read_gene_table')
 
-	gene_table = open(gene_table_fname) 
+	gene_table = open(config.input_table)
 	metadata = []
 	uniref_dm, gis_dm = {}, {}
 	count = 0
-	flag =False
+
 	for line in gene_table:
-		#if count == 350000:
-		#	break
 		count +=1
+		
 		if line.startswith('#'):
 			metadata += [line]
 		else:
 			split_i = line.split('\t')
 			annot = split_i[0].split('|') #geneID column split 
-			#print annot
 			try:
 				u90_annot = [i for i in annot if 'UniRef90' in i][0]
 			except: #Incase Gene table is not annotated with UniRef90
 				u90_annot = 'UniRef90_unknown'
-
 			try:
 				u50_annot = [i for i in annot if 'UniRef50' in i][0]
 			except: #Incase Gene table is not annotated with UniRef50
 				u50_annot = 'UniRef50_unknown'
-			#print 'u50_annot: ',u50_annot
+			
 			data_row = numpy.array([float(i) for i in split_i[1:]])
-			#print 'data_row: ', data_row
-			#	flag = True
-			#	print 'Essential!'
-				#count +=1
+			
 			if 'UniRef90_unknown' == u90_annot:
 				if 'UniRef50_unknown' == u50_annot:
 					try: #same name
@@ -79,21 +72,23 @@ def read_gene_table(gene_table_fname):
 				try:
 					uniref_dm[u90_annot] += data_row
 				except KeyError:
-					#print "Data row",data_row
 					uniref_dm[u90_annot] = data_row	
 				
 	if config.verbose == 'DEBUG':
 		print ("Gene Table contains %s genes." % count)
+
 	return [uniref_dm, gis_dm, metadata]
 
 def get_centroids_fromUCLUST(genes):
 	'''Returns the clusters dictionary
 
-	Input: gene_centroid_clusters_file_path = Filename of the centroids UC file
-		   genes = [List of genes that are unannotated with UniRef]
+	Input: genes = [List of genes that are unannotated with UniRef]
+		   
 
 	Output: cluster_dict = {CENTROIDS: [list of genes], ...}'''
-	gene_centroid_clusters_file_path = config.uclust_file
+
+	gene_centroid_clusters_file_path = config.uclust_file #Filename of the centroids UC file
+	
 	logger.debug('get_centroids_fromUCLUST: '+gene_centroid_clusters_file_path)
 
 	cluster_dict = {}
@@ -122,16 +117,13 @@ def get_centroids(uniref_dm, gi_dm):
 
 	Input:	uniref_dm = {UniRef_XYZ: numpy.array(abundance), ...}
 			gi_dm = {GENE_ID_UNKNOWN_UNIREF: numpy.array(abundance), ...}
-			usearch_folder = Location of the USEARCH program or in path if not provided
-			uclust_file = path to USEARCH_UCLUST FILE from PREPPANINI
-			gene_catalog = path to gene catalog containing all genes
-			nprocesses = Number of threads to run for clustering
-
-	Output: all_centroids = {gene_centroid : numpy.array(abundance), ...}'''
+			
+	Output: gc_dm = {gene_centroid : numpy.array(abundance), ...}'''
 	
 	logger.debug('get_centroids')
 
 	centroids_fasta = {}
+	
 	if not config.bypass_clustering:
 		if config.uclust_file == '':
 			centroid_gis = get_clusters() #all UniRef90_unknowns are clustered across samples
@@ -141,6 +133,7 @@ def get_centroids(uniref_dm, gi_dm):
 		centroid_gis = gi_dm
 
 	gc_dm = {}
+
 	for centroid in centroid_gis:
 		for gene in centroid_gis[centroid]:
 			if gene in gi_dm:
@@ -158,27 +151,31 @@ def get_centroids(uniref_dm, gi_dm):
 def get_clusters(): #ONLY FOR THE UNIREF UNANNOTATED
 	'''Returns the dict of unannotated gene centroids containing clusters of genes at 90% similarity
 
-	Input:	gene_catalog = path to all genes catalog}
-			args = args object containing information about the clust program
-			nprocesses = Number of threads to run for clustering
-
 	Output: centroid_gis = {gene_centroid: [List of genes in the cluster]}'''
 
 	logger.debug('get_clusters')
 
-	allgenes_file_path = config.gene_catalog
+	allgenes_file_path = config.gene_catalog #path to all genes catalog
 	gene_centroids_file_path = config.temp_folder+'/'+config.basename+'_centroids.fasta'
 	gene_centroid_clusters_file_path = config.temp_folder+'/'+config.basename+'_clusters.uc'
 	
-	clust_method = 'vsearch'
+	clust_method = 'vsearch' #default search method
 
 	if config.usearch != '':
 		clust_method = config.usearch
-		annotate_genes.run_uclust(clust_method, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, 0.9)
+		annotate_genes.run_uclust(clust_method, \
+								  allgenes_file_path, \
+								  gene_centroids_file_path, \
+								  gene_centroid_clusters_file_path, \
+								  0.9)
 	else:
 		if config.vsearch != '':
 			clust_method = config.vsearch
-		annotate_genes.run_vclust(clust_method, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, 0.9)
+		annotate_genes.run_vclust(clust_method, \
+								  allgenes_file_path, \
+								  gene_centroids_file_path, \
+								  gene_centroid_clusters_file_path, \
+								  0.9)
 		
 	
 	centroid_gis = annotate_genes.get_clusters_dict(gene_centroid_clusters_file_path)
@@ -220,11 +217,13 @@ def get_centroids_table(all_centroids, metadata):
 	return [norm_data_matrix, centroids_list]
 
 
-def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, beta):
+def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata):
 	'''Returns the dict of centroids with their prevalence and abundance
 
 	Input:	centroids_data_matrix = {gene_centroid: [Gene centroid abundance across samples]}
+			centroids_list = list of all the centroids
 			metadata = [metadata strings]; Rows with # as first character in table
+			beta = parameter value 
 
 	Output: centroid_prev_abund = {centroid: {'mean_abundance': mean abundance, 'prevalence': prevalence}}
 			all_prevalence = [List of all observed gene centroid prevalence values (>0) across samples]
@@ -233,48 +232,36 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, be
 	
 	logger.debug('get_prevalence_abundance')
 
+	beta=config.beta
 	centroid_prev_abund_file_path = config.temp_folder+'/'+config.basename+'_centroid_prev_abund.txt'
 	
 	[niche_line, ind] = utilities.is_present(metadata, '#NICHE')
-	#print niche_line
+
 	if niche_line:
 		niche_flag = True
-		centroid_prev_abund = get_niche_prevalence_abundance (centroids_data_matrix, centroids_list, niche_line, beta)
-		
-		#return centroid_prev_abund#[centroid_prev_abund, all_alpha_prev, all_mean_abund, niche_flag]
+		centroid_prev_abund = get_niche_prevalence_abundance (centroids_data_matrix, \
+															  centroids_list, \
+															  niche_line)
 	else:
 		niche_flag = False
 		centroid_prev_abund = {}
 		all_prevalence = [] 
 		all_abund = []
-		#print centroids_data_matrix
+		
 		for iter, centroid in enumerate(centroids_data_matrix):
-			'''
-			before was
-			for centroid in centroids_data_matrix:
-			'''
 			#abund only where the gene is present in sample
-			#print 'cenetroid_id', centroids_list[iter], 'cenroid', centroid
+			#print 'cenetroid_id', centroids_list[iter], 'centroid', centroid
 			abund_i = [i for i in  centroid if i > 0]
-			'''
-			before was  
-			abund_i = [i for i in  centroids_data_matrix[centroid] if i > 0]
-			'''
+			
 			abund_score = numpy.mean(abund_i)
 			prev_score = float(sum(centroid > 0)/\
 						 float(len(centroid)))
-			''' before was 
-			prev_score = float(sum(numpy.array(centroids_data_matrix[centroid]) > 0)/\
-						 float(len(centroids_data_matrix[centroid])))
-						 '''
-
+			
 			centroid_prev_abund[centroids_list[iter]] = {'mean_abundance': abund_score, \
-											 'prevalence': prev_score}
+											 			 'prevalence': prev_score}
 			
 			all_prevalence += [centroid_prev_abund[centroids_list[iter]]['prevalence']]
 			all_abund += abund_i
-			#config.all_prevalence = all_prevalence
-			#config.all_mean_abund = all_abund
 		
 		all_prevalence = sorted(all_prevalence)
 		all_abund = sorted(all_abund)
@@ -287,9 +274,9 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, be
 	write_prev_abund_matrix(centroid_prev_abund, centroid_prev_abund_file_path)
 	
 	config.niche_flag = niche_flag
-	return centroid_prev_abund #[centroid_prev_abund, all_prevalence, all_abund, niche_flag]
+	return centroid_prev_abund 
 
-def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_line, beta):
+def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_line):
 	'''Returns the dict of centroids with their prevalence and abundance
 
 	Input:	centroids_data_matrix = {gene_centroid: [Gene centroid abundance across samples]}
@@ -304,8 +291,10 @@ def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_
 
 	logger.debug('get_niche_prevalence_abundance')
 	
+	beta=config.beta
 	all_centroid_prev_abund_file_path = config.temp_folder+'/'+config.basename+'_centroid_prev_abund_dict_all.txt'
 	centroid_prev_abund_file_path = config.temp_folder+'/'+config.basename+'_centroid_prev_abund_ppanini_score_all.txt'
+
 	niches = {}
 	split_i = [re.sub('[\r\t\n]', '', i) for i in niche_line.split('\t')[1:]]
 	for i, val in enumerate(split_i):
@@ -353,6 +342,7 @@ def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_
 	
 	#Percentile of score requires sorted vectors! Blekh!
 	all_alpha_abund = sorted(all_alpha_abund)
+
 	for niche in all_alpha_prev:
 		all_alpha_prev[niche] = sorted(all_alpha_prev[niche])
 
@@ -364,16 +354,17 @@ def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_
 			centroid_prev_abund[centroid]['ppanini_score'] = p_score
         
 	dict_to_print = {}
+
 	for centroid in centroid_prev_abund:
 		dict_to_print[centroid] = {'beta_prevalence': centroid_prev_abund[centroid]['beta_prevalence'], \
 								   'mean_abundance': centroid_prev_abund[centroid]['mean_abundance']}
 		for niche in centroid_prev_abund[centroid]['alpha_prevalence']:
 			dict_to_print[centroid]['alpha_prevalence_'+niche] = centroid_prev_abund[centroid]['alpha_prevalence'][niche]
 			dict_to_print[centroid]['ppanini_score_'+niche] = centroid_prev_abund[centroid]['ppanini_score'][niche]
-	#config.all_prevalence = all_prevalence
-	#config.all_mean_abund = all_alpha_abund
+	
 	write_prev_abund_matrix(dict_to_print, all_centroid_prev_abund_file_path)
 	write_prev_abund_matrix(dict_to_print, centroid_prev_abund_file_path)
+	
 	return centroid_prev_abund
 
 def get_important_niche_centroids():
@@ -424,10 +415,8 @@ def get_important_niche_centroids():
 def get_important_centroids():
 	'''Returns the dict of important gene centroids [value-2SE(prevalence and abundance) >0.1]
 
-	Input:	centroid_prev_abund = {centroid: {'mean_abundance': mean abundance, 'prevalence': prevalence}}
-			all_prevalence = [List of all observed gene centroid prevalence values (>0) across samples]
-			all_mean_abund = [List of all calculated mean gene centroid abundance across samples]
-			output_folder = Location of the results folder
+	centroid_prev_abund = {centroid: {'mean_abundance': mean abundance, 'prevalence': prevalence}}
+	output_folder = Location of the results folder
 
 	Output: imp_centroids = {centroid: {'mean_abundance': mean abundance, 'prevalence': prevalence}}'''
 	
@@ -474,6 +463,7 @@ def write_prev_abund_matrix(centroid_prev_abund, out_file):
 			foo.writelines([str.join('\t', [centroid] + [str(centroid_prev_abund[centroid][key]) for key in keys]) + '\n'])
 
 def read_prevalence_abundance_table(input_table):
+	'''Need to redo this'''
 	foo = open(input_table)
 	abund_i = 0
 	beta_i = 0
@@ -519,10 +509,11 @@ def read_prevalence_abundance_table(input_table):
 				alphas_i = alphas_i[0]
 			baseline +=1
 	return [centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag]
+
 def read_parameters():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i','--input_table', help='REQUIRED: Gene abundance table with metadata', required=True)
-    parser.add_argument('-o','--output-folder', dest = 'output_folder',  help='Folder containing results', default=False)
+    parser.add_argument('-o','--output-folder', dest = 'output_folder',  help='Folder containing results', default=config.output_folder)
     parser.add_argument('--gene-catalog', dest = 'gene_catalog', default=config.gene_catalog, help='GENE CATALOG')
     parser.add_argument('--uc', default= config.uclust_file, help='UCLUST file containg centroids and clustered genes')
     parser.add_argument('--usearch', default = config.usearch, help='Path to USEARCH') #add to be in path?
@@ -533,7 +524,7 @@ def read_parameters():
     parser.add_argument('--tshld-abund', dest = 'tshld_abund', default=config.tshld_abund, type = float,help='[X] Percentile Cutoff for Abundance; Default=75th')
     parser.add_argument('--tshld-prev', dest = 'tshld_prev', default=config.tshld_prev, type =float, help='Percentile cutoff for Prevalence')
     parser.add_argument('--beta', default=config.beta, help='Beta parameter for weights on percentiles')
-    parser.add_argument('--bypass-clustering', dest = 'bypass_clustering', default=False, action='store_true', help='Bypass clustering')
+    parser.add_argument('--bypass-clustering', dest = 'bypass_clustering', default=config.bypass_clustering, action='store_true', help='Bypass clustering')
     # parser.add_argument('--bypass-prev-abund', dest = 'bypass_prev_abund', default=False, action='store_true', help='Bypass quantifying abundance and prevalence')
     
     args = parser.parse_args()
@@ -550,27 +541,27 @@ def read_parameters():
     
 def run():
     if config.uclust_file == '' and config.gene_catalog == '' and not config.bypass_clustering:
-    	sys.exit("At least one of --uc or --gene-catalog should be provided!!!")
-    if config.gene_catalog != '' and (config.usearch == '' and config.vsearch == ''):
+    	sys.exit("At least one of --uc or --gene-catalog should be provided! Or use the flag --bypass-clustering to skip this step")
+    if config.gene_catalog != '':
         try:
-            subprocess.call(["usearch", "--version"])
-            print "The program will use usearch if you wnat to use vsearch then provide it with --vsearch"
+            subprocess.call([config.usearch, "--version"])
+            print "The program will use USEARCH if you want to use VSEARCH then provide it with --vsearch"
         except OSError as e:
             try:
-                subprocess.call(["usearch", "--version"])
-                print "The program will use vsearch if you want to use usearch then provide it with --usearch"
+                subprocess.call([config.vsearch, "--version"])
+                print "The program will use VSEARCH if you want to use USEARCH then provide it with --usearch"
             except:
                 sys.exit("At least one of --usearch or --vsearch  with a path should be provided when gene-catalog is used!!!")
 
-    if config.basename =='':
-        #print config.input_table.split('.')[0]
-        #print config.input_table.split('.')[0].split('/')[-1]
+    if config.basename=='':
         config.basename = basename(config.input_table).split('.')[0]
         print config.basename
+    
     if config.output_folder == '':
     	config.output_folder = config.basename
-
-    config.temp_folder = config.output_folder+'/temp'#+config.basename+'_temp'
+    
+    print(config.output_folder)
+    config.temp_folder = config.output_folder+'/temp'
 
     utilities.create_folders([config.output_folder, config.temp_folder])
     
@@ -583,31 +574,38 @@ def run():
     
     if config.verbose =='DEBUG':
     	print "Reading the gene table..."
-    [uniref_dm, gi_dm, metadata]= read_gene_table(config.input_table)
+    [uniref_dm, gi_dm, metadata]= read_gene_table()
+
     if config.verbose =='DEBUG':
-    	print "Reading the gene table is done!"
+    	print "DONE"
     
     if config.verbose =='DEBUG':
     	print "Getting centroids..."
     all_centroids = get_centroids(uniref_dm, gi_dm)
+    
     if config.verbose =='DEBUG':
-    	print "Getting centroids is done!"
+    	print "DONE"
     
     if config.verbose =='DEBUG':
     	print "Getting centroids table..."
     [centroids_data_matrix, centroids_list] = get_centroids_table(all_centroids, metadata)
     config.centroids_list = centroids_list
-    if config.verbose =='DEBUG':
-    	print "Getting centroids table is done!"
     
     if config.verbose =='DEBUG':
-    	print "Getting prevelance abundnace..."
-    centroid_prev_abund = get_prevalence_abundance(centroids_data_matrix, centroids_list = centroids_list, metadata = metadata, beta = config.beta)
+    	print "DONE"
+    
     if config.verbose =='DEBUG':
-    	print "Getting prevelance abundnace is done!"
+    	print "Getting prevalence abundance..."
+    centroid_prev_abund = get_prevalence_abundance(centroids_data_matrix, \
+    												centroids_list = centroids_list, \
+    												metadata = metadata)
+    
+    if config.verbose =='DEBUG':
+    	print "DONE"
     # else:
     # 	[centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag] = read_prevalence_abundance_table(input_table, config.beta)
     config.centroid_prev_abund = centroid_prev_abund
+
 def  prioritize_centroids():
 	if config.verbose =='DEBUG':
 		print "Prioritize centroids..."
@@ -615,9 +613,11 @@ def  prioritize_centroids():
 		imp_centroids = get_important_niche_centroids()
 	else:
 		imp_centroids = get_important_centroids()
+
 	if config.verbose =='DEBUG':
-		print 'Prioritize centroids is done!'
+		print "DONE"
 	return imp_centroids
+
 def _main():
    read_parameters()
    run()
@@ -625,6 +625,3 @@ def _main():
     
 if __name__ == '__main__':
 	_main()
-
-	
-	

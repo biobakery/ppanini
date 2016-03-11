@@ -4,12 +4,13 @@ import re
 import tempfile
 import os
 import logging
+import ppanini
 
-from tests import var
+from ppanini.tests import var
 
 
 class TestPPANINIBasicFunctions(unittest.TestCase):
-	"""Test the functions found in ppanini.py"""
+	"""Test the functions found in preppanini.py"""
 	def test_XYZ(self):
 		self.assertEqual(1, 1)
 	def test_MNO(self):
