@@ -1,0 +1,17 @@
+03/11/2016 02:15:26 AM - __main__ - DEBUG: read_gene_table
+03/11/2016 02:15:29 AM - __main__ - DEBUG: get_centroids
+03/11/2016 02:15:29 AM - __main__ - DEBUG: get_clusters
+03/11/2016 02:15:29 AM - ppanini.annotate_genes - DEBUG: run_uclust ppanini/demo/demo2_genecatalog.fasta
+03/11/2016 02:15:41 AM - ppanini.annotate_genes - DEBUG: get_clusters_dict demo2_ppanini/temp/demo2_ppanini_clusters.uc
+03/11/2016 02:15:41 AM - __main__ - DEBUG: get_centroids_table
+03/11/2016 02:15:42 AM - __main__ - DEBUG: get_prevalence_abundance
+03/11/2016 02:15:42 AM - ppanini.utilities - DEBUG: is_present #NICHE
+03/11/2016 02:15:42 AM - __main__ - DEBUG: get_niche_prevalence_abundance
+03/11/2016 02:24:08 AM - __main__ - DEBUG: write_prev_abund_matrix
+03/11/2016 02:24:08 AM - __main__ - DEBUG: write_prev_abund_matrix
+03/11/2016 02:24:08 AM - __main__ - DEBUG: write_prev_abund_matrix
+03/11/2016 02:24:08 AM - __main__ - DEBUG: get_important_niche_centroids
+03/11/2016 02:24:08 AM - __main__ - DEBUG: get_important_niche_centroids: tshld_prev:75
+03/11/2016 02:24:08 AM - __main__ - DEBUG: get_important_niche_centroids: ppanini_score:14.0625
+03/11/2016 02:24:08 AM - __main__ - DEBUG: get_important_niche_centroids: tshld_abund:75
+03/11/2016 02:24:09 AM - __main__ - DEBUG: write_prev_abund_matrix

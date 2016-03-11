@@ -8,7 +8,7 @@ import argparse
 import subprocess
 import multiprocessing
 
-from . import utilities
+from ppanini import utilities
 
 logger = logging.getLogger(__name__)
 

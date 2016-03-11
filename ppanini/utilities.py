@@ -12,6 +12,7 @@ import multiprocessing
 from Bio import Seq
 
 logger = logging.getLogger(__name__)
+
 def read_ppanini_imp_genes_table(filename):
 	keys = {'ppanini_score':0, 'abundance':0, 'prevalence':0,'prevalence_beta':0}
 	abund = []
@@ -27,18 +28,21 @@ def read_ppanini_imp_genes_table(filename):
 						keys['abundance'] = i
 					elif 'prevalence' in val:
 						keys['prevalence'] = i
-					#elif 'beta' in val:
-					#	keys['beta'] = i
 					elif 'ppanini_score' in val:
 						keys['ppanini_score'] = i	
 			else:
-				# pdb.set_trace()
 				genes +=[split_line[0]]
 				ppanini_score +=[float(split_line[keys['ppanini_score']])]
 				abund +=[float(split_line[keys['abundance']])]
 				prev +=[float(split_line[keys['prevalence']])]
-	ppanini_table = {'genes': genes, 'ppanini_score':ppanini_score, 'abundance': abund, 'prevalence': prev}
+	
+	ppanini_table = {'genes': genes, \
+					'ppanini_score':ppanini_score, \
+					'abundance': abund, \
+					'prevalence': prev}
+
 	return ppanini_table
+
 def read_fasta(fasta_filename):
 	'''Reads a fasta_file and returns a fasta dict
 	Input: fasta_filename = path_to_fasta_file
@@ -59,6 +63,7 @@ def read_fasta(fasta_filename):
 				else:
 					fasta_seq[name] +=  re.sub('[\r\t\n]','', line)
 	return fasta_seq
+
 def parse_table(m8_filename, fasta_filename):
 	'''Parse the BLAST results to give gene hits to genomes
 	Input: 
@@ -108,6 +113,7 @@ def read_parsed(m8_filename):
 			table[split_i[0]] = [split_i[1]]
 	print"Total No. of genes:", len(table) 
 	return table
+
 def read_data(mg_file, ppanini_output_file):
 	metagenomic_table  = read_parsed(mg_file)
 	uniq_genomes = []
@@ -119,6 +125,7 @@ def read_data(mg_file, ppanini_output_file):
 	print 'No. of unique genomes: '+str(no_uniq_genomes)
 	ppanini_output = read_ppanini_imp_genes_table(ppanini_output_file)
 	return metagenomic_table, ppanini_output, no_uniq_genomes 
+
 def pullgenes_fromcontigs(contig_file, gff3_file, fna_file, faa_file):
 	'''Pulls genes from contigs using the coordinates from GFF3 file provided
 
