@@ -77,14 +77,6 @@ usage: ppanini.py [-h] -i INPUT_TABLE [-o OUTPUT_FOLDER]
                   [--log-level LOG_LEVEL] [--threads THREADS]
                   [--tshld-abund TSHLD_ABUND] [--tshld-prev TSHLD_PREV]
                   [--beta BETA] [--bypass-clustering]
-ppanini.py: error: argument -i/--input_table is required
-Afrahs-MacBook-Air:ppanini afrahshafquat$ python ppanini.py --help
-usage: ppanini.py [-h] -i INPUT_TABLE [-o OUTPUT_FOLDER]
-                  [--gene-catalog GENE_CATALOG] [--uc UC] [--usearch USEARCH]
-                  [--vsearch VSEARCH] [--basename BASENAME]
-                  [--log-level LOG_LEVEL] [--threads THREADS]
-                  [--tshld-abund TSHLD_ABUND] [--tshld-prev TSHLD_PREV]
-                  [--beta BETA] [--bypass-clustering]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -101,6 +93,10 @@ optional arguments:
   --log-level LOG_LEVEL
                         Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
   --threads THREADS     Number of threads
+  --tshld-abund TSHLD_ABUND
+                        [X] Percentile Cutoff for Abundance; Default=75th
+  --tshld-prev TSHLD_PREV
+                        Percentile cutoff for Prevalence
   --beta BETA           Beta parameter for weights on percentiles
   --bypass-clustering   Bypass clustering
 ```
@@ -141,6 +137,9 @@ This data is used to calculate the alpha- and beta- prevalence of the gene centr
 * ``--vsearch``: Runs VSEARCH for clustering genes using the path provided, including the name. E.g. [/n/usr/bin/vsearch]
 * ``--bypass-clustering``: To bypass clustering of unannotated genes based on homology of sequences (this option is best used when the clustering information[given via --uc] or the gene catalog, both dont exist, **OR** if you prefer to rank each unannotated gene individually)
 * ``--beta``: The parameter used in the methodology to prioritize genes via their metagenomic properties. 
+* ``--tshld_prev``: Percentile cut-off for prevalence
+* ``--tshld_abund``: Percentile cut-off for abundance
+
 
 
 ## Output ##
