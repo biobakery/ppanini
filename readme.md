@@ -71,13 +71,20 @@ The prerequisites for executing this command are:
 
 ```
 #!python
-
-usage: ppanini [-h] -i INPUT_TABLE [-o OUTPUT_FOLDER]
+usage: ppanini.py [-h] -i INPUT_TABLE [-o OUTPUT_FOLDER]
                   [--gene-catalog GENE_CATALOG] [--uc UC] [--usearch USEARCH]
                   [--vsearch VSEARCH] [--basename BASENAME]
                   [--log-level LOG_LEVEL] [--threads THREADS]
                   [--tshld-abund TSHLD_ABUND] [--tshld-prev TSHLD_PREV]
-                  [--beta BETA]
+                  [--beta BETA] [--bypass-clustering]
+ppanini.py: error: argument -i/--input_table is required
+Afrahs-MacBook-Air:ppanini afrahshafquat$ python ppanini.py --help
+usage: ppanini.py [-h] -i INPUT_TABLE [-o OUTPUT_FOLDER]
+                  [--gene-catalog GENE_CATALOG] [--uc UC] [--usearch USEARCH]
+                  [--vsearch VSEARCH] [--basename BASENAME]
+                  [--log-level LOG_LEVEL] [--threads THREADS]
+                  [--tshld-abund TSHLD_ABUND] [--tshld-prev TSHLD_PREV]
+                  [--beta BETA] [--bypass-clustering]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -94,11 +101,8 @@ optional arguments:
   --log-level LOG_LEVEL
                         Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
   --threads THREADS     Number of threads
-  --tshld-abund TSHLD_ABUND
-                        [X] Percentile Cutoff for Abundance; Default=75th
-  --tshld-prev TSHLD_PREV
-                        Percentile cutoff for Prevalence
   --beta BETA           Beta parameter for weights on percentiles
+  --bypass-clustering   Bypass clustering
 ```
 
 
@@ -123,9 +127,9 @@ geneID_MNO|UniRef90_unknown  0.00 0.09
 #SAMPLES SAMPLE_X SAMPLE_Y
 ```
 
-Each NICHE corresponds to the type of sample i.e. Human Stool, Skin, Soil, Rainforest etc. 
-This data is used to calculate the alpha- and beta- prevalence of the gene centroids i.e. prevalence within a specific niche and/or prevalence across different niches
-In absence of niche data, only alpha-prevalence is calculated.
+Each NICHE corresponds to the type of sample e.g. Human Stool, Skin, Leaf, Rainforest etc. 
+
+This data is used to calculate the alpha- and beta- prevalence of the gene centroids i.e. prevalence within a specific niche and/or prevalence across different niches. In absence of niche data, only alpha-prevalence is calculated.
 
 * ``--output-folder``: folder containing all the output files
 * ``--gene-catalog``: File containing the entire genes catalog for the metagenomic niche (**REQUIRED** if uc file not provided)
@@ -135,10 +139,8 @@ In absence of niche data, only alpha-prevalence is calculated.
 * ``--threads``: Number of threads to be used while clustering
 * ``--usearch``: Runs USEARCH for clustering genes using the path provided, including the name. E.g. [/n/usr/bin/usearch]
 * ``--vsearch``: Runs VSEARCH for clustering genes using the path provided, including the name. E.g. [/n/usr/bin/vsearch]
-* ``--tshld-abund``: Percentile threshold used to prioritize genes. Default value 75th percentile of the gene abundance observed.
-* ``--tshld-prev``: Prevalence cut-off used to prioritize genes. Default value 1/10 samples i.e. val - 2*Standard Error(distribution) > 0.1
-* ``--quad``: The quadrant of genes to prioritize {1: High Abundance, Low Prevalence; 2: High Abundance, High Prevalence; 3: Low Abundance, High Prevalence, 4: Low Abundance, Low Prevalence}
-* ``--bypass-abund-prev``: To bypass the calculation of important genes
+* ``--bypass-clustering``: To bypass clustering of unannotated genes based on homology of sequences (this option is best used when the clustering information[given via --uc] or the gene catalog, both dont exist, **OR** if you prefer to rank each unannotated gene individually)
+* ``--beta``: The parameter used in the methodology to prioritize genes via their metagenomic properties. 
 
 
 ## Output ##
