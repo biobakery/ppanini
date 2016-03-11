@@ -305,7 +305,7 @@ def write_dict(dictX, gene_annotations_file):
 			foo.writelines(['\t'.join([i, dictX[i] ])+'\n'])
 
 def is_present(metadata, meta_type):
-	'''Returns True if meta_type is present in metadata extracted from mappert_file
+	'''Returns True if meta_type is present in metadata extracted from mapper_file
 
 	Input: metadata = [metadata strings]; Rows with # as first character in table
 		   meta_type = Type of metadata that you are querying e.g. FASTAS, NICHE etc.
