@@ -6,7 +6,7 @@ import argparse
 import logging
 import pdb
 from ppanini import utilities
-from ppanini import config
+
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ def parse_annotation_table(annotations_file, fasta_sequences, thld_ref):
 
 	return [sample_annotations, search50_seqs]
 
-def run_diamond(query_file, db, out_fname, all_paths):
+def run_diamond(query_file, db, out_fname, all_paths, nprocesses):
 	'''Runs DIAMOND on query_file to produce results in out_fname
 	Input: query_file = path to query_fasta_file
 		   all_paths = {'uniref90': path_to_uniref90_index, 
@@ -54,18 +54,19 @@ def run_diamond(query_file, db, out_fname, all_paths):
 		   out_fname = path of output_file to put the results in
 		   nprocesses = Number of processes
 		   db = DIAMOND preprocessed database'''
+		   
 	logger.debug('run_diamond '+query_file)
 	os.system(all_paths['diamond']+' blastp -q ' + query_file + ' \
 													-d ' + db + ' \
 													-k 1 \
 													-a ' + out_fname + ' \
-													-p ' + str(config.nprocesses)) #check if command is correct.
+													-p ' + str(nprocesses)) #check if command is correct.
 
 	os.system(all_paths['diamond']+' view -a ' + out_fname + '.daa \
 												  -o ' + out_fname + '.m8 \
-												  -p ' + str(config.nprocesses))
+												  -p ' + str(nprocesses))
 
-def run_rapsearch(query_file, db, out_fname, nprocesses, all_paths):
+def run_rapsearch(query_file, db, out_fname, nprocesses, all_paths, nprocesses):
 	'''Runs RAPSEARCH2 on query_file to produce results in out_fname
 
 	Input: query_file = path to query_fasta_file
@@ -83,16 +84,17 @@ def run_rapsearch(query_file, db, out_fname, nprocesses, all_paths):
 												 -u 2 \
 												 -b 0 \
 												 -v 1 \
-												 -z' + str(config.nprocesses))	
+												 -z' + str(nprocesses))	
 
-def run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, perc_id):
+def run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, perc_id, nprocesses):
 	'''Runs USEARCH UCLUST on query_file to produce results in out_fname
 
 	Input: usearch_folder = path to folder containing USEARCH
 		   allgenes_file_path = path to input fasta file
 		   gene_centroids_file_path = path to place all the centroids produced in
 		   gene_centroid_clusters_file_path = path to file containing clustering results in
-		   id = %ID to cluster sequences at'''
+		   id = %ID to cluster sequences at
+		   nprocesses= number of threads'''
 
 	logger.debug('run_uclust '+allgenes_file_path)
 
@@ -100,16 +102,18 @@ def run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gen
 								 -id '+str(perc_id)+' \
 								 -centroids '+ gene_centroids_file_path + ' \
 								 -uc ' + gene_centroid_clusters_file_path+ '\
-								 -threads '+str(config.nprocesses))
+								 -threads '+str(nprocesses))
 
-def run_vclust(vsearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, perc_id):
+def run_vclust(vsearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, perc_id, nprocesses):
 	'''Runs USEARCH UCLUST on query_file to produce results in out_fname
 
 		Input: usearch_folder = path to folder containing USEARCH
 				   allgenes_file_path = path to input fasta file
 				   gene_centroids_file_path = path to place all the centroids produced in
 				   gene_centroid_clusters_file_path = path to file containing clustering results in
-				   id = %ID to cluster sequences at'''
+				   id = %ID to cluster sequences at
+				   nprocesses= number of threads'''
+
 	logger.debug('run_vclust '+allgenes_file_path) 
 
 
@@ -117,7 +121,7 @@ def run_vclust(vsearch_folder, allgenes_file_path, gene_centroids_file_path, gen
 								 --id '+str(perc_id)+' \
 								 --centroids '+ gene_centroids_file_path + ' \
 								 --uc ' + gene_centroid_clusters_file_path+ '\
-								 --threads '+str(config.nprocesses))
+								 --threads '+str(nprocesses))
 
 def get_clusters_dict(gene_centroid_clusters_file_path):
 	'''Return dict containing clusters

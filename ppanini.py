@@ -167,13 +167,15 @@ def get_clusters(): #ONLY FOR THE UNIREF UNANNOTATED
 								  allgenes_file_path, \
 								  gene_centroids_file_path, \
 								  gene_centroid_clusters_file_path, \
-								  0.9)
+								  0.9,\
+								  config.nprocesses)
 	elif config.vsearch != '':
 		annotate_genes.run_vclust(config.vsearch, \
 								  allgenes_file_path, \
 								  gene_centroids_file_path, \
 								  gene_centroid_clusters_file_path, \
-								  0.9)
+								  0.9,\
+								  config.nprocesses)
 		
 	
 	centroid_gis = annotate_genes.get_clusters_dict(gene_centroid_clusters_file_path)
