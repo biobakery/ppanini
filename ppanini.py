@@ -12,7 +12,7 @@ try:
     from ppanini import utilities
     from ppanini import annotate_genes
     from ppanini import config
-except ImportError,e:
+except ImportError, e:
     sys.exit("CRITICAL ERROR: Unable to find the PPANINI python package." +
         " Please check your install."+str(e))
 
@@ -159,19 +159,17 @@ def get_clusters(): #ONLY FOR THE UNIREF UNANNOTATED
 	gene_centroids_file_path = config.temp_folder+'/'+config.basename+'_centroids.fasta'
 	gene_centroid_clusters_file_path = config.temp_folder+'/'+config.basename+'_clusters.uc'
 	
-	clust_method = 'vsearch' #default search method
+	#default search method: USEARCH
 
 	if config.usearch != '':
 		clust_method = config.usearch
-		annotate_genes.run_uclust(clust_method, \
+		annotate_genes.run_uclust(config.usearch, \
 								  allgenes_file_path, \
 								  gene_centroids_file_path, \
 								  gene_centroid_clusters_file_path, \
 								  0.9)
-	else:
-		if config.vsearch != '':
-			clust_method = config.vsearch
-		annotate_genes.run_vclust(clust_method, \
+	elif config.vsearch != '':
+		annotate_genes.run_vclust(config.vsearch, \
 								  allgenes_file_path, \
 								  gene_centroids_file_path, \
 								  gene_centroid_clusters_file_path, \

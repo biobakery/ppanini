@@ -96,17 +96,13 @@ def run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gen
 
 	logger.debug('run_uclust '+allgenes_file_path)
 
-	if not usearch_folder:
-		usearch_folder = 'usearch'
-	else:
-		usearch_folder = usearch_folder
-	os.system(usearch_folder + ' -cluster_fast ' + allgenes_file_path +' \
+	os.system(usearch_folder+ ' -cluster_fast ' + allgenes_file_path +' \
 								 -id '+str(perc_id)+' \
 								 -centroids '+ gene_centroids_file_path + ' \
 								 -uc ' + gene_centroid_clusters_file_path+ '\
 								 -threads '+str(config.nprocesses))
 
-def run_vclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, perc_id):
+def run_vclust(vsearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, perc_id):
 	'''Runs USEARCH UCLUST on query_file to produce results in out_fname
 
 		Input: usearch_folder = path to folder containing USEARCH
@@ -116,12 +112,8 @@ def run_vclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gen
 				   id = %ID to cluster sequences at'''
 	logger.debug('run_vclust '+allgenes_file_path) 
 
-	if not usearch_folder:
-		usearch_folder = 'vsearch'
-	else:
-		usearch_folder = usearch_folder
 
-	os.system(usearch_folder + ' --cluster_fast ' + allgenes_file_path +' \
+	os.system(vsearch_folder+ ' --cluster_fast ' + allgenes_file_path +' \
 								 --id '+str(perc_id)+' \
 								 --centroids '+ gene_centroids_file_path + ' \
 								 --uc ' + gene_centroid_clusters_file_path+ '\

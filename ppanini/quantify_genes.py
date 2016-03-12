@@ -29,10 +29,9 @@ def generate_abundance_viabwt2(assembly_x_withpath, reads_x, sample, out):
 	
 	os.system('bowtie2-build --quiet ' + assembly_x_withpath + ' ' + assembly_x_index)
 	os.system('tar -xOvf ' + reads_x + ' | \
-									 bowtie2 -x ' + assembly_x_index + ' -U - --no-unal --very-sensitive | \
-									 samtools view -bS - > ' + assembly_x_bam)
+					bowtie2 -x ' + assembly_x_index + ' -U - --no-unal --very-sensitive | \
+					samtools view -bS - > ' + assembly_x_bam)
 
-#	pdb.set_trace()
 	return generate_abundance_viabam(assembly_x_bam, sample, out)
 
 

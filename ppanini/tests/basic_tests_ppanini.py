@@ -43,3 +43,7 @@ class TestPPANINIBasicFunctions(unittest.TestCase):
 ##Test for clustering containing all genes
 ##Test for read_fasta and write_fasta consistency
 #T#Test for gene length consistency when writing fasta
+
+# utilities.create_folder
+# utilities.is_present
+# annotate_genes.uclust, vclust, get_clusters_dict
