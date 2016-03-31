@@ -1,11 +1,11 @@
 
 #default values for user options
 
-input_table = ''#/n/hutlab12_nobackup/data/ppanini/DATA/PPANINI_INPUT/stool_ppanini.txt'#'/Users/rah/Documents/Hutlab/stool_ppanini.txt' #None # required 
+input_table = ''
 output_folder = ''
 gene_catalog = '' 
 uclust_file = ''
-usearch = '/Users/afrahshafquat/Downloads/usearch'
+usearch = 'usearch'
 vsearch = 'vsearch'
 basename = ''
 log_level = 'DEBUG'
