@@ -62,6 +62,8 @@ class TestUtilitiesBasicFunctions(unittest.TestCase):
 		ind = random.choice(test_faa_dict.keys())
 		ind2 = ind.split('|')[0]+'-T1-C'
 		self.assertEqual(test_faa_dict[ind], faa_dict[ind2])
+		os.remove(test_fna)
+		os.remove(test_faa)
 
 	def test_read_fasta(self):
 		faa_dict=utilities.read_fasta(demo_faa)
