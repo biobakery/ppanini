@@ -26,6 +26,7 @@ PPANINI provides a computational pipeline to prioritize microbial genes based on
 * [PREPPANINI: Creating a PPANINI table](#markdown-header-preppanini-creating-a-ppanini-table)
     * [Requirements](#markdown-header-requirements)
     * [How to run](#markdown-header-how-to-run)
+* [PPANINI_TEST](#markdown-header-testing-ppanini)
 
 ------------------------------------------------------------------------------------------------------------------------------
 # PPANINI #
@@ -214,6 +215,21 @@ optional arguments:
 * ``--uniref50``: UniRef50 database index filename for appropriate for the search tool being used. For information on how to create these indices, please refer to DIAMOND/RAPSEARCH user manual.
 * ``--to-normalize``: bool flag [True when sequence length normalization is required. E.g. when samtools is being used to translate Hits to FPKM or CPM]; [False when normalization has already been performed and an abundance table is being read. E.g. HUMAnN2 gene abundance table]
 * ``--log_level``: level of debugging information to be provided; Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
+
+------------------------------------------------------------------------------------------------------------------------
+
+#TESTING PPANINI #
+
+To test if PPANINI is running correctly, you may run the following command in the terminal:
+
+```
+#!cmd
+
+ppanini_test
+
+```
+
+If a few tests fail due to a **Permissions Denied** error, you may want to run the command using *sudo*. This feature is reserved for internal testing/debugging and development purposes for the PPANINI Team. This is not an integral part of the analysis pipeline, so unless you are modifying the pipeline, you **do not** need to use this feature.
 
 ------------------------------------------------------------------------------------------------------------------------
 
