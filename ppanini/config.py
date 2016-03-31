@@ -5,7 +5,7 @@ input_table = ''#/n/hutlab12_nobackup/data/ppanini/DATA/PPANINI_INPUT/stool_ppan
 output_folder = ''
 gene_catalog = '' 
 uclust_file = ''
-usearch = 'usearch'
+usearch = '/Users/afrahshafquat/Downloads/usearch'
 vsearch = 'vsearch'
 basename = ''
 log_level = 'DEBUG'
@@ -25,3 +25,6 @@ temp_folder = ''
 centroids_list = ''
 essantial_genes_uniref90_id = None
 bypass_clustering = False
+
+if __name__=='__main__':
+	pass

@@ -54,7 +54,7 @@ def run_diamond(query_file, db, out_fname, all_paths, nprocesses):
 		   out_fname = path of output_file to put the results in
 		   nprocesses = Number of processes
 		   db = DIAMOND preprocessed database'''
-		   
+
 	logger.debug('run_diamond '+query_file)
 	os.system(all_paths['diamond']+' blastp -q ' + query_file + ' \
 													-d ' + db + ' \
@@ -66,7 +66,7 @@ def run_diamond(query_file, db, out_fname, all_paths, nprocesses):
 												  -o ' + out_fname + '.m8 \
 												  -p ' + str(nprocesses))
 
-def run_rapsearch(query_file, db, out_fname, nprocesses, all_paths, nprocesses):
+def run_rapsearch(query_file, db, out_fname, all_paths, nprocesses):
 	'''Runs RAPSEARCH2 on query_file to produce results in out_fname
 
 	Input: query_file = path to query_fasta_file

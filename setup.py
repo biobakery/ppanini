@@ -1,11 +1,13 @@
 
 try:
-    from setuptools import setup, find_packages
+    import setuptools
+    #from setuptools import setup, find_packages
 except ImportError:
     sys.exit("Please install setuptools.")
 
+from setuptools.command.install import install as _install
 
-setup(
+setuptools.setup(
     name="ppanini",
     version="0.6.1",
     license="MIT",
@@ -25,6 +27,7 @@ setup(
         "Operating System :: Unix",
         "Topic :: Scientific/Engineering :: Bio-Informatics"
         ],
+    packages=setuptools.find_packages(),
     long_description=open('readme.md').read(),
     install_requires=[  
         #"Numpy >= 1.9.2",
@@ -32,10 +35,9 @@ setup(
         #"Matplotlib >= 1.1.1",
         #"Biopython >= 1.66"
     ],
-    packages=find_packages(),
     #cmdclass={'install': Install},
     package_data={
-        'ppanini' :[]},
+        'ppanini' :['tests/data/*']},
     entry_points={
         'console_scripts': [
             'ppanini = ppanini.ppanini:_main',
