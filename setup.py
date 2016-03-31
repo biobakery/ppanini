@@ -45,7 +45,7 @@ setuptools.setup(
             'ppanini_eval_roc = ppanini.utils.plot_roc:main',
             'ppanini_test = ppanini.tests.ppanini_test:main'
         ]},
-    test_suite= 'ppanini.tests.ppanini_test.main',
+    test_suite= 'ppanini.tests.ppanini_test.get_unittests()',
     zip_safe = False
  )
 

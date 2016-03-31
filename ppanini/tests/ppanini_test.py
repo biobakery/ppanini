@@ -25,8 +25,8 @@ def get_unittests():
 	basic_suite = unittest.TestLoader().discover(directory_of_tests, pattern='basic_tests_*.py')
 	advanced_suite = unittest.TestLoader().discover(directory_of_tests, pattern='advanced_tests_*.py')
 
-	return [basic_suite,advanced_suite]
+	return unittest.TestSuite([basic_suite,advanced_suite])
 
 def main():
 	full_suite = get_unittests()
-	unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(full_suite))
+	unittest.TextTestRunner(verbosity=2).run(full_suite)

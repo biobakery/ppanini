@@ -15,7 +15,6 @@ tshld_abund = 75
 tshld_prev = 75
 beta  = 0.75
 bypass_prev_abund = False
-
 tshld = None
 centroid_prev_abund = None
 #all_prevalence = None
