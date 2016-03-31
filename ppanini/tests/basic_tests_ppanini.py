@@ -14,6 +14,7 @@ from ppanini import utilities
 
 class TestPPANINIBasicFunctions(unittest.TestCase):
 	"""Test the functions found in ppanini.py"""
+	
 	config.basename='ppanini_test'
 	config.temp_folder =os.path.join(test_config.data_folder,"temp")
 	utilities.create_folders([config.temp_folder])
