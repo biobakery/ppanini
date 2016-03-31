@@ -288,8 +288,8 @@ def read_dict_num(gene_annotations_file):
 					split_line = [re.sub('[\t\r\n]', '', i).strip() for i in line.split(' ')]
 				try:
 					dictX[split_line[0]] = float(split_line[1])
-				except:
-					pdb.set_trace()
+				except Exception, e:
+					raise Exception('Error in utilities.py: '+str(e))
 	return dictX
 
 def write_dict(dictX, gene_annotations_file):

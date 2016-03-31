@@ -16,7 +16,7 @@ demo_gff3 = test_config.demo_gff3
 #demo1_test = test_config.demo_test
 
 
-class TestPrePPANINIBasicFunctions(unittest.TestCase):
-	"""Test the functions found in preppanini.py"""
-	def test_preppanini(self):
+class TestQuanitfyGenesBasicFunctions(unittest.TestCase):
+	"""Test the functions found in quantify_genes.py"""
+	def test_quantify_genes(self):
 		pass
