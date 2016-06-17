@@ -106,7 +106,7 @@ optional arguments:
 ## Input ##
 
 * ``-i or --input-table`` : Gene Abundance Table containing annotated gene abundance values in CPM or counts per million
-Such tables can be obtained using (i) ``HUMAnN2``, (ii) ``preppanini`` or (iii) manually creating the table using ``samtools`` (idxstats) etc.
+Such tables can be obtained using (i) [HUMANN2](http://huttenhower.sph.harvard.edu/humann2), (ii) [PREPPANINI](https://bitbucket.org/biobakery/biobakery/wiki/ppanini#rst-header-id1) or (iii) manually creating the table using ``samtools`` (idxstats) etc.
 See the mock gene table for an example. ppanini/input/mock_gene_table.tsv
 
 ```
