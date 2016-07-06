@@ -109,7 +109,7 @@ def graph():
 	ax1.set_color_cycle([scalarMap.to_rgba(i) for i in range(NUM_COLORS)])
 	i = 0
 	plt.text(0.5, 1.5, 'Precision-Recall Curves From 5-Fold Validation', horizontalalignment='center',fontsize=12,transform = ax1.transAxes)
-	work("fullOutput","full","fulldata")
+	work("fullOutput","full","fullData")
 	ffpra = fpra
         ftpra = tpra
         fchprecisiona = chprecisiona

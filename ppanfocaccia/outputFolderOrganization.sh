@@ -45,3 +45,4 @@ mv svmpredictions pipelineOutput
 mv svmtestfiles pipelineOutput
 mv svmtrainingfiles pipelineOutput
 mv graphs.png pipelineOutput
+rm -rf nohup.out
