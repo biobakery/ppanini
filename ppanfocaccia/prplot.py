@@ -3,7 +3,7 @@ print(__doc__)
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import svm, datasets
-from sklearn.metrics import roc_curve, auc
+from sklearn.metrics import roc_curve, auc, precision_recall_curve, average_precision_score
 from sklearn.cross_validation import train_test_split
 from sklearn.preprocessing import label_binarize
 from sklearn.multiclass import OneVsRestClassifier
@@ -48,20 +48,21 @@ text.append("Fold 4 Training")
 genVectors("samplePipelineOutput/svmtrainingfiles/full","samplePipelineOutput/svmpredictions/fullOutput")
 text.append("Full")
 
-fpr = dict()
-tpr = dict()
-roc_auc = dict()
+precision = dict()
+recall = dict()
+auprc = dict()
 for i in range(9):
-    fpr[i], tpr[i], _ = roc_curve(label[i], dist[i])
-    roc_auc[i] = auc(fpr[i], tpr[i])
+    precision[i], recall[i], _ = precision_recall_curve(label[i], dist[i])
+    auprc[i] = average_precision_score(label[i], dist[i])
 
+#print precision
 for i in range(9):
-	plt.plot(fpr[i], tpr[i], label=text[i]+' (area = %0.2f)' % roc_auc[i])
-plt.plot([0, 1], [0, 1], 'k--')
+	plt.plot(recall[i], precision[i], label=text[i]+' (area = %0.2f)' % auprc[i])
+#plt.plot([0, 1], [0, 1], 'k--')
 plt.xlim([0.0, 1.0])
 plt.ylim([0.0, 1.05])
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
-plt.title('Receiver Operating Characteristic Curves')
-plt.legend(loc="lower right",prop={'size':10})
+plt.xlabel('Recall')
+plt.ylabel('Precision')
+plt.title('Precision Recall Curves')
+plt.legend(loc="lower left",prop={'size':10})
 plt.show()
