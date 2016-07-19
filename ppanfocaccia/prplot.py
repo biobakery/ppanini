@@ -29,23 +29,25 @@ def genVectors(fname1, fname2):
 
 text = []
 
-genVectors("samplePipelineOutput/svmtestfiles/fold1HeldOut","samplePipelineOutput/svmpredictions/fold1HeldOutOutput")
+biologyContext = sys.argv[1]
+
+genVectors(biologyContext+"/svmtestfiles/fold1HeldOut",biologyContext+"/svmpredictions/fold1HeldOutOutput")
 text.append("Fold 1 Held Out") 
-genVectors("samplePipelineOutput/svmtrainingfiles/fold1","samplePipelineOutput/svmpredictions/fold1TrainingOutput")
+genVectors(biologyContext+"/svmtrainingfiles/fold1",biologyContext+"/svmpredictions/fold1TrainingOutput")
 text.append("Fold 1 Training")
-genVectors("samplePipelineOutput/svmtestfiles/fold2HeldOut","samplePipelineOutput/svmpredictions/fold2HeldOutOutput")
+genVectors(biologyContext+"/svmtestfiles/fold2HeldOut",biologyContext+"/svmpredictions/fold2HeldOutOutput")
 text.append("Fold 2 Held Out")
-genVectors("samplePipelineOutput/svmtrainingfiles/fold2","samplePipelineOutput/svmpredictions/fold2TrainingOutput")
+genVectors(biologyContext+"/svmtrainingfiles/fold2",biologyContext+"/svmpredictions/fold2TrainingOutput")
 text.append("Fold 2 Training")
-genVectors("samplePipelineOutput/svmtestfiles/fold3HeldOut","samplePipelineOutput/svmpredictions/fold3HeldOutOutput")
+genVectors(biologyContext+"/svmtestfiles/fold3HeldOut",biologyContext+"/svmpredictions/fold3HeldOutOutput")
 text.append("Fold 3 Held Out")
-genVectors("samplePipelineOutput/svmtrainingfiles/fold3","samplePipelineOutput/svmpredictions/fold3TrainingOutput")
+genVectors(biologyContext+"/svmtrainingfiles/fold3",biologyContext+"/svmpredictions/fold3TrainingOutput")
 text.append("Fold 3 Training")
-genVectors("samplePipelineOutput/svmtestfiles/fold4HeldOut","samplePipelineOutput/svmpredictions/fold4HeldOutOutput")
+genVectors(biologyContext+"/svmtestfiles/fold4HeldOut",biologyContext+"/svmpredictions/fold4HeldOutOutput")
 text.append("Fold 4 Held Out")
-genVectors("samplePipelineOutput/svmtrainingfiles/fold4","samplePipelineOutput/svmpredictions/fold4TrainingOutput")
+genVectors(biologyContext+"/svmtrainingfiles/fold4",biologyContext+"/svmpredictions/fold4TrainingOutput")
 text.append("Fold 4 Training")
-genVectors("samplePipelineOutput/svmtrainingfiles/full","samplePipelineOutput/svmpredictions/fullOutput")
+genVectors(biologyContext+"/svmtrainingfiles/full",biologyContext+"/svmpredictions/fullOutput")
 text.append("Full")
 
 precision = dict()

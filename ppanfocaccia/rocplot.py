@@ -29,23 +29,25 @@ def genVectors(fname1, fname2):
 
 text = []
 
-genVectors("samplePipelineOutput/svmtestfiles/fold1HeldOut","samplePipelineOutput/svmpredictions/fold1HeldOutOutput")
+biologicalAspect = sys.argv[1]
+
+genVectors(sys.argv[1]+"/svmtestfiles/fold1HeldOut",sys.argv[1]+"/svmpredictions/fold1HeldOutOutput")
 text.append("Fold 1 Held Out") 
-genVectors("samplePipelineOutput/svmtrainingfiles/fold1","samplePipelineOutput/svmpredictions/fold1TrainingOutput")
+genVectors(sys.argv[1]+"/svmtrainingfiles/fold1",sys.argv[1]+"/svmpredictions/fold1TrainingOutput")
 text.append("Fold 1 Training")
-genVectors("samplePipelineOutput/svmtestfiles/fold2HeldOut","samplePipelineOutput/svmpredictions/fold2HeldOutOutput")
+genVectors(sys.argv[1]+"/svmtestfiles/fold2HeldOut",sys.argv[1]+"/svmpredictions/fold2HeldOutOutput")
 text.append("Fold 2 Held Out")
-genVectors("samplePipelineOutput/svmtrainingfiles/fold2","samplePipelineOutput/svmpredictions/fold2TrainingOutput")
+genVectors(sys.argv[1]+"/svmtrainingfiles/fold2",sys.argv[1]+"/svmpredictions/fold2TrainingOutput")
 text.append("Fold 2 Training")
-genVectors("samplePipelineOutput/svmtestfiles/fold3HeldOut","samplePipelineOutput/svmpredictions/fold3HeldOutOutput")
+genVectors(sys.argv[1]+"/svmtestfiles/fold3HeldOut",sys.argv[1]+"/svmpredictions/fold3HeldOutOutput")
 text.append("Fold 3 Held Out")
-genVectors("samplePipelineOutput/svmtrainingfiles/fold3","samplePipelineOutput/svmpredictions/fold3TrainingOutput")
+genVectors(sys.argv[1]+"/svmtrainingfiles/fold3",sys.argv[1]+"/svmpredictions/fold3TrainingOutput")
 text.append("Fold 3 Training")
-genVectors("samplePipelineOutput/svmtestfiles/fold4HeldOut","samplePipelineOutput/svmpredictions/fold4HeldOutOutput")
+genVectors(sys.argv[1]+"/svmtestfiles/fold4HeldOut",sys.argv[1]+"/svmpredictions/fold4HeldOutOutput")
 text.append("Fold 4 Held Out")
-genVectors("samplePipelineOutput/svmtrainingfiles/fold4","samplePipelineOutput/svmpredictions/fold4TrainingOutput")
+genVectors(sys.argv[1]+"/svmtrainingfiles/fold4",sys.argv[1]+"/svmpredictions/fold4TrainingOutput")
 text.append("Fold 4 Training")
-genVectors("samplePipelineOutput/svmtrainingfiles/full","samplePipelineOutput/svmpredictions/fullOutput")
+genVectors(sys.argv[1]+"/svmtrainingfiles/full",sys.argv[1]+"/svmpredictions/fullOutput")
 text.append("Full")
 
 fpr = dict()
