@@ -56,14 +56,70 @@ def main():
         lines = f.read().splitlines()
     essential_genes_uniref90_id_299_eco = [line.split('\t')[1] for line in lines]
     essential_genes = essential_genes_uniref90_id_299_eco + essential_genes_uniref90_id_deg
+    '''
+    niches = ["stool", "buccal", "nares", "soil"]
+    categories= ["metagenomic", "genomic"] 
+    Betas = [.5]
+    
+    for niche in niches:
+        for beta in Betas:
+            for category in categoreis:
+                if category == "metagenomic":
+                    try:
+                        
+                        fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Dropbox (Huttenhower Lab)/PPANINI/ASM/ranks/nares.ranks',\
+                                               essential_genes= essential_genes, beta =0.1)
+                                               #input_ppanini='/Users/rah/Documents/Hutlab/ppanini//output_tables/nares_table.txt',\
+                        roc_info.append(['Anterior nares - Metagenomic Priority beta = .1',fpr, tpr])
+            
+                    except ValueError:
+                        print "ValueError for "+niche+ " "+ category + " " + beta+" calculation"  
+                if category == "genomic":
+                    try:
+                        fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Documents/Hutlab/ppanini/PF_final_gene_centroids_table/PF_final_gene_centroids_table_imp_centroid_prev_abund.txt',\
+                                                  essential_genes= essential_genes, beta =.5)     
+                        roc_info.append(['Posterior fornix - Metagenomic Priority',fpr, tpr])
+                    
+                    except ValueError:
+                        print "ValueError for Posterior fornix roc calculation"
+    '''
 # Stool
     if plot_mg:
-        try:
-            fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Documents/Hutlab/ppanini//output_tables/stool_table.txt',\
-                                      essential_genes= essential_genes, beta =.5)     
+        '''try:
+            
+            fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Dropbox (Huttenhower Lab)/PPANINI/ASM/ranks/stool.ranks',\
+                                   essential_genes= essential_genes, beta =0.5)
+                                   #input_ppanini='/Users/rah/Documents/Hutlab/ppanini//output_tables/nares_table.txt',\
             roc_info.append(['Stool - Metagenomic Priority',fpr, tpr])
+            
+            fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Dropbox (Huttenhower Lab)/PPANINI/ASM/ranks/buccal.ranks',\
+                                   essential_genes= essential_genes, beta =.5)
+                                   #input_ppanini='/Users/rah/Documents/Hutlab/ppanini//output_tables/nares _table.txt',\
+            roc_info.append(['Buccal mucosa - Metagenomic Priority',fpr, tpr])
+            
+            fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Dropbox (Huttenhower Lab)/PPANINI/ASM/ranks/fornix.ranks',\
+                                   essential_genes= essential_genes, beta =.5)
+                                   #input_ppanini='/Users/rah/Documents/Hutlab/ppanini//output_tables/nares _table.txt',\
+            roc_info.append(['Posterior fornix - Metagenomic Priority',fpr, tpr])
+            fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Dropbox (Huttenhower Lab)/PPANINI/ASM/ranks/nares.ranks',\
+                                   essential_genes= essential_genes, beta =.5)
+                                   #input_ppanini='/Users/rah/Documents/Hutlab/ppanini//output_tables/nares _table.txt',\
+            roc_info.append(['Anterior nares - Metagenomic Priority',fpr, tpr])
+            fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Dropbox (Huttenhower Lab)/PPANINI/ASM/ranks/soil.ranks',\
+                                   essential_genes= essential_genes, beta =.5)
+                                   #input_ppanini='/Users/rah/Documents/Hutlab/ppanini//output_tables/stool _table.txt',\
+            roc_info.append(['Prairie soil - Metagenomic Priority',fpr, tpr])
+
+            
         except ValueError:
-            print "ValueError for Stool roc calculation"  
+            print "ValueError for Buccal  roc calculation"  
+            '''
+    try:
+        fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Documents/Hutlab/ppanini/output_tables/Stool_table.txt',\
+                                  essential_genes= essential_genes, beta =.5)     
+        roc_info.append(['Stool - Metagenomic Priority',fpr, tpr])      
+    except ValueError:
+        print "ValueError for Stool roc calculation"
     if plot_g:
         try:
             metagenomic_table1, ppanini_output1, no_uniq_genomes1  = utilities.read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/stool_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/stool_table.txt')
@@ -122,7 +178,7 @@ def main():
             roc_info.append(['Anterior nares - Genomic Priority',fpr, tpr])
         except ValueError:
             print "ValueError for Anterior nares  roc calculation"
-    '''
+   
     if plot_mg:
         try:
             metagenomic_table4, ppanini_output4, no_uniq_genomes4 = utilities.read_data('/Users/rah/Documents/Hutlab/ppanini/PARSED_BLAST_RESULTS/PF_mg.m8', '/Users/rah/Documents/Hutlab/ppanini/output_tables/PF_table.txt')
@@ -142,7 +198,8 @@ def main():
             print "ValueError for Posterior fornix roc calculation"
     '''
     try:
-        roc_plot(roc_info, figure_name=config.output_folder+'/roc_plot_ppanini') 
+        print roc_info
+        roc_plot(roc_info, figure_name=config.output_folder+'/nares_roc_plot_ppanini') 
     except ValueError:
         print "ValueError for general roc plot"
     print "The evaluation is successfully done!" 
@@ -151,13 +208,12 @@ def get_fpr_tpr(input_ppanini, essential_genes, beta =.5):
     tpr = dict()
     true = dict()
     score = dict()
+    #config.input_table = '/Users/rah/Documents/Hutlab/stool_ppanini050715.txt'#'/n/hutlab12_nobackup/data/ppanini/DATA/PPANINI_INPUT/stool_ppanini.txt' 
+    #config.uclust_file = '/Users/rah/Documents/Hutlab/stool_ppanini/stool_final_clusters.uc'
     
-    config.input_table = '/Users/rah/Documents/Hutlab/stool_ppanini050715.txt'#'/n/hutlab12_nobackup/data/ppanini/DATA/PPANINI_INPUT/stool_ppanini.txt' 
-    config.uclust_file = '/Users/rah/Documents/Hutlab/stool_ppanini/stool_final_clusters.uc'
+    #config.output_folder = '/Users/rah/Documents/Hutlab/ppanini/myOutput2'
     
-    config.output_folder = '/Users/rah/Documents/Hutlab/ppanini/myOutput2'
-    
-    uniref_id_list = []
+    #uniref_id_list = []
     #ground_truth = [1 if (uniref_id in essential_genes_uniref_id) else 0 for uniref_id in uniref_id_list ] # this an example for each gene if it's important use 1 otherwise 0
     #print config.input_table
     if config.verbose =='DEBUG':
@@ -181,13 +237,15 @@ def get_fpr_tpr(input_ppanini, essential_genes, beta =.5):
     
     n = len(ppanini_table['genes'])-1
     config.centroids_list = ppanini_table['genes'][0:n]#config.centroids_list[1:n]
-    ppanini_score = ppanini_table['ppanini_score'][0:n]#ppanini_score[1:n]
+    
     #print config.centroids_list[0:10]
-    prev = ppanini_table['prevalence'][0:n]#prev[1:n]
+    prev = ppanini_table['prevalence_rank'][0:n]#prev[1:n]
     prev = [float(val) for val in prev]
     
     sorted_prev = sorted(prev)
-    abun = ppanini_table['abundance'][0:n]#abun[1:n]
+    abun = ppanini_table['abundance_rank'][0:n]#abun[1:n]
+    ppanini_table['ppanini_score'] = [1/((1/(beta*prev[i])+(1/((1-beta)* abun[i])))) for i in range(len(prev))] #
+    ppanini_score = ppanini_table['ppanini_score'][0:n]#ppanini_score[1:n]
     abun = [float(val) for val in abun]
     sorted_abun = sorted(abun)
     #print prev[0:101]
@@ -232,6 +290,7 @@ def get_fpr_tpr(input_ppanini, essential_genes, beta =.5):
         else:
             ground_truth.append(1)
     '''
+    
     true[beta] = ground_truth
     #print "ground_truth", scipy.stats.rankdata(score[beta])
     '''if config.niche_flag:
@@ -240,10 +299,11 @@ def get_fpr_tpr(input_ppanini, essential_genes, beta =.5):
         score[beta] =[config.centroid_prev_abund[gene_id]['ppanini_score'] for gene_id in config.centroids_list ] # 
     '''
     #legend_tag = b
+    #print score[0:10]
     assert(len(true[beta])==len(score[beta])) 
     fpr[beta], tpr[beta], _  = roc_curve( true[beta], score[beta], pos_label = 1)
     return fpr[beta], tpr[beta]
-        
+    
                                      
 def roc_plot(roc_info=None, figure_name='roc_plot_ppanini'):
     """
@@ -279,8 +339,9 @@ def roc_plot(roc_info=None, figure_name='roc_plot_ppanini'):
     #fig.set_size_inches(1, 10)
     #plt.figure(dpi= 300, figsize=(4, 4))
     for i in range(len(roc_info)):
-        params = {'legend.fontsize': 6,
-        'legend.linewidth': 2}
+        params = {'legend.fontsize': 6
+        }
+        #mpl.rcParams['lines.linewidth'] = 2
         plt.rcParams.update(params)
         axe.plot(fpr[roc_info[i][0]], tpr[roc_info[i][0]],  label='{0} (area = {1:0.2f})'
                                        ''.format(str(roc_info[i][0]), roc_auc[roc_info[i][0]]))   

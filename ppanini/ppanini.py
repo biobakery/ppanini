@@ -320,30 +320,28 @@ def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_
 		centroid_prev_abund[centroid] = {}
 		a_prev = {}
 		a_abund = {}
-		for niche in niches_label:
-			a_prev[niche] = 0
-			a_abund[niche] = []
- 			for ind in niches[niche]:
- 				check_i = int(centroids_data_matrix[i][ind] > 0) #present in a sample
-				a_prev[niche] += check_i
-				if check_i:
-					a_abund[niche] += [centroids_data_matrix[i][ind]]
+        for niche in niches_label:
+            a_prev[niche] = 0
+            a_abund[niche] = []
+            for ind in niches[niche]:
+               if centroids_data_matrix[i][ind] > 0: #present in a sample
+                  a_prev[niche] += 1
+                  a_abund[niche] += [centroids_data_matrix[i][ind]]
+            a_prev[niche] = float(a_prev[niche])/float(len(niches[niche]))
+            all_alpha_prev[niche] += [a_prev[niche]]
 
-			a_prev[niche] = float(a_prev[niche])/float(len(niches[niche]))
-			all_alpha_prev[niche] += [a_prev[niche]]
+            if not a_abund[niche]: #if gene completely empty throughout samples
+            	a_abund[niche] = [0]
+            a_abund[niche] = numpy.mean(numpy.array(a_abund[niche]))
 
-			if not a_abund[niche]: #if gene completely empty throughout samples
-				a_abund[niche] = [0]
-			a_abund[niche] = numpy.mean(numpy.array(a_abund[niche]))
-		
-		max_mean_abund = max(a_abund.values())
-		all_alpha_abund += [max_mean_abund]
-		b_prev = numpy.median(a_prev.values())
+        max_mean_abund = max(a_abund.values())
+        all_alpha_abund += [max_mean_abund]
+        b_prev = numpy.median(a_prev.values())
 
-		centroid_prev_abund[centroid]['alpha_prevalence'] = a_prev
-		centroid_prev_abund[centroid]['mean_abundance'] = max_mean_abund #a_abund
-		centroid_prev_abund[centroid]['beta_prevalence'] = b_prev
-	
+        centroid_prev_abund[centroid]['alpha_prevalence'] = a_prev
+        centroid_prev_abund[centroid]['mean_abundance'] = max_mean_abund #a_abund
+        centroid_prev_abund[centroid]['beta_prevalence'] = b_prev
+
 	#Percentile of score requires sorted vectors! Blekh!
 	all_alpha_abund = sorted(all_alpha_abund)
 

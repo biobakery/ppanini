@@ -12,37 +12,36 @@ import multiprocessing
 from Bio import Seq
 
 logger = logging.getLogger(__name__)
-
 def read_ppanini_imp_genes_table(filename):
-	keys = {'ppanini_score':0, 'abundance':0, 'prevalence':0,'prevalence_beta':0}
+	keys = { 'abundance_rank':0, 'prevalence_rank':0}
 	abund = []
 	prev = []
 	genes = []
 	ppanini_score = []
+	
 	with open(filename) as foo:
 		for line in foo:
 			split_line = [re.sub('[\r\t\n]','', i) for i in line.split('\t')]
 			if line.startswith('#'):
 				for i, val in enumerate(split_line):
-					if 'abundance' in val:
-						keys['abundance'] = i
-					elif 'prevalence' in val:
-						keys['prevalence'] = i
+					if 'abundance_rank' in val:
+						keys['abundance_rank'] = i
+					elif 'prevalence_rank' in val:
+						keys['prevalence_rank'] = i
+					#elif 'beta' in val:
+					#	keys['beta'] = i
 					elif 'ppanini_score' in val:
 						keys['ppanini_score'] = i	
 			else:
+				# pdb.set_trace()
+				#print line
 				genes +=[split_line[0]]
-				ppanini_score +=[float(split_line[keys['ppanini_score']])]
-				abund +=[float(split_line[keys['abundance']])]
-				prev +=[float(split_line[keys['prevalence']])]
-	
-	ppanini_table = {'genes': genes, \
-					'ppanini_score':ppanini_score, \
-					'abundance': abund, \
-					'prevalence': prev}
-
+				ppanini_score +=[None]
+				abund +=[float(split_line[keys['abundance_rank']])]
+				prev +=[float(split_line[keys['prevalence_rank']])]
+	#print prev
+	ppanini_table = {'genes': genes, 'abundance_rank': abund, 'prevalence_rank': prev, 'ppanini_score':ppanini_score }
 	return ppanini_table
-
 def read_fasta(fasta_filename):
 	'''Reads a fasta_file and returns a fasta dict
 	Input: fasta_filename = path_to_fasta_file
@@ -63,7 +62,6 @@ def read_fasta(fasta_filename):
 				else:
 					fasta_seq[name] +=  re.sub('[\r\t\n]','', line)
 	return fasta_seq
-
 def parse_table(m8_filename, fasta_filename):
 	'''Parse the BLAST results to give gene hits to genomes
 	Input: 
@@ -113,7 +111,6 @@ def read_parsed(m8_filename):
 			table[split_i[0]] = [split_i[1]]
 	print"Total No. of genes:", len(table) 
 	return table
-
 def read_data(mg_file, ppanini_output_file):
 	metagenomic_table  = read_parsed(mg_file)
 	uniq_genomes = []
@@ -125,7 +122,6 @@ def read_data(mg_file, ppanini_output_file):
 	print 'No. of unique genomes: '+str(no_uniq_genomes)
 	ppanini_output = read_ppanini_imp_genes_table(ppanini_output_file)
 	return metagenomic_table, ppanini_output, no_uniq_genomes 
-
 def pullgenes_fromcontigs(contig_file, gff3_file, fna_file, faa_file):
 	'''Pulls genes from contigs using the coordinates from GFF3 file provided
 
@@ -288,8 +284,8 @@ def read_dict_num(gene_annotations_file):
 					split_line = [re.sub('[\t\r\n]', '', i).strip() for i in line.split(' ')]
 				try:
 					dictX[split_line[0]] = float(split_line[1])
-				except Exception, e:
-					raise Exception('Error in utilities.py: '+str(e))
+				except:
+					pdb.set_trace()
 	return dictX
 
 def write_dict(dictX, gene_annotations_file):
@@ -305,7 +301,7 @@ def write_dict(dictX, gene_annotations_file):
 			foo.writelines(['\t'.join([i, dictX[i] ])+'\n'])
 
 def is_present(metadata, meta_type):
-	'''Returns True if meta_type is present in metadata extracted from mapper_file
+	'''Returns True if meta_type is present in metadata extracted from mappert_file
 
 	Input: metadata = [metadata strings]; Rows with # as first character in table
 		   meta_type = Type of metadata that you are querying e.g. FASTAS, NICHE etc.
