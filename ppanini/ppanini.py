@@ -8,8 +8,10 @@ import numpy
 import logging
 import scipy.stats
 import ppanini
+import pandas as pd
 
 from os.path import basename
+from numpy import percentile
 
 try:
     from . import utilities
@@ -25,6 +27,50 @@ logger = logging.getLogger(__name__)
 #beta = 0.5
 
 numpy.seterr(divide='ignore', invalid='ignore')
+
+# Multi-threading section
+def multi_pMethod(args):
+    """
+    Runs the pMethod function and returns the results plus the id of the node
+    """
+    
+    id, function, val, values = args
+    percentile_score = numpy.percentile(val, values)
+
+    return id, percentile_score
+
+def multiprocessing_function(function, val, preve_abun_mattrix):
+    """
+    Return the results from applying the data to the  function
+    """
+    function = numpy.percentile
+    def _multi_pMethod_args(function, val, values, ids_to_process):
+        for id in ids_to_process:
+            yield [id, function, val ,preve_abun_mattrix[id] ]
+    
+    if config.nprocesses > 1:
+        import multiprocessing
+        pool = multiprocessing.Pool(config.nprocesses)
+        
+        ids_to_process=[]
+        result = [0] * len(values)
+        for id in xrange(len(current_level_tests)):
+            ids_to_process.append(id)
+        
+        
+        results_by_id = pool.map(multi_pMethod, _multi_pMethod_args(function, val, values, ids_to_process))
+        pool.close()
+        pool.join()
+       
+        # order the results by id and apply results to nodes
+        for id, percentil_score in results_by_id:
+            result[id]=percentil_score
+    else:
+        result=[]
+        for i in xrange(len(preve_abun_mattrix)):
+            result.append(percentile(val, values))
+
+    return result
 
 def read_gene_table(config=config):
 	'''Returns the different elements from the gene table
@@ -239,9 +285,9 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, co
 	beta=config.beta
 	centroid_prev_abund_file_path = config.temp_folder+'/'+config.basename+'_centroid_prev_abund.txt'
 	
-	[niche_line, ind] = utilities.is_present(metadata, '#NICHE')
-
-	if niche_line:
+	#[niche_line, ind] = utilities.is_present(metadata, '#NICHE')
+    
+	if False:#niche_line:
 		niche_flag = True
 		centroid_prev_abund = get_niche_prevalence_abundance (centroids_data_matrix, \
 															  centroids_list, \
@@ -251,30 +297,31 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, co
 		centroid_prev_abund = {}
 		all_prevalence = [] 
 		all_abund = []
-		
-		for iter, centroid in enumerate(centroids_data_matrix):
-			#abund only where the gene is present in sample
-			#print 'cenetroid_id', centroids_list[iter], 'centroid', centroid
-			abund_i = [i for i in  centroid if i > 0]
-			
-			abund_score = numpy.mean(abund_i)
-			prev_score = float(sum(centroid > 0)/\
-						 float(len(centroid)))
-			
-			centroid_prev_abund[centroids_list[iter]] = {'mean_abundance': abund_score, \
-											 			 'prevalence': prev_score}
-			
-			all_prevalence += [centroid_prev_abund[centroids_list[iter]]['prevalence']]
-			all_abund += abund_i
-		
-		all_prevalence = sorted(all_prevalence)
-		all_abund = sorted(all_abund)
-		
-		for centroid in centroid_prev_abund:
-			p_score = 1/((1/(beta*(scipy.stats.percentileofscore(all_prevalence, centroid_prev_abund[centroid]['prevalence']))))+\
-				     (1/((1-beta)*(scipy.stats.percentileofscore(all_abund, centroid_prev_abund[centroid]['mean_abundance'])))))
-			centroid_prev_abund[centroid]['ppanini_score'] = p_score
-		
+		#centroid_prev_abund = pd.DataFrame(None, index = centroids_list,\
+        #                                   columns = ["abundance", "prevalence", "ppanini_score"])
+
+        for iter, centroid in enumerate(centroids_data_matrix):
+            #abund only where the gene is present in sample
+            #print 'cenetroid_id', centroids_list[iter], 'centroid', centroid
+            abund_i = [i for i in  centroid if i > 0]
+            
+            abund_score = numpy.mean(abund_i)
+            prev_score = float(sum(centroid > 0)/\
+            			 float(len(centroid)))
+            centroid_prev_abund[centroids_list[iter]] = {'mean_abundance': abund_score,'prevalence': prev_score}
+            
+            #centroid_prev_abund[centroid] = [abund_score, prev_score]
+            all_prevalence += [centroid_prev_abund[centroids_list[iter]]['prevalence']]
+            all_abund += abund_i
+	
+        all_prevalence = sorted(all_prevalence)
+        all_abund = sorted(all_abund)
+        		
+        for centroid in centroid_prev_abund:
+        	p_score = 1/((1/(beta*(numpy.percentile(all_prevalence, centroid_prev_abund[centroid]['prevalence']))))+\
+        		     (1/((1-beta)*(numpy.percentile(all_abund, centroid_prev_abund[centroid]['mean_abundance'])))))
+        	centroid_prev_abund[centroid]['ppanini_score'] = p_score
+
 	write_prev_abund_matrix(centroid_prev_abund, centroid_prev_abund_file_path)
 	
 	config.niche_flag = niche_flag
@@ -351,8 +398,8 @@ def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_
 	for centroid in centroid_prev_abund:
 		p_score = {}
 		for niche in centroid_prev_abund[centroid]['alpha_prevalence']:
-			p_score[niche] = 1/((1/((beta)*scipy.stats.percentileofscore(all_alpha_prev[niche], centroid_prev_abund[centroid]['alpha_prevalence'][niche])))+\
-															  (1/((1-beta)*scipy.stats.percentileofscore(all_alpha_abund, centroid_prev_abund[centroid]['mean_abundance']))))
+			p_score[niche] = 1/((1/((beta)*numpy.percentile(all_alpha_prev[niche], centroid_prev_abund[centroid]['alpha_prevalence'][niche])))+\
+															  (1/((1-beta)*numpy.percentile(all_alpha_abund, centroid_prev_abund[centroid]['mean_abundance']))))
 			centroid_prev_abund[centroid]['ppanini_score'] = p_score
         
 	dict_to_print = {}
@@ -404,6 +451,7 @@ def get_important_niche_centroids(config=config):
 		check = sum([centroid_prev_abund[centroid]['ppanini_score'][niche]>=ppanini_score for niche in centroid_prev_abund[centroid]['ppanini_score']])
 		if check:
 			imp_centroids[centroid]={'mean_abundance': centroid_prev_abund[centroid]['mean_abundance'], \
+                                     'alpha_prevalence': centroid_prev_abund[centroid]['alpha_prevalence'],\
 									 'beta_prevalence': centroid_prev_abund[centroid]['beta_prevalence']}
 			for niche in centroid_prev_abund[centroid]['alpha_prevalence']:
 				imp_centroids[centroid]['alpha_prevalence_' + niche] = centroid_prev_abund[centroid]['alpha_prevalence'][niche]

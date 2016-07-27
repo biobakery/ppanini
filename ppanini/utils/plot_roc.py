@@ -56,7 +56,6 @@ def main():
         lines = f.read().splitlines()
     essential_genes_uniref90_id_299_eco = [line.split('\t')[1] for line in lines]
     essential_genes = essential_genes_uniref90_id_299_eco + essential_genes_uniref90_id_deg
-    '''
     niches = ["stool", "buccal", "nares", "soil"]
     categories= ["metagenomic", "genomic"] 
     Betas = [.5]
@@ -82,10 +81,9 @@ def main():
                     
                     except ValueError:
                         print "ValueError for Posterior fornix roc calculation"
-    '''
 # Stool
     if plot_mg:
-        '''try:
+        try:
             
             fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Dropbox (Huttenhower Lab)/PPANINI/ASM/ranks/stool.ranks',\
                                    essential_genes= essential_genes, beta =0.5)
@@ -113,7 +111,7 @@ def main():
             
         except ValueError:
             print "ValueError for Buccal  roc calculation"  
-            '''
+        
     try:
         fpr, tpr = get_fpr_tpr(input_ppanini='/Users/rah/Documents/Hutlab/ppanini/output_tables/Stool_table.txt',\
                                   essential_genes= essential_genes, beta =.5)     
@@ -196,7 +194,6 @@ def main():
         
         except ValueError:
             print "ValueError for Posterior fornix roc calculation"
-    '''
     try:
         print roc_info
         roc_plot(roc_info, figure_name=config.output_folder+'/nares_roc_plot_ppanini') 
