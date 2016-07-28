@@ -35,7 +35,7 @@ def multi_pMethod(args):
     """
     
     id, function, val, values = args
-    percentile_score = numpy.percentile(val, values)
+    percentile_score = scipy.stats.percentileofscore(val, values)
 
     return id, percentile_score
 
@@ -43,7 +43,7 @@ def multiprocessing_function(function, val, preve_abun_mattrix):
     """
     Return the results from applying the data to the  function
     """
-    function = numpy.percentile
+    function = scipy.stats.percentileofscore
     def _multi_pMethod_args(function, val, values, ids_to_process):
         for id in ids_to_process:
             yield [id, function, val ,preve_abun_mattrix[id] ]
@@ -318,8 +318,8 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, co
         all_abund = sorted(all_abund)
         		
         for centroid in centroid_prev_abund:
-        	p_score = 1/((1/(beta*(numpy.percentile(all_prevalence, centroid_prev_abund[centroid]['prevalence']))))+\
-        		     (1/((1-beta)*(numpy.percentile(all_abund, centroid_prev_abund[centroid]['mean_abundance'])))))
+        	p_score = 1/((1/(beta*(scipy.stats.percentileofscore(all_prevalence, centroid_prev_abund[centroid]['prevalence']))))+\
+        		     (1/((1-beta)*(scipy.stats.percentileofscore(all_abund, centroid_prev_abund[centroid]['mean_abundance'])))))
         	centroid_prev_abund[centroid]['ppanini_score'] = p_score
 
 	write_prev_abund_matrix(centroid_prev_abund, centroid_prev_abund_file_path)
@@ -398,8 +398,8 @@ def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_
 	for centroid in centroid_prev_abund:
 		p_score = {}
 		for niche in centroid_prev_abund[centroid]['alpha_prevalence']:
-			p_score[niche] = 1/((1/((beta)*numpy.percentile(all_alpha_prev[niche], centroid_prev_abund[centroid]['alpha_prevalence'][niche])))+\
-															  (1/((1-beta)*numpy.percentile(all_alpha_abund, centroid_prev_abund[centroid]['mean_abundance']))))
+			p_score[niche] = 1/((1/((beta)*scipy.stats.percentileofscore(all_alpha_prev[niche], centroid_prev_abund[centroid]['alpha_prevalence'][niche])))+\
+															  (1/((1-beta)*scipy.stats.percentileofscore(all_alpha_abund, centroid_prev_abund[centroid]['mean_abundance']))))
 			centroid_prev_abund[centroid]['ppanini_score'] = p_score
         
 	dict_to_print = {}
