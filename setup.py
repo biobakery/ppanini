@@ -35,15 +35,24 @@ setuptools.setup(
     keywords=["important", "gene", "prioritization", "annotation" ],
     classifiers=[
         "Programming Language :: Python",
-        "Development Status :: 1 - Development",
+        "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
-        "License :: MIT License",
         "Operating System :: MacOS",
         "Operating System :: Unix",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2.7",
         "Topic :: Scientific/Engineering :: Bio-Informatics"
         ],
     packages=setuptools.find_packages(),
-    long_description=open('readme.md').read(),
+    long_description="PPANINI (Prioritization and Prediction of functional Annotations" + \
+    " for Novel and Important genes via automated data Network Integration) provides" + \
+    " a computational pipeline to prioritize microbial genes based on their metagenomic" + \
+    " properties (e.g. prevalence and abundance). The resulting prioritized list of gene" + \
+    " candidates can then be analyzed further using our visualization tools." + \
+    " PPANINI prioritizes important genes in a microbial community based on presenceabsence" + \
+    " and abundance from metagenomic data. Sequencing a metagenome typically produces millions" + \
+    " of short DNA/RNA reads. PPANINI takes a genes abundances table for all the samples in a study," + \
+    " it ranks the important genes",
     install_requires=[  
         #"Numpy >= 1.9.2",
         #"Scikit-learn  >= 0.14.1",
@@ -56,7 +65,7 @@ setuptools.setup(
     entry_points={
         'console_scripts': [
             'ppanini = ppanini.ppanini:_main',
-            'preppanini = ppanini.utils.preppanini:main',
+            'ppanini_abundance_table = ppanini.utils.preppanini:main',
             'ppanini_eval_roc = ppanini.utils.plot_roc:main',
             'ppanini_test = ppanini.tests.ppanini_test:main'
         ]},
