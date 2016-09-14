@@ -8,7 +8,6 @@ import numpy
 import logging
 import scipy.stats
 import ppanini
-import pandas as pd
 
 from os.path import basename
 from numpy import percentile
