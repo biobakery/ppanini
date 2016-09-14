@@ -12,6 +12,7 @@ from setuptools.command.install import install as _install
 # this has been added since PyPI has turned off the download stats
 # this will be removed when PyPI Warehouse is production as it
 # will have download stats
+VERSION = "0.6.4"
 COUNTER_URL="http://bitbucket.org/biobakery/ppanini/downloads/counter.txt"
 counter_file="counter.txt"
 if not os.path.isfile(counter_file):
@@ -24,7 +25,7 @@ if not os.path.isfile(counter_file):
 
 setuptools.setup(
     name="ppanini",
-    version="0.6.2",
+    version=VERSION,
     license="MIT",
     description="PPANINI: Prioritization and Prediction of functional Annotations for Novel and Important genes via automated data Network Integration.",
     author="Gholamali Rahnavard, Afrah Shafquat, Eric A. Franzosa, and Curtis Huttenhower",

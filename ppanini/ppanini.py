@@ -575,6 +575,7 @@ def read_parameters():
     parser.add_argument('--tshld-prev', dest = 'tshld_prev', default=config.tshld_prev, type =float, help='Percentile cutoff for Prevalence')
     parser.add_argument('--beta', default=config.beta, help='Beta parameter for weights on percentiles')
     parser.add_argument('--bypass-clustering', dest = 'bypass_clustering', default=config.bypass_clustering, action='store_true', help='Bypass clustering')
+    parser.add_argument('--version', action="version", version="%(prog)s "+config.version, help='prints the version')
     # parser.add_argument('--bypass-prev-abund', dest = 'bypass_prev_abund', default=False, action='store_true', help='Bypass quantifying abundance and prevalence')
     
     args = parser.parse_args()

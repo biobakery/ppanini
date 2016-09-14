@@ -84,7 +84,7 @@ def main():
 	parser.add_argument('--log-level', dest='log_level', default='DEBUG', help='Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]')
 
 	args = parser.parse_args()
-	nprocesses = int(args.threads)
+	nprocesses = args.threads
 	mapper_file = args.mapper_file
 	basename = args.basename
 	check_user_options(args)
@@ -208,10 +208,10 @@ def main():
 		#paths_dict['diamond'] = 'diamond'
 		if args.rapsearch:
 			paths_dict['rapsearch'] = args.rapsearch
-			annotate_genes.run_rapsearch(genome_catalog, args.uniref90, out_u90_fname, nprocesses, paths_dict)
+			annotate_genes.run_rapsearch(genome_catalog, args.uniref90, out_u90_fname, paths_dict, nprocesses)
 		elif args.diamond:
 			paths_dict['diamond'] = args.diamond
-			annotate_genes.run_diamond(genome_catalog, args.uniref90, out_u90_fname, nprocesses, paths_dict)
+			annotate_genes.run_diamond(genome_catalog, args.uniref90, out_u90_fname, paths_dict, nprocesses)
 		else:
 			raise Exception('No similarity search software found: Please use --diamond or --rapsearch to specify the path to software')
 		logger.debug('Running SEARCH against UniRef')

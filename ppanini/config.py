@@ -1,6 +1,6 @@
 
 #default values for user options
-
+version = '0.6.4'
 input_table = ''
 output_folder = ''
 gene_catalog = '' 
