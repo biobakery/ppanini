@@ -6,7 +6,7 @@
 
  * Please direct questions to the [PPANINI google group](https://groups.google.com/forum/#!forum/ppanini-users) (subscribe to receive PPANINI news).
 
- * If you use the HUMAnN2 software, please cite our manuscript: TBD
+ * If you use the PPANINI software, please cite our manuscript: TBD
 
 ----
 
