@@ -312,9 +312,10 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, co
             #centroid_prev_abund[centroid] = [abund_score, prev_score]
             all_prevalence += [centroid_prev_abund[centroids_list[iter]]['prevalence']]
             all_abund += abund_i
-	
-        all_prevalence = sorted(all_prevalence)
-        all_abund = sorted(all_abund)
+	    all_prevalence = numpy.asarray(all_prevalence)
+        all_abund = numpy.asarray(all_abund)
+        all_prevalence = numpy.sort(all_prevalence)
+        all_abund = numpy.sort(all_abund)
         		
         for centroid in centroid_prev_abund:
         	p_score = 1/((1/(beta*(scipy.stats.percentileofscore(all_prevalence, centroid_prev_abund[centroid]['prevalence']))))+\
