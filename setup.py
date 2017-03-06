@@ -12,7 +12,7 @@ from setuptools.command.install import install as _install
 # this has been added since PyPI has turned off the download stats
 # this will be removed when PyPI Warehouse is production as it
 # will have download stats
-VERSION = "0.6.4"
+VERSION = "0.7.0"
 COUNTER_URL="http://bitbucket.org/biobakery/ppanini/downloads/counter.txt"
 counter_file="counter.txt"
 if not os.path.isfile(counter_file):

@@ -11,13 +11,14 @@ import ppanini
 
 from os.path import basename
 from numpy import percentile
+from collections import namedtuple
 
 try:
     from . import utilities
     from . import annotate_genes
     from . import config
 
-except ImportError, e:
+except ImportError:
     sys.exit("CRITICAL ERROR: Unable to find the PPANINI python package." +
         " Please check your install."+str(e))
 
@@ -267,38 +268,45 @@ def get_centroids_table(all_centroids, metadata, config=config):
 
 
 def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, config=config):
-	'''Returns the dict of centroids with their prevalence and abundance
-
-	Input:	centroids_data_matrix = {gene_centroid: [Gene centroid abundance across samples]}
-			centroids_list = list of all the centroids
-			metadata = [metadata strings]; Rows with # as first character in table
-			beta = parameter value 
-
-	Output: centroid_prev_abund = {centroid: {'mean_abundance': mean abundance, 'prevalence': prevalence}}
-			all_prevalence = [List of all observed gene centroid prevalence values (>0) across samples]
-			all_abund = [List of all calculated gene centroid abundance across samples]
-			flag = True (if NICHE PRESENT) or False(if NICHE ABSENT)'''
-	
-	logger.debug('get_prevalence_abundance')
-
-	beta=config.beta
-	centroid_prev_abund_file_path = config.temp_folder+'/'+config.basename+'_centroid_prev_abund.txt'
-	
-	#[niche_line, ind] = utilities.is_present(metadata, '#NICHE')
+    '''Returns the dict of centroids with their prevalence and abundance
     
-	if False:#niche_line:
-		niche_flag = True
-		centroid_prev_abund = get_niche_prevalence_abundance (centroids_data_matrix, \
-															  centroids_list, \
-															  niche_line)
-	else:
-		niche_flag = False
-		centroid_prev_abund = {}
-		all_prevalence = [] 
-		all_abund = []
-		#centroid_prev_abund = pd.DataFrame(None, index = centroids_list,\
+    Input:	centroids_data_matrix = {gene_centroid: [Gene centroid abundance across samples]}
+    		centroids_list = list of all the centroids
+    		metadata = [metadata strings]; Rows with # as first character in table
+    		beta = parameter value 
+    
+    Output: centroid_prev_abund = {centroid: {'mean_abundance': mean abundance, 'prevalence': prevalence}}
+    		all_prevalence = [List of all observed gene centroid prevalence values (>0) across samples]
+    		all_abund = [List of all calculated gene centroid abundance across samples]
+    		flag = True (if NICHE PRESENT) or False(if NICHE ABSENT)'''
+    
+    logger.debug('get_prevalence_abundance')
+    
+    beta=config.beta
+    centroid_prev_abund_file_path = config.temp_folder+'/'+config.basename+'_centroid_prev_abund.txt'
+    
+    [niche_line, ind] = utilities.is_present(metadata, '#NICHE')
+    
+    # use this if niche is specified as a row in the abundance table
+    if niche_line:
+        niche_flag = True
+        centroid_prev_abund = get_niche_prevalence_abundance (centroids_data_matrix, \
+        													  centroids_list, \
+        													  niche_line)
+        write_prev_abund_matrix(centroid_prev_abund, centroid_prev_abund_file_path)
+        
+        config.niche_flag = niche_flag
+        return centroid_prev_abund 
+    # use this if niche is NOT specified as a row in the abundance table
+    else:
+    	niche_flag = False
+    	centroid_prev_abund = {}
+    	all_prevalence = [] 
+    	all_abund = []
+        Row = namedtuple("Row", ["alpha_prevalence", "mean_abundance", "beta_prevalence", "ppanini_score"], verbose=False, rename=False)
+    	#centroid_prev_abund = pd.DataFrame(None, index = centroids_list,\
         #                                   columns = ["abundance", "prevalence", "ppanini_score"])
-
+    
         for iter, centroid in enumerate(centroids_data_matrix):
             #abund only where the gene is present in sample
             #print 'cenetroid_id', centroids_list[iter], 'centroid', centroid
@@ -307,66 +315,67 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, co
             abund_score = numpy.mean(abund_i)
             prev_score = float(sum(centroid > 0)/\
             			 float(len(centroid)))
-            centroid_prev_abund[centroids_list[iter]] = {'mean_abundance': abund_score,'prevalence': prev_score}
+            centroid_prev_abund[centroids_list[iter]] = Row(alpha_prevalence = prev_score, mean_abundance= abund_score, beta_prevalence = None, ppanini_score = None)
             
             #centroid_prev_abund[centroid] = [abund_score, prev_score]
-            all_prevalence += [centroid_prev_abund[centroids_list[iter]]['prevalence']]
+            all_prevalence += [prev_score]#[centroid_prev_abund[centroids_list[iter]].alpha_prevalence]
             all_abund += abund_i
-	    all_prevalence = numpy.asarray(all_prevalence)
+        all_prevalence = numpy.asarray(all_prevalence)
         all_abund = numpy.asarray(all_abund)
         all_prevalence = numpy.sort(all_prevalence)
         all_abund = numpy.sort(all_abund)
         		
         for centroid in centroid_prev_abund:
-        	p_score = 1/((1/(beta*(scipy.stats.percentileofscore(all_prevalence, centroid_prev_abund[centroid]['prevalence']))))+\
-        		     (1/((1-beta)*(scipy.stats.percentileofscore(all_abund, centroid_prev_abund[centroid]['mean_abundance'])))))
-        	centroid_prev_abund[centroid]['ppanini_score'] = p_score
-
-	write_prev_abund_matrix(centroid_prev_abund, centroid_prev_abund_file_path)
-	
-	config.niche_flag = niche_flag
-	return centroid_prev_abund 
+            p_score = 1/((1/(beta*(scipy.stats.percentileofscore(all_prevalence, centroid_prev_abund[centroid].alpha_prevalence))))+\
+            	     (1/((1-beta)*(scipy.stats.percentileofscore(all_abund, centroid_prev_abund[centroid].mean_abundance)))))
+            centroid_prev_abund[centroid] = centroid_prev_abund[centroid]._replace(ppanini_score = p_score)
+    
+    write_prev_abund_matrix(centroid_prev_abund, centroid_prev_abund_file_path)
+    
+    config.niche_flag = niche_flag
+    return centroid_prev_abund 
 
 def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_line, config=config):
-	'''Returns the dict of centroids with their prevalence and abundance
+    '''Returns the dict of centroids with their prevalence and abundance
+    
+    Input:	centroids_data_matrix = {gene_centroid: [Gene centroid abundance across samples]}
+    		metadata = [metadata strings]; Rows with # as first character in table
+    		line = line from mapper file containing NICHE information
+    
+    Output: centroid_prev_abund = {centroid: {'mean_abundance': float_mean abundance, 
+    										  'alpha_prevalence': {'NICHE**': prevalence of centroid across samples within niche, ...}},
+    										  'b_prev': float_median of alpha prevalence within niches for centroid}}
+    		all_alpha_prev = {niche: List of all observed gene centroid alpha prevalence values (>0) across samples within each niche}
+    		all_mean_abund = [List of all calculated mean gene centroid abundance across samples]'''
+    
+    logger.debug('get_niche_prevalence_abundance')
+    
+    beta=config.beta
+    all_centroid_prev_abund_file_path = config.temp_folder+'/'+config.basename+'_centroid_prev_abund_dict_all.txt'
+    centroid_prev_abund_file_path = config.temp_folder+'/'+config.basename+'_centroid_prev_abund_ppanini_score_all.txt'
+    
+    niches = {}
+    split_i = [re.sub('[\r\t\n]', '', i) for i in niche_line.split('\t')[1:]]
+    for i, val in enumerate(split_i):
+    	try:
+    		niches[val] += [i]
+    	except KeyError:
+    		niches[val] = [i]
+    
+    niches_label = niches.keys()
+    centroid_prev_abund = {}
 
-	Input:	centroids_data_matrix = {gene_centroid: [Gene centroid abundance across samples]}
-			metadata = [metadata strings]; Rows with # as first character in table
-			line = line from mapper file containing NICHE information
-
-	Output: centroid_prev_abund = {centroid: {'mean_abundance': float_mean abundance, 
-											  'alpha_prevalence': {'NICHE**': prevalence of centroid across samples within niche, ...}},
-											  'b_prev': float_median of alpha prevalence within niches for centroid}}
-			all_alpha_prev = {niche: List of all observed gene centroid alpha prevalence values (>0) across samples within each niche}
-			all_mean_abund = [List of all calculated mean gene centroid abundance across samples]'''
-
-	logger.debug('get_niche_prevalence_abundance')
-	
-	beta=config.beta
-	all_centroid_prev_abund_file_path = config.temp_folder+'/'+config.basename+'_centroid_prev_abund_dict_all.txt'
-	centroid_prev_abund_file_path = config.temp_folder+'/'+config.basename+'_centroid_prev_abund_ppanini_score_all.txt'
-
-	niches = {}
-	split_i = [re.sub('[\r\t\n]', '', i) for i in niche_line.split('\t')[1:]]
-	for i, val in enumerate(split_i):
-		try:
-			niches[val] += [i]
-		except KeyError:
-			niches[val] = [i]
-	
-	niches_label = niches.keys()
-	centroid_prev_abund = {}
-
-	all_alpha_prev = {}
-	all_alpha_abund = []
-
-	for niche in niches_label:
-		all_alpha_prev[niche] = []
-
-	for i, centroid in enumerate(centroids_list):
-		centroid_prev_abund[centroid] = {}
-		a_prev = {}
-		a_abund = {}
+    all_alpha_prev = {}
+    all_alpha_abund = []
+    
+    for niche in niches_label:
+    	all_alpha_prev[niche] = []
+    Row = namedtuple("Row", ["alpha_prevalence", "mean_abundance", "beta_prevalence", "ppanini_score"], verbose=False, rename=False)
+    for i, centroid in enumerate(centroids_list):
+    	#centroid_prev_abund[centroid] = {}
+        
+    	a_prev = {}
+    	a_abund = {}
         for niche in niches_label:
             a_prev[niche] = 0
             a_abund[niche] = []
@@ -376,45 +385,34 @@ def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_
                   a_abund[niche] += [centroids_data_matrix[i][ind]]
             a_prev[niche] = float(a_prev[niche])/float(len(niches[niche]))
             all_alpha_prev[niche] += [a_prev[niche]]
-
+    
             if not a_abund[niche]: #if gene completely empty throughout samples
             	a_abund[niche] = [0]
             a_abund[niche] = numpy.mean(numpy.array(a_abund[niche]))
-
+    
         max_mean_abund = max(a_abund.values())
         all_alpha_abund += [max_mean_abund]
         b_prev = numpy.median(a_prev.values())
+        centroid_prev_abund[centroid] = Row(alpha_prevalence=a_prev, mean_abundance=max_mean_abund, beta_prevalence=b_prev, ppanini_score = None)
+    
+    #Percentile of score requires sorted vectors! Blekh!
+    all_alpha_abund = sorted(all_alpha_abund)
+    
+    for niche in all_alpha_prev:
+    	all_alpha_prev[niche] = sorted(all_alpha_prev[niche])
 
-        centroid_prev_abund[centroid]['alpha_prevalence'] = a_prev
-        centroid_prev_abund[centroid]['mean_abundance'] = max_mean_abund #a_abund
-        centroid_prev_abund[centroid]['beta_prevalence'] = b_prev
-
-	#Percentile of score requires sorted vectors! Blekh!
-	all_alpha_abund = sorted(all_alpha_abund)
-
-	for niche in all_alpha_prev:
-		all_alpha_prev[niche] = sorted(all_alpha_prev[niche])
-
-	for centroid in centroid_prev_abund:
-		p_score = {}
-		for niche in centroid_prev_abund[centroid]['alpha_prevalence']:
-			p_score[niche] = 1/((1/((beta)*scipy.stats.percentileofscore(all_alpha_prev[niche], centroid_prev_abund[centroid]['alpha_prevalence'][niche])))+\
-															  (1/((1-beta)*scipy.stats.percentileofscore(all_alpha_abund, centroid_prev_abund[centroid]['mean_abundance']))))
-			centroid_prev_abund[centroid]['ppanini_score'] = p_score
+    for centroid in centroid_prev_abund:
+    	p_score = {}
+    	for niche in centroid_prev_abund[centroid].alpha_prevalence:
+            p_score[niche] = 1/((1/((beta)*scipy.stats.percentileofscore(all_alpha_prev[niche], centroid_prev_abund[centroid].alpha_prevalence[niche])))+\
+            												  (1/((1-beta)*scipy.stats.percentileofscore(all_alpha_abund, centroid_prev_abund[centroid].mean_abundance))))
+            centroid_prev_abund[centroid] = centroid_prev_abund[centroid]._replace(ppanini_score = p_score)
         
-	dict_to_print = {}
 
-	for centroid in centroid_prev_abund:
-		dict_to_print[centroid] = {'beta_prevalence': centroid_prev_abund[centroid]['beta_prevalence'], \
-								   'mean_abundance': centroid_prev_abund[centroid]['mean_abundance']}
-		for niche in centroid_prev_abund[centroid]['alpha_prevalence']:
-			dict_to_print[centroid]['alpha_prevalence_'+niche] = centroid_prev_abund[centroid]['alpha_prevalence'][niche]
-			dict_to_print[centroid]['ppanini_score_'+niche] = centroid_prev_abund[centroid]['ppanini_score'][niche]
-	
-	write_prev_abund_matrix(dict_to_print, all_centroid_prev_abund_file_path)
-	write_prev_abund_matrix(dict_to_print, centroid_prev_abund_file_path)
-	
-	return centroid_prev_abund
+    write_prev_abund_matrix(centroid_prev_abund, all_centroid_prev_abund_file_path)
+    write_prev_abund_matrix(centroid_prev_abund, centroid_prev_abund_file_path)
+    
+    return centroid_prev_abund
 
 def get_important_niche_centroids(config=config):
 	'''Returns the dict of important gene centroids [>= 10th percentile of alpha_prevalence and mean abundance]
@@ -448,14 +446,15 @@ def get_important_niche_centroids(config=config):
 	imp_centroids = {}
 
 	for centroid in centroid_prev_abund:
-		check = sum([centroid_prev_abund[centroid]['ppanini_score'][niche]>=ppanini_score for niche in centroid_prev_abund[centroid]['ppanini_score']])
+		check = sum([centroid_prev_abund[centroid].ppanini_score[niche]>=ppanini_score for niche in centroid_prev_abund[centroid].ppanini_score])
 		if check:
-			imp_centroids[centroid]={'mean_abundance': centroid_prev_abund[centroid]['mean_abundance'], \
-                                     'alpha_prevalence': centroid_prev_abund[centroid]['alpha_prevalence'],\
-									 'beta_prevalence': centroid_prev_abund[centroid]['beta_prevalence']}
-			for niche in centroid_prev_abund[centroid]['alpha_prevalence']:
-				imp_centroids[centroid]['alpha_prevalence_' + niche] = centroid_prev_abund[centroid]['alpha_prevalence'][niche]
-				imp_centroids[centroid]['ppanini_score_'+niche] = centroid_prev_abund[centroid]['ppanini_score'][niche]
+			imp_centroids[centroid] = centroid_prev_abund[centroid]
+                        '''{'mean_abundance': centroid_prev_abund[centroid].mean_abundance, \
+                                                 'alpha_prevalence': centroid_prev_abund[centroid].alpha_prevalence,\
+						                         'beta_prevalence': centroid_prev_abund[centroid].beta_prevalence}'''
+			for niche in centroid_prev_abund[centroid].alpha_prevalence:
+				imp_centroids[centroid].alpha_prevalence[niche] = centroid_prev_abund[centroid].alpha_prevalence[niche]
+				imp_centroids[centroid].ppanini_score[niche] = centroid_prev_abund[centroid].ppanini_score[niche]
 	
 	write_prev_abund_matrix(imp_centroids, output_folder + '/' + imp_centroid_prev_abund_file_path)
 	
@@ -482,35 +481,31 @@ def get_important_centroids(config=config):
 	imp_centroids = {}
 
 	for centroid in centroid_prev_abund:
-		check = centroid_prev_abund[centroid]['ppanini_score'] >= ppanini_score
+		check = centroid_prev_abund[centroid].ppanini_score >= ppanini_score
 		if check:
-			imp_centroids[centroid]={'mean_abundance': centroid_prev_abund[centroid]['mean_abundance'], \
-									 'prevalence': centroid_prev_abund[centroid]['prevalence'],\
-									 'ppanini_score': centroid_prev_abund[centroid]['ppanini_score']}
+			imp_centroids[centroid]=centroid_prev_abund[centroid]
 	
 	write_prev_abund_matrix(imp_centroids, config.output_folder + '/' + imp_centroid_prev_abund_file_path)
 	
 	return imp_centroids
 
 def write_prev_abund_matrix(centroid_prev_abund, out_file):
-	'''Writes the centroids prevalence and abundance information in text file
-
-	Input: centroid_prev_abund = {centroids: {'mean_abundance': mean abundance, ...}}
-		   out_file = output_filename
-
-	Output: Writes the centroids dictionary to the output_filename'''
-
-	logger.debug('write_prev_abund_matrix')
-
-	keys = []
-	for i in centroid_prev_abund:
-		keys = centroid_prev_abund[i].keys()
-		break
-	
-	with open(out_file,'w') as foo:
-		foo.writelines(['#Centroids\t' + str.join('\t', keys) + '\n'])
-		for centroid in centroid_prev_abund:
-			foo.writelines([str.join('\t', [centroid] + [str(centroid_prev_abund[centroid][key]) for key in keys]) + '\n'])
+    '''Writes the centroids prevalence and abundance information in text file
+    
+    Input: centroid_prev_abund = {centroids: {'mean_abundance': mean abundance, ...}}
+    	   out_file = output_filename
+    
+    Output: Writes the centroids dictionary to the output_filename'''
+    
+    logger.debug('write_prev_abund_matrix')
+    keys = []
+    for i in centroid_prev_abund:
+    	keys = centroid_prev_abund[i]._asdict().keys()
+    	break
+    with open(out_file,'w') as foo:
+    	foo.writelines(['#Centroids\t' + str.join('\t', keys) + '\n'])
+    	for centroid in centroid_prev_abund:
+    		foo.writelines([str.join('\t', [centroid] + [str(centroid_prev_abund[centroid][key]) for key in range(len(keys))]) + '\n'])
 
 def read_prevalence_abundance_table(input_table):
 	'''Need to redo this'''
@@ -658,16 +653,17 @@ def run():
     config.centroid_prev_abund = centroid_prev_abund
 
 def  prioritize_centroids():
-	if config.verbose =='DEBUG':
-		print "Prioritize centroids..."
-	if config.niche_flag:
-		imp_centroids = get_important_niche_centroids()
-	else:
-		imp_centroids = get_important_centroids()
-
-	if config.verbose =='DEBUG':
-		print "DONE"
-	return imp_centroids
+    if config.verbose =='DEBUG':
+    	print "Prioritize centroids..."
+    if config.niche_flag:
+        imp_centroids = get_important_niche_centroids()
+        print ("Niche")
+    
+    else:
+    	imp_centroids = get_important_centroids()
+    
+    if config.verbose =='DEBUG':
+    	print "DONE"
 
 def _main():
    read_parameters()
