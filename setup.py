@@ -56,6 +56,7 @@ setuptools.setup(
     " it ranks the important genes",
     install_requires=[  
         #"Numpy >= 1.9.2",
+        "Scipy >= 0.13.0"
         #"Scikit-learn  >= 0.14.1",
         #"Matplotlib >= 1.1.1",
         #"Biopython >= 1.66"
