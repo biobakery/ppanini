@@ -284,14 +284,16 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, co
     
     beta=config.beta
     centroid_prev_abund_file_path = config.temp_folder+'/'+config.basename+'_centroid_prev_abund.txt'
-    
+    set_niches = []
     [niche_line, ind] = utilities.is_present(metadata, '#NICHE')
-    set_niches = list(set(re.split(r'\t|\n|\r+', niche_line)))
-    set_niches = list([item.title() for item in set_niches ])
+    if len(niche_line) >0:
+        set_niches = list(set(re.split(r'\t|\n|\r+', niche_line)))
+        set_niches = list([item.title() for item in set_niches ])
     # use this if niche is specified as a row in the abundance table
     # and we have more than one niche (there is #Niche + '' as part of niche line + one niche 
-    set_niches.remove('')
-    set_niches.remove('#Niche')
+        set_niches.remove('')
+        set_niches.remove('#Niche')
+        
     
     if niche_line and len(set_niches) > 1  :
         print ("Niches have been provided in abundance table are:", set_niches)
