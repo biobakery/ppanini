@@ -12,6 +12,9 @@ import ppanini
 from os.path import basename
 from numpy import percentile
 from collections import namedtuple
+from operator import attrgetter, itemgetter
+ppanini_table_row = namedtuple("ppanini_table_row", ["alpha_prevalence", "prevalence_percentile", "mean_abundance","abund_percentile", "beta_prevalence", "ppanini_score"], verbose=False, rename=False)
+import pandas as pd
 
 try:
     from . import utilities
@@ -73,61 +76,62 @@ def multiprocessing_function(function, val, preve_abun_mattrix):
     return result
 
 def read_gene_table(config=config):
-	'''Returns the different elements from the gene table
+    '''Returns the different elements from the gene table
+    
+    config.input_table = Filename of the gene_table
+    
+    Output: metadata = [metadata strings]; Rows with # as first character in table
+    		uniref_dm = {UniRef_XYZ: numpy.array(abundance), ...}
+    		gi_dm = {GENE_ID_UNKNOWN_UNIREF: numpy.array(abundance), ...}'''
+    
+    logger.debug('read_gene_table')
+    #gene_table = pd.read_csv(config.input_table, sep='\t', index_col=0)
 
-	config.input_table = Filename of the gene_table
-
-	Output: metadata = [metadata strings]; Rows with # as first character in table
-			uniref_dm = {UniRef_XYZ: numpy.array(abundance), ...}
-			gi_dm = {GENE_ID_UNKNOWN_UNIREF: numpy.array(abundance), ...}'''
-	
-	logger.debug('read_gene_table')
-
-	gene_table = open(config.input_table)
-	metadata = []
-	uniref_dm, gis_dm = {}, {}
-	count = 0
-
-	for line in gene_table:
-		count +=1
-		
-		if line.startswith('#'):
-			metadata += [line]
-		else:
-			split_i = line.split('\t')
-			annot = split_i[0].split('|') #geneID column split 
-			try:
-				u90_annot = [i for i in annot if 'UniRef90' in i][0]
-			except: #Incase Gene table is not annotated with UniRef90
-				u90_annot = 'UniRef90_unknown'
-			try:
-				u50_annot = [i for i in annot if 'UniRef50' in i][0]
-			except: #Incase Gene table is not annotated with UniRef50
-				u50_annot = 'UniRef50_unknown'
-			
-			data_row = numpy.array([float(i) for i in split_i[1:]])
-			
-			if 'UniRef90_unknown' == u90_annot:
-				if 'UniRef50_unknown' == u50_annot:
-					try: #same name
-						gis_dm[annot[0]] += data_row
-					except:
-						gis_dm[annot[0]] = data_row
-				else: #same uniref90 id
-					try:
-						uniref_dm[u50_annot] += data_row
-					except KeyError:
-						uniref_dm[u50_annot] = data_row
-			else: #same uniref90 id
-				try:
-					uniref_dm[u90_annot] += data_row
-				except KeyError:
-					uniref_dm[u90_annot] = data_row	
-				
-	if config.verbose == 'DEBUG':
-		print ("Gene Table contains %s genes." % count)
-
-	return [uniref_dm, gis_dm, metadata]
+    gene_table = open(config.input_table)
+    metadata = []
+    uniref_dm, gis_dm = {}, {}
+    count = 0
+    
+    for line in gene_table:
+    	count +=1
+    	
+    	if line.startswith('#'):
+    		metadata += [line]
+    	else:
+    		split_i = line.split('\t')
+    		annot = split_i[0].split('|') #geneID column split 
+    		try:
+    			u90_annot = [i for i in annot if 'UniRef90' in i][0]
+    		except: #Incase Gene table is not annotated with UniRef90
+    			u90_annot = 'UniRef90_unknown'
+    		try:
+    			u50_annot = [i for i in annot if 'UniRef50' in i][0]
+    		except: #Incase Gene table is not annotated with UniRef50
+    			u50_annot = 'UniRef50_unknown'
+    		
+    		data_row = numpy.array([float(i) for i in split_i[1:]])
+    		
+    		if 'UniRef90_unknown' == u90_annot:
+    			if 'UniRef50_unknown' == u50_annot:
+    				try: #same name
+    					gis_dm[annot[0]] += data_row
+    				except:
+    					gis_dm[annot[0]] = data_row
+    			else: #same uniref90 id
+    				try:
+    					uniref_dm[u50_annot] += data_row
+    				except KeyError:
+    					uniref_dm[u50_annot] = data_row
+    		else: #same uniref90 id
+    			try:
+    				uniref_dm[u90_annot] += data_row
+    			except KeyError:
+    				uniref_dm[u90_annot] = data_row	
+    			
+    if config.verbose == 'DEBUG':
+    	print ("Gene Table contains %s genes." % count)
+    
+    return [uniref_dm, gis_dm, metadata]
 
 def get_centroids_fromUCLUST(genes, config=config):
 	'''Returns the clusters dictionary
@@ -162,40 +166,39 @@ def get_centroids_fromUCLUST(genes, config=config):
 	return cluster_dict
 
 def get_centroids(uniref_dm, gi_dm, config=config):
-	'''Returns the dict of all centroids containing clusters of gene IDs
-
-	Input:	uniref_dm = {UniRef_XYZ: numpy.array(abundance), ...}
-			gi_dm = {GENE_ID_UNKNOWN_UNIREF: numpy.array(abundance), ...}
-			
-	Output: gc_dm = {gene_centroid : numpy.array(abundance), ...}'''
-	
-	logger.debug('get_centroids')
-
-	centroids_fasta = {}
-	
-	if not config.bypass_clustering:
-		if config.uclust_file == '':
-			centroid_gis = get_clusters() #all UniRef90_unknowns are clustered across samples
-		else:
-			centroid_gis = get_centroids_fromUCLUST(gi_dm.keys())
-	else:
-		centroid_gis = gi_dm
-
-	gc_dm = {}
-
-	for centroid in centroid_gis:
-		for gene in centroid_gis[centroid]:
-			if gene in gi_dm:
-				try:
-					gc_dm[centroid] += gi_dm[gene]
-				except:
-					gc_dm[centroid] = gi_dm[gene]
-	
-	for centroid in uniref_dm:
-		gc_dm[centroid] = uniref_dm[centroid]
-	
-	return gc_dm
-
+    '''Returns the dict of all centroids containing clusters of gene IDs
+    
+    Input:	uniref_dm = {UniRef_XYZ: numpy.array(abundance), ...}
+    		gi_dm = {GENE_ID_UNKNOWN_UNIREF: numpy.array(abundance), ...}
+    		
+    Output: gc_dm = {gene_centroid : numpy.array(abundance), ...}'''
+    
+    logger.debug('get_centroids')
+    
+    centroids_fasta = {}
+    
+    if not config.bypass_clustering:
+    	if config.uclust_file == '':
+    		centroid_gis = get_clusters() #all UniRef90_unknowns are clustered across samples
+    	else:
+    		centroid_gis = get_centroids_fromUCLUST(gi_dm.keys())
+    else:
+    	centroid_gis = gi_dm
+    
+    gc_dm = {}
+    
+    for centroid in centroid_gis:
+    	for gene in centroid_gis[centroid]:
+    		if gene in gi_dm:
+    			try:
+    				gc_dm[centroid] += gi_dm[gene]
+    			except:
+    				gc_dm[centroid] = gi_dm[gene]
+    
+    for centroid in uniref_dm:
+    	gc_dm[centroid] = uniref_dm[centroid]
+    print ("Number of cnteroid: %d"%(len(gc_dm)))
+    return gc_dm
 
 def get_clusters(config=config): #ONLY FOR THE UNIREF UNANNOTATED
 	'''Returns the dict of unannotated gene centroids containing clusters of genes at 90% similarity
@@ -234,40 +237,43 @@ def get_clusters(config=config): #ONLY FOR THE UNIREF UNANNOTATED
 
 
 def get_centroids_table(all_centroids, metadata, config=config):
-	'''Returns data matrix containing gene centroids and abundance per sample
+    '''Returns data matrix containing gene centroids and abundance per sample
+    
+    Input:	metadata = [metadata strings]; Rows with # as first character in table
+    		all_centroids = all_centroids = {gene_centroid : numpy.array(abundance), ...}
+    
+    Output: norm_data_matrix = numpy.array([0,0,0.0,...],[0,0,0.0,...],...)
+    		centroids_list = [List of centroids]'''
+    
+    logger.debug('get_centroids_table')
+    #print all_centroids
+    centroids_data_matrix = pd.DataFrame.from_dict(all_centroids).T
+    '''print centroids_data_matrix
+    return
+    centroids_data_matrix = []
+    centroids_list = []
+    centroids_data_matrix
+    for centroid in all_centroids:
+    	centroids_list +=[centroid]
+    	centroids_data_matrix +=[all_centroids[centroid]]
+        
+    #NORMALIZATION PER SAMPLE
+    centroids_data_matrix = numpy.array(centroids_data_matrix)'''
+    norm_data_matrix = centroids_data_matrix/sum(centroids_data_matrix)
+    norm_data_matrix = norm_data_matrix*1e6
+    gene_centroids_table_file_path = config.temp_folder+'/'+config.basename+'_gene_centroids_table.txt'
+    
+    '''with open(gene_centroids_table_file_path,'w') as foo:
+    	foo.writelines(metadata)
+    	for i, val in enumerate(centroids_list):
+    		foo.writelines([str.join('\t', [val] + [str(j) for j in norm_data_matrix[i]]) + '\n'])'''
+    norm_data_matrix.to_csv(gene_centroids_table_file_path, sep='\t')
+    		
+    
+    return norm_data_matrix
 
-	Input:	metadata = [metadata strings]; Rows with # as first character in table
-			all_centroids = all_centroids = {gene_centroid : numpy.array(abundance), ...}
 
-	Output: norm_data_matrix = numpy.array([0,0,0.0,...],[0,0,0.0,...],...)
-			centroids_list = [List of centroids]'''
-	
-	logger.debug('get_centroids_table')
-
-	centroids_data_matrix = []
-	centroids_list = []
-	
-	for centroid in all_centroids:
-		centroids_list +=[centroid]
-		centroids_data_matrix +=[all_centroids[centroid]]
-
-	#NORMALIZATION PER SAMPLE
-	centroids_data_matrix = numpy.array(centroids_data_matrix)
-	norm_data_matrix = centroids_data_matrix/sum(centroids_data_matrix)
-	norm_data_matrix = norm_data_matrix*1e6
-
-	gene_centroids_table_file_path = config.temp_folder+'/'+config.basename+'_gene_centroids_table.txt'
-	
-	with open(gene_centroids_table_file_path,'w') as foo:
-		foo.writelines(metadata)
-		for i, val in enumerate(centroids_list):
-			foo.writelines([str.join('\t', [val] + [str(j) for j in norm_data_matrix[i]]) + '\n'])
-			
-
-	return [norm_data_matrix, centroids_list]
-
-
-def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, config=config):
+def get_prevalence_abundance(centroids_data_matrix, metadata, config=config):
     '''Returns the dict of centroids with their prevalence and abundance
     
     Input:	centroids_data_matrix = {gene_centroid: [Gene centroid abundance across samples]}
@@ -294,7 +300,6 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, co
         set_niches.remove('')
         set_niches.remove('#Niche')
         
-    
     if niche_line and len(set_niches) > 1  :
         print ("Niches have been provided in abundance table are:", set_niches)
         niche_flag = True
@@ -309,44 +314,36 @@ def get_prevalence_abundance(centroids_data_matrix, centroids_list, metadata, co
     # use this if niche is NOT specified as a row in the abundance table
     else:
     	niche_flag = False
-    	centroid_prev_abund = {}
+    	centroid_prev_abund = pd.DataFrame(index=centroids_data_matrix.index, columns=ppanini_table_row._fields)
     	all_prevalence = [] 
     	all_abund = []
         all_prevalence_percentile = []
         all_abund_percentile = []
-        ppanini_table_row = namedtuple("ppanini_table_row", ["alpha_prevalence", "mean_abundance", "beta_prevalence", "ppanini_score"], verbose=False, rename=False)
+        #ppanini_table_row = namedtuple("ppanini_table_row", ["alpha_prevalence", "mean_abundance", "beta_prevalence", "ppanini_score"], verbose=False, rename=False)
     	#centroid_prev_abund = pd.DataFrame(None, index = centroids_list,\
         #                                   columns = ["abundance", "prevalence", "ppanini_score"])
-    
-        for iter, centroid in enumerate(centroids_data_matrix):
-            #abund only where the gene is present in sample
-            #print 'cenetroid_id', centroids_list[iter], 'centroid', centroid
-            abund_i = [i for i in  centroid if i > 0]
-            
-            abund_score = numpy.mean(abund_i)
-            prev_score = float(sum(centroid > 0)/\
-            			 float(len(centroid)))
-            centroid_prev_abund[centroids_list[iter]] = ppanini_table_row(alpha_prevalence = prev_score, mean_abundance= abund_score, beta_prevalence = None, ppanini_score = None)
-            
-            #centroid_prev_abund[centroid] = [abund_score, prev_score]
-            all_prevalence += [prev_score]#[centroid_prev_abund[centroids_list[iter]].alpha_prevalence]
-            all_abund += abund_i
-        all_prevalence = numpy.asarray(all_prevalence)
-        all_abund = numpy.asarray(all_abund)
-        #all_prevalence = numpy.sort(all_prevalence)
-        #all_abund = numpy.sort(all_abund)
-        all_prevalence_percentile = scipy.stats.rankdata(all_prevalence, method='average')/len(all_prevalence) * 100.0
-        all_abund_percentile = scipy.stats.rankdata(all_abund, method='average')/len(all_abund)	* 100.0
-        #print all_abund_percentile
-        #print all_prevalence_percentile
-        for count, centroid in enumerate(centroid_prev_abund):
+        
+        # Calculate mean abundance of non zero values
+        df = centroids_data_matrix.replace(0, numpy.NaN)
+        centroid_prev_abund['mean_abundance'] = df.mean(axis = 1)
+        
+        # Alpha prevalence 
+        centroid_prev_abund['alpha_prevalence'] = df.sum(axis = 1)/df.shape[1]
+        
+        # Calculate percentile for prevalence and abundance
+        centroid_prev_abund['prevalence_percentile'] = scipy.stats.rankdata(centroid_prev_abund['alpha_prevalence'], method='average')/centroid_prev_abund.shape[0] * 100.0
+        centroid_prev_abund['abund_percentile'] = scipy.stats.rankdata(centroid_prev_abund['mean_abundance'], method='average')/centroid_prev_abund.shape[0]* 100.0
+        
+        # Calculate PPANINI score
+        centroid_prev_abund['ppanini_score'] = 1/((1/(beta*(centroid_prev_abund['prevalence_percentile'])))+(1/((1-beta)*(centroid_prev_abund['abund_percentile'])))) 
+        '''for count, centroid in enumerate(centroid_prev_abund):
             #print(scipy.stats.percentileofscore(all_prevalence, centroid_prev_abund[centroid].alpha_prevalence))
            #p_score = 1/((1/(beta*(scipy.stats.percentileofscore(all_prevalence, centroid_prev_abund[centroid].alpha_prevalence))))+\
            #	     (1/((1-beta)*(scipy.stats.percentileofscore(all_abund, centroid_prev_abund[centroid].mean_abundance)))))
             p_score = 1/((1/(beta*(all_prevalence_percentile[count])))+\
                     (1/((1-beta)*(all_abund_percentile[count]))))
-            centroid_prev_abund[centroid] = centroid_prev_abund[centroid]._replace(ppanini_score = p_score)
-    write_prev_abund_matrix(centroid_prev_abund, centroid_prev_abund_file_path)
+            centroid_prev_abund.set_value(centroid,'ppanini_score', p_score)'''#centroid_prev_abund[centroid]._replace(ppanini_score = p_score)
+    centroid_prev_abund.to_csv(centroid_prev_abund_file_path, sep='\t')
     
     config.niche_flag = niche_flag
     return centroid_prev_abund 
@@ -389,7 +386,7 @@ def get_niche_prevalence_abundance(centroids_data_matrix, centroids_list, niche_
     
     for niche in niches_label:
     	all_alpha_prev[niche] = []
-    ppanini_table_row = namedtuple("ppanini_table_row", ["alpha_prevalence", "mean_abundance", "beta_prevalence", "ppanini_score"], verbose=False, rename=False)
+    #ppanini_table_row = namedtuple("ppanini_table_row", ["alpha_prevalence", "mean_abundance", "beta_prevalence", "ppanini_score"], verbose=False, rename=False)
     for i, centroid in enumerate(centroids_list):
     	#centroid_prev_abund[centroid] = {}
     	a_prev = {}
@@ -457,7 +454,6 @@ def get_important_niche_centroids(config=config):
     centroid_prev_abund = config.centroid_prev_abund
     beta = config.beta
     tshld = config.tshld
-    output_folder = config.output_folder
     imp_centroid_prev_abund_file_path = config.basename+'_imp_centroid_prev_abund.txt'
     
     
@@ -490,7 +486,8 @@ def get_important_niche_centroids(config=config):
             continue
     #print imp_centroids
     if len(imp_centroids) >0:
-        write_prev_abund_matrix(imp_centroids, output_folder + '/' + imp_centroid_prev_abund_file_path)
+        imp_centroids = sorted(imp_centroids, key=lambda k: k[2]['ppanini_score'])
+        write_prev_abund_matrix(imp_centroids, config.output_folder + '/' + imp_centroid_prev_abund_file_path)
 	
     return imp_centroids
 
@@ -511,14 +508,11 @@ def get_important_centroids(config=config):
     tshld_prev = config.tshld_prev
     tshld_abund = config.tshld_abund
     ppanini_score =  1/((1/(beta*tshld_prev)) + (1/((1-beta)*tshld_abund)))
-    imp_centroids = {}
-    for centroid in centroid_prev_abund:
-        if centroid_prev_abund[centroid].ppanini_score >= ppanini_score:
-            imp_centroids[centroid]=centroid_prev_abund[centroid]
-            continue
-        else:
-            continue
-    write_prev_abund_matrix(imp_centroids, config.output_folder + '/' + imp_centroid_prev_abund_file_path)
+    
+    #Get important centroids based on their PPANINI score
+    imp_centroids = centroid_prev_abund[centroid_prev_abund['ppanini_score'] >= ppanini_score]
+    imp_centroids = imp_centroids.sort_values(by='ppanini_score', ascending=False)
+    imp_centroids.to_csv( config.output_folder + '/' + imp_centroid_prev_abund_file_path, sep='\t')
     return imp_centroids
 
 def write_prev_abund_matrix(centroid_prev_abund, out_file):
@@ -666,16 +660,15 @@ def run():
     
     if config.verbose =='DEBUG':
     	print "Getting centroids table..."
-    [centroids_data_matrix, centroids_list] = get_centroids_table(all_centroids, metadata)
-    config.centroids_list = centroids_list
+    centroids_data_table = get_centroids_table(all_centroids, metadata)
+    #config.centroids_list = centroids_list
     
     if config.verbose =='DEBUG':
     	print "DONE"
     
     if config.verbose =='DEBUG':
     	print "Getting prevalence abundance..."
-    centroid_prev_abund = get_prevalence_abundance(centroids_data_matrix, \
-    												centroids_list = centroids_list, \
+    centroid_prev_abund = get_prevalence_abundance(centroids_data_table, \
     												metadata = metadata)
     
     if config.verbose =='DEBUG':
