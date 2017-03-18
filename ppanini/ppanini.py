@@ -511,7 +511,12 @@ def get_important_centroids(config=config):
     
     #Get important centroids based on their PPANINI score
     imp_centroids = centroid_prev_abund[centroid_prev_abund['ppanini_score'] >= ppanini_score]
-    imp_centroids = imp_centroids.sort_values(by='ppanini_score', ascending=False)
+    try:
+        # for  pandas >= 0.17.0
+        imp_centroids = imp_centroids.sort_values(by='ppanini_score', ascending=False)
+    except:
+        imp_centroids = imp_centroids.sort('ppanini_score', ascending=False)
+        
     imp_centroids.to_csv( config.output_folder + '/' + imp_centroid_prev_abund_file_path, sep='\t')
     return imp_centroids
 
