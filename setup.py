@@ -60,7 +60,7 @@ setuptools.setup(
         #"Scikit-learn  >= 0.14.1",
         #"Matplotlib >= 1.1.1",
         #"Biopython >= 1.66",
-        "pandas >= 0.18.1"
+        #"pandas >= 0.18.1"
     ],
     #cmdclass={'install': Install},
     package_data={
