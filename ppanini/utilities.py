@@ -10,37 +10,14 @@ import subprocess
 import multiprocessing
 
 from Bio import Seq
+import pandas as pd
 
 logger = logging.getLogger(__name__)
-def read_ppanini_imp_genes_table(filename):
-	keys = { 'abundance_rank':0, 'prevalence_rank':0}
-	abund = []
-	prev = []
-	genes = []
-	ppanini_score = []
-	
-	with open(filename) as foo:
-		for line in foo:
-			split_line = [re.sub('[\r\t\n]','', i) for i in line.split('\t')]
-			if line.startswith('#'):
-				for i, val in enumerate(split_line):
-					if 'abundance_rank' in val:
-						keys['abundance_rank'] = i
-					elif 'prevalence_rank' in val:
-						keys['prevalence_rank'] = i
-					#elif 'beta' in val:
-					#	keys['beta'] = i
-					elif 'ppanini_score' in val:
-						keys['ppanini_score'] = i	
-			else:
-				# pdb.set_trace()
-				#print line
-				genes +=[split_line[0]]
-				ppanini_score +=[None]
-				abund +=[float(split_line[keys['abundance_rank']])]
-				prev +=[float(split_line[keys['prevalence_rank']])]
-	#print prev
-	ppanini_table = {'genes': genes, 'abundance_rank': abund, 'prevalence_rank': prev, 'ppanini_score':ppanini_score }
+def read_ppanini_imp_genes_table_dead(filename):
+	gene_table = pd.read_csv(filename, sep='\t', index_col=0)
+	#print gene_table.columns.values
+	#print gene_table['abundance']
+	ppanini_table = {'genes': list(gene_table.index), 'abundance_rank': gene_table['abundance'], 'prevalence_rank':gene_table['prevalence'], 'ppanini_score':gene_table['ppanini_score'] }
 	return ppanini_table
 def read_fasta(fasta_filename):
 	'''Reads a fasta_file and returns a fasta dict
@@ -61,6 +38,7 @@ def read_fasta(fasta_filename):
 					fasta_seq[name] =  re.sub('[\r\t\n]','', line)
 				else:
 					fasta_seq[name] +=  re.sub('[\r\t\n]','', line)
+	print fasta_seq
 	return fasta_seq
 def parse_table(m8_filename, fasta_filename):
 	'''Parse the BLAST results to give gene hits to genomes
@@ -71,7 +49,7 @@ def parse_table(m8_filename, fasta_filename):
 	Output: 
 	table = {gene: [List of genomes]}'''
 
-	fasta_dict = utilities.read_fasta(fasta_filename)
+	fasta_dict = read_fasta(fasta_filename)
 
 	for seq in fasta_dict:
 		fasta_dict[seq] = float(len(fasta_dict[seq]))
@@ -100,17 +78,20 @@ def read_parsed(m8_filename):
 	Output: 
 	table = {gene: [List of genomes]}'''
 
-	table = {}
-	foo = open(m8_filename)
+	table = pd.DataFrame.from_csv(m8_filename, sep='\t', index_col=None, header =None)
+	table.columns =['gene', 'genome']
+	gene_count_genome = table['gene'].value_counts()
+	#table[['gene']].groupby(['gene']).size()
+	'''foo = open(m8_filename)
 
 	for line in foo:
 		split_i = [i.strip() for i in line.split('\t')]
 		try:
-			table[split_i[0]] += [split_i[1]]
+			table.genomes[table.gene == split_i[0]] += split_i[1]
 		except:
-			table[split_i[0]] = [split_i[1]]
-	print"Total No. of genes:", len(table) 
-	return table
+			table[split_i[0]] = [split_i[1]]'''
+	print"Total No. of genes:", gene_count_genome.shape[0] 
+	return gene_count_genome
 def read_data(mg_file, ppanini_output_file):
 	metagenomic_table  = read_parsed(mg_file)
 	uniq_genomes = []
@@ -120,8 +101,31 @@ def read_data(mg_file, ppanini_output_file):
 				uniq_genomes +=[genome]
 	no_uniq_genomes = len(uniq_genomes)
 	print 'No. of unique genomes: '+str(no_uniq_genomes)
-	ppanini_output = read_ppanini_imp_genes_table(ppanini_output_file)
+	ppanini_output = pd.DataFrame.from_csv(ppanini_output_file, sep='\t', index_col=0, header =0)#read_ppanini_imp_genes_table(ppanini_output_file)
 	return metagenomic_table, ppanini_output, no_uniq_genomes 
+def read_abund_prev(filename):
+	keys = {'abund':0, 'alpha':0,'beta':0}
+	abund = []
+	alpha = []
+	genes = []
+	with open(filename) as foo:
+		for line in foo:
+			split_line = [re.sub('[\r\t\n]','', i) for i in line.split('\t')]
+			if line.startswith('Centroids'):
+				for i, val in enumerate(split_line):
+					if 'abund' in val:
+						keys['abund'] = i
+					elif 'alpha' in val:
+						keys['alpha'] = i
+					elif 'beta' in val:
+						keys['beta'] = i
+			else:
+				# pdb.set_trace()
+				genes +=[split_line[0]]
+				abund +=[float(split_line[keys['abund']])]
+				alpha +=[float(split_line[keys['alpha']])]
+	abund_prev = {'genes': genes, 'abundance': abund, 'prevalence': alpha}
+	return abund_prev
 def pullgenes_fromcontigs(contig_file, gff3_file, fna_file, faa_file):
 	'''Pulls genes from contigs using the coordinates from GFF3 file provided
 
