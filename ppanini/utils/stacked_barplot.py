@@ -1,19 +1,27 @@
 import os
 import sys
-import matplotlib
 import re
 import numpy
 import time
 import argparse
 import pdb
-import matplotlib.pyplot as plt
-from matplotlib import colors
 import pandas as pd
-import numpy as np
+try:
+    import matplotlib
+    matplotlib.use( "Agg" )
+    matplotlib.rcParams["pdf.fonttype"] = 42
+    matplotlib.rcParams["font.family"] = "Arial"
+    import matplotlib.pyplot as plt
+    from matplotlib import colors
+    import matplotlib.patches as patches
+    import numpy as np
+    import scipy.cluster.hierarchy as sch
+except:
+    sys.exit( "This script requires the Python scientific stack: numpy, scipy, and matplotlib." )
+  
 #from . import utils
 
 #from .. import utilities
-
 
 def get_args( ):
     parser = argparse.ArgumentParser(
@@ -23,19 +31,29 @@ def get_args( ):
     parser.add_argument( "-i1", "--ppanini-input",
                          metavar = "<input table>",
                          dest = "ppanini_input",
-                         required = True, 
+                         required = False, 
                          help="Gene abundance table", )
     parser.add_argument( "-i2", "--ppanini-output",
                          dest = "ppanini_output",
                          metavar = "<feature id>",
                          help="PPANINI output table)", )
+    parser.add_argument( "-i", "--summary-table",
+                         metavar = "<input table>",
+                         dest = "summary_table",
+                         required = False, 
+                         help="Summary table", )
     parser.add_argument( "-o", "--output",
                          dest = "plot_output",
                          metavar = "<feature id>",
                          help="output plot)", )
     
     return parser.parse_args()
-
+def load_summary_table(summary_table_file_path):
+    try: 
+        df_in = pd.read_csv(str(summary_table_file_path), sep='\t', header=0, index_col =0)#, nrows= 1, header=0,) #('/Users/rah/Documents/HMP/metadata/performance_modified.xlsx')
+    except ImportError:
+        sys.exit("Input Error First File!") 
+    return df_in
 def summerize_gene_table(ppanini_input_file_path, ppanini_output_file_path, output_path = None ):
      
     try: 
@@ -49,28 +67,28 @@ def summerize_gene_table(ppanini_input_file_path, ppanini_output_file_path, outp
     summary_table = pd.DataFrame(index = df_in.columns, columns=['Unannotated', 'UniRef', 'GO'], dtype=float)
     summary_table[:] = 0.0000
     #print summary_table
-    for sample in df_in.columns:
+    for sample in range(len(df_in.columns)):
         
-        sum1 = sum(df_in[sample])
+        sum1 = sum(df_in[df_in.columns[sample]])
     
         # skip sample with all rows zero
-        if sum1 == 0.0:
+        if sum1 == 0.00:
             continue
         
-        for gene in df_in.index:
+        for gene in range(len(df_in.index)):
             # check if nan
-            if df_out.loc[gene,'GO'] == df_out.loc[gene,'GO']:
+            if df_out.iat[gene,df_out.columns.get_loc('GO')] == df_out.iat[gene,df_out.columns.get_loc('GO')]:
                 #print (df_out.loc[gene,'GO_term'])
-                summary_table.loc[sample, 'GO'] += df_in.loc[gene, sample]
-            elif gene.find('UniRef')==0  :
+                summary_table.iat[sample, 2] += df_in.iat[gene, sample]
+            elif df_in.index[gene].find('UniRef')==0  :
                 #print (df_out.loc[gene,'UniRef'])
-                summary_table.loc[sample,'UniRef'] += df_in.loc[gene, sample]
+                summary_table.iat[sample,1] += df_in.iat[gene, sample]
             else:
-                summary_table.loc[sample,'Unannotated'] += df_in.loc[gene, sample]
+                summary_table.iat[sample,0] += df_in.iat[gene, sample]
         #print df
-        summary_table.loc[sample, 'UniRef'] = summary_table.loc[sample, 'UniRef']/sum1 * 100
-        summary_table.loc[sample, 'Unannotated'] = summary_table.loc[sample, 'Unannotated']/sum1 * 100
-        summary_table.loc[sample, 'GO'] = summary_table.loc[sample,'GO']/sum1 * 100         
+        summary_table.iat[sample, 0] /= sum1 #* 100
+        summary_table.iat[sample, 1] /= sum1 #* 100
+        summary_table.iat[sample, 2] /= sum1 #* 100         
     #print summary_table['Unannotated']
     
     #df = pd.DataFrame(summary_table, columns = summary_table.keys())#['Sample', 'EC', 'GO', 'UniRef', 'Unannotated', 'Unmaped'])
@@ -110,20 +128,7 @@ def stache_barplot(df, output_path = None):
             # with color
             color='gold',#'silver',#'#F1911E',
             linewidth=0)
-    # Create a bar plot, in position bar_1
-    '''ax1.bar(bar_l,
-            df['Unmaped'],
-            # set the width
-            width=bar_width,
-            # with pre_score and mid_score on the bottom
-            bottom=df['Unannotated'],
-            # with the label post score
-            label='Known and uncharacterized',
-            # with alpha 0.5
-            alpha=0.9,
-            # with color
-            color='yellow',#'grey',#'#F1BD1A',
-            linewidth=0)'''
+    
     # Create a bar plot, in position bar_1
     ax1.bar(bar_l,
             df['UniRef'],
@@ -145,27 +150,14 @@ def stache_barplot(df, output_path = None):
             # set the width
             width=bar_width,
             # with the label pre score
-            label='Functionally known',
+            label='Functionally known in GO',
             bottom=[i+j for i,j in zip(df['Unannotated'],df['UniRef'])],
             # with alpha 0.5
             alpha=0.9,
             # with color
             color='limegreen',#'#29CE66',
             linewidth=0)
-    # Create a bar plot, in position bar_1
-    '''ax1.bar(bar_l,
-            df['EC'],
-            # set the width
-            width=bar_width,
-            # with the label pre score
-            label='Known and enzymatic reactions-annotated',
-            bottom=[i+j+k+l for i,j,k ,l in zip(df['Unannotated'],df['Unmaped'], df['UniRef'], df['GO'])],
-            # with alpha 0.5
-            alpha=0.9,
-            # with color
-            color='seagreen',#'#29CC66',
-            linewidth=0)
-    '''
+   
     # set the x ticks with names
     plt.xticks(tick_pos, df.index)
     
@@ -176,7 +168,7 @@ def stache_barplot(df, output_path = None):
     lgd.set_title(title = "Characterization:", prop={'weight':'bold'} )
     #lgd.get_title().set_ha('center')
     #lgd.get_title().set_position((20, 0))
-    ax1.set_ylabel("% of abundance")
+    ax1.set_ylabel("Fraction of abundance")
     ax1.set_xlabel("Samples (N=%d)" % (len(df.index)))
     ax1.get_xaxis().set_tick_params(which='both', labelsize=8,top='off', labelbottom='off', bottom= 'off', direction='out')
     ax1.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
@@ -199,7 +191,10 @@ def stache_barplot(df, output_path = None):
     #fig.savefig("stacked_barplot.pdf")
 def main():
     user_args = get_args()
-    df = summerize_gene_table(user_args.ppanini_input, user_args.ppanini_output, user_args.plot_output)
+    if user_args.summary_table:
+        df = load_summary_table(user_args.summary_table)
+    else:
+        df = summerize_gene_table(user_args.ppanini_input, user_args.ppanini_output, user_args.plot_output)
     stache_barplot(df, user_args.plot_output )
 if __name__ == '__main__':
     main()    

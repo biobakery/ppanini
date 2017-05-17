@@ -170,7 +170,7 @@ def get_centroids_fromUCLUST(genes, config=config):
 	#pdb.set_trace()
 	return cluster_dict
 
-def get_centroids(uniref_dm, gi_dm, config=config):
+def summerize_centroids(uniref_dm, gi_dm, config=config):
     '''Returns the dict of all centroids containing clusters of gene IDs
     
     Input:	uniref_dm = {UniRef_XYZ: numpy.array(abundance), ...}
@@ -257,7 +257,7 @@ def get_clusters(config=config): #ONLY FOR THE UNIREF UNANNOTATED
     return centroid_gis
 
 
-def get_centroids_table(all_centroids, metadata):
+def normalize_centroids_table(all_centroids, metadata):
     '''Returns data matrix containing gene centroids and abundance per sample
     
     Input:	metadata = [metadata strings]; Rows with # as first character in table
@@ -276,8 +276,10 @@ def get_centroids_table(all_centroids, metadata):
     # write abundance table
     abundance_table_path = config.temp_folder+'/'+config.basename+'_abundance_table.txt'
     centroids_data_matrix.to_csv(abundance_table_path, sep='\t', mode='w', header=True)
+    
     # Normalize abundance per sample
-    norm_data_matrix = centroids_data_matrix/sum(centroids_data_matrix)
+    norm_data_matrix = centroids_data_matrix.apply(lambda x: x/x.sum(), axis=0)
+    #centroids_data_matrix.div(centroids_data_matrix.sum(axis=1), axis=1)#centroids_data_matrix/sum(centroids_data_matrix)
     #norm_data_matrix = norm_data_matrix*1e6
     gene_centroids_table_file_path = config.temp_folder+'/'+config.basename+'_gene_centroids_norm.txt'
     
@@ -602,15 +604,15 @@ def run():
     	print "DONE"
     
     if config.verbose =='DEBUG':
-    	print "Getting centroids..."
-    all_centroids = get_centroids(uniref_dm, gi_dm)
+    	print "Summerize centroids table..."
+    all_centroids = summerize_centroids(uniref_dm, gi_dm)
     
     if config.verbose =='DEBUG':
     	print "DONE"
     
     if config.verbose =='DEBUG':
-    	print "Getting centroids table..."
-    centroids_data_table = get_centroids_table(all_centroids, metadata)
+    	print "Normalize centroids table..."
+    centroids_data_table = normalize_centroids_table(all_centroids, metadata)
     #config.centroids_list = centroids_list
     
     if config.verbose =='DEBUG':

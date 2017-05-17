@@ -324,6 +324,60 @@ def is_present(metadata, meta_type):
 			ind = i
 			break
 	return [line, ind]
+def generate_gene_table(abundance_dict, annotations_dict, niche_flag, mapper, output_table, samples):
+	'''Input: abundance_dict: {sample:{gene:abundance,...},...}
+			  annotation_dict: {gene: annotation},
+			  niche_flag: True if NICHE exists
+			  mapper'''
+	logger.debug('generate_gene_table '+output_table)
+#	samples = abundance_dict.keys()
+	# fasta_row = [mapper[i]['FAAS'] for i in samples]
+
+	with open(output_table, 'w') as foo:
+		if niche_flag:
+			niche_row = [mapper[i]['NICHE'] for i in samples]
+			foo.writelines([str.join('\t', ['#NICHE']+niche_row)+'\n']) #header
+		# foo.writelines([str.join('\t', ['#FAAS']+fasta_row)+'\n']) #header
+		foo.writelines([str.join('\t', ['#SAMPLES']+samples)+'\n']) #header
+		
+		#for i, sample in enumerate(samples):
+		for gene in abundance_dict:
+			#abund_x_i = abundance_dict[sample][gene]
+			#data_row = numpy.zeros(len(samples))
+			#data_row[i] = abund_x_i
+			str_data_row = [str(ele) for ele in abundance_dict[gene]]
+			if gene in annotations_dict: 
+				annot_x_i = annotations_dict[gene]
+				if annot_x_i.startswith('UniRef90'):
+					umap_i = 'UniRef50_unknown'
+					annot_x = annot_x_i + '|' + umap_i
+				else:
+					annot_x = 'UniRef90_unknown|' + annot_x_i 
+			else:
+				annot_x = 'UniRef90_unknown|UniRef50_unknown'
+			foo.writelines([str.join('\t', [gene+'|'+annot_x]+str_data_row)+'\n'])
+
+def extract_mapping():
+	'''Uses centroids from first file and 
+	produces mapped centroids to genes through mapper'''
+	foo = open(sys.argv[1])
+	centroids = [re.sub('[\t\r\n]','',i).strip() for i in foo]
+	
+	mapper = open(sys.argv[2])
+	mapping = {}
+	for line in mapper:
+		split_line = [re.sub('[\r\n\t]','', i) for i in line.split('\t')]
+		try:
+			mapping[split_line[0]] += [split_line[1]]
+		except:
+			mapping[split_line[0]] = [split_line[1]]
+	
+	for i in centroids:
+		if i in mapping:
+			for j in mapping[i]:
+				print '\t'.join([i,j])
+		else:
+			print i+'\tNA'
 
 if __name__ == '__main__':
 	pass
