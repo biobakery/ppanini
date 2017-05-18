@@ -24,7 +24,7 @@ try:
     from . import utils
     from utils import attach_GO
 
-except ImportError:
+except ImportError as e:
     sys.exit("CRITICAL ERROR: Unable to find the PPANINI python package." +
         " Please check your install."+str(e))
 
@@ -536,7 +536,7 @@ def read_prevalence_abundance_table(input_table):
 def read_parameters():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i','--input_table', help='REQUIRED: Gene abundance table with metadata', required=True)
-    parser.add_argument('-o','--output-folder', dest = 'output_folder',  help='Folder containing results', default=config.output_folder)
+    parser.add_argument('-o','--output-folder', dest = 'output_folder',  help='Folder containing results', required=False, default=config.output_folder)
     parser.add_argument('--gene-catalog', dest = 'gene_catalog', default=config.gene_catalog, help='GENE CATALOG')
     parser.add_argument('--uc', default= config.uclust_file, help='UCLUST file containg centroids and clustered genes')
     parser.add_argument('--usearch', action="store_true", default = config.usearch, help='Path to USEARCH') #add to be in path?
@@ -626,16 +626,16 @@ def run():
     if config.verbose =='DEBUG':
     	print "DONE"
         
-    if True: # an option should be added for this
+    if config.genomic_score: # an option should be added for this
         metagenomic_table  = utilities.read_parsed("/Users/rah/Documents/PPANINI/ppanini_old_files/PARSED_BLAST_RESULTS/AN_mg.m8")
         metagenomic_table.to_csv(config.output_folder + '/' +config.basename+'_metagenomic_table.txt', sep='\t')
     # else:
     # 	[centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag] = read_prevalence_abundance_table(input_table, config.beta)
     config.centroid_prev_abund = centroid_prev_abund
     
-    if True: # add Go terms to the table
-        #print("Mapping UniRef90 to GO terms!")
-        attach_GO.uniref2go(config.centroid_prev_abund)
+    # add Go terms to the table
+    #print("Mapping UniRef90 to GO terms!")
+    attach_GO.uniref2go(config.centroid_prev_abund, go_uniref_path = "/n/huttenhower_lab/tools/ppanini/ppanini/data/map_infogo1000_uniref90.txt.gz")
 def  prioritize_centroids():
     if config.verbose =='DEBUG':
     	print "Prioritize centroids..."

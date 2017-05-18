@@ -7,7 +7,7 @@ gene_catalog = ''
 uclust_file = ''
 usearch = False
 vsearch = False
-basename = ''
+basename = 'ppanini'
 log_level = 'DEBUG'
 verbose = 'DEBUG'
 nprocesses = 1 
@@ -26,6 +26,7 @@ temp_folder = ''
 centroids_list = ''
 essantial_genes_uniref90_id = None
 bypass_clustering = False
+genomic_score = False
 
 if __name__=='__main__':
 	pass

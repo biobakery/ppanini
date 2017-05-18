@@ -10,6 +10,7 @@ import csv
 import gzip
 import bz2
 import pandas as pd
+from .. import data
 '''Tmp file to parse results'''
 def read_map(map_obj):
 	csv_map = csv.reader(open(map_obj), csv.excel_tab)
@@ -143,12 +144,12 @@ def load_polymap ( path, start=0, skip=None, allowed_keys=None, allowed_values=N
                         #else:
                         #	polymap[value] = str(key)
     df_polymap = pd.DataFrame.from_dict(polymap,orient='index')#, columns =["GO_term"]) 
-    df_polymap.to_csv("/Users/rah/Documents/Hutlab/ppanini/ppanini/data/map_uniref90_infogo1000.txt", sep='\t')                                       	
+    #df_polymap.to_csv("data/map_uniref90_infogo1000.txt", sep='\t')                                       	
     #print("Mappping Uniref90 to infogo1000 is done")
     #print (polymap)
     return polymap
-def uniref2go(ppanini_table, path = "/Users/rah/Documents/Hutlab/ppanini/ppanini/data/map_infogo1000_uniref90.txt.gz" ):
-	go1000_uniref90_dic = load_polymap ( path )
+def uniref2go(ppanini_table, go_uniref_path ):
+	go1000_uniref90_dic = load_polymap ( go_uniref_path )
 	
 	#print('Loading the mapping file is done!')
 	#print (go1000_uniref90_dic.keys())

@@ -68,7 +68,7 @@ setuptools.setup(
     entry_points={
         'console_scripts': [
             'ppanini = ppanini.ppanini:_main',
-            'ppanini_abundance_table = ppanini.utils.preppanini:main',
+            'ppanini_preprocess = ppanini.utils.preppanini:main',
             'ppanini_eval_roc = ppanini.utils.plot_roc:main',
             'ppanini_test = ppanini.tests.ppanini_test:main',
             'ppanini_metagenome_genome = ppanini.utils.plot_metagenome_genome:main',
