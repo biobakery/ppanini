@@ -10,15 +10,6 @@ import csv
 import gzip
 import bz2
 import pandas as pd
-from .. import data
-'''Tmp file to parse results'''
-def read_map(map_obj):
-	csv_map = csv.reader(open(map_obj), csv.excel_tab)
-	uniref_go = {}
-	for line in csv_map:
-		for uid in line[1:]:
-			uniref_go[uid.strip()] = line[0]
-	return uniref_go
 
 # constants
 # ---------------------------------------------------------------
@@ -50,6 +41,14 @@ c_topsort = {
 # ---------------------------------------------------------------
 # helper functions
 # ---------------------------------------------------------------
+def read_map(map_obj):
+	csv_map = csv.reader(open(map_obj), csv.excel_tab)
+	uniref_go = {}
+	for line in csv_map:
+		for uid in line[1:]:
+			uniref_go[uid.strip()] = line[0]
+	return uniref_go
+
 def size_warn( path ):
     m = 1 if ".gz" not in path else c_zip_multiplier
     if m * os.path.getsize( path ) > c_many_bytes:
@@ -116,7 +115,7 @@ def gzip_bzip2_biom_open_readlines( path ):
                 else:
                     yield line.rstrip()
 
-def load_polymap ( path, start=0, skip=None, allowed_keys=None, allowed_values=None ):
+def convert_infogo1000_2_Uniref90 ( path_in= '' , path_out ='' , start=0, skip=None, allowed_keys=None, allowed_values=None ):
     """
     Load a file like:
     A 1 2
@@ -127,44 +126,67 @@ def load_polymap ( path, start=0, skip=None, allowed_keys=None, allowed_values=N
     {A:{1:1, 2:1}, B:{1:1, 3:1}, C:{1:1, 2:2, 4:1}
     Inner values are not important (set to 1)
     """
-    polymap = {}
-    print( "Loading mapping file from:", path, file=sys.stderr )
-    size_warn( path )
-    for line in gzip_bzip2_biom_open_readlines( path ):
+    if not sys.argv[1] or  not sys.argv[2]:
+        print ('Please provide an input and output path')
+    path_in = sys.argv[1],
+    path_out = sys.argv[2]
+    polymap_all = {}
+    print( "Loading mapping file from:", path_in, file=sys.stderr )
+    size_warn( path_in )
+    for line in gzip_bzip2_biom_open_readlines( path_in ):
         row = line.split("\t")
         key = row[start]
         if allowed_keys is None or key in allowed_keys:
             for i, value in enumerate( row ):
                 if i != start and (skip is None or i not in skip):
                     if allowed_values is None or value in allowed_values:
-                        #polymap.setdefault( value, {} )[key] = 1 #polymap.setdefault( key, {} )[value] = 1
-                        polymap[value] = str(key)
-                        #if value in polymap.keys() :
-                        #	polymap[value] += ("|"+str(key) )
-                        #else:
-                        #	polymap[value] = str(key)
-    df_polymap = pd.DataFrame.from_dict(polymap,orient='index')#, columns =["GO_term"]) 
-    #df_polymap.to_csv("data/map_uniref90_infogo1000.txt", sep='\t')                                       	
-    #print("Mappping Uniref90 to infogo1000 is done")
-    #print (polymap)
-    return polymap
-def uniref2go(ppanini_table, go_uniref_path ):
-	go1000_uniref90_dic = load_polymap ( go_uniref_path )
-	
-	#print('Loading the mapping file is done!')
-	#print (go1000_uniref90_dic.keys())
-	#uniref_go_keys = go1000_uniref90_dic.keys()
-	#go1000_uniref90_dic = pd.read_table("file.gz",compression='gzip',sep='\x01')
-	for index, row in ppanini_table.iterrows():
-	#	row["go_term"] = go1000_uniref90_dic.get(index, None)
-		#if index == '':
-		#	continue
-		#print(go1000_uniref90_dic.get(index))
-		ppanini_table.loc[index,'GO'] = go1000_uniref90_dic.get(index)# go1000_uniref90_dic.get(ppanini_table.index)
-	#ppanini_table.loc[ppanini_table.index,'go_term'] = go1000_uniref90_dic[list(ppanini_table.index)][1]
-	#print(ppanini_table['go_term']) 
-	#return 	ppanini_table
-	
+                        polymap_all.setdefault( value, {} )[key] = 1 #polymap.setdefault( key, {} )[value] = 1
+
+    with gzip.open(path_out+'_dict.txt.gz', 'wt') as csv_file:
+        writer = csv.writer(csv_file, delimiter='\t')
+        for key, values in polymap_all.items():
+           writer.writerow([key, ";".join(values)])                                          
+    print("Mappping Uniref90 to infogo1000 is done")
+
+def load_polymap ( path, start=0, skip=None, allowed_keys=None, allowed_values=None ):
+    """
+    Loads a file to a dictionry 
+    INPUT:
+    for each row in file format is:
+    UniRefID    GOID1;GOID2
+    OUTPUT:
+    Dictionary : UniRefID is key and value is GOID1;GOID2
+    """
+    polymap_all = {}
+    print( "Loading mapping file from:", path, file=sys.stderr )
+    size_warn( path )
+    for line in gzip_bzip2_biom_open_readlines( path ):
+        row = line.split("\t")
+        key = row[start]
+        polymap_all[key] = row[1]
+    '''with open(path) as csv_file:
+        reader = csv.reader(csv_file)
+        polymap_all = dict(reader)'''
+    return polymap_all
+
+def uniref2go(ppanini_table, uniref_go_path ):
+    #go1000_uniref90_dic = load_polymap ( go_uniref_path )
+    #convert_infogo1000_2_Uniref90()
+    go1000_uniref90_dic = load_polymap ( uniref_go_path )
+    #print('Loading the mapping file is done!')
+    #print (go1000_uniref90_dic.keys())
+    #uniref_go_keys = go1000_uniref90_dic.keys()
+    #go1000_uniref90_dic = pd.read_table("file.gz",compression='gzip',sep='\x01')
+    for index, row in ppanini_table.iterrows():
+    #	row["go_term"] = go1000_uniref90_dic.get(index, None)
+    	#if index == '':
+    	#	continue
+    	#print(go1000_uniref90_dic.get(index))
+    	ppanini_table.loc[index,'GO'] = go1000_uniref90_dic.get(index)# go1000_uniref90_dic.get(ppanini_table.index)
+    #ppanini_table.loc[ppanini_table.index,'go_term'] = go1000_uniref90_dic[list(ppanini_table.index)][1]
+    #print(ppanini_table['go_term']) 
+    #return 	ppanini_table
+
 if __name__ == '__main__':
 	uniref_go = read_map(sys.argv[1])
 	csv_table = csv.reader(open(sys.argv[2]), csv.excel_tab)

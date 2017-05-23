@@ -635,7 +635,7 @@ def run():
     
     # add Go terms to the table
     #print("Mapping UniRef90 to GO terms!")
-    attach_GO.uniref2go(config.centroid_prev_abund, go_uniref_path = "/n/huttenhower_lab/tools/ppanini/ppanini/data/map_infogo1000_uniref90.txt.gz")
+    attach_GO.uniref2go(config.centroid_prev_abund, uniref_go_path = "/Users/rah/Documents/Hutlab/ppanini/ppanini/data/map_uniref90_infogo1000.txt.gz")
 def  prioritize_centroids():
     if config.verbose =='DEBUG':
     	print "Prioritize centroids..."

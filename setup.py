@@ -72,8 +72,8 @@ setuptools.setup(
             'ppanini_eval_roc = ppanini.utils.plot_roc:main',
             'ppanini_test = ppanini.tests.ppanini_test:main',
             'ppanini_metagenome_genome = ppanini.utils.plot_metagenome_genome:main',
-            'ppanini_barplot = ppanini.utils.stacked_barplot:main'
-            
+            'ppanini_barplot = ppanini.utils.stacked_barplot:main',
+            'ppanini_rev_go2uniref = ppanini.utils.attach_GO:convert_infogo1000_2_Uniref90'            
         ]},
     test_suite= 'ppanini.tests.ppanini_test.get_unittests()',
     zip_safe = False
