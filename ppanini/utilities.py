@@ -38,7 +38,7 @@ def read_fasta(fasta_filename):
 					fasta_seq[name] =  re.sub('[\r\t\n]','', line)
 				else:
 					fasta_seq[name] +=  re.sub('[\r\t\n]','', line)
-	print fasta_seq
+	#print fasta_seq
 	return fasta_seq
 def parse_table(m8_filename, fasta_filename):
 	'''Parse the BLAST results to give gene hits to genomes

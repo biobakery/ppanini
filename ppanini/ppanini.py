@@ -542,6 +542,7 @@ def read_parameters():
     parser.add_argument('--usearch', action="store_true", default = config.usearch, help='Path to USEARCH') #add to be in path?
     parser.add_argument('--vsearch', action="store_true", default = config.vsearch, help='Path to VSEARCH') #add to be in path?
     parser.add_argument('--basename', default = config.basename, help='BASENAME for all the output files')
+    parser.add_argument('--uniref2go', default = config.uniref2go, help='uniref to GO term mapping file')
     parser.add_argument('--log-level', dest = 'log_level',  default=config.log_level, help='Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]')
     parser.add_argument('--threads', default= config.nprocesses, type=int,help='Number of threads')
     parser.add_argument('--tshld-abund', dest = 'tshld_abund', default=config.tshld_abund, type = float,help='[X] Percentile Cutoff for Abundance; Default=75th')
@@ -562,6 +563,7 @@ def read_parameters():
     config.bypass_clustering = args.bypass_clustering
     config.vsearch = args.vsearch
     config.usearch = args.usearch
+    config.uniref2go = args.uniref2go
     
 def run():
     if config.uclust_file == '' and config.gene_catalog == '' and not config.bypass_clustering:
@@ -635,7 +637,17 @@ def run():
     
     # add Go terms to the table
     #print("Mapping UniRef90 to GO terms!")
-    attach_GO.uniref2go(config.centroid_prev_abund, uniref_go_path = "/Users/rah/Documents/Hutlab/ppanini/ppanini/data/map_uniref90_infogo1000.txt.gz")
+    if not config.uniref2go == '':
+        attach_GO.uniref2go(config.centroid_prev_abund, uniref_go_path = config.uniref2go)
+    else:
+        import pkg_resources
+        resource_package = __name__  # Could be any module/package name
+        resource_path = '/'.join(('data', 'map_uniref90_infogo1000.txt.gz'))  # Do not use os.path.join(), see below
+        template = pkg_resources.resource_filename(resource_package, resource_path)
+        print (template)
+        attach_GO.uniref2go(config.centroid_prev_abund, uniref_go_path = template)
+        print('Uniref to Go term mapping file has NOT been provided!!!')
+    #"/Users/rah/Documents/Hutlab/ppanini/ppanini/data/map_uniref90_infogo1000.txt.gz"
 def  prioritize_centroids():
     if config.verbose =='DEBUG':
     	print "Prioritize centroids..."

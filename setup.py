@@ -63,8 +63,10 @@ setuptools.setup(
         #"pandas >= 0.18.1"
     ],
     #cmdclass={'install': Install},
+    include_package_data=True,
     package_data={
-        'ppanini' :['tests/data/*']},
+        #'ppanini' :['tests/data/*',' data/*'],
+        'ppanini' :['data/*']},
     entry_points={
         'console_scripts': [
             'ppanini = ppanini.ppanini:_main',
@@ -76,6 +78,6 @@ setuptools.setup(
             'ppanini_rev_go2uniref = ppanini.utils.attach_GO:convert_infogo1000_2_Uniref90'            
         ]},
     test_suite= 'ppanini.tests.ppanini_test.get_unittests()',
-    zip_safe = False
+    zip_safe = True
  )
 

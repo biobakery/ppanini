@@ -27,6 +27,7 @@ centroids_list = ''
 essantial_genes_uniref90_id = None
 bypass_clustering = False
 genomic_score = False
+uniref2go = ''
 
 if __name__=='__main__':
 	pass
