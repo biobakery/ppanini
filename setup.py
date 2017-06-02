@@ -65,8 +65,9 @@ setuptools.setup(
     #cmdclass={'install': Install},
     include_package_data=True,
     package_data={
-        #'ppanini' :['tests/data/*',' data/*'],
-        'ppanini' :['data/*']},
+        #'ppanini' :['data/*'],
+        'ppanini' :['tests/data/*','data/*'],
+        },
     entry_points={
         'console_scripts': [
             'ppanini = ppanini.ppanini:_main',

@@ -636,18 +636,18 @@ def run():
     config.centroid_prev_abund = centroid_prev_abund
     
     # add Go terms to the table
-    #print("Mapping UniRef90 to GO terms!")
+    if config.verbose =='DEBUG':
+        print("Mapping UniRef90 to GO terms!")
     if not config.uniref2go == '':
         attach_GO.uniref2go(config.centroid_prev_abund, uniref_go_path = config.uniref2go)
     else:
         import pkg_resources
         resource_package = __name__  # Could be any module/package name
-        resource_path = '/'.join(('data', 'map_uniref90_infogo1000.txt.gz'))  # Do not use os.path.join(), see below
+        resource_path = '/'.join(('data', 'map_uniref90_infogo1000.txt.gz'))
         template = pkg_resources.resource_filename(resource_package, resource_path)
         print (template)
         attach_GO.uniref2go(config.centroid_prev_abund, uniref_go_path = template)
-        print('Uniref to Go term mapping file has NOT been provided!!!')
-    #"/Users/rah/Documents/Hutlab/ppanini/ppanini/data/map_uniref90_infogo1000.txt.gz"
+
 def  prioritize_centroids():
     if config.verbose =='DEBUG':
     	print "Prioritize centroids..."
