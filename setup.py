@@ -55,10 +55,10 @@ setuptools.setup(
     " of short DNA/RNA reads. PPANINI takes a genes abundances table for all the samples in a study," + \
     " it ranks the important genes",
     install_requires=[  
-        #"Numpy >= 1.9.2",
+        #Numpy >= 1.9.2",
         #"Scipy >= 0.13.0"
         #"Scikit-learn  >= 0.14.1",
-        #"Matplotlib >= 1.1.1",
+        #"Matplotlib >= 2.0.2",
         #"Biopython >= 1.66",
         #"pandas >= 0.18.1"
     ],
@@ -72,10 +72,10 @@ setuptools.setup(
         'console_scripts': [
             'ppanini = ppanini.ppanini:_main',
             'ppanini_preprocess = ppanini.utils.preppanini:main',
-            'ppanini_eval_roc = ppanini.utils.plot_roc:main',
             'ppanini_test = ppanini.tests.ppanini_test:main',
-            'ppanini_metagenome_genome = ppanini.utils.plot_metagenome_genome:main',
+            'ppanini_scatterplot = ppanini.utils.ppanini_scatterplot:main',
             'ppanini_barplot = ppanini.utils.stacked_barplot:main',
+            'ppanini_rocplot = ppanini.utils.ppanini_rocplot:main',
             'ppanini_rev_go2uniref = ppanini.utils.attach_GO:convert_infogo1000_2_Uniref90'            
         ]},
     test_suite= 'ppanini.tests.ppanini_test.get_unittests()',

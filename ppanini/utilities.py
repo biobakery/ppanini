@@ -69,31 +69,45 @@ def parse_table(m8_filename, fasta_filename):
 			elif sp not in table[split_i[0]]:
 				table[split_i[0]] += sp
 	return table
-
-def read_parsed(m8_filename):
+def count_genomes(m8_filename):
+	table = pd.DataFrame.from_csv(m8_filename, sep='\t', index_col=None, header =None)
+	table.columns =['gene', 'genome']
+	gene_count_genome = table['gene'].value_counts()
+	return gene_count_genome
+def gene2genomes(m8_filename):
 	'''Read parsed table for {gene: genomes}
 	Input: 
 	m8_filename = filename of blast results
 
 	Output: 
 	table = {gene: [List of genomes]}'''
-
-	table = pd.DataFrame.from_csv(m8_filename, sep='\t', index_col=None, header =None)
-	table.columns =['gene', 'genome']
-	gene_count_genome = table['gene'].value_counts()
-	#table[['gene']].groupby(['gene']).size()
-	'''foo = open(m8_filename)
+	
+	table ={}
+	
+	foo = open(m8_filename)
 
 	for line in foo:
 		split_i = [i.strip() for i in line.split('\t')]
 		try:
-			table.genomes[table.gene == split_i[0]] += split_i[1]
+			table[split_i[0]] += [split_i[1]]
 		except:
-			table[split_i[0]] = [split_i[1]]'''
-	print"Total No. of genes:", gene_count_genome.shape[0] 
-	return gene_count_genome
+			table[split_i[0]] = [split_i[1]]
+	return table
+def number_of_unique_genomes(mg_file):
+	metagenomic_table  =  pd.DataFrame.from_csv(mg_file, sep='\t', index_col=None, header =None)
+	metagenomic_table.columns =['gene', 'genome']
+	uniq_genomes = []
+	for gene in metagenomic_table:
+		for genome in metagenomic_table[gene]:
+			if genome not in uniq_genomes:
+				uniq_genomes +=[genome]
+	no_uniq_genomes = len(uniq_genomes)
+	#print 'No. of unique genomes: '+str(no_uniq_genomes)
+	#ppanini_output = pd.DataFrame.from_csv(ppanini_output_file, sep='\t', index_col=0, header =0)#read_ppanini_imp_genes_table(ppanini_output_file)
+	return no_uniq_genomes 
 def read_data(mg_file, ppanini_output_file):
-	metagenomic_table  = read_parsed(mg_file)
+	metagenomic_table  =  pd.DataFrame.from_csv(mg_file, sep='\t', index_col=None, header =None)
+	metagenomic_table.columns =['gene', 'genome']
 	uniq_genomes = []
 	for gene in metagenomic_table:
 		for genome in metagenomic_table[gene]:

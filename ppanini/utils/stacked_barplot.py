@@ -25,7 +25,7 @@ except:
 
 def get_args( ):
     parser = argparse.ArgumentParser(
-        description="HUMAnN2 plotting tool",
+        description="PPANINI plotting tool",
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser.add_argument( "-i1", "--ppanini-input",
@@ -50,18 +50,17 @@ def get_args( ):
     return parser.parse_args()
 def load_summary_table(summary_table_file_path):
     try: 
-        df_in = pd.read_csv(str(summary_table_file_path), sep='\t', header=0, index_col =0)#, nrows= 1, header=0,) #('/Users/rah/Documents/HMP/metadata/performance_modified.xlsx')
+        df_in = pd.read_csv(str(summary_table_file_path), sep='\t', header=0, index_col =0)
     except ImportError:
         sys.exit("Input Error First File!") 
     return df_in
 def summerize_gene_table(ppanini_input_file_path, ppanini_output_file_path, output_path = None ):
      
     try: 
-        df_in = pd.read_csv(str(ppanini_input_file_path), sep='\t', header=0, index_col =0)#, nrows= 1, header=0,) #('/Users/rah/Documents/HMP/metadata/performance_modified.xlsx')
+        df_in = pd.read_csv(str(ppanini_input_file_path), sep='\t', header=0, index_col =0)
         df_out = pd.read_csv(str(ppanini_output_file_path), sep='\t', header=0, index_col =0)
     except ImportError:
         sys.exit("Input Error First File!") 
-
     
     # summary table for annotations to be used for stacke bar plot (samples * characterization type
     summary_table = pd.DataFrame(index = df_in.columns, columns=['Unannotated', 'UniRef', 'GO'], dtype=float)
@@ -95,16 +94,18 @@ def summerize_gene_table(ppanini_input_file_path, ppanini_output_file_path, outp
     summary_table.sort_values(by=['Unannotated', 'UniRef', 'GO' ], ascending=[0, 0 , 0], inplace= True) #
     #print summary_table
     if output_path == None:
-        output_path = './ppanin_barplot'
+        output_path = './ppanini_barplot'
     summary_table.to_csv(output_path+'.txt', sep='\t')
     return summary_table
-def stache_barplot(df, output_path = None):
+def stack_barplot(df, output_path = None, axe = None, legend = True, legend_title = "Characterization:", title= None):
        
     # Create the general blog and the "subplots" i.e. the bars
-    fig, ax1 = plt.subplots(1, figsize=(6,4))
-    title =''# "Charactraztion of genes in NICHE"
+    if axe == None:
+        fig, axe = plt.subplots(1, figsize=(6,4))
+
+
     if title:
-        ax1.set_title(title, loc='left', fontdict={'fontsize':'10','fontweight' :'bold'})
+        axe.set_title(title, loc='left', fontdict={'fontsize':'10','fontweight' :'bold'})
     # Set the bar width
     bar_width = 1.0#0.75
     
@@ -115,7 +116,7 @@ def stache_barplot(df, output_path = None):
     tick_pos = [i+(bar_width/2) for i in bar_l]
     
     # Create a bar plot, in position bar_1
-    ax1.bar(bar_l,
+    axe.bar(bar_l,
             df['Unannotated'],
             # set the width
             width=bar_width,
@@ -130,7 +131,7 @@ def stache_barplot(df, output_path = None):
             linewidth=0)
     
     # Create a bar plot, in position bar_1
-    ax1.bar(bar_l,
+    axe.bar(bar_l,
             df['UniRef'],
             # set the width
             width=bar_width,
@@ -144,7 +145,7 @@ def stache_barplot(df, output_path = None):
             linewidth=0)
     
     # Create a bar plot, in position bar_1
-    ax1.bar(bar_l,
+    axe.bar(bar_l,
             # using the pre_score data
             df['GO'],
             # set the width
@@ -163,21 +164,25 @@ def stache_barplot(df, output_path = None):
     
     # Set the label and legends
     # Put a legend below current axis
-    lgd = ax1.legend(loc='upper left', bbox_to_anchor=(1, 1),
-          fancybox=False, shadow=False,  frameon=False) #ncol=5
-    lgd.set_title(title = "Characterization:", prop={'weight':'bold'} )
+    if False:
+        lgd = axe.legend(loc='upper left', bbox_to_anchor=(1, 1),
+              fancybox=False, shadow=False,  frameon=False) #ncol=5
+        if  legend_title != None:
+            lgd.set_title(title = legend_title, prop={'weight':'bold'} )
+
     #lgd.get_title().set_ha('center')
     #lgd.get_title().set_position((20, 0))
-    ax1.set_ylabel("Fraction of abundance")
-    ax1.set_xlabel("Samples (N=%d)" % (len(df.index)))
-    ax1.get_xaxis().set_tick_params(which='both', labelsize=8,top='off', labelbottom='off', bottom= 'off', direction='out')
-    ax1.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
-    ax1.autoscale_view('tight')
+    axe.set_ylabel("Fraction of abundance")
+    axe.set_xlabel("Samples (N=%d)" % (len(df.index)))
+    axe.get_xaxis().set_tick_params(which='both', labelsize=8,top='off', labelbottom='off', bottom= 'off', direction='out')
+    axe.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
+    
     params = {'legend.fontsize': 8}#, 'legend.linewidth': 0}
     plt.rcParams.update(params)
     #plt.legend(loc='best', frameon=False )
     plt.xlim([min(tick_pos)-bar_width, max(tick_pos)])
     plt.ylim(0, 1)
+    axe.autoscale_view('tight')
     plt.tight_layout()
     #fig.subplots_adjust(left=0,right=1,bottom=0,top=1)
     #plt.show()
@@ -187,14 +192,13 @@ def stache_barplot(df, output_path = None):
     plt.savefig(output_path+".pdf", dpi=300, format='pdf', bbox_inches='tight', pad_inches = 0) #dpi=300, format='png', bbox_extra_artists=(lgd,),
     plt.savefig(output_path+".png", dpi=300, format='png', bbox_inches='tight', pad_inches = 0)
     plt.savefig(output_path+".svgz", dpi=300, format='svgz', bbox_inches='tight', pad_inches = 0)
-
-    #fig.savefig("stacked_barplot.pdf")
+    return axe
 def main():
     user_args = get_args()
     if user_args.summary_table:
         df = load_summary_table(user_args.summary_table)
     else:
         df = summerize_gene_table(user_args.ppanini_input, user_args.ppanini_output, user_args.plot_output)
-    stache_barplot(df, user_args.plot_output )
+    stack_barplot(df, user_args.plot_output )
 if __name__ == '__main__':
     main()    
