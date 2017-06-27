@@ -12,6 +12,7 @@ from .. import quantify_genes
 from .. import utilities
 from .. import annotate_genes
 from .. import write_ppanini_table
+from .. import config
 
 basename = ''
 logger = logging.getLogger(__name__)
