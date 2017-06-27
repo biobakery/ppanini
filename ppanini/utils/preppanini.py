@@ -78,7 +78,7 @@ def main():
 	parser.add_argument('--vsearch', default=False, help='Path to VSEARCH') 
 	parser.add_argument('--diamond', default=True, help='Path to DIAMOND') 
 	parser.add_argument('--rapsearch', default=False, help='Path to RAPSEARCH') 
-	parser.add_argument('--threads', help='Number of threads', default=1, dtype= int)
+	parser.add_argument('--threads', help='Number of threads', default=1, type= int)
 	parser.add_argument('--uniref90', help='UniRef90 INDEX file')
 	parser.add_argument('--to-normalize', dest='to_normalize', default=False, action='store_true', help='Default HUMAnN2 table; if sam-idxstats table; enable')
 	parser.add_argument('--log-level', dest='log_level', default='DEBUG', help='Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]')
