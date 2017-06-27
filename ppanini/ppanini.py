@@ -16,6 +16,7 @@ from collections import namedtuple
 from operator import attrgetter, itemgetter
 ppanini_table_row = namedtuple("ppanini_table_row", ["alpha_prevalence", "prevalence_percentile", "mean_abundance","abund_percentile", "beta_prevalence", "ppanini_score", "pvalue", "GO"], verbose=False, rename=False)
 import pandas as pd
+import pkg_resources
 
 try:
     from . import utilities
@@ -636,17 +637,31 @@ def run():
     config.centroid_prev_abund = centroid_prev_abund
     
     # add Go terms to the table
-    if config.verbose =='DEBUG':
-        print("Mapping UniRef90 to GO terms!")
     if not config.uniref2go == '':
+        if config.verbose =='DEBUG':
+            print("Mapping UniRef90 to GO terms!")
         attach_GO.uniref2go(config.centroid_prev_abund, uniref_go_path = config.uniref2go)
     else:
-        import pkg_resources
+        if config.verbose =='DEBUG':
+            print("Mapping UniRef90 to GO terms!")
         resource_package = __name__  # Could be any module/package name
         resource_path = '/'.join(('data', 'map_uniref90_infogo1000.txt.gz'))
         template = pkg_resources.resource_filename(resource_package, resource_path)
         print (template)
         attach_GO.uniref2go(config.centroid_prev_abund, uniref_go_path = template)
+    # add Go terms to the table
+    if not config.uniref2go == '':
+        if config.verbose =='DEBUG':
+            print("Mapping UniRef90 to COG terms!")
+        attach_GO.uniref2go(config.centroid_prev_abund, uniref_cog_path = config.uniref2go)
+    else:
+        if config.verbose =='DEBUG':
+            print("Mapping UniRef90 to COG terms!")
+        resource_package = __name__  # Could be any module/package name
+        resource_path = '/'.join(('data', 'map_uniref90_cog.txt.gz'))
+        template = pkg_resources.resource_filename(resource_package, resource_path)
+        print (template)
+        attach_GO.uniref2go(config.centroid_prev_abund, uniref_cog_path = template)
 
 def  prioritize_centroids():
     if config.verbose =='DEBUG':

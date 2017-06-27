@@ -115,7 +115,7 @@ def gzip_bzip2_biom_open_readlines( path ):
                 else:
                     yield line.rstrip()
 
-def convert_infogo1000_2_Uniref90 ( path_in= '' , path_out ='' , start=0, skip=None, allowed_keys=None, allowed_values=None ):
+def rev_uniref_mapper ( path_in= '' , path_out ='' , start=0, skip=None, allowed_keys=None, allowed_values=None ):
     """
     Load a file like:
     A 1 2
@@ -126,9 +126,9 @@ def convert_infogo1000_2_Uniref90 ( path_in= '' , path_out ='' , start=0, skip=N
     {A:{1:1, 2:1}, B:{1:1, 3:1}, C:{1:1, 2:2, 4:1}
     Inner values are not important (set to 1)
     """
-    if not sys.argv[1] or  not sys.argv[2]:
-        print ('Please provide an input and output path')
-    path_in = sys.argv[1],
+    if len(sys.argv)<3:
+        sys.exit('Please provide an input and output path')
+    path_in = sys.argv[1]
     path_out = sys.argv[2]
     polymap_all = {}
     print( "Loading mapping file from:", path_in, file=sys.stderr )
@@ -141,12 +141,12 @@ def convert_infogo1000_2_Uniref90 ( path_in= '' , path_out ='' , start=0, skip=N
                 if i != start and (skip is None or i not in skip):
                     if allowed_values is None or value in allowed_values:
                         polymap_all.setdefault( value, {} )[key] = 1 #polymap.setdefault( key, {} )[value] = 1
-
+    
     with gzip.open(path_out+'_dict.txt.gz', 'wt') as csv_file:
         writer = csv.writer(csv_file, delimiter='\t')
         for key, values in polymap_all.items():
            writer.writerow([key, ";".join(values)])                                          
-    print("Mappping Uniref90 to infogo1000 is done")
+    print("Mappping Uniref90 to annotation is done")
 
 def load_polymap ( path, start=0, skip=None, allowed_keys=None, allowed_values=None ):
     """
@@ -171,42 +171,35 @@ def load_polymap ( path, start=0, skip=None, allowed_keys=None, allowed_values=N
 
 def uniref2go(ppanini_table, uniref_go_path ):
     #go1000_uniref90_dic = load_polymap ( go_uniref_path )
-    #convert_infogo1000_2_Uniref90()
     go1000_uniref90_dic = load_polymap ( uniref_go_path )
     #print('Loading the mapping file is done!')
     #print (go1000_uniref90_dic.keys())
     #uniref_go_keys = go1000_uniref90_dic.keys()
     #go1000_uniref90_dic = pd.read_table("file.gz",compression='gzip',sep='\x01')
     for index, row in ppanini_table.iterrows():
-    #	row["go_term"] = go1000_uniref90_dic.get(index, None)
-    	#if index == '':
-    	#	continue
-    	#print(go1000_uniref90_dic.get(index))
-    	ppanini_table.loc[index,'GO'] = go1000_uniref90_dic.get(index)# go1000_uniref90_dic.get(ppanini_table.index)
-    #ppanini_table.loc[ppanini_table.index,'go_term'] = go1000_uniref90_dic[list(ppanini_table.index)][1]
-    #print(ppanini_table['go_term']) 
+    	ppanini_table.loc[index,'GO'] = go1000_uniref90_dic.get(index)
     #return 	ppanini_table
 
 if __name__ == '__main__':
-	uniref_go = read_map(sys.argv[1])
-	csv_table = csv.reader(open(sys.argv[2]), csv.excel_tab)
-	check = 0
-	new_foo = []
-	for line in csv_table:
-		new_line = ''
-		if check:
-			uid = line[0]
-			if uid.strip() in uniref_go:
-				head = [uid+'|'+uniref_go[uid]]
-				new_line = head + line[1:]
-				new_foo += [new_line]
-			else:
-				new_foo +=[line]
-		else:
-			new_foo += [line]
-		check +=1
-	with open(sys.argv[2]+'_GOadded.txt', 'w') as foo:
-		for line in new_foo:
-			foo.writelines(['\t'.join(line)+'\n'])
-
-
+    uniref_go = read_map(sys.argv[1])
+    csv_table = csv.reader(open(sys.argv[2]), csv.excel_tab)
+    check = 0
+    new_foo = []
+    for line in csv_table:
+    	new_line = ''
+    	if check:
+    		uid = line[0]
+    		if uid.strip() in uniref_go:
+    			head = [uid+'|'+uniref_go[uid]]
+    			new_line = head + line[1:]
+    			new_foo += [new_line]
+    		else:
+    			new_foo +=[line]
+    	else:
+    		new_foo += [line]
+    	check +=1
+    with open(sys.argv[2]+'_GOadded.txt', 'w') as foo:
+    	for line in new_foo:
+    		foo.writelines(['\t'.join(line)+'\n'])
+    
+    

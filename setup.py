@@ -76,7 +76,7 @@ setuptools.setup(
             'ppanini_scatterplot = ppanini.utils.ppanini_scatterplot:main',
             'ppanini_barplot = ppanini.utils.stacked_barplot:main',
             'ppanini_rocplot = ppanini.utils.ppanini_rocplot:main',
-            'ppanini_rev_go2uniref = ppanini.utils.attach_GO:convert_infogo1000_2_Uniref90'            
+            'ppanini_rev_uniref_mapper = ppanini.utils.attach_GO:rev_uniref_mapper'            
         ]},
     test_suite= 'ppanini.tests.ppanini_test.get_unittests()',
     zip_safe = True

@@ -86,7 +86,7 @@ def run_rapsearch(query_file, db, out_fname, all_paths, nprocesses):
 												 -v 1 \
 												 -z' + str(nprocesses))	
 
-def run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, perc_id, nprocesses):
+def run_uclust(allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, perc_id, nprocesses):
 	'''Runs USEARCH UCLUST on query_file to produce results in out_fname
 
 	Input: usearch_folder = path to folder containing USEARCH
@@ -98,13 +98,13 @@ def run_uclust(usearch_folder, allgenes_file_path, gene_centroids_file_path, gen
 
 	logger.debug('run_uclust '+allgenes_file_path)
 
-	os.system(usearch_folder+ ' -cluster_fast ' + allgenes_file_path +' \
+	os.system('usearch --cluster_fast ' + allgenes_file_path +' \
 								 -id '+str(perc_id)+' \
 								 -centroids '+ gene_centroids_file_path + ' \
 								 -uc ' + gene_centroid_clusters_file_path+ '\
 								 -threads '+str(nprocesses))
 
-def run_vclust(vsearch_folder, allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, perc_id, nprocesses):
+def run_vclust(allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, perc_id, nprocesses):
 	'''Runs USEARCH UCLUST on query_file to produce results in out_fname
 
 		Input: usearch_folder = path to folder containing USEARCH
@@ -117,7 +117,7 @@ def run_vclust(vsearch_folder, allgenes_file_path, gene_centroids_file_path, gen
 	logger.debug('run_vclust '+allgenes_file_path) 
 
 
-	os.system(vsearch_folder+ ' --cluster_fast ' + allgenes_file_path +' \
+	os.system('vsearch --cluster_fast ' + allgenes_file_path +' \
 								 --id '+str(perc_id)+' \
 								 --centroids '+ gene_centroids_file_path + ' \
 								 --uc ' + gene_centroid_clusters_file_path+ '\

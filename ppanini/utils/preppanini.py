@@ -74,9 +74,9 @@ def main():
 	parser.add_argument('--bypass-annotation', dest= 'bypass_annotation', default=False, action='store_true', help='Bypass annotating genes')
 	parser.add_argument('--bypass-clust', dest='bypass_clust', default=False, action='store_true', help='Bypass annotating genes')
 	parser.add_argument('--bypass-write-table', dest= 'bypass_write_table', default=False, action='store_true', help='Bypass writing table')
-	parser.add_argument('--usearch', default=False, help='Path to USEARCH') #add to be in path?
+	parser.add_argument('--usearch', default=True, help='Path to USEARCH') #add to be in path?
 	parser.add_argument('--vsearch', default=False, help='Path to VSEARCH') #add to be in path?
-	parser.add_argument('--diamond', default=False, help='Path to DIAMOND') #add to be in path??
+	parser.add_argument('--diamond', default=True, help='Path to DIAMOND') #add to be in path??
 	parser.add_argument('--rapsearch', default=False, help='Path to RAPSEARCH') #add to be in path??
 	parser.add_argument('--threads', help='Number of threads', default=1)
 	parser.add_argument('--uniref90', help='UniRef90 INDEX file')
@@ -182,16 +182,14 @@ def main():
 			gene_centroid_clusters_file_path = paths_dict['ANNOTATION_TMP']+'/'+basename+'.uc'
 			if args.usearch:
 				clust_method = args.usearch
-				annotate_genes.run_uclust(clust_method, \
-									 whole_genome_catalog, \
+				annotate_genes.run_uclust(whole_genome_catalog, \
 									 gene_centroids_file_path, \
 									 gene_centroid_clusters_file_path, \
 									 0.9, \
 									 nprocesses)
 			elif args.vsearch:
 					clust_method = args.vsearch #assumes vsearch in path if not provided
-					annotate_genes.run_vclust(clust_method, \
-											whole_genome_catalog, \
+					annotate_genes.run_vclust(whole_genome_catalog, \
 											gene_centroids_file_path, \
 											gene_centroid_clusters_file_path, \
 											0.9)
