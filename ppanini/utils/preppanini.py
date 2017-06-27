@@ -77,6 +77,12 @@ def main():
 	parser.add_argument('--usearch', default=True, help='Path to USEARCH') 
 	parser.add_argument('--vsearch', default=False, help='Path to VSEARCH') 
 	parser.add_argument('--diamond', default=True, help='Path to DIAMOND') 
+	parser.add_argument(
+        "--translated-alignment", 
+        help="software to use for translated alignment\n[DEFAULT: " + 
+            config.translated_alignment_selected + "]", 
+        default=config.translated_alignment_selected,
+        choices=config.translated_alignment_choices)
 	parser.add_argument('--rapsearch', default=False, help='Path to RAPSEARCH') 
 	parser.add_argument('--threads', help='Number of threads', default=1, type= int)
 	parser.add_argument('--uniref90', help='UniRef90 INDEX file')
@@ -180,18 +186,17 @@ def main():
 			gene_centroids_file_path = paths_dict['ANNOTATION_TMP']+'/'+basename+'.centroids.fasta'
 			gene_centroid_clusters_file_path = paths_dict['ANNOTATION_TMP']+'/'+basename+'.uc'
 			if args.usearch:
-				clust_method = args.usearch
 				annotate_genes.run_uclust(whole_genome_catalog, \
 									 gene_centroids_file_path, \
 									 gene_centroid_clusters_file_path, \
 									 0.9, \
 									 args.threads)
 			elif args.vsearch:
-					clust_method = args.vsearch #assumes vsearch in path if not provided
 					annotate_genes.run_vclust(whole_genome_catalog, \
 											gene_centroids_file_path, \
 											gene_centroid_clusters_file_path, \
-											0.9)
+											0.9,\
+											args.threads)
 			else:
 				raise Exception('No clustering software found: Please use --vsearch or --usearch (default) to specify the clustering software')
 			genome_catalog = gene_centroids_file_path

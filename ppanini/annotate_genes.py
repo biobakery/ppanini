@@ -54,7 +54,7 @@ def run_diamond(query_file, db, out_fname, all_paths, nprocesses):
 		   out_fname = path of output_file to put the results in
 		   nprocesses = Number of processes
 		   db = DIAMOND preprocessed database'''
-
+	print(query_file, db, out_fname, all_paths, nprocesses)
 	logger.debug('run_diamond '+query_file)
 	os.system(all_paths['diamond']+' blastp -q ' + query_file + ' \
 													-d ' + db + ' \
@@ -84,7 +84,7 @@ def run_rapsearch(query_file, db, out_fname, all_paths, nprocesses):
 												 -u 2 \
 												 -b 0 \
 												 -v 1 \
-												 -z' + str(nprocesses))	
+												 -z ' + str(nprocesses))	
 
 def run_uclust(allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, perc_id, nprocesses):
 	'''Runs USEARCH UCLUST on query_file to produce results in out_fname

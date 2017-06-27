@@ -29,5 +29,9 @@ bypass_clustering = False
 genomic_score = False
 uniref2go = ''
 
+# translated alignment options
+translated_alignment_choices = ["usearch","rapsearch","diamond", "vsearch"]
+translated_alignment_selected = translated_alignment_choices[2]
+
 if __name__=='__main__':
 	pass
