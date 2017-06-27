@@ -74,10 +74,10 @@ def main():
 	parser.add_argument('--bypass-annotation', dest= 'bypass_annotation', default=False, action='store_true', help='Bypass annotating genes')
 	parser.add_argument('--bypass-clust', dest='bypass_clust', default=False, action='store_true', help='Bypass annotating genes')
 	parser.add_argument('--bypass-write-table', dest= 'bypass_write_table', default=False, action='store_true', help='Bypass writing table')
-	parser.add_argument('--usearch', default=True, help='Path to USEARCH') #add to be in path?
-	parser.add_argument('--vsearch', default=False, help='Path to VSEARCH') #add to be in path?
-	parser.add_argument('--diamond', default=True, help='Path to DIAMOND') #add to be in path??
-	parser.add_argument('--rapsearch', default=False, help='Path to RAPSEARCH') #add to be in path??
+	parser.add_argument('--usearch', default=True, help='Path to USEARCH') 
+	parser.add_argument('--vsearch', default=False, help='Path to VSEARCH') 
+	parser.add_argument('--diamond', default=True, help='Path to DIAMOND') 
+	parser.add_argument('--rapsearch', default=False, help='Path to RAPSEARCH') 
 	parser.add_argument('--threads', help='Number of threads', default=1)
 	parser.add_argument('--uniref90', help='UniRef90 INDEX file')
 	parser.add_argument('--to-normalize', dest='to_normalize', default=False, action='store_true', help='Default HUMAnN2 table; if sam-idxstats table; enable')
@@ -186,7 +186,7 @@ def main():
 									 gene_centroids_file_path, \
 									 gene_centroid_clusters_file_path, \
 									 0.9, \
-									 nprocesses)
+									 args.threads)
 			elif args.vsearch:
 					clust_method = args.vsearch #assumes vsearch in path if not provided
 					annotate_genes.run_vclust(whole_genome_catalog, \
@@ -194,7 +194,7 @@ def main():
 											gene_centroid_clusters_file_path, \
 											0.9)
 			else:
-				raise Exception('No clustering software found: Please use --vsearch or --usearch to specify the path to software')
+				raise Exception('No clustering software found: Please use --vsearch or --usearch (default) to specify the clustering software')
 			genome_catalog = gene_centroids_file_path
 		else:
 			logger.debug('BYPASSING CLUSTERING')
@@ -204,14 +204,14 @@ def main():
 		out_u90_fname = paths_dict['ANNOTATION_TMP']+'/'+basename+'.centroids.u90'
 
 		#paths_dict['diamond'] = 'diamond'
-		if args.rapsearch:
-			paths_dict['rapsearch'] = args.rapsearch
-			annotate_genes.run_rapsearch(genome_catalog, args.uniref90, out_u90_fname, paths_dict, nprocesses)
-		elif args.diamond:
+		if args.diamond:
 			paths_dict['diamond'] = args.diamond
-			annotate_genes.run_diamond(genome_catalog, args.uniref90, out_u90_fname, paths_dict, nprocesses)
+			annotate_genes.run_diamond(genome_catalog, args.uniref90, out_u90_fname, paths_dict, args.threads)
+		elif args.rapsearch:
+			paths_dict['rapsearch'] = args.rapsearch
+			annotate_genes.run_rapsearch(genome_catalog, args.uniref90, out_u90_fname, paths_dict, args.threads)
 		else:
-			raise Exception('No similarity search software found: Please use --diamond or --rapsearch to specify the path to software')
+			raise Exception('No similarity search software found: Please make sure provide one of them by --rapsearch or --diamond (default)')
 		logger.debug('Running SEARCH against UniRef')
 		
 		

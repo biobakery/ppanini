@@ -60,11 +60,11 @@ def run_diamond(query_file, db, out_fname, all_paths, nprocesses):
 													-d ' + db + ' \
 													-k 1 \
 													-a ' + out_fname + ' \
-													-p ' + str(nprocesses)) #check if command is correct.
+													-p ' + nprocesses) #check if command is correct.
 
 	os.system(all_paths['diamond']+' view -a ' + out_fname + '.daa \
 												  -o ' + out_fname + '.m8 \
-												  -p ' + str(nprocesses))
+												  -p ' + nprocesses)
 
 def run_rapsearch(query_file, db, out_fname, all_paths, nprocesses):
 	'''Runs RAPSEARCH2 on query_file to produce results in out_fname
@@ -84,7 +84,7 @@ def run_rapsearch(query_file, db, out_fname, all_paths, nprocesses):
 												 -u 2 \
 												 -b 0 \
 												 -v 1 \
-												 -z' + str(nprocesses))	
+												 -z' + nprocesses)	
 
 def run_uclust(allgenes_file_path, gene_centroids_file_path, gene_centroid_clusters_file_path, perc_id, nprocesses):
 	'''Runs USEARCH UCLUST on query_file to produce results in out_fname
