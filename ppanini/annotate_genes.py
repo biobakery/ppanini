@@ -54,15 +54,14 @@ def run_diamond(query_file, db, out_fname, all_paths, nprocesses):
 		   out_fname = path of output_file to put the results in
 		   nprocesses = Number of processes
 		   db = DIAMOND preprocessed database'''
-	print(query_file, db, out_fname, all_paths, nprocesses)
 	logger.debug('run_diamond '+query_file)
-	os.system(all_paths['diamond']+' blastp -q ' + query_file + ' \
+	os.system('diamond blastp -q ' + query_file + ' \
 													-d ' + db + ' \
 													-k 1 \
 													-a ' + out_fname + ' \
 													-p ' + str(nprocesses)) #check if command is correct.
 
-	os.system(all_paths['diamond']+' view -a ' + out_fname + '.daa \
+	os.system('diamond view -a ' + out_fname + '.daa \
 												  -o ' + out_fname + '.m8 \
 												  -p ' + str(nprocesses))
 
@@ -78,7 +77,7 @@ def run_rapsearch(query_file, db, out_fname, all_paths, nprocesses):
 		   db = RAPSEARCH2 preprocessed database'''
 
 	logger.debug('run_rapsearch '+query_file)
-	os.system(all_paths['rapsearch']+' -q ' + query_file + ' \
+	os.system('rapsearch -q ' + query_file + ' \
 												 -d ' + db + ' \
 												 -o ' + out_fname + '.m8 \
 												 -u 2 \
