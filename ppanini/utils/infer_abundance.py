@@ -130,7 +130,10 @@ for row in iter_rows( args.hits ):
             and scover >= c_min_scover:
         if gene not in unirefs or args.all_valid_hits:
             unirefs.setdefault( gene, set( ) ).add( uniref )
-    else:
+
+for row in iter_rows( args.hits ):
+    gene = row[0]
+    if gene not in unirefs:
         no_unirefs.setdefault( gene, set( ) ).add( uniref )
 
 with open(args.output+'/hits.txt', 'wt') as csv_file:

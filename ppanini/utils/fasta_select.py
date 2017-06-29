@@ -38,4 +38,4 @@ with open( args.input ) as fh:
         if not skipping:
             print line.strip()
 
-print >>sys.stderr, "ok seqs:", len( ok ), "total seqs:", total, "found:", count
+print >>sys.stderr, "Hits:", len( ok ), "total sequences:", total, "found hits sequences:", count
