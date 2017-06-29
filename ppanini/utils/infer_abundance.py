@@ -6,7 +6,6 @@ import re
 import argparse
 import csv
 import shutil
-
 #from zopy.utils import iter_rows, tprint, warn
 
 #==== Helper function from zopy by Eric Franzosa ========
