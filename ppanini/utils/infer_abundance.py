@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 import os
 import sys
@@ -6,74 +5,9 @@ import re
 import argparse
 import csv
 import shutil
-#from zopy.utils import iter_rows, tprint, warn
-
-#==== Helper function from zopy by Eric Franzosa ========
-def warn ( *args ):
-    script = "?"
-    if sys.argv[0] != "":
-        script = os.path.split( sys.argv[0] )[1].upper()
-    args = ["WARNING ({}):".format( script )] + list( args )
-    print >>sys.stderr, " ".join( map( str, args ) )
-
-def iter_rows( path ):
-    """ easy table loading """
-    lens = []
-    with try_open( path ) as fh:
-        for row in reader( fh ):
-            lens.append( len( row ) )
-            yield row
-    if len( set( lens ) ) != 1:
-        warn( "rows didn't all have equal lengths:", set( lens ) )
-
-def tprint( *args, **kwargs ):
-    """ coerce list of items to strings then print with tabs between """
-    print >>kwargs.get( "file", sys.stdout ), "\t".join( map( str, args ) )
-
-def try_open( path, *args ):
-    """ open an uncompressed or gzipped file; fail gracefully """
-    fh = None
-    try:
-        if re.search( r".gz$", path ):
-            print >>sys.stderr, "Treating", path, "as gzipped file"
-            fh = gzip.GzipFile( path, *args )
-        else:
-            fh = open( path, *args )
-    except:
-        die( "Problem opening", path )
-    return fh   
-# ---------------------------------------------------------------
-# text manipulation
-# ---------------------------------------------------------------
-
-def reader ( file_handle ):
-    """ my favorite options for csv reader """
-    for aItems in csv.reader( file_handle, delimiter="\t", quotechar="", quoting=csv.QUOTE_NONE ):
-        yield aItems
-
-def make_directory(output_dir):
-    if not os.path.isdir(output_dir):
-        try:
-            print("Creating output directory: " + output_dir)
-            os.mkdir(output_dir)
-        except EnvironmentError:
-            sys.exit("CRITICAL ERROR: Unable to create output directory.")
-    else:
-        try:
-            print("Removing the old output directory: " + output_dir)
-            shutil.rmtree(output_dir)
-            print("Creating output directory: " + output_dir)
-            os.mkdir(output_dir)
-        except EnvironmentError:
-            sys.exit("CRITICAL ERROR: Unable to create output directory.")
-        
-    
-    if not os.access(output_dir, os.W_OK):
-        sys.exit("CRITICAL ERROR: The output directory is not " + 
-            "writeable. This software needs to write files to this directory.\n" +
-            "Please select another directory.")
-        
-    print("Output files will be written to: " + output_dir) 
+import json
+import pandas as pd
+from ppanini.utilities import make_directory, iter_rows
 parser = argparse.ArgumentParser()
 #parser.add_argument( "orfs" )
 parser.add_argument( "hits" )
@@ -82,6 +16,7 @@ parser.add_argument( "--min-percid", type=float, required=True )
 parser.add_argument( "--min-qcover", type=float, required=True )
 parser.add_argument( "--min-scover", type=float, required=True )
 parser.add_argument( "--all-valid-hits", action="store_true" )
+parser.add_argument( "--json", action="store_true" )
 args = parser.parse_args()
 
 c_min_percid = args.min_percid
@@ -119,6 +54,7 @@ with open( args.hits ) as fh: # it was args.orfs
 make_directory(args.output)
 unirefs = {}
 no_unirefs = {}
+polymap_all = {}
 for row in iter_rows( args.hits ):
     gene = row[0]
     uniref = row[1].split( "|" )[0]
@@ -129,7 +65,17 @@ for row in iter_rows( args.hits ):
             and qcover >= c_min_qcover \
             and scover >= c_min_scover:
         if gene not in unirefs or args.all_valid_hits:
+            polymap_all.setdefault( uniref, {} )[gene] = 1 
             unirefs.setdefault( gene, set( ) ).add( uniref )
+            
+if args.json:
+    f=open(args.output+'/json_map_uniref_gene.txt',"wt")
+    f.write(json.dumps(polymap_all))
+
+f1=open(args.output+'/map_uniref_gene.txt',"wt")
+for cluster in polymap_all:
+    f1.write ("%s \t %s \n" % (cluster,str(';'.join(gene for gene in polymap_all.get(cluster)))))
+        #f1.write([cluster, polymap_all.get(cluster)])
 
 for row in iter_rows( args.hits ):
     gene = row[0]
@@ -143,7 +89,8 @@ with open(args.output+'/hits.txt', 'wt') as csv_file:
 with open(args.output+'/no_hits.txt', 'wt') as csv_file:
         writer = csv.writer(csv_file, delimiter='\t')
         for gene in no_unirefs:
-           writer.writerow([gene])    
+           writer.writerow([gene])  
+  
 '''output = {}
 for gene in abunds:
     if len( unirefs.get( gene, [] ) ) > 1:

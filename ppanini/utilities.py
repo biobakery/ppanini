@@ -1,6 +1,10 @@
-import os
+
+from __future__ import print_function # PYTHON 2.7+ REQUIREDimport os
 import re
 import sys
+import os
+import shutil
+import csv
 import pdb
 import Bio
 import numpy
@@ -13,6 +17,105 @@ from Bio import Seq
 import pandas as pd
 
 logger = logging.getLogger(__name__)
+
+# constants
+# ---------------------------------------------------------------
+
+c_strat_delim     = "|"
+c_taxon_delim     = "."
+c_name_delim      = ": "
+c_multiname_delim = ";"
+c_str_unknown     = "NO_NAME"
+c_ungrouped       = "UNGROUPED"
+c_unmapped        = "UNMAPPED"
+c_unintegrated    = "UNINTEGRATED"
+c_many_bytes      = 1e8
+c_zip_multiplier  = 10
+# the last line in the file with this indicator is the header
+GENE_TABLE_COMMENT_LINE="#"
+
+# the extension used for biom files
+BIOM_FILE_EXTENSION=".biom"
+
+c_topsort = {
+    c_unmapped:0,
+    c_ungrouped:1,
+    c_unintegrated:2,
+    "UniRef50_unknown":3,
+    "UniRef90_unknown":4,
+}
+
+#from zopy.utils import iter_rows, tprint, warn
+
+#==== Helper function from zopy by Eric Franzosa ========
+def warn ( *args ):
+    script = "?"
+    if sys.argv[0] != "":
+        script = os.path.split( sys.argv[0] )[1].upper()
+    args = ["WARNING ({}):".format( script )] + list( args )
+    print >>sys.stderr, " ".join( map( str, args ) )
+
+def iter_rows( path ):
+    """ easy table loading """
+    lens = []
+    with try_open( path ) as fh:
+        for row in reader( fh ):
+            lens.append( len( row ) )
+            yield row
+    if len( set( lens ) ) != 1:
+        warn( "rows didn't all have equal lengths:", set( lens ) )
+
+def tprint( *args, **kwargs ):
+    """ coerce list of items to strings then print with tabs between """
+    print >>kwargs.get( "file", sys.stdout ), "\t".join( map( str, args ) )
+
+def try_open( path, *args ):
+    """ open an uncompressed or gzipped file; fail gracefully """
+    fh = None
+    try:
+        if re.search( r".gz$", path ):
+            print >>sys.stderr, "Treating", path, "as gzipped file"
+            fh = gzip.GzipFile( path, *args )
+        else:
+            fh = open( path, *args )
+    except:
+        die( "Problem opening", path )
+    return fh   
+# ---------------------------------------------------------------
+# text manipulation
+# ---------------------------------------------------------------
+
+def reader ( file_handle ):
+    """ my favorite options for csv reader """
+    for aItems in csv.reader( file_handle, delimiter="\t", quotechar="", quoting=csv.QUOTE_NONE ):
+        yield aItems
+
+def make_directory(output_dir):
+    if not os.path.isdir(output_dir):
+        try:
+            print("Creating output directory: " + output_dir)
+            os.mkdir(output_dir)
+        except EnvironmentError:
+            sys.exit("CRITICAL ERROR: Unable to create output directory.")
+    else:
+        try:
+            print("Removing the old output directory: " + output_dir)
+            shutil.rmtree(output_dir)
+            print("Creating output directory: " + output_dir)
+            os.mkdir(output_dir)
+        except EnvironmentError:
+            sys.exit("CRITICAL ERROR: Unable to create output directory.")
+        
+    
+    if not os.access(output_dir, os.W_OK):
+        sys.exit("CRITICAL ERROR: The output directory is not " + 
+            "writeable. This software needs to write files to this directory.\n" +
+            "Please select another directory.")
+        
+    print("Output files will be written to: " + output_dir) 
+
+
+
 def read_ppanini_imp_genes_table_dead(filename):
 	gene_table = pd.read_csv(filename, sep='\t', index_col=0)
 	#print gene_table.columns.values
@@ -114,7 +217,7 @@ def read_data(mg_file, ppanini_output_file):
 			if genome not in uniq_genomes:
 				uniq_genomes +=[genome]
 	no_uniq_genomes = len(uniq_genomes)
-	print 'No. of unique genomes: '+str(no_uniq_genomes)
+	print ('No. of unique genomes: '+str(no_uniq_genomes))
 	ppanini_output = pd.DataFrame.from_csv(ppanini_output_file, sep='\t', index_col=0, header =0)#read_ppanini_imp_genes_table(ppanini_output_file)
 	return metagenomic_table, ppanini_output, no_uniq_genomes 
 def read_abund_prev(filename):
@@ -389,9 +492,143 @@ def extract_mapping():
 	for i in centroids:
 		if i in mapping:
 			for j in mapping[i]:
-				print '\t'.join([i,j])
+				print ('\t'.join([i,j]))
 		else:
-			print i+'\tNA'
+			print (i+'\tNA')
+			
+
+# ---------------------------------------------------------------
+# helper functions
+# ---------------------------------------------------------------
+def read_map(map_obj):
+	csv_map = csv.reader(open(map_obj), csv.excel_tab)
+	uniref_go = {}
+	for line in csv_map:
+		for uid in line[1:]:
+			uniref_go[uid.strip()] = line[0]
+	return uniref_go
+
+def size_warn( path ):
+    m = 1 if ".gz" not in path else c_zip_multiplier
+    if m * os.path.getsize( path ) > c_many_bytes:
+		print( "  This is a large file, one moment please...", file=sys.stderr )
+
+def try_zip_open( path, write=None ):
+    """ 
+    open an uncompressed or gzipped file; fail gracefully 
+    """
+    fh = None
+
+    # set the open mode
+    if write:
+        open_mode = "w"
+    elif path.endswith(".bz2"):
+        open_mode = "r"
+    else:
+        open_mode = "rt"
+
+    try:
+        if path.endswith(".gz"):
+            fh = gzip.open( path, open_mode )
+        elif path.endswith(".bz2"):
+            fh = bz2.BZ2File( path, open_mode )
+        else:
+            fh = open( path, open_mode )
+    except EnvironmentError:
+        sys.exit( "Problem opening file: " + path)
+    return fh
+
+def read_biom_table( path ):
+    """
+    return the lines in the biom file
+    """
+
+    try:
+        import biom
+    except ImportError:
+        sys.exit("Could not find the biom software."+
+            " This software is required since the input file is a biom file.")
+        
+    try:
+        tsv_table = biom.load_table( path ).to_tsv().split("\n")
+    except (EnvironmentError, TypeError):
+        sys.exit("ERROR: Unable to read biom input file.")
+        
+    return tsv_table
+
+def gzip_bzip2_biom_open_readlines( path ):
+    """
+    return the lines in the opened file for tab delimited text, gzip, bzip2 and biom files
+    """
+
+    # if the file is biom, convert to text and return lines
+    if path.endswith(BIOM_FILE_EXTENSION):
+        for line in read_biom_table(path):
+            yield line
+    else:
+        with try_zip_open( path ) as file_handle:
+            for line in file_handle:
+                if path.endswith(".bz2"):
+                    # convert the line to text from binary
+                    yield line.decode('utf-8').rstrip()
+                else:
+                    yield line.rstrip()
+
+def rev_uniref_mapper ( path_in= '' , path_out ='' , start=0, skip=None, allowed_keys=None, allowed_values=None ):
+    """
+    Load a file like:
+    A 1 2
+    B 1
+    B 3
+    C 1 2 4
+    To a nested dict structure:
+    {A:{1:1, 2:1}, B:{1:1, 3:1}, C:{1:1, 2:2, 4:1}
+    Inner values are not important (set to 1)
+    """
+    if len(sys.argv)<3:
+        sys.exit('Please provide an input and output path')
+    path_in = sys.argv[1]
+    path_out = sys.argv[2]
+    polymap_all = {}
+    print( "Loading mapping file from:", path_in, file=sys.stderr )
+    size_warn( path_in )
+    for line in gzip_bzip2_biom_open_readlines( path_in ):
+        row = line.split("\t")
+        key = row[start]
+        if allowed_keys is None or key in allowed_keys:
+            for i, value in enumerate( row ):
+                if i != start and (skip is None or i not in skip):
+                    if allowed_values is None or value in allowed_values:
+                        polymap_all.setdefault( value, {} )[key] = 1 #polymap.setdefault( key, {} )[value] = 1
+    
+    with gzip.open(path_out+'_dict.txt.gz', 'wt') as csv_file:
+        writer = csv.writer(csv_file, delimiter='\t')
+        for key, values in polymap_all.items():
+           writer.writerow([key, ";".join(values)])                                          
+    print("Mappping Uniref90 to annotation is done")
+
+def load_polymap ( path, start=0, skip=None, allowed_keys=None, allowed_values=None ):
+    """
+    Loads a file to a dictionry 
+    INPUT:
+    for each row in file format is:
+    UniRefID    GOID1;GOID2
+    OUTPUT:
+    Dictionary : UniRefID is key and value is GOID1;GOID2
+    """
+    polymap_all = {}
+    print( "Loading mapping file from:", path, file=sys.stderr )
+    size_warn( path )
+    for line in gzip_bzip2_biom_open_readlines( path ):
+        row = line.split("\t")
+        key = row[start]
+        polymap_all[key] = row[1]
+    '''with open(path) as csv_file:
+        reader = csv.reader(csv_file)
+        polymap_all = dict(reader)'''
+    return polymap_all
+			
+
 
 if __name__ == '__main__':
 	pass

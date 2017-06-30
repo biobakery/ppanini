@@ -13,6 +13,10 @@ parser.add_argument(
     '-f', '--ok_file',
     help='like grep -f behavior', 
     )
+parser.add_argument( 
+    '-o', '--output', 
+    help='fasta file', 
+    )
 args = parser.parse_args()
 
 ok = {}
@@ -26,6 +30,7 @@ with open( args.ok_file ) as fh:
 total = 0
 count = 0
 skipping = True
+f1=open(args.output, 'w')
 with open( args.input ) as fh:
     for line in fh:
         if line[0] == ">":
@@ -36,6 +41,7 @@ with open( args.input ) as fh:
             else:
                 skipping = True
         if not skipping:
-            print line.strip()
+            f1.write(line)
+            #print line.strip()
 
 print >>sys.stderr, "Hits:", len( ok ), "total sequences:", total, "found hits sequences:", count

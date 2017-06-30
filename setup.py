@@ -74,7 +74,7 @@ setuptools.setup(
             'ppanini_preprocess = ppanini.utils.preppanini:main',
             'ppanini_test = ppanini.tests.ppanini_test:main',
             'ppanini_scatterplot = ppanini.utils.ppanini_scatterplot:main',
-            'ppanini_barplot = ppanini.utils.stacked_barplot:main',
+            'ppanini_barplot = ppanini.utils.ppanini_barplot:main',
             'ppanini_rocplot = ppanini.utils.ppanini_rocplot:main',
             'ppanini_rev_uniref_mapper = ppanini.utils.attach_GO:rev_uniref_mapper'            
         ]},
