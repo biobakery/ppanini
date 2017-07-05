@@ -573,6 +573,42 @@ def gzip_bzip2_biom_open_readlines( path ):
                     yield line.decode('utf-8').rstrip()
                 else:
                     yield line.rstrip()
+def process_gene_table_with_header(gene_table, allow_for_missing_header=None):
+    """
+    Process through the header portion of the gene table file
+    """
+    
+    # try to open the file
+    try:
+        lines=gzip_bzip2_biom_open_readlines( gene_table )
+    except EnvironmentError:
+        sys.exit("Unable to read file: " + gene_table)
+            
+    # find the headers
+    header=""
+    first_data_line=""
+    for line in lines:
+        if line[0] == GENE_TABLE_COMMENT_LINE:
+            header = line
+        else:
+            first_data_line = line
+            break
+            
+    if not header and not allow_for_missing_header:
+        sys.exit("File does not have a required header: " + gene_table +
+            " . Please add a header which includes the indicator: " +
+            GENE_TABLE_COMMENT_LINE)
+        
+    # provide the header, if one was found
+    if header:
+        yield header
+    
+    # provide the first data line
+    yield first_data_line
+    
+    # now provide the remaining lines
+    for line in lines:
+        yield line
 
 def rev_uniref_mapper ( path_in= '' , path_out ='' , start=0, skip=None, allowed_keys=None, allowed_values=None ):
     """
