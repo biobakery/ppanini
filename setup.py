@@ -76,7 +76,8 @@ setuptools.setup(
             'ppanini_scatterplot = ppanini.utils.ppanini_scatterplot:main',
             'ppanini_barplot = ppanini.utils.ppanini_barplot:main',
             'ppanini_rocplot = ppanini.utils.ppanini_rocplot:main',
-            'ppanini_rev_uniref_mapper = ppanini.utils.attach_GO:rev_uniref_mapper'            
+            'ppanini_rev_uniref_mapper = ppanini.utils.attach_GO:rev_uniref_mapper',
+            'ppanini_join_tables = ppanini.utils.ppanini_join_tables:main'             
         ]},
     test_suite= 'ppanini.tests.ppanini_test.get_unittests()',
     zip_safe = True

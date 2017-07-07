@@ -573,6 +573,138 @@ def gzip_bzip2_biom_open_readlines( path ):
                     yield line.decode('utf-8').rstrip()
                 else:
                     yield line.rstrip()
+
+def execute_command(exe, args, infiles, outfiles, stdout_file=None, 
+        stdin_file=None, raise_error=None, stderr_file=None):
+    """
+    Execute third party software or shell command with files
+    """
+	
+    if exe == sys.executable:
+        # check that the python module can be found
+        module_path=return_module_path(args[0])
+        if not module_path:
+            message="Can not find python module " + args[0]
+            logger.critical(message)
+            if raise_error:
+                raise EnvironmentError
+            else:
+                sys.exit("CRITICAL ERROR: " + message)
+        # update the module to the full path if not already the full path
+        elif not os.path.isabs(args[0]):
+            args[0]=os.path.join(module_path,args[0])
+            
+        logger.debug("Using python module : " + args[0])
+    else:
+        # check that the executable can be found
+        exe_path=return_exe_path(exe)
+        if not exe_path:
+            message="Can not find executable " + exe
+            logger.critical(message)
+            if raise_error:
+                raise EnvironmentError
+            else:
+                sys.exit("CRITICAL ERROR: " + message)
+        # update the executable to the full path
+        else:
+            exe=os.path.join(exe_path,exe)
+	
+        logger.debug("Using software: " + exe)
+    
+    # check that the input files exist and are readable
+    for file in infiles:
+        file_exists_readable(file, raise_IOError=raise_error)
+        
+    # check if outfiles already exist
+    bypass=check_outfiles(outfiles)
+
+    # convert numbers to strings
+    args=[str(i) for i in args]
+
+    if not bypass:
+        
+        cmd=[exe]+args
+
+        message=" ".join(cmd)
+        logger.info("Execute command: "+ message)
+        if config.verbose:
+            print("\n"+message+"\n")
+            
+        # Open the input and output files (stdin, stdout, stderr)
+        stdin=None
+        stdout=None
+        stderr=None
+        
+        if stdin_file:
+            try:
+                stdin=open(stdin_file,"rt")
+            except EnvironmentError:
+                message="Unable to open file: " + stdin_file
+                logger.critical(message)
+                if raise_error:
+                    raise EnvironmentError
+                else:
+                    sys.exit("CRITICAL ERROR: " + message)
+        
+        if stdout_file:
+            # check for file open mode
+            try:
+                stdout_file_name, mode = stdout_file
+            except ValueError:
+                stdout_file_name = stdout_file
+                mode = "w"
+            
+            try:
+                stdout=open(stdout_file_name,mode)
+            except EnvironmentError:
+                message="Unable to open file: " + stdout_file_name
+                logger.critical(message)
+                if raise_error:
+                    raise EnvironmentError
+                else:
+                    sys.exit("CRITICAL ERROR: " + message)
+                    
+        if stderr_file:
+            try:
+                stderr=open(stderr_file,"w")
+            except EnvironmentError:
+                message="Unable to open file: " + stderr_file
+                logger.critical(message)
+                if raise_error:
+                    raise EnvironmentError
+                else:
+                    sys.exit("CRITICAL ERROR: " + message)
+	
+        try:
+            if stdin_file or stdout_file or stderr_file:
+                # run command, raise CalledProcessError if return code is non-zero
+                p = subprocess.check_call(cmd, stdin=stdin, stdout=stdout, stderr=stderr)
+            else:
+                p_out = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+                logger.debug(p_out)            
+        except (EnvironmentError, subprocess.CalledProcessError) as e:
+            message="Error executing: " + " ".join(cmd) + "\n"
+            if hasattr(e, 'output') and e.output:
+                message+="\nError message returned from " + os.path.basename(exe) + " :\n" + e.output.decode("utf-8")
+            logger.critical(message)
+            logger.critical("TRACEBACK: \n" + traceback.format_exc())
+            log_system_status()
+            if raise_error:
+                raise
+            else:
+                sys.exit("CRITICAL ERROR: " + message)
+
+        # check that the output files exist and are readable
+        for file in outfiles:
+            file_exists_readable(file, raise_IOError=raise_error)
+    
+    else:
+        if config.verbose:
+            print("Bypass: \n" + exe + " " + " ".join(args) + "\n")
+        else:
+            print("Bypass\n")
+
+
 def process_gene_table_with_header(gene_table, allow_for_missing_header=None):
     """
     Process through the header portion of the gene table file

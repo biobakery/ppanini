@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 """
-Join a set of gene, pathway, or taxonomy tables into a single table
+Join a set of gene tables into a single table
 
-This module will join gene and pathway tables output by HUMAnN2. 
+This module will join gene tables output by ppanini. 
 
 Dependencies: Biom (only required if running with .biom files)
 
@@ -190,7 +190,7 @@ def main():
         for file in file_list:
             if re.search(args.file_name,file):
                 reduced_file_list.append(file)
-                if file.endswith(util.BIOM_FILE_EXTENSION):
+                if file.endswith(BIOM_FILE_EXTENSION):
                     biom_flag=True
     else: 
         for file in file_list:
@@ -216,7 +216,7 @@ def main():
     # Create a temp folder for the biom conversions
     if biom_flag:
         temp_dir=tempfile.mkdtemp( 
-            prefix='humann2_split_gene_tables_', dir=output_dir)
+            prefix='ppanini_split_gene_tables_', dir=output_dir)
         if args.verbose:
             print("Temp folder created: " + temp_dir)
     
