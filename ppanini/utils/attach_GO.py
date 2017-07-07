@@ -14,7 +14,7 @@ from .. import utilities
 
 def uniref2go(ppanini_table, uniref_go_path ):
     #go1000_uniref90_dic = load_polymap ( go_uniref_path )
-    go1000_uniref90_dic = load_polymap ( uniref_go_path )
+    go1000_uniref90_dic = load_polymap_dic ( uniref_go_path )
     #print('Loading the mapping file is done!')
     #print (go1000_uniref90_dic.keys())
     #uniref_go_keys = go1000_uniref90_dic.keys()

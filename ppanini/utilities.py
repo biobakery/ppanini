@@ -742,40 +742,48 @@ def process_gene_table_with_header(gene_table, allow_for_missing_header=None):
     for line in lines:
         yield line
 
-def rev_uniref_mapper ( path_in= '' , path_out ='' , start=0, skip=None, allowed_keys=None, allowed_values=None ):
-    """
-    Load a file like:
-    A 1 2
-    B 1
-    B 3
-    C 1 2 4
-    To a nested dict structure:
-    {A:{1:1, 2:1}, B:{1:1, 3:1}, C:{1:1, 2:2, 4:1}
-    Inner values are not important (set to 1)
-    """
-    if len(sys.argv)<3:
-        sys.exit('Please provide an input and output path')
-    path_in = sys.argv[1]
-    path_out = sys.argv[2]
-    polymap_all = {}
-    print( "Loading mapping file from:", path_in, file=sys.stderr )
-    size_warn( path_in )
-    for line in gzip_bzip2_biom_open_readlines( path_in ):
-        row = line.split("\t")
-        key = row[start]
-        if allowed_keys is None or key in allowed_keys:
-            for i, value in enumerate( row ):
-                if i != start and (skip is None or i not in skip):
-                    if allowed_values is None or value in allowed_values:
-                        polymap_all.setdefault( value, {} )[key] = 1 #polymap.setdefault( key, {} )[value] = 1
-    
-    with gzip.open(path_out+'_dict.txt.gz', 'wt') as csv_file:
-        writer = csv.writer(csv_file, delimiter='\t')
-        for key, values in polymap_all.items():
-           writer.writerow([key, ";".join(values)])                                          
-    print("Mappping Uniref90 to annotation is done")
+def rev_load_polymap ( path_in= '' , path_out ='' , start=0, skip=None, allowed_keys=None, allowed_values=None, write_output = True, sep = '\t' ):
+	"""
+	Load a file like:
+	A 1 2
+	B 3
+	C 4 5
+	To a nested dict structure:
+	{1:{A}, 2:{A}, 3:{B:1}, 4:{C:1}, 5:{C:1}}
+	Inner values are not important (set to 1)
+	"""
+	# if it used from command line
+	if path_in == '':
+		if len(sys.argv)<3:
+		    sys.exit('Please provide an input and output path')
+		path_in = sys.argv[1]
+		path_out = sys.argv[2]
+	polymap_all = {}
+	print( "Loading mapping file from:", path_in, file=sys.stderr )
+	size_warn( path_in )
+	for line in gzip_bzip2_biom_open_readlines( path_in ):
+	    row = line.split("\t")
+	    key = row[start]
+	    # if the row input format is like: A\t1;2
+	    if sep == ';':
+	    	row = row[1].split(";")
+	    if allowed_keys is None or key in allowed_keys:
+	        for i, value in enumerate( row ):
+	            if i != start and (skip is None or i not in skip):
+	                if allowed_values is None or value in allowed_values:
+	                    polymap_all.setdefault( value, {} )[key] = 1 #polymap.setdefault( key, {} )[value] = 1
+	
+	if write_output:
+	    with gzip.open(path_out+'_dict.txt.gz', 'wt') as csv_file:
+	        writer = csv.writer(csv_file, delimiter='\t')
+	        for key, values in polymap_all.items():
+	           writer.writerow([key, ";".join(values)])                                          
+	    print("Mappping is done")
+	else:
+		return polymap_all
+	 	
 
-def load_polymap ( path, start=0, skip=None, allowed_keys=None, allowed_values=None ):
+def load_polymap_dic ( path, start=0, skip=None, allowed_keys=None, allowed_values=None ):
     """
     Loads a file to a dictionry 
     INPUT:
@@ -795,6 +803,29 @@ def load_polymap ( path, start=0, skip=None, allowed_keys=None, allowed_values=N
         reader = csv.reader(csv_file)
         polymap_all = dict(reader)'''
     return polymap_all
+def load_polymap ( path, start=0, skip=None, allowed_keys=None, allowed_values=None ):
+    """
+    Load a file like:
+    A 1 2
+    B 1
+    B 3
+    C 1 2 4
+    To a nested dict structure:
+    {A:{1:1, 2:1}, B:{1:1, 3:1}, C:{1:1, 2:2, 4:1}
+    Inner values are not important (set to 1)
+    """
+    polymap = {}
+    print( "Loading mapping file from:", path, file=sys.stderr )
+    size_warn( path )
+    for line in gzip_bzip2_biom_open_readlines( path ):
+        row = line.split("\t")
+        key = row[start]
+        if allowed_keys is None or key in allowed_keys:
+            for i, value in enumerate( row ):
+                if i != start and (skip is None or i not in skip):
+                    if allowed_values is None or value in allowed_values:
+                        polymap.setdefault( key, {} )[value] = 1
+    return polymap
 			
 
 

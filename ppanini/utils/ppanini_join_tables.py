@@ -18,7 +18,7 @@ import tempfile
 import os
 import shutil
 import re
-from ppanini.utilities import gzip_bzip2_biom_open_readlines, process_gene_table_with_header
+from ppanini.utilities import gzip_bzip2_biom_open_readlines, process_gene_table_with_header, rev_load_polymap
 
 
 GENE_TABLE_DELIMITER="\t"
@@ -35,7 +35,7 @@ BIOM_FILE_EXTENSION=".biom"
 
         
         
-def join_gene_tables(gene_tables,output,verbose=None):
+def join_gene_tables(gene_tables,output,verbose=None, mapper= None):
     """
     Join the gene tables to a single gene table
     """
@@ -69,18 +69,26 @@ def join_gene_tables(gene_tables,output,verbose=None):
         
         for line in lines:
             data=line.split(GENE_TABLE_DELIMITER)
-            if data[6].startswith('/'):
+            if len(data) < 7 or data[6].startswith('/'):
                 continue
             try:
-                gene=data[0]
-                # if the header names multiple samples, merge all samples
-                # this prevents extra columns from being included in some rows
-                # this requires files containing multiple samples to include a header
-                data_points=[data[6]] #1:len(sample_names)+1
+                if mapper:
+                    if data[0] in mapper:
+                        gene = mapper[data[0]].keys()[0]
+                    else:
+                        gene=data[0]
+                    data_points = [data[6]]
+                else:
+                    gene=data[0]
+                    # if the header names multiple samples, merge all samples
+                    # this prevents extra columns from being included in some rows
+                    # this requires files containing multiple samples to include a header
+                    data_points=[data[6]] #1:len(sample_names)+1
             except IndexError:
                 gene=""
 
             if gene:
+                print gene
                 current_data=gene_table_data.get(gene,"")
                 fill = index - current_data.count(GENE_TABLE_DELIMITER)
                 if fill > 0:
@@ -155,6 +163,11 @@ def parse_arguments(args):
         help="search sub-directories of input folder for files\n", 
         action="store_true",
         default=False)
+    parser.add_argument(
+        "--mapping-file",
+        dest= 'mapping_file', 
+        help="Mapping cluster(or uniref) to genes file\n", 
+        default='')
 
     return parser.parse_args()
 
@@ -170,8 +183,12 @@ def main():
     if not os.path.isdir(input_dir):
         sys.exit("The input directory provided can not be found." + 
             "  Please enter a new directory.")
-    
-    
+    polymap = None
+    if args.mapping_file != '':
+        print ("Loading mapping cluster/uniref genes file ...")
+        polymap = rev_load_polymap ( path_in= args.mapping_file , path_out ='' , 
+                                     start=0, skip=None, allowed_keys=None, allowed_values=None, write_output = False, sep = ';' )
+        
     gene_tables=[]
     file_list=os.listdir(input_dir)
     # add in files in subdirectories, if set
@@ -249,7 +266,7 @@ def main():
             join_gene_tables(gene_tables,new_file)
             util.tsv_to_biom(new_file, args.output)
         else:
-            join_gene_tables(gene_tables,args.output,verbose=args.verbose)
+            join_gene_tables(gene_tables,args.output,verbose=args.verbose, mapper = polymap)
                 
         # deleting temp folder with all files
         if biom_flag:
