@@ -44,5 +44,5 @@ if args.json:
 f1=open(args.output+'/map_uniref_gene.txt',"wt")
 # cluster_id  cluster_rep genes
 for cluster in polymap_all:
-    f1.write ("%s \t %s \t %s \n" % (cluster, polymap_all[cluster]['rep'], str(';'.join(gene for gene in polymap_all.get(cluster)))))
+    f1.write ("%s \t %s \t %s \n" % (cluster, str(';'.join(gene for gene in polymap_all.get(cluster))), polymap_all[cluster]['rep']))
 
