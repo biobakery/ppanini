@@ -5,7 +5,7 @@ import argparse
 
 import logging
 
-from .. import quantify_genes
+#from .. import quantify_genes
 from .. import utilities
 from .. import config
 
@@ -82,39 +82,7 @@ def main():
 	alignment_file = utilities.alignment(args.fastq, index_name)
 	
 	# Run featureCounts
-	
-	
-	# find gene clusters mapped to the same uniref90 using diamond
-	#uniref = /n/huttenhower_lab/data/humann2_databases/uniref_annotated/uniref90/v1.1_uniref90/uniref90_annotated.1.1.dmnd
-	#diamond_alignment(genes_file_faa,uniref, unaligned_reads_file_fasta)
-	
-	'''
-	
-	
-	* run for all samples (on-by-one):  sh ~/ppanini_stuff/scripts/run_diamond.sh 
-	
-	$ python /n/huttenhower_lab/tools/ppanini/ppanini/utils/infer_abundance.py  SRSXXXXX.uniref90hits --min-percid .9 --min-qcover .8 --min-scover .8 —output SRSXXXXX  --json
-	* for many: sh ppanini_stuff/scripts/run_infer_abund.sh  
-	$ python /n/huttenhower_lab/tools/ppanini/ppanini/utils/fasta_select.py -i hmp_sub_nares.faa -f infer_output/no_hits.txt —output no_hits_reads.faa
-	$ python /n/huttenhower_lab/tools/ppanini/ppanini/utils/fasta_select.py -i hmp_sub_nares.faa -f infer_output/hits.txt  —output hits_reads.faa
-	
-	$ source new-modules.sh
-	$ module load cd-hit/4.6.4-fasrc02
-	$ cd-hit -c .9 -aL .8 -G 0 -T 8 -i no_hits_reads.faa -o no_hits_reads.clust90
-	$ python /n/huttenhower_lab/tools/ppanini/ppanini/utils/ppanini_cluster2genes.py -i no_hits_reads.clust90.clstr --output cd_hit_clust_temp —json
-	
-	$ module load bowtie2/2.3.1-fasrc01
-	$ bowtie2-build -f renamed_contigs_SRS015051.fna  renamed_contigs_SRS015051_bowtie2_index_db 
-	* for all samples $ sh ~/ppanini_stuff/scripts/mkbowtie2_dbs.sh 
-	$ bowtie2 -q -p 8 -x SRS015051_bowtie2_index_db -U SRS015051.fastq.gz -S SRS015051.sam
-	* for all samples sh ~/ppanini_stuff/scripts/align_bowtie2.sh 
-	
-	$ source new-modules.sh 
-	$ module load subread/1.5.1-fasrc01 
-	$ featureCounts -T 8 -g ID -t CDS  -a ../../prodigal_output/hmp_sub_nares/renamed_contigs_SRS015051.gff -o counts.txt SRS015051.sam 
-	* many samples: $ sh ~/ppanini_stuff/scripts/run_featureCounts.sh 
-	$ python ~/Documents/Hutlab/ppanini/ppanini/utils/ppanini_join_tables.py -i hmp_sub_nares/ -o hmp_sub_nares.tsv
-'''
+
 
 if __name__ == '__main__':
 	main()
