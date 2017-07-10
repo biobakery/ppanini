@@ -35,7 +35,7 @@ BIOM_FILE_EXTENSION=".biom"
 
         
         
-def join_gene_tables(gene_tables,output,verbose=None, mapper= None):
+def join_gene_tables(gene_tables,output,verbose=None, mapper= None, scale = None):
     """
     Join the gene tables to a single gene table
     """
@@ -72,23 +72,22 @@ def join_gene_tables(gene_tables,output,verbose=None, mapper= None):
             if len(data) < 7 or data[6].startswith('/'):
                 continue
             try:
+                if scale == 'rpk':
+                    data_points = [str(int(data[6]) * 1000.0/int(data[5]))]#hits * 1000/len 
+                elif scale == 'count':
+                    data_points = [data[6]]
+                else:system.exit("scale is not valid!") 
                 if mapper:
                     if data[0] in mapper:
                         gene = mapper[data[0]].keys()[0]
                     else:
                         gene=data[0]
-                    data_points = [data[6]]
                 else:
                     gene=data[0]
-                    # if the header names multiple samples, merge all samples
-                    # this prevents extra columns from being included in some rows
-                    # this requires files containing multiple samples to include a header
-                    data_points=[data[6]] #1:len(sample_names)+1
             except IndexError:
                 gene=""
 
             if gene:
-                print gene
                 current_data=gene_table_data.get(gene,"")
                 fill = index - current_data.count(GENE_TABLE_DELIMITER)
                 if fill > 0:
@@ -168,6 +167,13 @@ def parse_arguments(args):
         dest= 'mapping_file', 
         help="Mapping cluster(or uniref) to genes file\n", 
         default='')
+    parser.add_argument(
+        "--scale",
+        dest= 'scale', 
+        help="scale the abundance table\n",
+        choices=["rpk","count"], 
+        default='rpk')
+    
 
     return parser.parse_args()
 
@@ -266,7 +272,7 @@ def main():
             join_gene_tables(gene_tables,new_file)
             util.tsv_to_biom(new_file, args.output)
         else:
-            join_gene_tables(gene_tables,args.output,verbose=args.verbose, mapper = polymap)
+            join_gene_tables(gene_tables,args.output,verbose=args.verbose, mapper = polymap, scale = args.scale)
                 
         # deleting temp folder with all files
         if biom_flag:

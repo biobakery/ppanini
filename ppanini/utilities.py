@@ -12,9 +12,13 @@ import logging
 import argparse
 import subprocess
 import multiprocessing
+import tempfile
+import traceback
+
 
 from Bio import Seq
 import pandas as pd
+from . import config
 
 logger = logging.getLogger(__name__)
 
@@ -574,6 +578,386 @@ def gzip_bzip2_biom_open_readlines( path ):
                 else:
                     yield line.rstrip()
 
+def unnamed_temp_file(prefix=None):
+    """
+    Return the full path to an unnamed temp file
+    stored in the unnamed temp folder
+    """
+    
+    if not prefix:
+        prefix="tmp"
+        
+    try:
+        file_out, new_file=tempfile.mkstemp(dir=config.unnamed_temp_dir,prefix=prefix)
+        os.close(file_out)
+    except EnvironmentError:
+        sys.exit("ERROR: Unable to create temp file in directory: " + config.unnamed_temp_dir)
+    
+    return(new_file)
+    
+
+def append_filename2cotignames(fna_file):
+    """
+    Bind the file name to the contig names
+    """
+    
+    # create a unnamed temp file
+    new_file=unnamed_temp_file()
+
+    exe="ppanini_rename_contigs"
+    args=["-i",fna_file,"-o",new_file]
+    
+    message="Running " + exe + " ........"
+    logger.info(message)
+    print("\n"+message+"\n")
+    
+    execute_command(exe, args, [fna_file], [new_file])
+    return new_file
+
+def fasta_or_fastq(file):
+    """
+    Check to see if a file is of fasta or fastq format
+	
+    Fastq format short example:
+    @SEQ_ID
+    GATCTGG
+    +
+    !''****
+	
+    Fasta format short example:
+    >SEQ_INFO
+    GATCTGG
+	
+    Returns error if not of fasta or fastq format
+    """
+	
+    format="error"
+	
+    # check file exists
+    file_exists_readable(file)
+	
+    # read in first 2 lines of file to check format
+    file_handle = open(file, "rt")
+	
+    first_line = file_handle.readline()
+    second_line = file_handle.readline()
+	
+    # check that second line is only nucleotides or amino acids
+    if re.search("^[A-Z|a-z]+$", second_line):
+        # check first line to determine fasta or fastq format
+        if re.search("^@",first_line):
+            format="fastq"		
+        if re.search("^>",first_line):
+            format="fasta"
+			
+    file_handle.close()
+
+    return format
+
+def index(custom_database):
+    """
+    Index database and run alignment with bowtie2
+    """
+    
+    '''$ bowtie2-build -f renamed_contigs_SRS015051.fna  renamed_contigs_SRS015051_bowtie2_index_db 
+	* for all samples $ sh ~/ppanini_stuff/scripts/mkbowtie2_dbs.sh '''
+    # name the index
+    index_name = utilities.name_temp_file( 
+        config.bowtie2_index_name)
+  
+    exe="bowtie2-build"
+    opts=config.bowtie2_build_opts
+
+    args=["-f",custom_database,index_name]
+
+    outfiles=[index_name + ext for ext in config.bowtie2_index_ext_list] 
+
+    # if custom_database is large (>4G) then use the --large-index flag
+    if os.path.getsize(custom_database) > config.bowtie2_large_index_threshold:
+        args+=["--large-index"]
+        outfiles=[index_name + config.bowtie2_large_index_ext]
+        
+    # index the database
+    message="Running " + exe + " ........"
+    logger.info(message)
+    print("\n"+message+"\n")
+
+    args+=opts
+    
+    # create temp file for stdout and stderr
+    tmpfile=utilities.unnamed_temp_file("bowtie2_stdout_")
+    tmpfile2=utilities.unnamed_temp_file("bowtie2_stderr_")
+    
+    utilities.execute_command(exe,args,[custom_database],outfiles,
+        stdout_file=tmpfile, stderr_file=tmpfile2)
+
+    return index_name
+
+def alignment(user_fastq, index_name):
+    """
+    Run alignment with bowtie2
+    """
+    '''
+	$ bowtie2 -q -p 8 -x SRS015051_bowtie2_index_db -U SRS015051.fastq.gz -S SRS015051.sam
+	* for all samples sh ~/ppanini_stuff/scripts/align_bowtie2.sh '''
+    # name the alignment file
+    alignment_file = utilities.name_temp_file(
+        config.chocophlan_alignment_name)
+
+    # align user input to database
+    exe="bowtie2"
+    opts=config.bowtie2_align_opts
+
+    #determine input type as fastq or fasta
+    input_type = utilities.fasta_or_fastq(user_fastq)
+
+    logger.debug("Nucleotide input file is of type: %s", input_type)
+
+    #determine input type flag
+    #default flag to fastq
+    input_type_flag = "-q"
+    if input_type == "fasta":
+        input_type_flag="-f"
+
+    args=[input_type_flag,"-x",index_name,"-U",user_fastq,"-S",alignment_file]
+    
+    #add threads
+    if config.threads > 1:
+        args+=["-p",config.threads]
+
+    # run the bowtie2 alignment
+    message="Running " + exe + " ........"
+    print("\n"+message+"\n")
+    
+    args+=opts
+
+    utilities.execute_command(exe,args,[user_fastq],[alignment_file])
+
+    return alignment_file
+
+def genecall(contig_file):
+    """
+    Run gene call with Prodigal
+    """
+    
+    # name the genes file
+    genes_file_gff = name_temp_file(
+        'prodigal_output/'+config.basename+'.gff')
+    genes_file_fna = name_temp_file(
+        'prodigal_output/'+config.basename+'.fna')
+    genes_file_faa = name_temp_file(
+        'prodigal_output/'+config.basename+'.faa')
+
+    # align user input to database
+    exe="prodigal"
+    opts=config.prodigal_opts
+
+    args=["-i",contig_file,"-o",genes_file_gff,"-f ggf", '-d', genes_file_fna, 
+		'-a',  genes_file_faa, '-p meta']
+
+    # run the prodigal gene caller
+    message="Running " + exe + " ........"
+    print("\n"+message+"\n")
+    
+    args+=opts
+
+    execute_command(exe,args,[contig_file],[genes_file_gff, genes_file_fna, genes_file_faa])
+
+    return genes_file_gff, genes_file_fna, genes_file_faa
+
+def diamond_alignment(alignment_file,uniref, unaligned_reads_file_fasta):
+    """
+    Run diamond alignment on database formatted for diamond
+    """
+
+    bypass=utilities.check_outfiles([alignment_file])
+
+    exe="diamond"
+    #$ diamond blastp --quiet --query hmp_sub_nares.faa 
+    #--db /n/huttenhower_lab/data/humann2_databases/uniref_annotated/uniref90/v1.1_uniref90/uniref90_annotated.1.1.dmnd --threads 8 
+    #--outfmt 6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen --out hmp_sub_nares.uniref90hits
+    
+    # Select the command based on a protein or nucleotide database search
+    args=[]
+    if config.pick_frames_toggle == "on":
+        args=[config.diamond_cmmd_protein_search]
+    else:
+        args=[config.diamond_cmmd_nucleotide_search]
+        
+    opts=config.diamond_opts
+
+    args+=["--quiet --query",unaligned_reads_file_fasta,#"--evalue",config.evalue_threshold, 
+		"--outfmt 6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen",
+		'--out', '.uniref90hits']
+    args+=["--threads",config.threads]
+
+    message="Running " + exe + " ........"
+    logger.info(message)
+    print("\n"+message+"\n")
+
+    if not bypass:
+        args+=opts
+        temp_out_files=[]
+        for database in os.listdir(uniref):          
+            # ignore any files that are not the database files
+            if database.endswith(config.diamond_database_extension):
+                # Provide the database name without the extension
+                input_database=os.path.join(uniref,database)
+                message="Aligning to reference database: " + database
+                logger.info(message)
+                print("\n"+message+"\n")  
+                input_database_extension_removed=re.sub(config.diamond_database_extension
+                    +"$","",input_database)
+                full_args=args+["--db",input_database_extension_removed]
+    
+                # create temp output file
+                temp_out_file=utilities.unnamed_temp_file("diamond_m8_")
+                utilities.remove_file(temp_out_file)
+                
+                temp_out_files.append(temp_out_file)
+    
+                full_args+=["--out",temp_out_file,"--tmpdir",os.path.dirname(temp_out_file)]
+    
+                utilities.execute_command(exe,full_args,[input_database],[])
+        
+        # merge the temp output files
+        utilities.execute_command("cat",temp_out_files,temp_out_files,[alignment_file],
+            alignment_file)
+
+    else:
+        message="Bypass"
+        logger.info(message)
+        print(message)
+def name_temp_file(file_name):
+    """
+    Return the full path to a new temp file 
+    using the sample name and temp dir location
+    """
+
+    return os.path.join(config.temp_dir,
+       config.file_basename + file_name)    
+
+def return_exe_path(exe):
+    """
+    Return the location of the exe in $PATH
+    """
+    paths = os.environ["PATH"].split(os.pathsep)
+    for path in paths:
+        fullexe = os.path.join(path,exe)
+        if os.path.exists(fullexe) and os.path.isfile(fullexe):
+            if os.access(fullexe,os.X_OK):
+                return path
+    return ""
+
+def remove_file(file):
+    """
+    If file exists, then remove
+    """
+    
+    try:
+        if os.path.isfile(file):
+            os.unlink(file)
+            logger.debug("Remove file: %s", file)
+    except OSError:
+        message="Unable to remove file"
+        logger.error(message)
+
+def file_exists_readable(file, raise_IOError=None):
+    """
+    Exit with error if file does not exist or is not readable
+    Or raise an IOerror if selected
+    """
+    
+    if not os.path.isfile(file):
+        message="Can not find file "+ file
+        logger.critical(message)
+        if raise_IOError:
+            print("CRITICAL ERROR: " + message)   
+            raise IOError 
+        else:
+            sys.exit("CRITICAL ERROR: " + message)
+		
+    if not os.access(file, os.R_OK):
+        message="Not able to read file " + file
+        logger.critical(message)
+        if raise_IOError:
+            print("CRITICAL ERROR: " + message)
+            raise IOError
+        else:
+            sys.exit("CRITICAL ERROR: " + message)
+
+def check_outfiles(outfiles):
+    """
+    If outfiles already_exist, then remove or bypass
+    """
+    bypass=[]
+    for file in outfiles:
+        if os.path.isfile(file):
+            if config.resume and os.path.getsize(file) > 0:
+                bypass.append(True)
+            else:
+                bypass.append(False)
+        else:
+            bypass.append(False)
+
+    if False in bypass or not bypass:
+        # remove any existing files
+        for file in outfiles:
+            remove_file(file)
+        return False
+    else:
+        return True
+
+def log_system_status():
+    """
+    Print the status of the system
+    """
+    
+    module_available=True
+    try:
+        import psutil
+    except ImportError:
+        module_available=False
+        
+    if module_available:
+        try:
+            # record the memory used
+            memory = psutil.virtual_memory()
+            logger.info("Total memory = " + str(byte_to_gigabyte(memory.total)) + " GB")
+            logger.info("Available memory = " + str(byte_to_gigabyte(memory.available)) + " GB")
+            logger.info("Free memory = " + str(byte_to_gigabyte(memory.free)) + " GB")
+            logger.info("Percent memory used = " + str(memory.percent) + " %")
+    
+            # record the cpu info
+            logger.info("CPU percent = " + str(psutil.cpu_percent()) + " %")
+            logger.info("Total cores count = " + str(psutil.cpu_count()))
+            
+            # record the disk usage
+            disk = psutil.disk_usage('/')
+            logger.info("Total disk = " + str(byte_to_gigabyte(disk.total)) + " GB")
+            logger.info("Used disk = "+ str(byte_to_gigabyte(disk.used)) + " GB")
+            logger.info("Percent disk used = " + str(disk.percent) + " %")
+
+            # record information about this current process
+            process=psutil.Process()
+            process_memory=process.memory_info()
+            process_create_time=datetime.datetime.fromtimestamp(
+                process.create_time()).strftime("%Y-%m-%d %H:%M:%S")
+            process_cpu_times=process.cpu_times()
+            # two calls required to cpu percent for non-blocking as per documentation
+            process_cpu_percent=process.cpu_percent()
+            process_cpu_percent=process.cpu_percent()
+            
+            logger.info("Process create time = " + process_create_time)
+            logger.info("Process user time = " + str(process_cpu_times.user) + " seconds")
+            logger.info("Process system time = " + str(process_cpu_times.system) + " seconds")
+            logger.info("Process CPU percent = " + str(process_cpu_percent) + " %")
+            logger.info("Process memory RSS = " + str(byte_to_gigabyte(process_memory.rss)) + " GB")
+            logger.info("Process memory VMS = " + str(byte_to_gigabyte(process_memory.vms)) + " GB")
+            logger.info("Process memory percent = " + str(process.memory_percent()) + " %")
+            
+        except (AttributeError, OSError, TypeError, psutil.Error):
+            pass    
 def execute_command(exe, args, infiles, outfiles, stdout_file=None, 
         stdin_file=None, raise_error=None, stderr_file=None):
     """

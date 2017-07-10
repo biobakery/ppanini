@@ -71,13 +71,15 @@ setuptools.setup(
     entry_points={
         'console_scripts': [
             'ppanini = ppanini.ppanini:_main',
-            'ppanini_preprocess = ppanini.utils.preppanini:main',
+            #'ppanini_preprocess = ppanini.utils.preppanini:main',
+            'ppanini_gene_caller = ppanini.utils.ppanini_gene_caller:main',
             'ppanini_test = ppanini.tests.ppanini_test:main',
             'ppanini_scatterplot = ppanini.utils.ppanini_scatterplot:main',
             'ppanini_barplot = ppanini.utils.ppanini_barplot:main',
             'ppanini_rocplot = ppanini.utils.ppanini_rocplot:main',
             'ppanini_rev_uniref_mapper = ppanini.utils.attach_GO:rev_load_polymap',
-            'ppanini_join_tables = ppanini.utils.ppanini_join_tables:main'             
+            'ppanini_join_tables = ppanini.utils.ppanini_join_tables:main',
+            'ppanini_rename_contigs = ppanini.utils.ppanini_rename_contigs:main'           
         ]},
     test_suite= 'ppanini.tests.ppanini_test.get_unittests()',
     zip_safe = True
