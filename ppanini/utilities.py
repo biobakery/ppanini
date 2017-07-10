@@ -602,7 +602,7 @@ def append_filename2cotignames(fna_file):
     """
     
     # create a unnamed temp file
-    new_file=unnamed_temp_file()
+    new_file=name_temp_file('/renamed_'+ config.file_basename + '.fna')
 
     exe="ppanini_rename_contigs"
     args=["-i",fna_file,"-o",new_file]
@@ -891,6 +891,19 @@ def remove_file(file):
     except OSError:
         message="Unable to remove file"
         logger.error(message)
+
+def remove_directory(dir):
+    """
+    Remove directory if exists
+    """
+    if os.path.isdir(dir):
+        try:
+            shutil.rmtree(dir)
+            logger.debug("Remove directory: " + dir)
+        except EnvironmentError: 
+            logger.error("Unable to remove directory: " + dir)
+    else:
+        logger.debug("Request to remove directory that does not exist: " + dir)
 
 def file_exists_readable(file, raise_IOError=None):
     """
