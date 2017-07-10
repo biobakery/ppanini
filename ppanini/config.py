@@ -53,6 +53,8 @@ bowtie2_version={
 bowtie2_build_opts=[]
 bowtie2_align_opts=["--very-sensitive"]
 
+featureCounts_opts=["-T 8 -g ID -t CDS"]
+
 
 # translated alignment options
 translated_alignment_choices = ["usearch","rapsearch","diamond", "vsearch"]

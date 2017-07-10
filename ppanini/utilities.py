@@ -653,6 +653,36 @@ def fasta_or_fastq(file):
     file_handle.close()
 
     return format
+def abundance(genes_file, alignment_file):
+	"""
+	gene abundance table with featureCounts
+	"""
+	#featureCounts -T 8 -g ID -t CDS  -a ../../prodigal_output/hmp_sub_nares/renamed_contigs_SRS015051.gff -o counts.txt SRS015051.sam
+	
+	# name the abundance file
+	abundance_file = name_temp_file(config.file_basename+
+	    '/abundance/'+config.file_basename+'_counts.txt')
+  
+	exe="featureCounts"
+	opts=config.featureCounts_opts
+
+	args=["-a",genes_file, "-o", abundance_file, alignment_file]
+
+	
+	message="Running " + exe + " ........"
+	logger.info(message)
+	print("\n"+message+"\n")
+
+	args+=opts
+	
+	# create temp file for stdout and stderr
+	tmpfile=utilities.unnamed_temp_file("featureCounts_stdout_")
+	tmpfile2=utilities.unnamed_temp_file("featureCounts_stderr_")
+	
+	utilities.execute_command(exe,args,[genes_file, alignment_file],[abundance_file],
+		stdout_file=tmpfile, stderr_file=tmpfile2)
+
+	return abundance_file
 
 def index(custom_database):
     """
@@ -742,11 +772,11 @@ def genecall(contig_file):
     
     # name the genes file
     genes_file_gff = name_temp_file(
-        'prodigal_output/'+config.basename+'.gff')
+        'prodigal_output/'+config.file_basename+'.gff')
     genes_file_fna = name_temp_file(
-        'prodigal_output/'+config.basename+'.fna')
+        'prodigal_output/'+config.file_basename+'.fna')
     genes_file_faa = name_temp_file(
-        'prodigal_output/'+config.basename+'.faa')
+        'prodigal_output/'+config.file_basename+'.faa')
 
     # align user input to database
     exe="prodigal"
@@ -958,6 +988,7 @@ def log_system_status():
             
         except (AttributeError, OSError, TypeError, psutil.Error):
             pass    
+
 def execute_command(exe, args, infiles, outfiles, stdout_file=None, 
         stdin_file=None, raise_error=None, stderr_file=None):
     """

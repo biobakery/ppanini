@@ -2,7 +2,6 @@ import os
 import sys
 import re
 import argparse
-
 import logging
 
 #from .. import quantify_genes
@@ -78,11 +77,14 @@ def main():
 	# make index database using bowti2-build
 	index_name = index(args.fastq)
 	
-	# gene abundance using Bowtie2
+	# reads alignment using Bowtie2
 	alignment_file = utilities.alignment(args.fastq, index_name)
 	
-	# Run featureCounts
-
+	# gene abundance using featureCounts
+	abundance_file = utilities.abundance(genes_file_gff, alignment_file)
+	
+	# join gene abundance tables
+	
 
 if __name__ == '__main__':
 	main()

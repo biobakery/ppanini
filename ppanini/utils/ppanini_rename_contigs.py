@@ -26,6 +26,6 @@ def main():
             if line[0] == ">":
                 line = line.replace(">", (">"+sample_name+"_"))
             f1.write(line)
-
+    return f1
 if __name__ == '__main__':
     main()
