@@ -602,7 +602,7 @@ def append_filename2cotignames(fna_file):
     """
     
     # create a unnamed temp file
-    new_file=name_temp_file('/renamed_'+ config.file_basename + '.fna')
+    new_file=name_temp_file('/'+ config.file_basename + '.fna')
 
     exe="ppanini_rename_contigs"
     args=["-i",fna_file,"-o",new_file]
