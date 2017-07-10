@@ -772,11 +772,11 @@ def genecall(contig_file):
     
     # name the genes file
     genes_file_gff = name_temp_file(
-        'prodigal_output/'+config.file_basename+'.gff')
+        '/prodigal_output/'+config.file_basename+'.gff')
     genes_file_fna = name_temp_file(
-        'prodigal_output/'+config.file_basename+'.fna')
+        '/prodigal_output/'+config.file_basename+'.fna')
     genes_file_faa = name_temp_file(
-        'prodigal_output/'+config.file_basename+'.faa')
+        '/prodigal_output/'+config.file_basename+'.faa')
 
     # align user input to database
     exe="prodigal"

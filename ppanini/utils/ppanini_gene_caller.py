@@ -63,15 +63,22 @@ def main():
 	
 	    config.file_basename=input_file_basename
     
-	utilities.make_directory(config.file_basename)    
+	   
 	#Steps
 	#Commands to generate gene families abundance from assemblies and sequences files
 	
 	# append sample file name to the contig names
 	
+	
+	#make a directory or outputs
+	utilities.make_directory(config.file_basename) 
+	
 	# contig as input
 	new_contig_file = utilities.append_filename2cotignames(args.contig)
-	print new_contig_file
+	
+	# make directory for prodigal output
+	utilities.make_directory(config.file_basename + '/prodigal_output') 
+	
 	# gene call using prodigal
 	genes_file_gff, genes_file_fna, genes_file_faa = utilities.genecall(new_contig_file)
 	
