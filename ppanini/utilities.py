@@ -22,6 +22,7 @@ import pandas as pd
 from . import config
 
 # name global logging instance
+logging.basicConfig()
 logger=logging.getLogger(__name__)
 
 # constants
@@ -779,7 +780,7 @@ def genecall(contig_file):
     opts=config.prodigal_opts
 
     args=["-i",contig_file,"-o",genes_file_gff,"-f", "gff", '-d', genes_file_fna, 
-		'-a',  genes_file_faa, '-p', 'meta']
+		'-a',  genes_file_faa, '-p', 'meta', "-q"]
 
     # run the prodigal gene caller
     message="Running " + exe + " ........"
