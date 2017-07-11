@@ -7,7 +7,8 @@ import csv
 import shutil
 import json
 import pandas as pd
-from ppanini.utilities import make_directory, iter_rows
+from .. import utilities
+from utilities import make_directory, iter_rows
 parser = argparse.ArgumentParser()
 #parser.add_argument( "orfs" )
 parser.add_argument( "hits" )

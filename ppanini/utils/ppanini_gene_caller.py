@@ -95,17 +95,14 @@ def main():
 	# make index database using bowtie2-build
 	index_name = utilities.index(new_contig_file)
 	
-	# make directory for featureCounts abundance output
-	config.temp_dir = args.output+'/featureCounts_output/'
-	utilities.make_directory(config.temp_dir)
-	
 	# reads alignment using Bowtie2
 	alignment_file = utilities.alignment(args.fastq, index_name)
 	
+	# make directory for featureCounts abundance output
+	config.temp_dir = args.output+'/featureCounts_output/'
+	utilities.make_directory(config.temp_dir)
 	# gene abundance using featureCounts
 	abundance_file = utilities.abundance(genes_file_gff, alignment_file)
-	
-	# join gene abundance tables
 	
 
 if __name__ == '__main__':
