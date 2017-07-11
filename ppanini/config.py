@@ -52,7 +52,7 @@ bowtie2_version={
 
 bowtie2_build_opts=[]
 bowtie2_align_opts=["--very-sensitive"]
-
+alignment_name="_bowtie2_aligned.sam"
 featureCounts_opts=["-T 8 -g ID -t CDS"]
 
 

@@ -692,7 +692,7 @@ def index(custom_database):
     '''$ bowtie2-build -f renamed_contigs_SRS015051.fna  renamed_contigs_SRS015051_bowtie2_index_db 
 	* for all samples $ sh ~/ppanini_stuff/scripts/mkbowtie2_dbs.sh '''
     # name the index
-    index_name = utilities.name_temp_file( 
+    index_name = name_temp_file( 
         config.bowtie2_index_name)
   
     exe="bowtie2-build"
@@ -715,10 +715,10 @@ def index(custom_database):
     args+=opts
     
     # create temp file for stdout and stderr
-    tmpfile=utilities.unnamed_temp_file("bowtie2_stdout_")
-    tmpfile2=utilities.unnamed_temp_file("bowtie2_stderr_")
+    tmpfile=unnamed_temp_file("bowtie2_stdout_")
+    tmpfile2=unnamed_temp_file("bowtie2_stderr_")
     
-    utilities.execute_command(exe,args,[custom_database],outfiles,
+    execute_command(exe,args,[custom_database],outfiles,
         stdout_file=tmpfile, stderr_file=tmpfile2)
 
     return index_name
@@ -731,15 +731,15 @@ def alignment(user_fastq, index_name):
 	$ bowtie2 -q -p 8 -x SRS015051_bowtie2_index_db -U SRS015051.fastq.gz -S SRS015051.sam
 	* for all samples sh ~/ppanini_stuff/scripts/align_bowtie2.sh '''
     # name the alignment file
-    alignment_file = utilities.name_temp_file(
-        config.chocophlan_alignment_name)
+    alignment_file = name_temp_file(
+        config.alignment_name)
 
     # align user input to database
     exe="bowtie2"
     opts=config.bowtie2_align_opts
 
     #determine input type as fastq or fasta
-    input_type = utilities.fasta_or_fastq(user_fastq)
+    input_type = fasta_or_fastq(user_fastq)
 
     logger.debug("Nucleotide input file is of type: %s", input_type)
 
@@ -761,7 +761,7 @@ def alignment(user_fastq, index_name):
     
     args+=opts
 
-    utilities.execute_command(exe,args,[user_fastq],[alignment_file])
+    execute_command(exe,args,[user_fastq],[alignment_file])
 
     return alignment_file
 
@@ -797,7 +797,7 @@ def diamond_alignment(alignment_file,uniref, unaligned_reads_file_fasta):
     Run diamond alignment on database formatted for diamond
     """
 
-    bypass=utilities.check_outfiles([alignment_file])
+    bypass=check_outfiles([alignment_file])
 
     exe="diamond"
     #$ diamond blastp --quiet --query hmp_sub_nares.faa 
@@ -838,17 +838,17 @@ def diamond_alignment(alignment_file,uniref, unaligned_reads_file_fasta):
                 full_args=args+["--db",input_database_extension_removed]
     
                 # create temp output file
-                temp_out_file=utilities.unnamed_temp_file("diamond_m8_")
-                utilities.remove_file(temp_out_file)
+                temp_out_file=unnamed_temp_file("diamond_m8_")
+                remove_file(temp_out_file)
                 
                 temp_out_files.append(temp_out_file)
     
                 full_args+=["--out",temp_out_file,"--tmpdir",os.path.dirname(temp_out_file)]
     
-                utilities.execute_command(exe,full_args,[input_database],[])
+                execute_command(exe,full_args,[input_database],[])
         
         # merge the temp output files
-        utilities.execute_command("cat",temp_out_files,temp_out_files,[alignment_file],
+        execute_command("cat",temp_out_files,temp_out_files,[alignment_file],
             alignment_file)
 
     else:
