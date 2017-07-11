@@ -63,7 +63,7 @@ def main():
     13 415
     """
     # make the output directory
-    utilities.make_directory(args.output)
+    make_directory(args.output)
     unirefs = {}
     no_unirefs = {}
     polymap_all = {}
