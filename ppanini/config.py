@@ -50,7 +50,7 @@ bowtie2_version={
     "line" : 0,
     "column" : 2}
 
-bowtie2_build_opts=[]
+bowtie2_build_opts=["-q"]
 bowtie2_align_opts=["--very-sensitive"]
 bowtie2_index_name="_bowtie2_index"
 
