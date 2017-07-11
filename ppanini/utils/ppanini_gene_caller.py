@@ -89,7 +89,7 @@ def main():
 	genes_file_gff, genes_file_fna, genes_file_faa = utilities.genecall(new_contig_file)
 	
 	# make index database using bowti2-build
-	index_name = index(args.fastq)
+	index_name = utilities.index(args.fastq)
 	
 	# reads alignment using Bowtie2
 	alignment_file = utilities.alignment(args.fastq, index_name)
