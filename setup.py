@@ -79,7 +79,8 @@ setuptools.setup(
             'ppanini_rocplot = ppanini.utils.ppanini_rocplot:main',
             'ppanini_rev_uniref_mapper = ppanini.utils.attach_GO:rev_load_polymap',
             'ppanini_join_tables = ppanini.utils.ppanini_join_tables:main',
-            'ppanini_rename_contigs = ppanini.utils.ppanini_rename_contigs:main'           
+            'ppanini_rename_contigs = ppanini.utils.ppanini_rename_contigs:main',
+            'ppanini_infer_abundance = ppanini.utils.ppanini_rename_contigs:main'           
         ]},
     test_suite= 'ppanini.tests.ppanini_test.get_unittests()',
     zip_safe = True
