@@ -61,7 +61,7 @@ translated_alignment_choices = ["usearch","rapsearch","diamond", "vsearch"]
 translated_alignment_selected = translated_alignment_choices[2]
 
 # prodigal options
-prodigal_opts=[""]
+prodigal_opts=["-q"]
 threads = 8
 
 # file naming

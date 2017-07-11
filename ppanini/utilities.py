@@ -780,7 +780,7 @@ def genecall(contig_file):
     opts=config.prodigal_opts
 
     args=["-i",contig_file,"-o",genes_file_gff,"-f", "gff", '-d', genes_file_fna, 
-		'-a',  genes_file_faa, '-p', 'meta', "-q"]
+		'-a',  genes_file_faa, '-p', 'meta']
 
     # run the prodigal gene caller
     message="Running " + exe + " ........"
