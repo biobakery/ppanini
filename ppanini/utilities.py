@@ -660,8 +660,7 @@ def abundance(genes_file, alignment_file):
 	#featureCounts -T 8 -g ID -t CDS  -a ../../prodigal_output/hmp_sub_nares/renamed_contigs_SRS015051.gff -o counts.txt SRS015051.sam
 	
 	# name the abundance file
-	abundance_file = name_temp_file(config.file_basename+
-	    '/abundance/'+config.file_basename+'_counts.txt')
+	abundance_file = name_temp_file('.txt')
   
 	exe="featureCounts"
 	opts=config.featureCounts_opts
