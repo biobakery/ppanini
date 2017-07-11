@@ -675,8 +675,8 @@ def abundance(genes_file, alignment_file):
 	args+=opts
 	
 	# create temp file for stdout and stderr
-	tmpfile=utilities.unnamed_temp_file("featureCounts_stdout_")
-	tmpfile2=utilities.unnamed_temp_file("featureCounts_stderr_")
+	tmpfile=unnamed_temp_file("featureCounts_stdout_")
+	tmpfile2=unnamed_temp_file("featureCounts_stderr_")
 	
 	execute_command(exe,args,[genes_file, alignment_file],[abundance_file],
 		stdout_file=tmpfile, stderr_file=tmpfile2)
