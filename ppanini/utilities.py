@@ -115,10 +115,6 @@ def make_directory(output_dir):
         sys.exit("CRITICAL ERROR: The output directory is not " + 
             "writeable. This software needs to write files to this directory.\n" +
             "Please select another directory.")
-        
-    print("Output files will be written to: " + output_dir) 
-
-
 
 def read_ppanini_imp_genes_table_dead(filename):
 	gene_table = pd.read_csv(filename, sep='\t', index_col=0)
@@ -601,9 +597,9 @@ def append_filename2cotignames(fna_file):
     Bind the file name to the contig names
     """
     
-    # create a unnamed temp file
+    # create a named temp file
     new_file=name_temp_file('.fna')
-
+    print (new_file)
     exe="ppanini_rename_contigs"
     args=["-i",fna_file,"-o",new_file]
     

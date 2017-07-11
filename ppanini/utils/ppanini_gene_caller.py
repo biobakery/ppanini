@@ -63,8 +63,11 @@ def main():
 	        input_file_basename='.'.join(input_file_basename.split('.')[:-1])
 	
 	    config.file_basename=input_file_basename
-	args.output = config.file_basename
-	config.temp_dir= args.output
+	if args.output:
+		config.temp_dir = args.output
+	else:		
+		args.output = config.file_basename
+		config.temp_dir= args.output
 	#Steps
 	#Commands to generate gene families abundance from assemblies and sequences files
 	
@@ -78,8 +81,9 @@ def main():
 	new_contig_file = utilities.append_filename2cotignames(args.contig)
 	
 	# make directory for prodigal output
-	utilities.make_directory(config.file_basename + '/prodigal_output') 
 	config.temp_dir +='/prodigal_output/'
+	utilities.make_directory(config.temp_dir) 
+	
 	#config.file_basename = ''
 	# gene call using prodigal
 	genes_file_gff, genes_file_fna, genes_file_faa = utilities.genecall(new_contig_file)
