@@ -88,7 +88,9 @@ def main():
 	# gene call using prodigal
 	genes_file_gff, genes_file_fna, genes_file_faa = utilities.genecall(new_contig_file)
 	
-	# make index database using bowti2-build
+	# make index database using bowtie2-build
+	config.temp_dir = args.output+'/bowtie2/'
+	utilities.make_directory(config.temp_dir)
 	index_name = utilities.index(args.fastq)
 	
 	# reads alignment using Bowtie2

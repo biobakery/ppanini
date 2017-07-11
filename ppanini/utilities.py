@@ -692,8 +692,7 @@ def index(custom_database):
     '''$ bowtie2-build -f renamed_contigs_SRS015051.fna  renamed_contigs_SRS015051_bowtie2_index_db 
 	* for all samples $ sh ~/ppanini_stuff/scripts/mkbowtie2_dbs.sh '''
     # name the index
-    index_name = name_temp_file(
-        config.alignment_name)
+    index_name = name_temp_file(config.bowtie2_index_name)
   
     exe="bowtie2-build"
     opts=config.bowtie2_build_opts
