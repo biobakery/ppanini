@@ -692,8 +692,8 @@ def index(custom_database):
     '''$ bowtie2-build -f renamed_contigs_SRS015051.fna  renamed_contigs_SRS015051_bowtie2_index_db 
 	* for all samples $ sh ~/ppanini_stuff/scripts/mkbowtie2_dbs.sh '''
     # name the index
-    index_name = name_temp_file( 
-        config.bowtie2_index_name)
+    index_name = name_temp_file(
+        config.alignment_name)
   
     exe="bowtie2-build"
     opts=config.bowtie2_build_opts
@@ -731,8 +731,7 @@ def alignment(user_fastq, index_name):
 	$ bowtie2 -q -p 8 -x SRS015051_bowtie2_index_db -U SRS015051.fastq.gz -S SRS015051.sam
 	* for all samples sh ~/ppanini_stuff/scripts/align_bowtie2.sh '''
     # name the alignment file
-    alignment_file = name_temp_file(
-        config.alignment_name)
+    alignment_file = name_temp_file('.sam')
 
     # align user input to database
     exe="bowtie2"
