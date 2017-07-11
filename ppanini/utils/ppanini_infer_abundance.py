@@ -6,8 +6,7 @@ import csv
 import shutil
 import json
 import pandas as pd
-from .. import utilities
-from utilities import make_directory, iter_rows
+from ..utilities import make_directory, iter_rows
 
 def get_args():
     parser = argparse.ArgumentParser()

@@ -18,7 +18,7 @@ import tempfile
 import os
 import shutil
 import re
-from ppanini.utilities import gzip_bzip2_biom_open_readlines, process_gene_table_with_header, rev_load_polymap
+from ..utilities import gzip_bzip2_biom_open_readlines, process_gene_table_with_header, rev_load_polymap
 
 
 GENE_TABLE_DELIMITER="\t"
