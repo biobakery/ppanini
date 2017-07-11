@@ -1,5 +1,7 @@
-
 from __future__ import print_function # PYTHON 2.7+ REQUIREDimport os
+"""
+PPANINI utilities
+"""
 import re
 import sys
 import os
@@ -15,12 +17,12 @@ import multiprocessing
 import tempfile
 import traceback
 
-
 from Bio import Seq
 import pandas as pd
 from . import config
 
-logger = logging.getLogger(__name__)
+# name global logging instance
+logger=logging.getLogger(__name__)
 
 # constants
 # ---------------------------------------------------------------
@@ -94,14 +96,14 @@ def reader ( file_handle ):
     for aItems in csv.reader( file_handle, delimiter="\t", quotechar="", quoting=csv.QUOTE_NONE ):
         yield aItems
 
-def make_directory(output_dir):
+def make_directory(output_dir, force = False):
     if not os.path.isdir(output_dir):
         try:
             print("Creating output directory: " + output_dir)
             os.mkdir(output_dir)
         except EnvironmentError:
             sys.exit("CRITICAL ERROR: Unable to create output directory.")
-    else:
+    elif force:
         try:
             print("Removing the old output directory: " + output_dir)
             shutil.rmtree(output_dir)
@@ -109,7 +111,8 @@ def make_directory(output_dir):
             os.mkdir(output_dir)
         except EnvironmentError:
             sys.exit("CRITICAL ERROR: Unable to create output directory.")
-        
+    else:
+    	print("Directory exists, use force = True to remove and recreate it ")    
     
     if not os.access(output_dir, os.W_OK):
         sys.exit("CRITICAL ERROR: The output directory is not " + 
@@ -775,8 +778,8 @@ def genecall(contig_file):
     exe="prodigal"
     opts=config.prodigal_opts
 
-    args=["-i",contig_file,"-o",genes_file_gff,"-f ggf", '-d', genes_file_fna, 
-		'-a',  genes_file_faa, '-p meta']
+    args=["-i",contig_file,"-o",genes_file_gff,"-f", "gff", '-d', genes_file_fna, 
+		'-a',  genes_file_faa, '-p', 'meta']
 
     # run the prodigal gene caller
     message="Running " + exe + " ........"
@@ -1247,8 +1250,3 @@ def load_polymap ( path, start=0, skip=None, allowed_keys=None, allowed_values=N
                     if allowed_values is None or value in allowed_values:
                         polymap.setdefault( key, {} )[value] = 1
     return polymap
-			
-
-
-if __name__ == '__main__':
-	pass
