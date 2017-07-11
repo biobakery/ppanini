@@ -32,6 +32,7 @@ def get_args ():
         )
     parser.add_argument(
         "--output-basename",
+        dest = 'output_basename',
         help="the basename for the output files\n[DEFAULT: " +
         "input file basename]",
         default=config.file_basename,
