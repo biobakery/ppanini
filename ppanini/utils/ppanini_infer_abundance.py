@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+
+"""
+Infer from abundances
+
+This module will distinguish between genes with sufficient uniref90 map. 
+
+
+"""
 import os
 import sys
 import re
@@ -108,5 +117,6 @@ def main():
     a = len( abunds )
     u = len( unirefs )
     warn( a, u, u / float( a ) )'''
+
 if __name__ == '__main__':
     main()
