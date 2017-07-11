@@ -679,7 +679,7 @@ def abundance(genes_file, alignment_file):
 	tmpfile=utilities.unnamed_temp_file("featureCounts_stdout_")
 	tmpfile2=utilities.unnamed_temp_file("featureCounts_stderr_")
 	
-	utilities.execute_command(exe,args,[genes_file, alignment_file],[abundance_file],
+	execute_command(exe,args,[genes_file, alignment_file],[abundance_file],
 		stdout_file=tmpfile, stderr_file=tmpfile2)
 
 	return abundance_file

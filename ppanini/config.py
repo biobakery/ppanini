@@ -51,7 +51,7 @@ bowtie2_version={
     "column" : 2}
 
 bowtie2_build_opts=["-q"]
-bowtie2_align_opts=["--very-sensitive"]
+bowtie2_align_opts=["--sensitive"]
 bowtie2_index_name="_bowtie2_index"
 
 featureCounts_opts=["-T 8 -g ID -t CDS"]
