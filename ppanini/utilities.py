@@ -602,7 +602,7 @@ def append_filename2cotignames(fna_file):
     """
     
     # create a unnamed temp file
-    new_file=name_temp_file('/'+ config.file_basename + '.fna')
+    new_file=name_temp_file('.fna')
 
     exe="ppanini_rename_contigs"
     args=["-i",fna_file,"-o",new_file]
@@ -771,12 +771,9 @@ def genecall(contig_file):
     """
     
     # name the genes file
-    genes_file_gff = name_temp_file(
-        '/prodigal_output/'+config.file_basename+'.gff')
-    genes_file_fna = name_temp_file(
-        '/prodigal_output/'+config.file_basename+'.fna')
-    genes_file_faa = name_temp_file(
-        '/prodigal_output/'+config.file_basename+'.faa')
+    genes_file_gff = name_temp_file('.gff')
+    genes_file_fna = name_temp_file('.fna')
+    genes_file_faa = name_temp_file('.faa')
 
     # align user input to database
     exe="prodigal"
