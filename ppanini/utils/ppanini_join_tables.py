@@ -69,21 +69,29 @@ def join_gene_tables(gene_tables,output,verbose=None, mapper= None, scale = None
         
         for line in lines:
             data=line.split(GENE_TABLE_DELIMITER)
+            # Skip the header line or incomplete lines
             if len(data) < 7 or data[6].startswith('/'):
                 continue
             try:
+                # Normalize counts
                 if scale == 'rpk':
-                    data_points = [str(int(data[6]) * 1000.0/int(data[5]))]#hits * 1000/len 
-                elif scale == 'count':
-                    data_points = [data[6]]
-                else:system.exit("scale is not valid!") 
-                if mapper:
-                    if data[0] in mapper:
-                        gene = mapper[data[0]].keys()[0]
+                    if int(data[5]) >0:
+                        data_points = [str(int(data[6]) * 1000.0/int(data[5]))]#hits * 1000/len 
                     else:
-                        gene=data[0]
-                else:
-                    gene=data[0]
+                        # use row counts if the count is zero
+                        data_points = [data[6]]
+                elif scale == 'count':
+                    # no scale, use the raw counts
+                    data_points = [data[6]]
+                else:system.exit("scale is not valid!")
+                
+                # bind sample name and gene id to use as gene name
+                gene = data[1]+'_'+data[0] 
+                
+                # add the gene abundance to its cluster and use its cluster name
+                if mapper and gene in mapper:
+                    gene = mapper[data[1]+'_'+data[0]].keys()[0]
+
             except IndexError:
                 gene=""
 
