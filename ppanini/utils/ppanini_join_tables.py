@@ -168,7 +168,7 @@ def get_args():
         help="Mapping file: gene to uniref90 file\n", 
         default='')
     parser.add_argument(
-        "--mapping-uniref",
+        "--mapping-cluster",
         dest= 'mapping_cluster', 
         help="Mapping file: cluster to genes file\n", 
         default='')
