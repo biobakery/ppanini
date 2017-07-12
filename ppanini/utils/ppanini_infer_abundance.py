@@ -98,7 +98,7 @@ def main():
     with open(args.output+'/hits.txt', 'wt') as csv_file:
             writer = csv.writer(csv_file, delimiter='\t')
             for gene in unirefs:
-               writer.writerow([unirefs[gene], gene])
+               writer.writerow([list(unirefs[gene])[0], gene])
     # list of genes that doesn't pass the threshold for mapping to uniref  
     with open(args.output+'/no_hits.txt', 'wt') as csv_file:
             writer = csv.writer(csv_file, delimiter='\t')
