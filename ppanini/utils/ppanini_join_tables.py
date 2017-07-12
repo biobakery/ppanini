@@ -164,8 +164,13 @@ def get_args():
         default=False)
     parser.add_argument(
         "--mapping-uniref",
-        dest= 'mapping_file', 
-        help="Mapping uniref to genes file\n", 
+        dest= 'mapping_uniref', 
+        help="Mapping file: gene to uniref90 file\n", 
+        default='')
+    parser.add_argument(
+        "--mapping-uniref",
+        dest= 'mapping_cluster', 
+        help="Mapping file: cluster to genes file\n", 
         default='')
     parser.add_argument(
         "--scale",
@@ -190,12 +195,14 @@ def main():
         sys.exit("The input directory provided can not be found." + 
             "  Please enter a new directory.")
     polymap = None
-    if args.mapping_uniref != '' or args.mapping_cluster != '':
-        print ("Loading mapping cluster/uniref genes file ...")
+    if args.mapping_uniref != '':
+        print ("Loading mapping gene-uniref file ...")
         polymap =  load_polymap_dic ( path_in= args.mapping_uniref )
-        polymap2 = rev_load_polymap ( path_in= args.mapping_cluster , path_out ='' , 
+    if args.mapping_cluster != '':
+        print ("Loading mapping cluster-genes file ...")
+        temp_map = rev_load_polymap ( path_in= args.mapping_cluster , path_out ='' , 
                                      start=0, skip=None, allowed_keys=None, allowed_values=None, write_output = False, sep = ';' )
-        polymap.update(polymap2)
+        polymap.update(temp_map)
         
     gene_tables=[]
     file_list=os.listdir(input_dir)
