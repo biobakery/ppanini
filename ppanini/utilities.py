@@ -1189,6 +1189,8 @@ def rev_load_polymap ( path_in= '' , path_out ='' , start=0, skip=None, allowed_
 	    # if the row input format is like: A\t1;2
 	    if sep == ';':
 	    	row = row[1].split(";")
+	    elif sep == '\t':
+	    	row = row[1]
 	    if allowed_keys is None or key in allowed_keys:
 	        for i, value in enumerate( row ):
 	            if i != start and (skip is None or i not in skip):

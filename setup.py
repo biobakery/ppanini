@@ -80,7 +80,8 @@ setuptools.setup(
             'ppanini_rev_uniref_mapper = ppanini.utils.attach_GO:rev_load_polymap',
             'ppanini_join_tables = ppanini.utils.ppanini_join_tables:main',
             'ppanini_rename_contigs = ppanini.utils.ppanini_rename_contigs:main',
-            'ppanini_infer_abundance = ppanini.utils.ppanini_infer_abundance:main'           
+            'ppanini_infer_abundance = ppanini.utils.ppanini_infer_abundance:main',
+            'ppanini_cluster2genes = ppanini.utils.ppanini_cluster2genes:main'           
         ]},
     test_suite= 'ppanini.tests.ppanini_test.get_unittests()',
     zip_safe = True

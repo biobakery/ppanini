@@ -1,14 +1,12 @@
 #!/usr/bin/env python
-
-import os
-import sys
-import re
-#!/usr/bin/env python
 """
 This script make a map table for CD-Hit output
 Cluster\tList of genes separated by ;\t Representative gene 
 """
 
+import os
+import sys
+import re
 import argparse
 import csv
 import shutil
@@ -25,7 +23,7 @@ def  get_args():
         '-f', '--fasta',
         help='fasta file for mapped genes to clusters (uniref90)', 
         )
-    parser.add_argument( "--output", default = 'CD-Hit-Map', required=True )
+    parser.add_argument( "-o", "--output", default = 'CD-Hit-Map', required=True )
     parser.add_argument( "--json", action="store_true" )
     
     args = parser.parse_args()
@@ -33,7 +31,7 @@ def  get_args():
 
 def main():
     
-    args = get_args
+    args = get_args()
     
     # make the output directory
     make_directory(args.output)
@@ -47,15 +45,17 @@ def main():
                cluster = line.split(">")[1]
             else:
                 gene = line.split(">")[1].split("...")[0]
+                #print gene, line    
                 polymap_all.setdefault( cluster, {} )[gene] = 1    
                 if line.endswith('*'):
-                    polymap_all[cluster]['rep']= gene
+                    polymap_all[cluster]['representaive_gene']= gene
     if args.json:
-        f=open(args.output+'/json_map_uniref_gene.txt',"wt")
+        f=open(args.output+'/map_cluster_gene.json',"wt")
         f.write(json.dumps(polymap_all))
     
-    f1=open(args.output+'/map_uniref_gene.txt',"wt")
+    f1=open(args.output+'/map_cluster_gene.txt',"wt")
     # cluster_id  cluster_rep genes
     for cluster in polymap_all:
-        f1.write ("%s \t %s \t %s \n" % (cluster, str(';'.join(gene for gene in polymap_all.get(cluster))), polymap_all[cluster]['rep']))
-    
+        f1.write ("%s \t %s \t %s \n" % (cluster, str(';'.join(gene for gene in polymap_all.get(cluster)  if gene != 'representaive_gene')), polymap_all[cluster]['representaive_gene']))
+if __name__ == '__main__':
+    main() 

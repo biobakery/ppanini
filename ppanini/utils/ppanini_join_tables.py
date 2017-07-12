@@ -86,11 +86,13 @@ def join_gene_tables(gene_tables,output,verbose=None, mapper= None, scale = None
                 else:system.exit("scale is not valid!")
                 
                 # bind sample name and gene id to use as gene name
-                gene = data[1]+'_'+data[0] 
+                gene = data[1].split("_")[0]+'_'+data[0] 
                 
                 # add the gene abundance to its cluster and use its cluster name
                 if mapper and gene in mapper:
-                    gene = mapper[data[1]+'_'+data[0]].keys()[0]
+                    gene = mapper[gene].keys()[0]
+                #else:
+                #    print gene ,data[1], data[0], mapper[gene].keys()[0]
 
             except IndexError:
                 gene=""
@@ -206,14 +208,13 @@ def main():
     if args.mapping_uniref != '':
         print ("Loading mapping uniref-gene file ...")
         polymap =  rev_load_polymap ( path_in= args.mapping_uniref , path_out ='' , 
-                                     start=0, skip=None, allowed_keys=None, allowed_values=None, write_output = False, sep = ';' )
-
+                                     start=0, skip=None, allowed_keys=None, allowed_values=None, write_output = False )
     if args.mapping_cluster != '':
         print ("Loading mapping cluster-genes file ...")
         temp_map = rev_load_polymap ( path_in= args.mapping_cluster , path_out ='' , 
                                      start=0, skip=None, allowed_keys=None, allowed_values=None, write_output = False, sep = ';' )
         polymap.update(temp_map)
-        
+
     gene_tables=[]
     file_list=os.listdir(input_dir)
     # add in files in subdirectories, if set
@@ -298,8 +299,10 @@ def main():
             if args.verbose:
                 print("Deleting temp files in temp folder: " + temp_dir)
             shutil.rmtree(temp_dir)
-        
-        print("Gene table created: " + args.output)
+        if polymap:
+            print("Gene families table created: " + args.output)
+        else:
+            print("Gene table created: " + args.output)
     else:
         print("Zero gene tables were found to join.")
 
