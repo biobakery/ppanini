@@ -1225,6 +1225,7 @@ def load_polymap_dic ( path, start=0, skip=None, allowed_keys=None, allowed_valu
         reader = csv.reader(csv_file)
         polymap_all = dict(reader)'''
     return polymap_all
+
 def load_polymap ( path, start=0, skip=None, allowed_keys=None, allowed_values=None ):
     """
     Load a file like:

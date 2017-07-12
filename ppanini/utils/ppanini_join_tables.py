@@ -133,7 +133,7 @@ def join_gene_tables(gene_tables,output,verbose=None, mapper= None, scale = None
     
     file_handle.close()
 
-def parse_arguments(args):
+def get_args():
     """ 
     Parse the arguments from the user
     """
@@ -163,9 +163,9 @@ def parse_arguments(args):
         action="store_true",
         default=False)
     parser.add_argument(
-        "--mapping-file",
+        "--mapping-uniref",
         dest= 'mapping_file', 
-        help="Mapping cluster(or uniref) to genes file\n", 
+        help="Mapping uniref to genes file\n", 
         default='')
     parser.add_argument(
         "--scale",
@@ -180,7 +180,7 @@ def parse_arguments(args):
 
 def main():
     # Parse arguments from command line
-    args=parse_arguments(sys.argv)
+    args=get_args()
     
     # check for format of the gene tables
     input_dir=os.path.abspath(args.input)
@@ -190,10 +190,12 @@ def main():
         sys.exit("The input directory provided can not be found." + 
             "  Please enter a new directory.")
     polymap = None
-    if args.mapping_file != '':
+    if args.mapping_uniref != '' or args.mapping_cluster != '':
         print ("Loading mapping cluster/uniref genes file ...")
-        polymap = rev_load_polymap ( path_in= args.mapping_file , path_out ='' , 
+        polymap =  load_polymap_dic ( path_in= args.mapping_uniref )
+        polymap2 = rev_load_polymap ( path_in= args.mapping_cluster , path_out ='' , 
                                      start=0, skip=None, allowed_keys=None, allowed_values=None, write_output = False, sep = ';' )
+        polymap.update(polymap2)
         
     gene_tables=[]
     file_list=os.listdir(input_dir)
