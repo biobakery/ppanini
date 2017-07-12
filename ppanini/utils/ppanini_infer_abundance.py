@@ -94,10 +94,12 @@ def main():
         if gene not in unirefs:
             no_unirefs.setdefault( gene, set( ) ).add( uniref )
     
+    # use gene-uniref map for genes that pass the thresholds
     with open(args.output+'/hits.txt', 'wt') as csv_file:
             writer = csv.writer(csv_file, delimiter='\t')
             for gene in unirefs:
-               writer.writerow([gene])  
+               writer.writerow([unirefs[gene], gene])
+    # list of genes that doesn't pass the threshold for mapping to uniref  
     with open(args.output+'/no_hits.txt', 'wt') as csv_file:
             writer = csv.writer(csv_file, delimiter='\t')
             for gene in no_unirefs:

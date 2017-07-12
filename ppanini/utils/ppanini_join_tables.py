@@ -204,8 +204,10 @@ def main():
             "  Please enter a new directory.")
     polymap = None
     if args.mapping_uniref != '':
-        print ("Loading mapping gene-uniref file ...")
-        polymap =  load_polymap_dic ( path= args.mapping_uniref )
+        print ("Loading mapping uniref-gene file ...")
+        polymap =  rev_load_polymap ( path_in= args.mapping_uniref , path_out ='' , 
+                                     start=0, skip=None, allowed_keys=None, allowed_values=None, write_output = False, sep = ';' )
+
     if args.mapping_cluster != '':
         print ("Loading mapping cluster-genes file ...")
         temp_map = rev_load_polymap ( path_in= args.mapping_cluster , path_out ='' , 
