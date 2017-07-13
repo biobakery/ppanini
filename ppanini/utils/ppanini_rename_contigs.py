@@ -26,7 +26,7 @@ def main():
             if line[0] == ">":
                 line = line.replace(">", (">"+sample_name+"_"))
                 line = line.split(" ")
-                line = ''.join(e for e in line[0] if e.isalnum()) + line[1:]
+                line = [''.join(e for e in line[0] if e.isalnum())] + line[1:]
             f1.write(line)
 if __name__ == '__main__':
     main()
