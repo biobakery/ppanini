@@ -790,12 +790,10 @@ def genecall(contig_file):
 
     return genes_file_gff, genes_file_fna, genes_file_faa
 
-def diamond_alignment(alignment_file,uniref, unaligned_reads_file_fasta):
+def diamond_alignment(genes_file, uniref_db):
     """
     Run diamond alignment on database formatted for diamond
     """
-
-    bypass=check_outfiles([alignment_file])
 
     exe="diamond"
     #$ diamond blastp --quiet --query hmp_sub_nares.faa 
@@ -804,16 +802,20 @@ def diamond_alignment(alignment_file,uniref, unaligned_reads_file_fasta):
     
     # Select the command based on a protein or nucleotide database search
     args=[]
+    opts = []
+    '''
     if config.pick_frames_toggle == "on":
         args=[config.diamond_cmmd_protein_search]
     else:
         args=[config.diamond_cmmd_nucleotide_search]
         
-    opts=config.diamond_opts
-
-    args+=["--quiet --query",unaligned_reads_file_fasta,#"--evalue",config.evalue_threshold, 
+    opts=config.diamond_opts'''
+    alignment_file = name_temp_file(config.temp_dir+'/genes.uniref90hits')
+    bypass=check_outfiles([alignment_file])
+    args+=["blastp --quiet --query",genes_file,#"--evalue",config.evalue_threshold, 
 		"--outfmt 6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen",
-		'--out', '.uniref90hits']
+        '--db', uniref_db, 
+		'--out', alignment_file+'.uniref90hits']
     args+=["--threads",config.threads]
 
     message="Running " + exe + " ........"
@@ -822,37 +824,38 @@ def diamond_alignment(alignment_file,uniref, unaligned_reads_file_fasta):
 
     if not bypass:
         args+=opts
-        temp_out_files=[]
-        for database in os.listdir(uniref):          
-            # ignore any files that are not the database files
-            if database.endswith(config.diamond_database_extension):
-                # Provide the database name without the extension
-                input_database=os.path.join(uniref,database)
-                message="Aligning to reference database: " + database
-                logger.info(message)
-                print("\n"+message+"\n")  
-                input_database_extension_removed=re.sub(config.diamond_database_extension
-                    +"$","",input_database)
-                full_args=args+["--db",input_database_extension_removed]
-    
-                # create temp output file
-                temp_out_file=unnamed_temp_file("diamond_m8_")
-                remove_file(temp_out_file)
-                
-                temp_out_files.append(temp_out_file)
-    
-                full_args+=["--out",temp_out_file,"--tmpdir",os.path.dirname(temp_out_file)]
-    
-                execute_command(exe,full_args,[input_database],[])
-        
-        # merge the temp output files
-        execute_command("cat",temp_out_files,temp_out_files,[alignment_file],
-            alignment_file)
-
+        execute_command(exe,args,[genes_file],[alignment_file])
     else:
         message="Bypass"
         logger.info(message)
         print(message)
+    return alignment_file
+
+def Infer_aligmnets(alignment_file, output):
+    """
+    Run infer_abundance to get dufficnet maaped genes (hits) and insufficient genes (no_hits)
+    """
+    # name the hits and no hits file
+    hits_genes_faa = name_temp_file('hits_genes.faa')
+    no_hits_genes_faa = name_temp_file('no_hits_genes_faa')
+    hits_map = name_temp_file('hits.txt')
+    no_hits_map = name_temp_file('no_hits.txt')
+    # align user input to database
+    exe="ppanini_infer_abundance"
+    opts=''
+
+    args=[alignment_file,"--min-percid", .9,"--min-qcover", .8, "--min-scover", .8, '--output', output]
+
+    # run the prodigal gene caller
+    message="Running " + exe + " ........"
+    print("\n"+message+"\n")
+    
+    args+=opts
+
+    execute_command(exe,args,[alignment_file],[hits_genes_faa, no_hits_genes_faa, hits_map, no_hits_map])
+
+    return hits_genes_faa, no_hits_genes_faa, hits_map, no_hits_map
+
 def name_temp_file(file_name):
     """
     Return the full path to a new temp file 

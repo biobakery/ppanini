@@ -22,12 +22,6 @@ def get_args ():
         help="Prodigal output",
         )
     parser.add_argument( 
-        "-u", "--uniref90-db", 
-        dest = 'uniref90',
-        required = True,
-        help="UniRe90 database",
-        )
-    parser.add_argument( 
         "-u", "--uniref-db", 
         dest = 'uniref',
         required = True,
@@ -43,6 +37,12 @@ def get_args ():
         help="bypass commands if the output files exist\n", 
         action="store_true",
         default=config.resume)
+    parser.add_argument(
+        "--threads", 
+        help="number of threads/processes\n[DEFAULT: " + str(config.threads) + "]", 
+        metavar="<" + str(config.threads) + ">", 
+        type=int,
+        default=config.threads)
     
     args = parser.parse_args()
     return args
@@ -52,41 +52,37 @@ def main():
     args = get_args()
     
     config.temp_dir= args.output
-    
+    config.threads = args.threads
     #Steps:   
     
     #make a directory or outputs
-    config.temp_dir +='/diamond_output/'
     utilities.make_directory(config.temp_dir)
     
     # Concatenate all FAA files from prodigal outputs
-    for gene_file in os.listdir(config.gene):          
+    temp_out_files=[]
+    for gene_file in os.listdir(args.gene):          
         # only use FAA files
-        if gene.endswith('.faa'):
-            temp_out_files.append(temp_out_file)
- 
-    utilities.execute_command("cat",temp_out_files,temp_out_files,[alignment_file],
-        alignment_file)
+        if gene_file.endswith('.faa'):
+            temp_out_files.append(args.gene+'/'+gene_file)
+    genes_file = utilities.name_temp_file('genes.faa')
+    print temp_out_files, genes_file
+    utilities.execute_command("cat",temp_out_files,temp_out_files,[genes_file],
+        genes_file)
+    print genes_file
+    alignment_file = config.temp_dir + '/genes.uniref90hits'
 
     # Run diamond
-    utilities.diamond_alignment(alignment_file,args.uniref, unaligned_reads_file_fasta)
-    #diamond blastp --quiet --query $FILE --db /n/huttenhower_lab/data/humann2_databases/uniref_annotated/uniref90/v1.1_uniref90/uniref90_annotated.1.1.dmnd --threads 2 --outfmt 6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen --out ${diamond_output}/${sample}.uniref90hits &
+    utilities.diamond_alignment(genes_file, args.uniref )
+    
     
     # Infer abundance for sufficient hits to  uniref90 and no_hits
+    hits_genes_faa, no_hits_genes_faa, hits_map, no_hits_map = utilities.Infer_aligmnets(alignment_file, config.temp_dir)
     
     # Cluster no sufficient hits using CD-Hit
     
     # Generate mapping file for clusters to genes (with no sufficient hit to UniRef90)
     
     # Join gene families
-    
-    new_contig_file = utilities.append_filename2cotignames(args.contig)
-    
-    # make directory for prodigal output
-    config.temp_dir +='/prodigal_output/'
-    utilities.make_directory(config.temp_dir) 
-    
-
 
 if __name__ == '__main__':
 	main()

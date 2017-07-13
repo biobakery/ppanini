@@ -83,6 +83,7 @@ diamond_version={
     "second minor" : 22,
     "line" : 0,
     "column" : 2}
+pick_frames_toggle = 'on'
 
 resume =  False
 if __name__=='__main__':

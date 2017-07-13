@@ -607,14 +607,14 @@ def run():
     	print "DONE"
     
     if config.verbose =='DEBUG':
-    	print "Summerize centroids table..."
+    	print "Summerize gene families table..."
     all_centroids = summerize_centroids(uniref_dm, gi_dm)
     
     if config.verbose =='DEBUG':
     	print "DONE"
     
     if config.verbose =='DEBUG':
-    	print "Normalize centroids table..."
+    	print "Normalize gene families table..."
     centroids_data_table = normalize_centroids_table(all_centroids, metadata)
     #config.centroids_list = centroids_list
     
@@ -666,7 +666,7 @@ def run():
 
 def  prioritize_centroids():
     if config.verbose =='DEBUG':
-    	print "Prioritize centroids..."
+    	print "Prioritize gene families..."
     
     imp_centroids = get_important_centroids()
     
