@@ -7,14 +7,13 @@ import sys
 import re
 import subprocess
 import csv
-import gzip
 import bz2
 import pandas as pd
 from .. import utilities
 
 def uniref2go(ppanini_table, uniref_go_path ):
     #go1000_uniref90_dic = load_polymap ( go_uniref_path )
-    go1000_uniref90_dic = load_polymap_dic ( uniref_go_path )
+    go1000_uniref90_dic = utilities.load_polymap_dic ( uniref_go_path )
     #print('Loading the mapping file is done!')
     #print (go1000_uniref90_dic.keys())
     #uniref_go_keys = go1000_uniref90_dic.keys()

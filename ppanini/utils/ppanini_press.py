@@ -16,27 +16,28 @@ def get_args ():
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser.add_argument( 
-        "-i", "--contig", 
+        "-i", "--gene-path",
+        dest = 'gene', 
         required = True,
-        help="contigs file (fna)",
+        help="Prodigal output",
         )
     parser.add_argument( 
-        "-f", "--fastq", 
+        "-u", "--uniref90-db", 
+        dest = 'uniref90',
         required = True,
-        help="reads file (fastq)",
+        help="UniRe90 database",
+        )
+    parser.add_argument( 
+        "-u", "--uniref-db", 
+        dest = 'uniref',
+        required = True,
+        help="UniRe90 database",
         )
     parser.add_argument( 
         "-o", "--output", 
         default=None,
         help="Path for outputs",
         )
-    parser.add_argument(
-        "--output-basename",
-        dest = 'output_basename',
-        help="the basename for the output files\n[DEFAULT: " +
-        "input file basename]",
-        default=config.file_basename,
-        metavar="<sample_name>")
     parser.add_argument(
         "-r","--resume", 
         help="bypass commands if the output files exist\n", 
@@ -48,62 +49,44 @@ def get_args ():
 
 
 def main():
-	args = get_args()
-	# Set the basename of the output files if specified as an option
-	if args.output_basename:
-	    config.file_basename=args.output_basename
-	else:
-	    # Determine the basename of the input file to use as output file basename
-	    input_file_basename=os.path.basename(args.contig)
-	    # Remove gzip extension if present
-	    if re.search('.gz$',input_file_basename):
-	        input_file_basename='.'.join(input_file_basename.split('.')[:-1])
-	    # Remove input file extension if present
-	    if '.' in input_file_basename:
-	        input_file_basename='.'.join(input_file_basename.split('.')[:-1])
-	
-	    config.file_basename=input_file_basename
-	if args.output:
-		config.temp_dir = args.output
-	else:		
-		args.output = config.file_basename
-		config.temp_dir= args.output
-	#Steps
-	#Commands to generate gene families abundance from assemblies and sequences files
-	
-	# append sample file name to the contig names
-	
-	
-	#make a directory or outputs
-	utilities.make_directory(config.temp_dir) 
-	
-	# contig as input
-	new_contig_file = utilities.append_filename2cotignames(args.contig)
-	
-	# make directory for prodigal output
-	config.temp_dir +='/prodigal_output/'
-	utilities.make_directory(config.temp_dir) 
-	
-	#config.file_basename = ''
-	# gene call using prodigal
-	genes_file_gff, genes_file_fna, genes_file_faa = utilities.genecall(new_contig_file)
-	
-	# make directory for bowtie2 output
-	config.temp_dir = args.output+'/bowtie2_output/'
-	utilities.make_directory(config.temp_dir)
-	
-	# make index database using bowtie2-build
-	index_name = utilities.index(new_contig_file)
-	
-	# reads alignment using Bowtie2
-	alignment_file = utilities.alignment(args.fastq, index_name)
-	
-	# make directory for featureCounts abundance output
-	config.temp_dir = args.output+'/featureCounts_output/'
-	utilities.make_directory(config.temp_dir)
-	# gene abundance using featureCounts
-	abundance_file = utilities.abundance(genes_file_gff, alignment_file)
-	
+    args = get_args()
+    
+    config.temp_dir= args.output
+    
+    #Steps:   
+    
+    #make a directory or outputs
+    config.temp_dir +='/diamond_output/'
+    utilities.make_directory(config.temp_dir)
+    
+    # Concatenate all FAA files from prodigal outputs
+    for gene_file in os.listdir(config.gene):          
+        # only use FAA files
+        if gene.endswith('.faa'):
+            temp_out_files.append(temp_out_file)
+ 
+    utilities.execute_command("cat",temp_out_files,temp_out_files,[alignment_file],
+        alignment_file)
+
+    # Run diamond
+    utilities.diamond_alignment(alignment_file,args.uniref, unaligned_reads_file_fasta)
+    #diamond blastp --quiet --query $FILE --db /n/huttenhower_lab/data/humann2_databases/uniref_annotated/uniref90/v1.1_uniref90/uniref90_annotated.1.1.dmnd --threads 2 --outfmt 6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen --out ${diamond_output}/${sample}.uniref90hits &
+    
+    # Infer abundance for sufficient hits to  uniref90 and no_hits
+    
+    # Cluster no sufficient hits using CD-Hit
+    
+    # Generate mapping file for clusters to genes (with no sufficient hit to UniRef90)
+    
+    # Join gene families
+    
+    new_contig_file = utilities.append_filename2cotignames(args.contig)
+    
+    # make directory for prodigal output
+    config.temp_dir +='/prodigal_output/'
+    utilities.make_directory(config.temp_dir) 
+    
+
 
 if __name__ == '__main__':
 	main()

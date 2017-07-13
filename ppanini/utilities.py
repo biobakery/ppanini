@@ -9,6 +9,7 @@ import shutil
 import csv
 import pdb
 import Bio
+import gzip
 import numpy
 import logging
 import argparse

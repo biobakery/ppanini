@@ -649,19 +649,20 @@ def run():
         template = pkg_resources.resource_filename(resource_package, resource_path)
         print (template)
         attach_GO.uniref2go(config.centroid_prev_abund, uniref_go_path = template)
-    # add Go terms to the table
-    if not config.uniref2go == '':
-        if config.verbose =='DEBUG':
-            print("Mapping UniRef90 to COG terms!")
-        attach_GO.uniref2go(config.centroid_prev_abund, uniref_cog_path = config.uniref2go)
-    else:
-        if config.verbose =='DEBUG':
-            print("Mapping UniRef90 to COG terms!")
-        resource_package = __name__  # Could be any module/package name
-        resource_path = '/'.join(('data', 'map_uniref90_cog.txt.gz'))
-        template = pkg_resources.resource_filename(resource_package, resource_path)
-        print (template)
-        attach_GO.uniref2go(config.centroid_prev_abund, uniref_cog_path = template)
+    
+    ''' # add Go terms to the table
+     if not config.uniref2go == '':
+         if config.verbose =='DEBUG':
+             print("Mapping UniRef90 to COG terms!")
+         attach_GO.uniref2go(config.centroid_prev_abund, uniref_cog_path = config.uniref2go)
+     else:
+         if config.verbose =='DEBUG':
+             print("Mapping UniRef90 to COG terms!")
+         resource_package = __name__  # Could be any module/package name
+         resource_path = '/'.join(('data', 'map_uniref90_cog.txt.gz'))
+         template = pkg_resources.resource_filename(resource_package, resource_path)
+         print (template)
+         attach_GO.uniref2go(config.centroid_prev_abund, uniref_cog_path = template)'''
 
 def  prioritize_centroids():
     if config.verbose =='DEBUG':
