@@ -25,6 +25,7 @@ def main():
         for line in fh:
             if line[0] == ">":
                 line = line.replace(">", (">"+sample_name+"_"))
+                line = line.replace(".", "_", 1)
             f1.write(line)
 if __name__ == '__main__':
     main()
