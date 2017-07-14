@@ -856,6 +856,30 @@ def Infer_aligmnets(alignment_file, output):
 
     return hits_genes_faa, no_hits_genes_faa, hits_map, no_hits_map
 
+def cluster_genes(genes_fasta_file):
+    """
+    Run CD-Hit to cluster genes
+    """
+    # name the genes cluster output 
+    cluster_alignments = name_temp_file('no_hits_reads.clust90')
+    cluster_gene_file = name_temp_file('no_hits_reads.clust90.clsr')
+
+    # align user input to database
+    exe="cd-hit"
+    opts=''
+    #cd-hit -d 0 -c .9 -aL .8 -G 0 -T 2 -i ${infer_output}/no_hits_reads.faa -o ${infer_output}/no_hits_reads.clust90
+    args=["-i", genes_fasta_file,"-o", cluster_alignments, "-d", 0, "-c", .9, "aL", .8, "-G", 0, "-T", 2]
+
+    # run the prodigal gene caller
+    message="Running " + exe + " ........"
+    print("\n"+message+"\n")
+    
+    args+=opts
+
+    execute_command(exe,args,[genes_file],[cluster_gene_file, cluster_alignments])
+
+    return cluster_gene_file, cluster_alignments
+
 def name_temp_file(file_name):
     """
     Return the full path to a new temp file 
@@ -1255,3 +1279,29 @@ def load_polymap ( path, start=0, skip=None, allowed_keys=None, allowed_values=N
                     if allowed_values is None or value in allowed_values:
                         polymap.setdefault( key, {} )[value] = 1
     return polymap
+
+def uniref2go(ppanini_table_path, uniref_go_path ):
+
+    go1000_uniref90_dic = load_polymap_dic ( uniref_go_path )
+    ppanini_output = name_temp_file('ppanini_table2.txt')
+    print (ppanini_output)
+    f1=open(ppanini_output, 'w')
+    with open( ppanini_table_path) as fh:
+        for line in fh:
+            gene_familiy = line.split("\t")[0]
+            
+            if gene_familiy:
+                #line = line.rstrip()
+                go_term = go1000_uniref90_dic.get(gene_familiy, "")
+                line += go_term +"\n"
+            f1.write(line)
+    
+
+    '''for index, row in ppanini_table.iterrows():
+        ppanini_table.loc[index,'GO'] = go1000_uniref90_dic.get(index)
+        '''
+        
+        
+        
+        
+        

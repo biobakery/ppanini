@@ -14,7 +14,7 @@ from os.path import basename
 from numpy import percentile
 from collections import namedtuple
 from operator import attrgetter, itemgetter
-ppanini_table_row = namedtuple("ppanini_table_row", ["alpha_prevalence", "prevalence_percentile", "mean_abundance","abund_percentile", "beta_prevalence", "ppanini_score", "pvalue", "GO"], verbose=False, rename=False)
+ppanini_table_row = namedtuple("ppanini_table_row", ["alpha_prevalence", "prevalence_percentile", "mean_abundance","abund_percentile", "beta_prevalence", "ppanini_score", "GO"], verbose=False, rename=False)
 import pandas as pd
 import pkg_resources
 
@@ -307,7 +307,6 @@ def get_prevalence_abundance(centroids_data_matrix, metadata):
     
     logger.debug('get_prevalence_abundance')
     
-    centroid_prev_abund_file_path = config.temp_folder+'/'+config.basename+'_centroid_prev_abund.txt'
     set_niches = []
     [niche_line, ind] = utilities.is_present(metadata, '#NICHE')
     if len(niche_line) >0:
@@ -327,7 +326,6 @@ def get_prevalence_abundance(centroids_data_matrix, metadata):
     else:
     	niche_flag = False
         centroid_prev_abund = get_no_niche_prevalence_abundance(centroids_data_matrix)
-    centroid_prev_abund.to_csv(centroid_prev_abund_file_path, sep='\t')
     config.niche_flag = niche_flag
     return centroid_prev_abund 
 
@@ -465,7 +463,7 @@ def get_important_centroids(config=config):
         except:
             imp_centroids = imp_centroids.sort('ppanini_score', ascending=False)
         
-    imp_centroids.to_csv( config.output_folder + '/' + imp_centroid_prev_abund_file_path, sep='\t')
+    imp_centroids.to_csv( config.temp_dir + '/' + imp_centroid_prev_abund_file_path, sep='\t')
     return imp_centroids
 
 def write_prev_abund_matrix(centroid_prev_abund, out_file):
@@ -537,7 +535,7 @@ def read_prevalence_abundance_table(input_table):
 def read_parameters():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i','--input_table', help='REQUIRED: Gene abundance table with metadata', required=True)
-    parser.add_argument('-o','--output-folder', dest = 'output_folder',  help='Folder containing results', required=False, default=config.output_folder)
+    parser.add_argument('-o','--output-folder', dest = 'output_folder',  help='Folder containing results', required=False, default=config.temp_dir)
     #parser.add_argument('--gene-catalog', dest = 'gene_catalog', default=config.gene_catalog, help='GENE CATALOG')
     #parser.add_argument('--uc', default= config.uclust_file, help='UCLUST file containg centroids and clustered genes')
     #parser.add_argument('--usearch', action="store_true", default = config.usearch, help='Path to USEARCH') #add to be in path?
@@ -555,7 +553,7 @@ def read_parameters():
     
     args = parser.parse_args()
     config.beta = args.beta 
-    config.output_folder = args.output_folder
+    config.temp_dir = args.output_folder
     #config.nprocesses = args.threads   
     config.basename = args.basename
     config.input_table = args.input_table
@@ -584,15 +582,15 @@ def run():
         #config.basename = basename(config.input_table).split('.')[0]
         #print config.basename
         pass
-    if config.output_folder == '':
-    	config.output_folder = config.basename
+    if config.temp_dir == '':
+    	config.temp_dir = config.basename
     
-    print(config.output_folder)
-    config.temp_folder = config.output_folder+'/temp'
+    print(config.temp_dir)
+    config.temp_folder = config.temp_dir+'/temp'
 
-    utilities.create_folders([config.output_folder, config.temp_folder])
+    utilities.create_folders([config.temp_dir, config.temp_folder])
     
-    log_file = config.output_folder+'/'+config.basename+'.log'
+    log_file = config.temp_dir+'/'+config.basename+'.log'
     logging.basicConfig(filename=log_file, \
     					format='%(asctime)s - %(name)s - %(levelname)s: %(message)s', \
     					level=getattr(logging, config.log_level), \
@@ -626,12 +624,14 @@ def run():
     centroid_prev_abund = get_prevalence_abundance(centroids_data_table, \
     												metadata = metadata)
     
+    centroid_prev_abund_file_path = config.temp_folder+'/'+config.basename+'_centroid_prev_abund.txt'
+    centroid_prev_abund.to_csv(centroid_prev_abund_file_path, sep='\t')
     if config.verbose =='DEBUG':
     	print "DONE"
         
     if config.genomic_score: # an option should be added for this
         metagenomic_table  = utilities.read_parsed("/Users/rah/Documents/PPANINI/ppanini_old_files/PARSED_BLAST_RESULTS/AN_mg.m8")
-        metagenomic_table.to_csv(config.output_folder + '/' +config.basename+'_metagenomic_table.txt', sep='\t')
+        metagenomic_table.to_csv(config.temp_dir + '/' +config.basename+'_metagenomic_table.txt', sep='\t')
     # else:
     # 	[centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag] = read_prevalence_abundance_table(input_table, config.beta)
     config.centroid_prev_abund = centroid_prev_abund
@@ -640,7 +640,7 @@ def run():
     if not config.uniref2go == '':
         if config.verbose =='DEBUG':
             print("Mapping UniRef90 to GO terms!")
-        attach_GO.uniref2go(config.centroid_prev_abund, uniref_go_path = config.uniref2go)
+        utilities.uniref2go(centroid_prev_abund_file_path, uniref_go_path = config.uniref2go)
     else:
         if config.verbose =='DEBUG':
             print("Mapping UniRef90 to GO terms!")
@@ -648,7 +648,7 @@ def run():
         resource_path = '/'.join(('data', 'map_uniref90_infogo1000.txt.gz'))
         template = pkg_resources.resource_filename(resource_package, resource_path)
         print (template)
-        attach_GO.uniref2go(config.centroid_prev_abund, uniref_go_path = template)
+        utilities.uniref2go(config.centroid_prev_abund, uniref_go_path = template)
     
     ''' # add Go terms to the table
      if not config.uniref2go == '':

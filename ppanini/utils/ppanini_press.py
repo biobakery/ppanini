@@ -69,20 +69,28 @@ def main():
     utilities.execute_command("cat",temp_out_files,temp_out_files,[genes_file],
         genes_file)
     print genes_file
-    alignment_file = config.temp_dir + '/genes.uniref90hits'
+    #alignment_file = config.temp_dir + '/genes.uniref90hits'
 
     # Run diamond
-    utilities.diamond_alignment(genes_file, args.uniref )
+    alignment_file = utilities.diamond_alignment(genes_file, args.uniref )
     
     
     # Infer abundance for sufficient hits to  uniref90 and no_hits
     hits_genes_faa, no_hits_genes_faa, hits_map, no_hits_map = utilities.Infer_aligmnets(alignment_file, config.temp_dir)
     
     # Cluster no sufficient hits using CD-Hit
+    cluster_gene_file, cluster_alignments = utilities.cluster_genes(no_hits_genes_faa)
+    
     
     # Generate mapping file for clusters to genes (with no sufficient hit to UniRef90)
+    # ppanini_cluster2genes -i ${infer_output}/no_hits_reads.clust90.clstr --output ${infer_output}/cd_hit_clust_temp
+    
     
     # Join gene families
+    #ppanini_join_tables -i tables/ 
+    #-o hmp_sub_nares_genefamilies_abund.tsv 
+    #--mapping-cluster cd_hit_clust_temp/map_cluster_gene.txt 
+    #--mapping-uniref ./hmp_nares_map_uniref_gene.txt
 
 if __name__ == '__main__':
 	main()
