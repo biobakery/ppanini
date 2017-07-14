@@ -12,14 +12,14 @@ logger = logging.getLogger(__name__)
 def get_args ():
     """ Get args from Argparse """
     parser = argparse.ArgumentParser( 
-        description="PPANINI gene caller", 
+        description="PPANINI Press: clusters genes to gene families including annoted genes to UniRef90 and homology-based clustered genes.", 
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser.add_argument( 
-        "-i", "--gene-path",
+        "-i", "--genes-path",
         dest = 'gene', 
         required = True,
-        help="Prodigal output",
+        help="Prodigal outputs for all samples whichincludes gff and faa files",
         )
     parser.add_argument( 
         "-u", "--uniref-db", 

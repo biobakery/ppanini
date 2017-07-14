@@ -538,32 +538,32 @@ def read_parameters():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i','--input_table', help='REQUIRED: Gene abundance table with metadata', required=True)
     parser.add_argument('-o','--output-folder', dest = 'output_folder',  help='Folder containing results', required=False, default=config.output_folder)
-    parser.add_argument('--gene-catalog', dest = 'gene_catalog', default=config.gene_catalog, help='GENE CATALOG')
-    parser.add_argument('--uc', default= config.uclust_file, help='UCLUST file containg centroids and clustered genes')
-    parser.add_argument('--usearch', action="store_true", default = config.usearch, help='Path to USEARCH') #add to be in path?
-    parser.add_argument('--vsearch', action="store_true", default = config.vsearch, help='Path to VSEARCH') #add to be in path?
+    #parser.add_argument('--gene-catalog', dest = 'gene_catalog', default=config.gene_catalog, help='GENE CATALOG')
+    #parser.add_argument('--uc', default= config.uclust_file, help='UCLUST file containg centroids and clustered genes')
+    #parser.add_argument('--usearch', action="store_true", default = config.usearch, help='Path to USEARCH') #add to be in path?
+    #parser.add_argument('--vsearch', action="store_true", default = config.vsearch, help='Path to VSEARCH') #add to be in path?
     parser.add_argument('--basename', default = config.basename, help='BASENAME for all the output files')
     parser.add_argument('--uniref2go', default = config.uniref2go, help='uniref to GO term mapping file')
     parser.add_argument('--log-level', dest = 'log_level',  default=config.log_level, help='Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]')
-    parser.add_argument('--threads', default= config.nprocesses, type=int,help='Number of threads')
+    #parser.add_argument('--threads', default= config.nprocesses, type=int,help='Number of threads')
     parser.add_argument('--tshld-abund', dest = 'tshld_abund', default=config.tshld_abund, type = float,help='[X] Percentile Cutoff for Abundance; Default=75th')
     parser.add_argument('--tshld-prev', dest = 'tshld_prev', default=config.tshld_prev, type =float, help='Percentile cutoff for Prevalence')
     parser.add_argument('--beta', default=config.beta, help='Beta parameter for weights on percentiles')
-    parser.add_argument('--bypass-clustering', dest = 'bypass_clustering', default=config.bypass_clustering, action='store_true', help='Bypass clustering')
+    #parser.add_argument('--bypass-clustering', dest = 'bypass_clustering', default=config.bypass_clustering, action='store_true', help='Bypass clustering')
     parser.add_argument('--version', action="version", version="%(prog)s "+config.version, help='prints the version')
     # parser.add_argument('--bypass-prev-abund', dest = 'bypass_prev_abund', default=False, action='store_true', help='Bypass quantifying abundance and prevalence')
     
     args = parser.parse_args()
     config.beta = args.beta 
     config.output_folder = args.output_folder
-    config.nprocesses = args.threads   
+    #config.nprocesses = args.threads   
     config.basename = args.basename
     config.input_table = args.input_table
-    config.uclust_file = args.uc
-    config.gene_catalog = args.gene_catalog 
-    config.bypass_clustering = args.bypass_clustering
-    config.vsearch = args.vsearch
-    config.usearch = args.usearch
+    #config.uclust_file = args.uc
+    #config.gene_catalog = args.gene_catalog 
+    config.bypass_clustering = True
+    #config.vsearch = args.vsearch
+    #config.usearch = args.usearch
     config.uniref2go = args.uniref2go
     
 def run():
