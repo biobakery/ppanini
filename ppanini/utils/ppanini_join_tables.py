@@ -45,7 +45,6 @@ def join_gene_tables(gene_tables,output,verbose=None, mapper= None, scale = None
     samples=[]
     file_basenames=[]
     index=0
-    print mapper
     for gene_table in gene_tables:
         
         if verbose:
@@ -88,13 +87,13 @@ def join_gene_tables(gene_tables,output,verbose=None, mapper= None, scale = None
                 
                 # bind sample name and gene id to use as gene name
                 gene = data[1] +'_'+data[0] # data[1].split("_")[0]+'_'+data[0]
-                gene = gene.replace(" ","")
+                #gene = gene.replace(" ","")
                 # add the gene abundance to its cluster and use its cluster name
                 if mapper and gene in mapper:
                     gene = mapper[gene].keys()[0]
                     #print gene ,data[1], data[0]
                 else:
-                    continue
+                    print ("No mapping cluster found for:", gene )
 
             except IndexError:
                 gene=""
