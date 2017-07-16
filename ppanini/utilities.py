@@ -1212,13 +1212,12 @@ def rev_load_polymap ( path_in= '' , path_out ='' , start=0, skip=None, allowed_
     print( "Loading mapping file from:", path_in, file=sys.stderr )
     size_warn( path_in )
     for line in gzip_bzip2_biom_open_readlines( path_in ):
-        row = line.split("\t")
+        genes = line.split("\t")
         key = row[start].replace(" ","")
         # if the row input format is like: A\t1;2
         if sep == ';':
         	genes = row[1].split(";")
-        else:
-            genes = row[1:]
+
         #print(genes)
         if allowed_keys is None or key in allowed_keys:
             for i, value in enumerate( row ):
