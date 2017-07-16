@@ -1224,7 +1224,7 @@ def rev_load_polymap ( path_in= '' , path_out ='' , start=0, skip=None, allowed_
             for i, value in enumerate( row ):
                 if i != start and (skip is None or i not in skip):
                     if allowed_values is None or value in allowed_values:
-                        polymap_all.setdefault( value, {} )[key.rstrip()] = 1 #polymap.setdefault( key, {} )[value] = 1
+                        polymap_all.setdefault( genes, {} )[key] = 1 #polymap.setdefault( key, {} )[value] = 1
     
     if write_output:
         with gzip.open(path_out+'_dict.txt.gz', 'wt') as csv_file:
