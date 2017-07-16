@@ -90,7 +90,7 @@ def join_gene_tables(gene_tables,output,verbose=None, mapper= None, scale = None
                 gene = data[1] +'_'+data[0] # data[1].split("_")[0]+'_'+data[0]
                 gene = gene.replace(" ","")
                 # add the gene abundance to its cluster and use its cluster name
-                if gene in mapper:
+                if mapper and gene in mapper:
                     gene = mapper[gene].keys()[0]
                     print gene ,data[1], data[0]
                 else:

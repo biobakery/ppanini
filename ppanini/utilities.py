@@ -1219,7 +1219,7 @@ def rev_load_polymap ( path_in= '' , path_out ='' , start=0, skip=None, allowed_
         	genes = row[1].split(";")
         else:
             genes = row[1:]
-        print(genes)
+        #print(genes)
         if allowed_keys is None or key in allowed_keys:
             for i, value in enumerate( row ):
                 if i != start and (skip is None or i not in skip):
@@ -1233,7 +1233,7 @@ def rev_load_polymap ( path_in= '' , path_out ='' , start=0, skip=None, allowed_
                writer.writerow([key, ";".join(values)])                                          
         print("Mappping is done")
     else:
-        print (polymap_all)
+        #print (polymap_all)
         return polymap_all
 
 

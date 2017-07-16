@@ -19,10 +19,6 @@ def  get_args():
         '-i', '--cd-hit', dest ="cd_hit" ,
         help='CD-HIT clusters output', 
         )
-    parser.add_argument(
-        '-f', '--fasta',
-        help='fasta file for mapped genes to clusters (uniref90)', 
-        )
     parser.add_argument( "-o", "--output", default = 'CD-Hit-Map', required=True )
     parser.add_argument( "--json", action="store_true" )
     
