@@ -90,11 +90,11 @@ def join_gene_tables(gene_tables,output,verbose=None, mapper= None, scale = None
                 gene = data[1] +'_'+data[0] # data[1].split("_")[0]+'_'+data[0]
                 gene = gene.replace(" ","")
                 # add the gene abundance to its cluster and use its cluster name
-                if mapper and gene in mapper:
+                if gene in mapper:
                     gene = mapper[gene].keys()[0]
                     print gene ,data[1], data[0]
                 else:
-                    pass
+                    continue
 
             except IndexError:
                 gene=""
@@ -211,12 +211,12 @@ def main():
         print ("Loading mapping uniref-gene file ...")
         polymap =  rev_load_polymap ( path_in= args.mapping_uniref , path_out ='' , 
                                      start=0, skip=None, allowed_keys=None, allowed_values=None, write_output = False, sep = '\t' )
-        print("UniRef Mapper: ",polymap)
+        #print("UniRef Mapper: ",polymap)
     if args.mapping_cluster != '':
         print ("Loading mapping cluster-genes file ...")
         temp_map = rev_load_polymap ( path_in= args.mapping_cluster , path_out ='' , 
                                      start=0, skip=None, allowed_keys=None, allowed_values=None, write_output = False, sep = ';' )
-        print("Mapper :",temp_map)
+        #print("Mapper :",temp_map)
         polymap.update(temp_map)
 
     gene_tables=[]

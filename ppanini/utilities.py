@@ -1193,45 +1193,49 @@ def process_gene_table_with_header(gene_table, allow_for_missing_header=None):
         yield line
 
 def rev_load_polymap ( path_in= '' , path_out ='' , start=0, skip=None, allowed_keys=None, allowed_values=None, write_output = True, sep = '\t' ):
-	"""
-	Load a file like:
-	A 1 2
-	B 3
-	C 4 5
-	To a nested dict structure:
-	{1:{A}, 2:{A}, 3:{B:1}, 4:{C:1}, 5:{C:1}}
-	Inner values are not important (set to 1)
-	"""
-	# if it used from command line
-	if path_in == '':
-		if len(sys.argv)<3:
-		    sys.exit('Please provide an input and output path')
-		path_in = sys.argv[1]
-		path_out = sys.argv[2]
-	polymap_all = {}
-	print( "Loading mapping file from:", path_in, file=sys.stderr )
-	size_warn( path_in )
-	for line in gzip_bzip2_biom_open_readlines( path_in ):
-	    row = line.split("\t")
-	    key = row[start].replace(" ","")
-	    # if the row input format is like: A\t1;2
-	    if sep == ';':
-	    	row = row[1].split(";")
+    """
+    Load a file like:
+    A 1 2
+    B 3
+    C 4 5
+    To a nested dict structure:
+    {1:{A}, 2:{A}, 3:{B:1}, 4:{C:1}, 5:{C:1}}
+    Inner values are not important (set to 1)
+    """
+    # if it used from command line
+    if path_in == '':
+    	if len(sys.argv)<3:
+    	    sys.exit('Please provide an input and output path')
+    	path_in = sys.argv[1]
+    	path_out = sys.argv[2]
+    polymap_all = {}
+    print( "Loading mapping file from:", path_in, file=sys.stderr )
+    size_warn( path_in )
+    for line in gzip_bzip2_biom_open_readlines( path_in ):
+        row = line.split("\t")
+        key = row[start].replace(" ","")
+        # if the row input format is like: A\t1;2
+        if sep == ';':
+        	genes = row[1].split(";")
+        else:
+            genes = row[1:]
+        print(genes)
         if allowed_keys is None or key in allowed_keys:
             for i, value in enumerate( row ):
                 if i != start and (skip is None or i not in skip):
                     if allowed_values is None or value in allowed_values:
-                        polymap_all.setdefault( value.replace(" ",""), {} )[key.rstrip()] = 1 #polymap.setdefault( key, {} )[value] = 1
+                        polymap_all.setdefault( value, {} )[key.rstrip()] = 1 #polymap.setdefault( key, {} )[value] = 1
+    
+    if write_output:
+        with gzip.open(path_out+'_dict.txt.gz', 'wt') as csv_file:
+            writer = csv.writer(csv_file, delimiter='\t')
+            for key, values in polymap_all.items():
+               writer.writerow([key, ";".join(values)])                                          
+        print("Mappping is done")
+    else:
+        print (polymap_all)
+        return polymap_all
 
-	if write_output:
-	    with gzip.open(path_out+'_dict.txt.gz', 'wt') as csv_file:
-	        writer = csv.writer(csv_file, delimiter='\t')
-	        for key, values in polymap_all.items():
-	           writer.writerow([key, ";".join(values)])                                          
-	    print("Mappping is done")
-	else:
-		return polymap_all
-	 	
 
 def load_polymap_dic ( path, start=0, skip=None, allowed_keys=None, allowed_values=None ):
     """
