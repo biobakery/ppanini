@@ -39,13 +39,8 @@ def main():
     >NODE_1_length_628004_cov_22.174_1 # 2 # ...
     """
     
-    abunds = {}
-    with open( args.hits ) as fh: # it was args.orfs
-        for line in fh:
-            if line[0] == ">":
-               gene = line[1:].split( )[0]
-               #abunds[gene] = float( gene.split( "_" )[5] )
-
+    
+    
     """
     00 NODE_1_length_628004_cov_22.174_1
     01 UniRef90_R7JM20|1245
@@ -62,6 +57,7 @@ def main():
     12 194
     13 415
     """
+    abunds = {}
     # make the output directory
     make_directory(args.output)
     unirefs = {}
@@ -86,7 +82,7 @@ def main():
     
     f1=open(args.output+'/map_uniref_gene.txt',"wt")
     for cluster in polymap_all:
-        f1.write ("%s \t %s \n" % (cluster,str(';'.join(gene for gene in polymap_all.get(cluster)))))
+        f1.write ("%s\t%s\n" % (cluster,str(';'.join(gene for gene in polymap_all.get(cluster)))))
             #f1.write([cluster, polymap_all.get(cluster)])
     
     for row in iter_rows( args.hits ):
@@ -104,21 +100,6 @@ def main():
             writer = csv.writer(csv_file, delimiter='\t')
             for gene in no_unirefs:
                writer.writerow([gene])  
-      
-    '''output = {}
-    for gene in abunds:
-        if len( unirefs.get( gene, [] ) ) > 1:
-            warn( unirefs[gene] )
-        for u in unirefs.get( gene, ["UniRef90_unknown"] ):
-            output[u] = output.get( u, 0 ) + abunds[gene]
-    
-    tprint( "# GENE", "ABUND" )
-    for u in sorted( output, key=lambda x: -output[x] ):
-        tprint( u, output[u] )
-    
-    a = len( abunds )
-    u = len( unirefs )
-    warn( a, u, u / float( a ) )'''
 
 if __name__ == '__main__':
     main()

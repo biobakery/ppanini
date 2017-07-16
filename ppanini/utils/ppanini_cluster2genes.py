@@ -56,6 +56,6 @@ def main():
     f1=open(args.output+'/map_cluster_gene.txt',"wt")
     # cluster_id  cluster_rep genes
     for cluster in polymap_all:
-        f1.write ("%s \t %s \t %s \n" % (cluster, str(';'.join(gene for gene in polymap_all.get(cluster)  if gene != 'representaive_gene')), polymap_all[cluster]['representaive_gene']))
+        f1.write ("%s\t%s\t%s\n" % (cluster, str(';'.join(gene for gene in polymap_all.get(cluster)  if gene != 'representaive_gene')), polymap_all[cluster]['representaive_gene']))
 if __name__ == '__main__':
     main() 

@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 def get_args ():
     """ Get args from Argparse """
     parser = argparse.ArgumentParser( 
-        description="PPANINI Press: clusters genes to gene families including annoted genes to UniRef90 and homology-based clustered genes.", 
+        description="PPANINI Press: clusters genes to gene families including annotated genes to UniRef90 and homology-based clustered genes.", 
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser.add_argument( 
