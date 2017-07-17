@@ -339,7 +339,7 @@ def get_important_centroids(config=config):
         except:
             imp_centroids = imp_centroids.sort('ppanini_score', ascending=False)
         
-    imp_centroids.to_csv( config.temp_dir + '/' + imp_centroid_prev_abund_file_path, sep='\t')
+    #imp_centroids.to_csv( config.temp_dir + '/' + imp_centroid_prev_abund_file_path, sep='\t')
     return imp_centroids
 
 def write_prev_abund_matrix(centroid_prev_abund, out_file):
@@ -496,14 +496,12 @@ def run():
     # else:
     # 	[centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag] = read_prevalence_abundance_table(input_table, config.beta)
     config.centroid_prev_abund = centroid_prev_abund
-    
-    # set the path for ppanini table out
-    ppanini_output_file_path = config.temp_folder+'/'+config.basename+'_centroid_prev_abund.txt' 
+   
     # add Go terms to the table
     if not config.uniref2go == '':
         if config.verbose =='DEBUG':
             print("Mapping UniRef90 to GO terms!")
-        utilities.uniref2go(centroid_prev_abund_file_path, uniref_go_path = config.uniref2go, output = ppanini_output_file_path)
+        utilities.uniref2go(config.centroid_prev_abund, uniref_go_path = config.uniref2go)
     else:
         if config.verbose =='DEBUG':
             print("Mapping UniRef90 to GO terms!")
@@ -511,22 +509,22 @@ def run():
         resource_path = '/'.join(('data', 'map_uniref90_infogo1000.txt.gz'))
         template = pkg_resources.resource_filename(resource_package, resource_path)
         print (template)
-        utilities.uniref2go(centroid_prev_abund, uniref_go_path = template, output = ppanini_output_file_path)
-    #
-    #centroid_prev_abund.to_csv(centroid_prev_abund_file_path, sep='\t')
-def  prioritize_centroids():
-    if config.verbose =='DEBUG':
-    	print "Prioritize gene families ..."
+        utilities.uniref2go(config.centroid_prev_abund, uniref_go_path = template)
     
-    imp_centroids = get_important_centroids()
-    
-    if config.verbose =='DEBUG':
-    	print "DONE"
-
 def _main():
-   read_parameters()
-   run()
-   prioritize_centroids()	
+    read_parameters()
+    run()
     
+    if config.verbose =='DEBUG':
+        print "Prioritize gene families ..."
+    imp_centroids = get_important_centroids()
+    if config.verbose =='DEBUG':
+        print "DONE"	
+    
+    # set the path for ppanini table out
+    ppanini_output_file_path = config.temp_dir+'/'+config.basename+'_table.txt' 
+    # Write PPANINI output table
+    imp_centroids.to_csv(ppanini_output_file_path, sep='\t')
+
 if __name__ == '__main__':
 	_main()

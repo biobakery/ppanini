@@ -1280,39 +1280,22 @@ def load_polymap ( path, start=0, skip=None, allowed_keys=None, allowed_values=N
                         polymap.setdefault( key, {} )[value] = 1
     return polymap
 
-def uniref2go(ppanini_table, uniref_go_path, output ):
+def uniref2go(ppanini_table, uniref_go_path ):
     
     # Load mapping UniRef90--Go term dictionary
     go1000_uniref90_dic = load_polymap_dic ( uniref_go_path )
-    #ppanini_output = name_temp_file('ppanini_table2.txt')
-    #print (ppanini_output)
     
     # add the GO terms to the end of each line (last column) of the ppanini_table
-    f1=open(output, 'w')
-    for line in ppanini_table.iterrows():
-        print (line['GO'])
-        gene_familiy = line[0]
-        #if gene_familiy:
-            #line = line.rstrip()
-        line[6] = go1000_uniref90_dic.get(gene_familiy, "")
-            #print (go_term)
-            #line ['Go+go_term +"\n")
-        print (line)
-        f1.write(line)
-    #done
-    
+    ppanini_table['GO'] = ppanini_table.index.to_series().apply(go1000_uniref90_dic.get)
+        
 def check_cmd (cmd):
-    # check if USEARCH or VSERACH is installed
-    cmd = "where" if platform.system() == "Windows" else "which"
+    # check if cmd is installed
+    cmd_wh = "where" if platform.system() == "Windows" else "which"
     try: 
-        subprocess.call([cmd, "usearch"])
-        config.usearch = True
+        subprocess.call([cmd_wh, cmd])
+        return True
     except:
-        try:
-            subprocess.call([cmd, "vsearch"]) 
-            config.usearch = True
-        except: 
-            print ("No executable usearch or vsearch! Please install the one you want to use! ")
+        print ("No executable %s! Please install it! ", cmd)
           
         
         
