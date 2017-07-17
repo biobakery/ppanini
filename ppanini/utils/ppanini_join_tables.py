@@ -45,6 +45,8 @@ def join_gene_tables(gene_tables,output,verbose=None, mapper= None, scale = None
     samples=[]
     file_basenames=[]
     index=0
+    find_count = 0
+    miss_count = 0
     for gene_table in gene_tables:
         
         if verbose:
@@ -84,17 +86,20 @@ def join_gene_tables(gene_tables,output,verbose=None, mapper= None, scale = None
                     # no scale, use the raw counts
                     data_points = [data[6]]
                 else:system.exit("scale is not valid!")
-                
+                print (data[1]+'_'+data[0])
                 # bind sample name and gene id to use as gene name
-                gene = data[1] +'_'+data[0] # data[1].split("_")[0]+'_'+data[0]
-                #gene = gene.replace(" ","")
+                gene = data[1]+'_'+data[0].split("_")[1]
+                
                 # add the gene abundance to its cluster and use its cluster name
                 if mapper and gene in mapper:
                     gene = mapper[gene].keys()[0]
-                    #print gene ,data[1], data[0]
+                    print ("mapping cluster found for:", gene )
+                    find_count += 1
+
                 else:
                     print ("No mapping cluster found for:", gene )
-
+                    miss_count += 1
+                    continue
             except IndexError:
                 gene=""
 
@@ -142,6 +147,7 @@ def join_gene_tables(gene_tables,output,verbose=None, mapper= None, scale = None
             current_data=current_data + GENE_TABLE_DELIMITER.join(["0"]*fill) + GENE_TABLE_DELIMITER
         file_handle.write(gene+GENE_TABLE_DELIMITER+current_data.rstrip(GENE_TABLE_DELIMITER)+"\n")
     
+    print "Matched genes to clusters : ", find_count, " Unmatched genes: ", miss_count
     file_handle.close()
 
 def get_args():

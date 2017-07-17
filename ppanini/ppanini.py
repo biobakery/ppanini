@@ -31,53 +31,8 @@ except ImportError as e:
 
 logger = logging.getLogger(__name__)
 
-#beta = 0.5
-
 numpy.seterr(divide='ignore', invalid='ignore')
 
-# Multi-threading section
-def multi_pMethod(args):
-    """
-    Runs the pMethod function and returns the results plus the id of the node
-    """
-    
-    id, function, val, values = args
-    percentile_score = scipy.stats.percentileofscore(val, values)
-
-    return id, percentile_score
-
-def multiprocessing_function(function, val, preve_abun_mattrix):
-    """
-    Return the results from applying the data to the  function
-    """
-    function = scipy.stats.percentileofscore
-    def _multi_pMethod_args(function, val, values, ids_to_process):
-        for id in ids_to_process:
-            yield [id, function, val ,preve_abun_mattrix[id] ]
-    
-    if config.nprocesses > 1:
-        import multiprocessing
-        pool = multiprocessing.Pool(config.nprocesses)
-        
-        ids_to_process=[]
-        result = [0] * len(values)
-        for id in xrange(len(current_level_tests)):
-            ids_to_process.append(id)
-        
-        
-        results_by_id = pool.map(multi_pMethod, _multi_pMethod_args(function, val, values, ids_to_process))
-        pool.close()
-        pool.join()
-       
-        # order the results by id and apply results to nodes
-        for id, percentil_score in results_by_id:
-            result[id]=percentil_score
-    else:
-        result=[]
-        for i in xrange(len(preve_abun_mattrix)):
-            result.append(percentile(val, values))
-
-    return result
 
 def read_gene_table(config=config):
     '''Returns the different elements from the gene table
@@ -139,38 +94,6 @@ def read_gene_table(config=config):
     
     return [uniref_dm, gis_dm, metadata]
 
-def get_centroids_fromUCLUST(genes, config=config):
-	'''Returns the clusters dictionary
-
-	Input: genes = [List of genes that are unannotated with UniRef]
-		   
-	Output: cluster_dict = {CENTROIDS: [list of genes], ...}'''
-
-	gene_centroid_clusters_file_path = config.uclust_file #Filename of the centroids UC file
-	
-	logger.debug('get_centroids_fromUCLUST: '+gene_centroid_clusters_file_path)
-
-	cluster_dict = {}
-	genes_clustered = []
-	foo = open(gene_centroid_clusters_file_path)
-
-	for line in foo:
-		if line.startswith('H'):
-			split_line = [re.sub('[\r\t\n]','', i) for i in line.split('\t')[-2:]]
-			if sum([1 for i in split_line if i in genes]):
-				try:
-					cluster_dict[split_line[1]] += [split_line[0]]
-					genes_clustered += [split_line[0]]
-				except:
-					cluster_dict[split_line[1]] = [split_line[0], split_line[1]]
-					genes_clustered += [split_line[0], split_line[1]]
-
-	for i in genes:
-		if not i in genes_clustered: #For all genes not in the clustering file.
-			cluster_dict[i] = [i]
-	#pdb.set_trace()
-	return cluster_dict
-
 def summerize_centroids(uniref_dm, gi_dm, config=config):
     '''Returns the dict of all centroids containing clusters of gene IDs
     
@@ -209,53 +132,6 @@ def summerize_centroids(uniref_dm, gi_dm, config=config):
     	gc_dm[centroid] = uniref_dm[centroid]
     print ("Number of centroids: %d"%(len(gc_dm)))
     return gc_dm
-
-def get_clusters(config=config): #ONLY FOR THE UNIREF UNANNOTATED
-    '''Returns the dict of unannotated gene centroids containing clusters of genes at 90% similarity
-    
-    Output: centroid_gis = {gene_centroid: [List of genes in the cluster]}'''
-    
-    logger.debug('get_clusters')
-    
-    allgenes_file_path = config.gene_catalog #path to all genes catalog
-    gene_centroids_file_path = config.temp_folder+'/'+config.basename+'_centroids.fasta'
-    gene_centroid_clusters_file_path = config.temp_folder+'/'+config.basename+'_clusters.uc'
-    
-    #default search method: USEARCH
-    
-    # check if USEARCH or VSERACH is installed
-    cmd = "where" if platform.system() == "Windows" else "which"
-    try: 
-        subprocess.call([cmd, "usearch"])
-        config.usearch = True
-    except:
-        try:
-            subprocess.call([cmd, "vsearch"]) 
-            config.usearch = True
-        except: 
-            print "No executable usearch or vsearch! Please install the one you want to use! "
-    
-    if config.usearch:
-    	clust_method = config.usearch
-    	annotate_genes.run_uclust(config.usearch, \
-    							  allgenes_file_path, \
-    							  gene_centroids_file_path, \
-    							  gene_centroid_clusters_file_path, \
-    							  0.9,\
-    							  config.nprocesses)
-    elif config.vsearch:
-    	annotate_genes.run_vclust(config.vsearch, \
-    							  allgenes_file_path, \
-    							  gene_centroids_file_path, \
-    							  gene_centroid_clusters_file_path, \
-    							  0.9,\
-    							  config.nprocesses)
-    else:
-    	raise Exception("At least one of --usearch or --vsearch  with a path should be provided when gene-catalog is used!!!")
-    
-    centroid_gis = annotate_genes.get_clusters_dict(gene_centroid_clusters_file_path)
-    
-    return centroid_gis
 
 
 def normalize_centroids_table(all_centroids, metadata):
@@ -554,30 +430,17 @@ def read_parameters():
     args = parser.parse_args()
     config.beta = args.beta 
     config.temp_dir = args.output_folder
-    #config.nprocesses = args.threads   
     config.basename = args.basename
     config.input_table = args.input_table
-    #config.uclust_file = args.uc
-    #config.gene_catalog = args.gene_catalog 
     config.bypass_clustering = True
-    #config.vsearch = args.vsearch
-    #config.usearch = args.usearch
     config.uniref2go = args.uniref2go
     
 def run():
-    if config.uclust_file == '' and config.gene_catalog == '' and not config.bypass_clustering:
-    	sys.exit("At least one of --uc or --gene-catalog should be provided! Or use the flag --bypass-clustering to skip this step")
-    if config.gene_catalog != '':
-        try:
-            subprocess.call(['usearch', "--version"])
-            print "The program will use USEARCH if you want to use VSEARCH then provide it with --vsearch"
-        except OSError as e:
-            try:
-                subprocess.call(['vsearch', "--version"])
-                print "The program will use VSEARCH if you want to use USEARCH then provide it with --usearch"
-            except:
-                sys.exit("At least one of --usearch or --vsearch  with a path should be provided when gene-catalog is used!!!")
-
+ 
+    # check for sofwares here
+    
+    #
+    
     if config.basename=='':
         #config.basename = basename(config.input_table).split('.')[0]
         #print config.basename
@@ -605,14 +468,14 @@ def run():
     	print "DONE"
     
     if config.verbose =='DEBUG':
-    	print "Summerize gene families table..."
+    	print "Summerize gene families table ..."
     all_centroids = summerize_centroids(uniref_dm, gi_dm)
     
     if config.verbose =='DEBUG':
     	print "DONE"
     
     if config.verbose =='DEBUG':
-    	print "Normalize gene families table..."
+    	print "Normalize gene families table ..."
     centroids_data_table = normalize_centroids_table(all_centroids, metadata)
     #config.centroids_list = centroids_list
     
@@ -620,12 +483,10 @@ def run():
     	print "DONE"
     
     if config.verbose =='DEBUG':
-    	print "Getting prevalence abundance..."
+    	print "Getting prevalence abundance ..."
     centroid_prev_abund = get_prevalence_abundance(centroids_data_table, \
     												metadata = metadata)
     
-    centroid_prev_abund_file_path = config.temp_folder+'/'+config.basename+'_centroid_prev_abund.txt'
-    centroid_prev_abund.to_csv(centroid_prev_abund_file_path, sep='\t')
     if config.verbose =='DEBUG':
     	print "DONE"
         
@@ -636,11 +497,13 @@ def run():
     # 	[centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag] = read_prevalence_abundance_table(input_table, config.beta)
     config.centroid_prev_abund = centroid_prev_abund
     
+    # set the path for ppanini table out
+    ppanini_output_file_path = config.temp_folder+'/'+config.basename+'_centroid_prev_abund.txt' 
     # add Go terms to the table
     if not config.uniref2go == '':
         if config.verbose =='DEBUG':
             print("Mapping UniRef90 to GO terms!")
-        utilities.uniref2go(centroid_prev_abund_file_path, uniref_go_path = config.uniref2go)
+        utilities.uniref2go(centroid_prev_abund_file_path, uniref_go_path = config.uniref2go, output = ppanini_output_file_path)
     else:
         if config.verbose =='DEBUG':
             print("Mapping UniRef90 to GO terms!")
@@ -648,25 +511,12 @@ def run():
         resource_path = '/'.join(('data', 'map_uniref90_infogo1000.txt.gz'))
         template = pkg_resources.resource_filename(resource_package, resource_path)
         print (template)
-        utilities.uniref2go(config.centroid_prev_abund, uniref_go_path = template)
-    
-    ''' # add Go terms to the table
-     if not config.uniref2go == '':
-         if config.verbose =='DEBUG':
-             print("Mapping UniRef90 to COG terms!")
-         attach_GO.uniref2go(config.centroid_prev_abund, uniref_cog_path = config.uniref2go)
-     else:
-         if config.verbose =='DEBUG':
-             print("Mapping UniRef90 to COG terms!")
-         resource_package = __name__  # Could be any module/package name
-         resource_path = '/'.join(('data', 'map_uniref90_cog.txt.gz'))
-         template = pkg_resources.resource_filename(resource_package, resource_path)
-         print (template)
-         attach_GO.uniref2go(config.centroid_prev_abund, uniref_cog_path = template)'''
-
+        utilities.uniref2go(centroid_prev_abund, uniref_go_path = template, output = ppanini_output_file_path)
+    #
+    #centroid_prev_abund.to_csv(centroid_prev_abund_file_path, sep='\t')
 def  prioritize_centroids():
     if config.verbose =='DEBUG':
-    	print "Prioritize gene families..."
+    	print "Prioritize gene families ..."
     
     imp_centroids = get_important_centroids()
     

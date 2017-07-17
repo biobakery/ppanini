@@ -1213,14 +1213,13 @@ def rev_load_polymap ( path_in= '' , path_out ='' , start=0, skip=None, allowed_
     size_warn( path_in )
     for line in gzip_bzip2_biom_open_readlines( path_in ):
         row = line.split("\t")
-        key = row[start].replace(" ","")
+        key = row[start]
         # if the row input format is like: A\t1;2
         if sep == ';':
         	row = row[1].split(";")
-
-        #print(genes)
         if allowed_keys is None or key in allowed_keys:
             for i, value in enumerate( row ):
+                #value = value.replace(".","_")
                 if i != start and (skip is None or i not in skip):
                     if allowed_values is None or value in allowed_values:
                         polymap_all.setdefault( value, {} )[key] = 1 #polymap.setdefault( key, {} )[value] = 1
@@ -1281,28 +1280,40 @@ def load_polymap ( path, start=0, skip=None, allowed_keys=None, allowed_values=N
                         polymap.setdefault( key, {} )[value] = 1
     return polymap
 
-def uniref2go(ppanini_table_path, uniref_go_path ):
-
-    go1000_uniref90_dic = load_polymap_dic ( uniref_go_path )
-    ppanini_output = name_temp_file('ppanini_table2.txt')
-    print (ppanini_output)
-    f1=open(ppanini_output, 'w')
-    with open( ppanini_table_path) as fh:
-        for line in fh:
-            gene_familiy = line.split("\t")[0]
-            
-            if gene_familiy:
-                #line = line.rstrip()
-                go_term = go1000_uniref90_dic.get(gene_familiy, "")
-                line += go_term +"\n"
-            f1.write(line)
+def uniref2go(ppanini_table, uniref_go_path, output ):
     
-
-    '''for index, row in ppanini_table.iterrows():
-        ppanini_table.loc[index,'GO'] = go1000_uniref90_dic.get(index)
-        '''
-        
-        
+    # Load mapping UniRef90--Go term dictionary
+    go1000_uniref90_dic = load_polymap_dic ( uniref_go_path )
+    #ppanini_output = name_temp_file('ppanini_table2.txt')
+    #print (ppanini_output)
+    
+    # add the GO terms to the end of each line (last column) of the ppanini_table
+    f1=open(output, 'w')
+    for line in ppanini_table.iterrows():
+        print (line['GO'])
+        gene_familiy = line[0]
+        #if gene_familiy:
+            #line = line.rstrip()
+        line[6] = go1000_uniref90_dic.get(gene_familiy, "")
+            #print (go_term)
+            #line ['Go+go_term +"\n")
+        print (line)
+        f1.write(line)
+    #done
+    
+def check_cmd (cmd):
+    # check if USEARCH or VSERACH is installed
+    cmd = "where" if platform.system() == "Windows" else "which"
+    try: 
+        subprocess.call([cmd, "usearch"])
+        config.usearch = True
+    except:
+        try:
+            subprocess.call([cmd, "vsearch"]) 
+            config.usearch = True
+        except: 
+            print ("No executable usearch or vsearch! Please install the one you want to use! ")
+          
         
         
         
