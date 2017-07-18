@@ -176,7 +176,7 @@ def get_prevalence_abundance(centroids_data_matrix, metadata):
     		metadata = [metadata strings]; Rows with # as first character in table
     		beta = parameter value 
     
-    Output: centroid_prev_abund = {centroid: {'mean_abundance': mean abundance, 'prevalence': prevalence}}
+    Output: summary_table = {centroid: {'mean_abundance': mean abundance, 'prevalence': prevalence}}
     		all_prevalence = [List of all observed gene centroid prevalence values (>0) across samples]
     		all_abund = [List of all calculated gene centroid abundance across samples]
     		flag = True (if NICHE PRESENT) or False(if NICHE ABSENT)'''
@@ -196,14 +196,14 @@ def get_prevalence_abundance(centroids_data_matrix, metadata):
     if niche_line and len(set_niches) > 1  :
         print ("Niches have been provided in abundance table are:", set_niches)
         niche_flag = True
-        centroid_prev_abund = get_niche_prevalence_abundance (centroids_data_matrix, niche_line)
+        summary_table = get_niche_prevalence_abundance (centroids_data_matrix, niche_line)
     
     # use this if niche is NOT specified as a row in the abundance table
     else:
     	niche_flag = False
-        centroid_prev_abund = get_no_niche_prevalence_abundance(centroids_data_matrix)
+        summary_table = get_no_niche_prevalence_abundance(centroids_data_matrix)
     config.niche_flag = niche_flag
-    return centroid_prev_abund 
+    return summary_table 
 
 def get_no_niche_prevalence_abundance(centroids_data_matrix):
     '''Returns the dataframe of centroids with their prevalence, abundance, percentiles, and PPANINI score
@@ -213,29 +213,29 @@ def get_no_niche_prevalence_abundance(centroids_data_matrix):
             metadata = [metadata strings]; Rows with # as first character in table
             beta = parameter value 
     
-    Output: centroid_prev_abund = {centroid: {'mean_abundance': mean abundance, 'prevalence': prevalence}}'''
+    Output: summary_table = {centroid: {'mean_abundance': mean abundance, 'prevalence': prevalence}}'''
             
     
     logger.debug('get_no_niche_prevalence_abundance')
 
     # cerate a data frame for one niche data
-    centroid_prev_abund = pd.DataFrame(index=centroids_data_matrix.index, columns=ppanini_table_row._fields)
+    summary_table = pd.DataFrame(index=centroids_data_matrix.index, columns=ppanini_table_row._fields)
        
     # Calculate mean abundance of non zero values
     df = centroids_data_matrix.replace(0, numpy.NaN)
-    centroid_prev_abund['mean_abundance'] = df.mean(axis = 1)
+    summary_table['mean_abundance'] = df.mean(axis = 1)
 
         # Alpha prevalence 
-    centroid_prev_abund['alpha_prevalence'] = df.count(axis = 1)/df.shape[1]
+    summary_table['alpha_prevalence'] = df.count(axis = 1)/df.shape[1]
     
     # Calculate percentile for prevalence and abundance
-    centroid_prev_abund['prevalence_percentile'] = scipy.stats.rankdata(centroid_prev_abund['alpha_prevalence'], method='average')/centroid_prev_abund.shape[0] * 100.0
-    centroid_prev_abund['abund_percentile'] = scipy.stats.rankdata(centroid_prev_abund['mean_abundance'], method='average')/centroid_prev_abund.shape[0]* 100.0
+    summary_table['prevalence_percentile'] = scipy.stats.rankdata(summary_table['alpha_prevalence'], method='average')/summary_table.shape[0] * 100.0
+    summary_table['abund_percentile'] = scipy.stats.rankdata(summary_table['mean_abundance'], method='average')/summary_table.shape[0]* 100.0
     
     # Calculate PPANINI score
-    centroid_prev_abund['ppanini_score'] = 1/((1/(config.beta*(centroid_prev_abund['prevalence_percentile'])))+(1/((1-config.beta)*(centroid_prev_abund['abund_percentile']))))   
+    summary_table['ppanini_score'] = 1/((1/(config.beta*(summary_table['prevalence_percentile'])))+(1/((1-config.beta)*(summary_table['abund_percentile']))))   
     
-    return centroid_prev_abund 
+    return summary_table 
 
 def get_niche_prevalence_abundance(centroids_data_matrix, niche_line):
     
@@ -258,14 +258,14 @@ def get_niche_prevalence_abundance(centroids_data_matrix, niche_line):
         ppanini_columns.append('ppanini_score_'+niche)
         config.ppanini_niche_score_labels.append('ppanini_score_'+niche)
         
-    centroid_prev_abund = pd.DataFrame(index=centroids_data_matrix.index, columns=ppanini_columns)
+    summary_table = pd.DataFrame(index=centroids_data_matrix.index, columns=ppanini_columns)
     # Calculate mean abundance of non zero values
     #print centroids_data_matrix
     df = centroids_data_matrix.replace(0, numpy.NaN)
-    centroid_prev_abund['mean_abundance'] = df.mean(axis = 0)
+    summary_table['mean_abundance'] = df.mean(axis = 0)
    
     # Alpha prevalence 
-    centroid_prev_abund['alpha_prevalence'] = centroids_data_matrix.astype(bool).sum(axis=0)/centroids_data_matrix.shape[1]
+    summary_table['alpha_prevalence'] = centroids_data_matrix.astype(bool).sum(axis=0)/centroids_data_matrix.shape[1]
     
     # get the index of columns for each niche
     niches = {}
@@ -279,27 +279,27 @@ def get_niche_prevalence_abundance(centroids_data_matrix, niche_line):
     niches_label = niches.keys()
         
     # Calculate alpha prevalence and abundance for each niche
-    centroid_prev_abund['mean_abundance'] = 0
+    summary_table['mean_abundance'] = 0
     for niche in config.niches:
         #print niches[niche], niche, centroids_data_matrix
-        centroid_prev_abund['alpha_prevalence_'+niche] = centroids_data_matrix.loc[:,niches[niche]].astype(bool).sum(axis=1)/len(niches[niche])
-        centroid_prev_abund['prevalence_percentile_'+niche] = scipy.stats.rankdata(centroid_prev_abund['alpha_prevalence_'+niche], method='average')/len(niches[niche]) * 100.0
+        summary_table['alpha_prevalence_'+niche] = centroids_data_matrix.loc[:,niches[niche]].astype(bool).sum(axis=1)/len(niches[niche])
+        summary_table['prevalence_percentile_'+niche] = scipy.stats.rankdata(summary_table['alpha_prevalence_'+niche], method='average')/len(niches[niche]) * 100.0
         
-        centroid_prev_abund['alpha_abundance_'+niche] = df.loc[:, niches[niche]].mean(axis=1)
-        centroid_prev_abund['abundance_percentile_'+niche] = scipy.stats.rankdata(centroid_prev_abund['alpha_prevalence_'+niche], method='average')/len(niches[niche]) * 100.0
+        summary_table['alpha_abundance_'+niche] = df.loc[:, niches[niche]].mean(axis=1)
+        summary_table['abundance_percentile_'+niche] = scipy.stats.rankdata(summary_table['alpha_prevalence_'+niche], method='average')/len(niches[niche]) * 100.0
 
     # update mean abundance
-    centroid_prev_abund.loc['mean_abundance'] = centroid_prev_abund.loc[:,abundance_cols].max(axis=1) 
+    summary_table.loc['mean_abundance'] = summary_table.loc[:,abundance_cols].max(axis=1) 
     
-    centroid_prev_abund['abund_percentile'] = scipy.stats.rankdata(centroid_prev_abund['mean_abundance'], method='average')/centroid_prev_abund.shape[0]* 100.0
+    summary_table['abund_percentile'] = scipy.stats.rankdata(summary_table['mean_abundance'], method='average')/summary_table.shape[0]* 100.0
 
     
     # Calculate PPANINI score of reach niche
     
     for niche in config.niches:
-        centroid_prev_abund['ppanini_score_'+niche] = 1/((1/(config.beta*(centroid_prev_abund['prevalence_percentile_'+niche])))+(1/((1-config.beta)*(centroid_prev_abund['abund_percentile']))))   
+        summary_table['ppanini_score_'+niche] = 1/((1/(config.beta*(summary_table['prevalence_percentile_'+niche])))+(1/((1-config.beta)*(summary_table['abund_percentile']))))   
         
-    return centroid_prev_abund 
+    return summary_table 
 
 def impotrance_measure(scores,q=.1, n = 10):
     max_rank = len(scores)
@@ -316,49 +316,49 @@ def get_important_centroids(config=config):
     
     logger.debug('get_important_centroids')
     beta = config.beta
-    centroid_prev_abund = config.centroid_prev_abund
-    imp_centroid_prev_abund_file_path = config.basename+'_ppanini_table.txt'
+    summary_table = config.summary_table
+    imp_summary_table_file_path = config.basename+'_ppanini_table.txt'
     
     tshld_prev = config.tshld_prev
     tshld_abund = config.tshld_abund
     ppanini_score = -1# 1/((1/(beta*tshld_prev)) + (1/((1-beta)*tshld_abund)))
-    #centroid_prev_abund["pvalue"] = impotrance_measure(centroid_prev_abund['ppanini_score'])
+    #summary_table["pvalue"] = impotrance_measure(summary_table['ppanini_score'])
     #Get important centroids based on their PPANINI score
     if config.niche_flag:
-        imp_centroids = centroid_prev_abund[centroid_prev_abund.loc[:,config.ppanini_niche_score_labels].max(axis=1) >= ppanini_score]
+        imp_centroids = summary_table[summary_table.loc[:,config.ppanini_niche_score_labels].max(axis=1) >= ppanini_score]
         try:
             # for  pandas >= 0.17.0
             imp_centroids = imp_centroids.sort_values(by=config.ppanini_niche_score_labels, ascending=False)
         except:
             imp_centroids = imp_centroids.sort(ppanini_niche_score_labels, ascending=False)
     else:
-        imp_centroids = centroid_prev_abund[centroid_prev_abund['ppanini_score'] >= ppanini_score]
+        imp_centroids = summary_table[summary_table['ppanini_score'] >= ppanini_score]
         try:
             # for  pandas >= 0.17.0
             imp_centroids = imp_centroids.sort_values(by='ppanini_score', ascending=False)
         except:
             imp_centroids = imp_centroids.sort('ppanini_score', ascending=False)
         
-    #imp_centroids.to_csv( config.temp_dir + '/' + imp_centroid_prev_abund_file_path, sep='\t')
+    #imp_centroids.to_csv( config.temp_dir + '/' + imp_summary_table_file_path, sep='\t')
     return imp_centroids
 
-def write_prev_abund_matrix(centroid_prev_abund, out_file):
+def write_prev_abund_matrix(summary_table, out_file):
     '''Writes the centroids prevalence and abundance information in text file
     
-    Input: centroid_prev_abund = {centroids: {'mean_abundance': mean abundance, ...}}
+    Input: summary_table = {centroids: {'mean_abundance': mean abundance, ...}}
     	   out_file = output_filename
     
     Output: Writes the centroids dictionary to the output_filename'''
     
     logger.debug('write_prev_abund_matrix')
     keys = []
-    for i in centroid_prev_abund:
-    	keys = centroid_prev_abund[i]._asdict().keys()
+    for i in summary_table:
+    	keys = summary_table[i]._asdict().keys()
     	break
     with open(out_file,'w') as foo:
     	foo.writelines(['#Centroids\t' + str.join('\t', list(keys)) + '\n'])
-    	for centroid in centroid_prev_abund:
-    		foo.writelines([str.join('\t', [centroid] + [str(centroid_prev_abund[centroid][key]) for key in range(len(keys))]) + '\n'])
+    	for centroid in summary_table:
+    		foo.writelines([str.join('\t', [centroid] + [str(summary_table[centroid][key]) for key in range(len(keys))]) + '\n'])
 
 def read_prevalence_abundance_table(input_table):
 	'''Need to redo this'''
@@ -368,26 +368,26 @@ def read_prevalence_abundance_table(input_table):
 	alphas_i = 0
 	baseline = 0
 	niche_flag = 0
-	centroid_prev_abund = {}
+	summary_table = {}
 	all_prevalence = []
 	all_mean_abund = []
 	for line in foo:
 		if baseline:
 			split_line = [re.sub('[\r\t\n]','',i) for i in line.split('\t')]
-			centroid_prev_abund[split_line[0]] = {'mean_abundance': float(split_line[abund_i]),
+			summary_table[split_line[0]] = {'mean_abundance': float(split_line[abund_i]),
 											  	  'beta_prevalence': float(split_line[beta_i])}
 			if niche_flag:
 				for i in alphas_i:
 					niche_i = i[1].split('_')[-1]
 					try:
-						centroid_prev_abund[split_line[0]]['alpha_prevalence'][niche_i] =float(split_line[i[0]])
+						summary_table[split_line[0]]['alpha_prevalence'][niche_i] =float(split_line[i[0]])
 					except:
-						centroid_prev_abund[split_line[0]]['alpha_prevalence']= {niche_i:float(split_line[i[0]])}
-					all_prevalence[niche_i] += [centroid_prev_abund[split_line[0]]['alpha_prevalence'][niche_i]]
+						summary_table[split_line[0]]['alpha_prevalence']= {niche_i:float(split_line[i[0]])}
+					all_prevalence[niche_i] += [summary_table[split_line[0]]['alpha_prevalence'][niche_i]]
 			else:
-				centroid_prev_abund[split_line[0]][alphas_i[1]] =float(split_line[alphas_i[0]])
-				all_prevalence += [centroid_prev_abund[split_line[0]][alphas_i[1]]]
-			all_mean_abund += [centroid_prev_abund[split_line[0]]['mean_abundance']]
+				summary_table[split_line[0]][alphas_i[1]] =float(split_line[alphas_i[0]])
+				all_prevalence += [summary_table[split_line[0]][alphas_i[1]]]
+			all_mean_abund += [summary_table[split_line[0]]['mean_abundance']]
 		else:
 			split_line = line.split('\t')			
 			split_line = [re.sub('[\r\t\n]','',i) for i in line.split('\t')]
@@ -406,7 +406,7 @@ def read_prevalence_abundance_table(input_table):
 			else:
 				alphas_i = alphas_i[0]
 			baseline +=1
-	return [centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag]
+	return [summary_table, all_prevalence, all_mean_abund, niche_flag]
 
 def read_parameters():
     parser = argparse.ArgumentParser()
@@ -484,7 +484,7 @@ def run():
     
     if config.verbose =='DEBUG':
     	print "Getting prevalence abundance ..."
-    centroid_prev_abund = get_prevalence_abundance(centroids_data_table, \
+    summary_table = get_prevalence_abundance(centroids_data_table, \
     												metadata = metadata)
     
     if config.verbose =='DEBUG':
@@ -494,14 +494,14 @@ def run():
         metagenomic_table  = utilities.read_parsed("/Users/rah/Documents/PPANINI/ppanini_old_files/PARSED_BLAST_RESULTS/AN_mg.m8")
         metagenomic_table.to_csv(config.temp_dir + '/' +config.basename+'_metagenomic_table.txt', sep='\t')
     # else:
-    # 	[centroid_prev_abund, all_prevalence, all_mean_abund, niche_flag] = read_prevalence_abundance_table(input_table, config.beta)
-    config.centroid_prev_abund = centroid_prev_abund
+    # 	[summary_table, all_prevalence, all_mean_abund, niche_flag] = read_prevalence_abundance_table(input_table, config.beta)
+    config.summary_table = summary_table
    
     # add Go terms to the table
     if not config.uniref2go == '':
         if config.verbose =='DEBUG':
             print("Mapping UniRef90 to GO terms!")
-        utilities.uniref2go(config.centroid_prev_abund, uniref_go_path = config.uniref2go)
+        utilities.uniref2go(config.summary_table, uniref_go_path = config.uniref2go)
     else:
         if config.verbose =='DEBUG':
             print("Mapping UniRef90 to GO terms!")
@@ -509,7 +509,7 @@ def run():
         resource_path = '/'.join(('data', 'map_uniref90_infogo1000.txt.gz'))
         template = pkg_resources.resource_filename(resource_package, resource_path)
         print (template)
-        utilities.uniref2go(config.centroid_prev_abund, uniref_go_path = template)
+        utilities.uniref2go(config.summary_table, uniref_go_path = template)
     
 def _main():
     read_parameters()

@@ -71,18 +71,18 @@ setuptools.setup(
     entry_points={
         'console_scripts': [
             'ppanini = ppanini.ppanini:_main',
-            #'ppanini_preprocess = ppanini.utils.preppanini:main',
-            'ppanini_gene_caller = ppanini.utils.ppanini_gene_caller:main',
+            #'ppanini_preprocess = ppanini.tools.preppanini:main',
+            'ppanini_gene_caller = ppanini.tools.ppanini_gene_caller:main',
             'ppanini_test = ppanini.tests.ppanini_test:main',
-            'ppanini_scatterplot = ppanini.utils.ppanini_scatterplot:main',
-            'ppanini_barplot = ppanini.utils.ppanini_barplot:main',
-            'ppanini_rocplot = ppanini.utils.ppanini_rocplot:main',
-            'ppanini_rev_uniref_mapper = ppanini.utils.attach_GO:rev_load_polymap',
-            'ppanini_join_tables = ppanini.utils.ppanini_join_tables:main',
-            'ppanini_rename_contigs = ppanini.utils.ppanini_rename_contigs:main',
-            'ppanini_infer_gene = ppanini.utils.ppanini_infer_gene:main',
-            'ppanini_cluster2genes = ppanini.utils.ppanini_cluster2genes:main',
-            'ppanini_press = ppanini.utils.ppanini_press:main'           
+            'ppanini_scatterplot = ppanini.tools.ppanini_scatterplot:main',
+            'ppanini_barplot = ppanini.tools.ppanini_barplot:main',
+            'ppanini_rocplot = ppanini.tools.ppanini_rocplot:main',
+            'ppanini_rev_uniref_mapper = ppanini.tools.attach_GO:rev_load_polymap',
+            'ppanini_join_tables = ppanini.tools.ppanini_join_tables:main',
+            'ppanini_rename_contigs = ppanini.tools.ppanini_rename_contigs:main',
+            'ppanini_infer_gene = ppanini.tools.ppanini_infer_gene:main',
+            'ppanini_cluster2genes = ppanini.tools.ppanini_cluster2genes:main',
+            'ppanini_press = ppanini.tools.ppanini_press:main'           
         ]},
     test_suite= 'ppanini.tests.ppanini_test.get_unittests()',
     zip_safe = True

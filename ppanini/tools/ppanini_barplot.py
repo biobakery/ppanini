@@ -34,13 +34,13 @@ def get_args( ):
                          required = False, 
                          help="Gene abundance table", )
     parser.add_argument( "-i2", "--ppanini-output",
-                         dest = "ppanini_output",
-                         metavar = "<feature id>",
-                         help="PPANINI output table)", )
-    parser.add_argument( "-i", "--summary-table",
                          metavar = "<input table>",
-                         dest = "summary_table",
+                         dest = "ppanini_output",
                          required = False, 
+                         help="PPANINI output table", )
+    parser.add_argument( "--summary-table",
+                         dest = "summary_table",
+                         action="store_true",
                          help="Summary table", )
     parser.add_argument( "-o", "--output",
                          dest = "plot_output",
@@ -54,49 +54,87 @@ def load_summary_table(summary_table_file_path):
     except ImportError:
         sys.exit("Input Error First File!") 
     return df_in
-def summerize_gene_table(ppanini_input_file_path, ppanini_output_file_path, output_path = None ):
+
+def summerize_gene_table(ppanini_input, output_path = None ):
+    '''
+    Summarize gene tables based on only row names, 'GO' should be added to the beginning of UNirefs with Go term
+    '''
      
     try: 
-        df_in = pd.read_csv(str(ppanini_input_file_path), sep='\t', header=0, index_col =0)
-        df_out = pd.read_csv(str(ppanini_output_file_path), sep='\t', header=0, index_col =0)
+        df_in = pd.read_csv(str(ppanini_input), sep='\t', header=0, index_col =0)
     except ImportError:
         sys.exit("Input Error First File!") 
     
     # summary table for annotations to be used for stacke bar plot (samples * characterization type
     summary_table = pd.DataFrame(index = df_in.columns, columns=['Unannotated', 'UniRef', 'GO'], dtype=float)
     summary_table[:] = 0.0000
+
     #print summary_table
-    for sample in range(len(df_in.columns)):
-        
-        sum1 = sum(df_in[df_in.columns[sample]])
+    for sample in list(df_in.columns):
+        sum1 = sum(df_in[sample])
     
         # skip sample with all rows zero
         if sum1 == 0.00:
             continue
-        
-        for gene in range(len(df_in.index)):
-            # check if nan
-            if df_out.iat[gene,df_out.columns.get_loc('GO')] == df_out.iat[gene,df_out.columns.get_loc('GO')]:
-                #print (df_out.loc[gene,'GO_term'])
-                summary_table.iat[sample, 2] += df_in.iat[gene, sample]
-            elif df_in.index[gene].find('UniRef')==0  :
-                #print (df_out.loc[gene,'UniRef'])
-                summary_table.iat[sample,1] += df_in.iat[gene, sample]
-            else:
-                summary_table.iat[sample,0] += df_in.iat[gene, sample]
-        #print df
-        summary_table.iat[sample, 0] /= sum1 #* 100
-        summary_table.iat[sample, 1] /= sum1 #* 100
-        summary_table.iat[sample, 2] /= sum1 #* 100         
-    #print summary_table['Unannotated']
-    
-    #df = pd.DataFrame(summary_table, columns = summary_table.keys())#['Sample', 'EC', 'GO', 'UniRef', 'Unannotated', 'Unmaped'])
+        summary_table.loc[sample, 'GO'] = df_in.loc[df_in.index.str.startswith('GO'),sample].sum() /sum1 
+        summary_table.loc[sample, 'UniRef'] = df_in.loc[df_in.index.str.startswith('UniRef'), sample].sum() /sum1 
+        summary_table.loc[sample, 'Unannotated'] = df_in.loc[df_in.index.str.startswith('Cluster'), sample].sum()/sum1
+
     summary_table.sort_values(by=['Unannotated', 'UniRef', 'GO' ], ascending=[0, 0 , 0], inplace= True) #
+    
     #print summary_table
     if output_path == None:
         output_path = './ppanini_barplot'
     summary_table.to_csv(output_path+'.txt', sep='\t')
     return summary_table
+
+
+def summerize_gene_table(ppanini_input, ppanini_output, output_path = None ):
+     
+    try: 
+        df_in = pd.read_csv(str(ppanini_input), sep='\t', header=0, index_col =0)
+        df_out = pd.read_csv(str(ppanini_output), sep='\t', header=0, index_col =0)
+    except ImportError:
+        sys.exit("Input Error First File!") 
+    
+    # add GO to the names of gene families 
+    # that have a GO term in the PPANINI output file 
+    mapper = {}
+    
+    # check if the gene family has mapped to any GO term using PPANINI output file
+    # add category names in the beginning of gene families
+    for gene_family in df_in.index:
+        mapper[gene_family] = df_out.loc[gene_family, 'GO']
+        if mapper[gene_family] !=  mapper[gene_family]: # if mapper[gene_family] is nan then is not equal to itself :)
+            if gene_family.startswith('UniRef'):
+                mapper[gene_family] = 'UniRef'+gene_family
+            else:
+                mapper[gene_family] = 'Cluster'+gene_family
+        else:
+            mapper[gene_family] = 'GO' + gene_family
+    df_in.index = mapper.values()        
+    #print mapper #.to_series().apply(startswith,'GO')
+    summary_table = pd.DataFrame(index = df_in.columns, columns=['Unannotated', 'UniRef', 'GO'], dtype=float)
+    summary_table[:] = 0.0000
+    for sample in list(df_in.columns):
+        sum1 = sum(df_in[sample])
+    
+        # skip sample with all rows zero
+        if sum1 == 0.00:
+            continue
+        #print sum1, sample
+        summary_table.loc[sample, 'GO'] = df_in.loc[df_in.index.str.startswith('GO'),sample].sum() /sum1 
+        summary_table.loc[sample, 'UniRef'] = df_in.loc[df_in.index.str.startswith('UniRef'), sample].sum() /sum1 
+        summary_table.loc[sample, 'Unannotated'] = df_in.loc[df_in.index.str.startswith('Cluster'), sample].sum()/sum1
+
+    summary_table.sort_values(by=['Unannotated', 'UniRef', 'GO' ], ascending=[0, 0 , 0], inplace= True) #
+    
+    #print summary_table
+    if output_path == None:
+        output_path = './ppanini_barplot'
+    summary_table.to_csv(output_path+'.txt', sep='\t')
+    return summary_table
+
 def stack_barplot(df, output_path = None, axe = None, legend = True, legend_title = "Characterization:", title= None):
        
     # Create the general blog and the "subplots" i.e. the bars
