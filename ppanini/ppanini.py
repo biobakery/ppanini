@@ -20,10 +20,7 @@ import pkg_resources
 
 try:
     from . import utilities
-    from . import annotate_genes
     from . import config
-    from . import utils
-    from utils import attach_GO
 
 except ImportError as e:
     sys.exit("CRITICAL ERROR: Unable to find the PPANINI python package." +
