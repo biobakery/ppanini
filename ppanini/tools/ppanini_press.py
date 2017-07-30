@@ -19,7 +19,7 @@ def get_args ():
         "-i", "--genes-path",
         dest = 'gene', 
         required = True,
-        help="Prodigal outputs for all samples whichincludes gff and faa files",
+        help="Prodigal outputs for all samples which includes gff and faa files",
         )
     parser.add_argument( 
         "-u", "--uniref-db", 

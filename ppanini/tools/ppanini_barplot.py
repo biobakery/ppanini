@@ -40,7 +40,7 @@ def get_args( ):
                          help="PPANINI output table", )
     parser.add_argument( "--summary-table",
                          dest = "summary_table",
-                         action="store_true",
+                         #action="store_true",
                          help="Summary table", )
     parser.add_argument( "-o", "--output",
                          dest = "plot_output",
@@ -54,40 +54,6 @@ def load_summary_table(summary_table_file_path):
     except ImportError:
         sys.exit("Input Error First File!") 
     return df_in
-
-def summerize_gene_table(ppanini_input, output_path = None ):
-    '''
-    Summarize gene tables based on only row names, 'GO' should be added to the beginning of UNirefs with Go term
-    '''
-     
-    try: 
-        df_in = pd.read_csv(str(ppanini_input), sep='\t', header=0, index_col =0)
-    except ImportError:
-        sys.exit("Input Error First File!") 
-    
-    # summary table for annotations to be used for stacke bar plot (samples * characterization type
-    summary_table = pd.DataFrame(index = df_in.columns, columns=['Unannotated', 'UniRef', 'GO'], dtype=float)
-    summary_table[:] = 0.0000
-
-    #print summary_table
-    for sample in list(df_in.columns):
-        sum1 = sum(df_in[sample])
-    
-        # skip sample with all rows zero
-        if sum1 == 0.00:
-            continue
-        summary_table.loc[sample, 'GO'] = df_in.loc[df_in.index.str.startswith('GO'),sample].sum() /sum1 
-        summary_table.loc[sample, 'UniRef'] = df_in.loc[df_in.index.str.startswith('UniRef'), sample].sum() /sum1 
-        summary_table.loc[sample, 'Unannotated'] = df_in.loc[df_in.index.str.startswith('Cluster'), sample].sum()/sum1
-
-    summary_table.sort_values(by=['Unannotated', 'UniRef', 'GO' ], ascending=[0, 0 , 0], inplace= True) #
-    
-    #print summary_table
-    if output_path == None:
-        output_path = './ppanini_barplot'
-    summary_table.to_csv(output_path+'.txt', sep='\t')
-    return summary_table
-
 
 def summerize_gene_table(ppanini_input, ppanini_output, output_path = None ):
      
@@ -112,17 +78,16 @@ def summerize_gene_table(ppanini_input, ppanini_output, output_path = None ):
                 mapper[gene_family] = 'Cluster'+gene_family
         else:
             mapper[gene_family] = 'GO' + gene_family
+    # update gene family names       
     df_in.index = mapper.values()        
-    #print mapper #.to_series().apply(startswith,'GO')
+
     summary_table = pd.DataFrame(index = df_in.columns, columns=['Unannotated', 'UniRef', 'GO'], dtype=float)
     summary_table[:] = 0.0000
     for sample in list(df_in.columns):
         sum1 = sum(df_in[sample])
-    
         # skip sample with all rows zero
         if sum1 == 0.00:
             continue
-        #print sum1, sample
         summary_table.loc[sample, 'GO'] = df_in.loc[df_in.index.str.startswith('GO'),sample].sum() /sum1 
         summary_table.loc[sample, 'UniRef'] = df_in.loc[df_in.index.str.startswith('UniRef'), sample].sum() /sum1 
         summary_table.loc[sample, 'Unannotated'] = df_in.loc[df_in.index.str.startswith('Cluster'), sample].sum()/sum1
@@ -202,7 +167,7 @@ def stack_barplot(df, output_path = None, axe = None, legend = True, legend_titl
     
     # Set the label and legends
     # Put a legend below current axis
-    if False:
+    if legend:
         lgd = axe.legend(loc='upper left', bbox_to_anchor=(1, 1),
               fancybox=False, shadow=False,  frameon=False) #ncol=5
         if  legend_title != None:
