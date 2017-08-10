@@ -812,8 +812,8 @@ def diamond_alignment(genes_file, uniref_db):
     opts=config.diamond_opts'''
     alignment_file = name_temp_file(config.temp_dir+'/genes.uniref90hits')
     bypass=check_outfiles([alignment_file])
-    args+=["blastp --quiet --query",genes_file,#"--evalue",config.evalue_threshold, 
-		"--outfmt 6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen",
+    args+=["blastp", "--quiet", "--query", genes_file,#"--evalue",config.evalue_threshold, 
+		"--outfmt",  "6", "qseqid", "sseqid", "pident", "length",  "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore", "qlen", "slen",
         '--db', uniref_db, 
 		'--out', alignment_file+'.uniref90hits']
     args+=["--threads",config.threads]
