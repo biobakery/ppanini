@@ -815,7 +815,7 @@ def diamond_alignment(genes_file, uniref_db):
     args+=["blastp", "--quiet", "--query", genes_file,#"--evalue",config.evalue_threshold, 
 		"--outfmt",  "6", "qseqid", "sseqid", "pident", "length",  "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore", "qlen", "slen",
         '--db', uniref_db, 
-		'--out', alignment_file+'.uniref90hits']
+		'--out', alignment_file]
     args+=["--threads",config.threads]
 
     message="Running " + exe + " ........"
@@ -841,7 +841,7 @@ def Infer_aligmnets(alignment_file, output):
     hits_map = name_temp_file('hits.txt')
     no_hits_map = name_temp_file('no_hits.txt')
     # align user input to database
-    exe="ppanini_infer_abundance"
+    exe="ppanini_gene_abundance"
     opts=''
 
     args=[alignment_file,"--min-percid", .9,"--min-qcover", .8, "--min-scover", .8, '--output', output]
