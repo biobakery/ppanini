@@ -41,8 +41,12 @@ bowtie2_version={
     "line" : 0,
     "column" : 2}
 
-bowtie2_build_opts=["-q"]
-bowtie2_align_opts=["--sensitive"]
+# prodigal options
+prodigal_opts=["-q"]
+threads = 8
+
+bowtie2_build_opts=["-q","--threads "+str(threads)]
+bowtie2_align_opts=["--sensitive", "--threads "+str(threads)]
 bowtie2_index_name="_bowtie2_index"
 
 featureCounts_opts=["-T","8","-g","ID","-t","CDS"]
@@ -52,9 +56,7 @@ featureCounts_opts=["-T","8","-g","ID","-t","CDS"]
 translated_alignment_choices = ["usearch","rapsearch","diamond", "vsearch"]
 translated_alignment_selected = translated_alignment_choices[2]
 
-# prodigal options
-prodigal_opts=["-q"]
-threads = 8
+
 
 # file naming
 temp_dir=""

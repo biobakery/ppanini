@@ -83,14 +83,12 @@ def main():
     
     
     # Generate mapping file for clusters to genes (with no sufficient hit to UniRef90)
-    # ppanini_cluster2genes -i ${infer_output}/no_hits_reads.clust90.clstr --output ${infer_output}/cd_hit_clust_temp
-    
+    #ppanini_cluster2genes -i ${infer_output}/no_hits_reads.clust90.clstr --output ${infer_output}/cd_hit_clust_temp
+    map_cluster_gene = utilities.mapping_clusters_genes(cluster_gene_file)
     
     # Join gene families
-    #ppanini_join_tables -i tables/ 
-    #-o hmp_sub_nares_genefamilies_abund.tsv 
-    #--mapping-cluster cd_hit_clust_temp/map_cluster_gene.txt 
-    #--mapping-uniref ./hmp_nares_map_uniref_gene.txt
+    gene_families_table = gene2genefamilies(tables, mapping_cluster, mapping_uniref)
+
 
 if __name__ == '__main__':
 	main()
