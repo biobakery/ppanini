@@ -78,13 +78,18 @@ def main():
     # Infer abundance for sufficient hits to  uniref90 and no_hits
     hits_genes_faa, no_hits_genes_faa, hits_map, no_hits_map = utilities.Infer_aligmnets(alignment_file, config.temp_dir)
     
+    
+    # select sequence for sufficient hits and insufficient hits
+    no_hits_genes_faa = utilities.seletc_sequnces(alignment_file, no_hits_map, output_name = 'no_hits.faa')
+    #$ python /n/huttenhower_lab/tools/ppanini/ppanini/utils/fasta_select.py -i hmp_sub_nares.faa -f infer_output/hits.txt  —output hits_reads.faa
+
     # Cluster no sufficient hits using CD-Hit
     cluster_gene_file, cluster_alignments = utilities.cluster_genes(no_hits_genes_faa)
     
     
     # Generate mapping file for clusters to genes (with no sufficient hit to UniRef90)
     #ppanini_cluster2genes -i ${infer_output}/no_hits_reads.clust90.clstr --output ${infer_output}/cd_hit_clust_temp
-    map_cluster_gene = utilities.mapping_clusters_genes(cluster_gene_file)
+    mapping_cluster = utilities.mapping_clusters_genes(cluster_gene_file)
     
     # Join gene families
     gene_families_table = gene2genefamilies(tables, mapping_cluster, mapping_uniref)

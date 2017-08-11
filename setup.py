@@ -82,7 +82,8 @@ setuptools.setup(
             'ppanini_rename_contigs = ppanini.tools.ppanini_rename_contigs:main',
             'ppanini_infer_gene = ppanini.tools.ppanini_infer_gene:main',
             'ppanini_cluster2genes = ppanini.tools.ppanini_cluster2genes:main',
-            'ppanini_press = ppanini.tools.ppanini_press:main'           
+            'ppanini_press = ppanini.tools.ppanini_press:main',
+            'ppanini_fasta_select = ppanini.tools.fasta_select:main'            
         ]},
     test_suite= 'ppanini.tests.ppanini_test.get_unittests()',
     zip_safe = True

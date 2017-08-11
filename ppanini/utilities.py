@@ -815,7 +815,7 @@ def diamond_alignment(genes_file, uniref_db):
     args+=["blastp", "--quiet", "--query", genes_file,#"--evalue",config.evalue_threshold, 
 		"--outfmt",  "6", "qseqid", "sseqid", "pident", "length",  "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore", "qlen", "slen",
         '--db', uniref_db, 
-		'--out', alignment_file]
+		'--out', alignment_file, "--threads",config.threads]
 
     message="Running " + exe + " ........"
     logger.info(message)
@@ -832,10 +832,9 @@ def diamond_alignment(genes_file, uniref_db):
 
 def Infer_aligmnets(alignment_file, output):
     """
-    Run infer_abundance to get dufficnet maaped genes (hits) and insufficient genes (no_hits)
+    Run infer_abundance to get sufficnet maaped genes (hits) and insufficient genes (no_hits)
     """
     # name the hits and no hits file
-    hits_genes_faa = name_temp_file('hits_genes.faa')
     no_hits_genes_faa = name_temp_file('no_hits_genes_faa')
     hits_map = name_temp_file('hits.txt')
     no_hits_map = name_temp_file('no_hits.txt')
@@ -854,7 +853,27 @@ def Infer_aligmnets(alignment_file, output):
     execute_command(exe,args,[alignment_file],[hits_genes_faa, no_hits_genes_faa, hits_map, no_hits_map])
 
     return hits_genes_faa, no_hits_genes_faa, hits_map, no_hits_map
+def seletct_sequnces(fasta_file, sequnces_names, output_name = 'selected_genes.faa'):
+    """
+    Gets a fasta file and a list of names and returen sequnces for the list
+    """
+    # name the  output 
+    genes_faa = name_temp_file(output_name)
 
+    # align user input to database
+    exe="ppanini_fasta_select"
+    
+    args=["-i", fasta_file,"-f", sequnces_names, "—output", genes_faa]
+
+    # run the prodigal gene caller
+    message="Running " + exe + " ........"
+    print("\n"+message+"\n")
+    #python /n/huttenhower_lab/tools/ppanini/ppanini/utils/fasta_select.py 
+
+    execute_command(exe,args,[genes_file],[cluster_gene_file, cluster_alignments])
+
+    return genes_faa
+    
 def cluster_genes(genes_fasta_file):
     """
     Run CD-Hit to cluster genes
