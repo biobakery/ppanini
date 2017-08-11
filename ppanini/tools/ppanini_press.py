@@ -80,7 +80,7 @@ def main():
     
     
     # select sequence for sufficient hits and insufficient hits
-    no_hits_genes_faa = utilities.select_sequnces(alignment_file, no_hits_map, output_name = 'no_hits.faa')
+    no_hits_genes_faa = utilities.select_sequnces(genes_file, no_hits_map, output_name = 'no_hits.faa')
 
     # Cluster no sufficient hits using CD-Hit
     cluster_gene_file, cluster_alignments = utilities.cluster_genes(no_hits_genes_faa)
@@ -90,8 +90,8 @@ def main():
     #ppanini_cluster2genes -i ${infer_output}/no_hits_reads.clust90.clstr --output ${infer_output}/cd_hit_clust_temp
     mapping_cluster = utilities.mapping_clusters_genes(cluster_gene_file)
     
-    # Join gene families
-    gene_families_table = gene2genefamilies(tables, mapping_cluster, hits_map)
+    # Join gene families and write them to output directory as gene_families_table.txt
+    gene_families_table = utilities.gene2genefamilies(tables, mapping_cluster, hits_map)
 
 
 if __name__ == '__main__':
