@@ -892,7 +892,7 @@ def cluster_genes(genes_fasta_file):
     
     args+=opts
 
-    execute_command(exe,args,[genes_file],[cluster_gene_file, cluster_alignments])
+    execute_command(exe,args,[genes_fasta_file],[cluster_gene_file, cluster_alignments])
 
     return cluster_gene_file, cluster_alignments
 
