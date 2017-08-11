@@ -862,7 +862,7 @@ def select_sequnces(fasta_file, sequnces_names, output_name = 'selected_genes.fa
     # align user input to database
     exe="ppanini_fasta_select"
     
-    args=["-i", fasta_file,"-f", sequnces_names, "—o", genes_faa]
+    args=["-i", fasta_file,"-f", sequnces_names, "-o", genes_faa]
 
     # run the prodigal gene caller
     message="Running " + exe + " ........"
