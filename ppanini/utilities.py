@@ -869,7 +869,7 @@ def select_sequnces(fasta_file, sequnces_names, output_name = 'selected_genes.fa
     print("\n"+message+"\n")
     #python /n/huttenhower_lab/tools/ppanini/ppanini/utils/fasta_select.py 
 
-    execute_command(exe,args,[genes_file],[genes_faa])
+    execute_command(exe,args,[fasta_file, sequnces_names],[genes_faa])
 
     return genes_faa
     
