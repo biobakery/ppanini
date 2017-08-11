@@ -60,7 +60,7 @@ translated_alignment_selected = translated_alignment_choices[2]
 
 # file naming
 temp_dir=""
-unnamed_temp_dir=""
+unnamed_temp_dir=temp_dir
 file_basename=""
 
 # diamond options

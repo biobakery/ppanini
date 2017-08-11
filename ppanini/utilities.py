@@ -815,8 +815,7 @@ def diamond_alignment(genes_file, uniref_db):
     args+=["blastp", "--quiet", "--query", genes_file,#"--evalue",config.evalue_threshold, 
 		"--outfmt",  "6", "qseqid", "sseqid", "pident", "length",  "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore", "qlen", "slen",
         '--db', uniref_db, 
-		'--out', alignment_file]
-    args+=["--threads",config.threads]
+		'--out', alignment_file, "--threads",config.threads]
 
     message="Running " + exe + " ........"
     logger.info(message)
