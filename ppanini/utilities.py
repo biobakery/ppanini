@@ -852,7 +852,7 @@ def Infer_aligmnets(alignment_file, output):
     execute_command(exe,args,[alignment_file],[hits_map, no_hits_map])
 
     return hits_map, no_hits_map
-def seletct_sequnces(fasta_file, sequnces_names, output_name = 'selected_genes.faa'):
+def select_sequnces(fasta_file, sequnces_names, output_name = 'selected_genes.faa'):
     """
     Gets a fasta file and a list of names and returen sequnces for the list
     """

@@ -80,7 +80,7 @@ def main():
     
     
     # select sequence for sufficient hits and insufficient hits
-    no_hits_genes_faa = utilities.seletc_sequnces(alignment_file, no_hits_map, output_name = 'no_hits.faa')
+    no_hits_genes_faa = utilities.select_sequnces(alignment_file, no_hits_map, output_name = 'no_hits.faa')
 
     # Cluster no sufficient hits using CD-Hit
     cluster_gene_file, cluster_alignments = utilities.cluster_genes(no_hits_genes_faa)
@@ -91,7 +91,7 @@ def main():
     mapping_cluster = utilities.mapping_clusters_genes(cluster_gene_file)
     
     # Join gene families
-    gene_families_table = gene2genefamilies(tables, mapping_cluster, mapping_uniref)
+    gene_families_table = gene2genefamilies(tables, mapping_cluster, hits_map)
 
 
 if __name__ == '__main__':
