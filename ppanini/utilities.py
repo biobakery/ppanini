@@ -878,7 +878,7 @@ def cluster_genes(genes_fasta_file):
     """
     # name the genes cluster output 
     cluster_alignments = name_temp_file('no_hits_reads.clust90')
-    cluster_gene_file = name_temp_file('no_hits_reads.clust90.clsr')
+    cluster_gene_file = name_temp_file('no_hits_reads.clust90.clstr')
 
     # align user input to database
     exe="cd-hit"
