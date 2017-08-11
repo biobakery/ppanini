@@ -840,7 +840,7 @@ def Infer_aligmnets(alignment_file, output):
     hits_map = name_temp_file('hits.txt')
     no_hits_map = name_temp_file('no_hits.txt')
     # align user input to database
-    exe="ppanini_gene_abundance"
+    exe="ppanini_infer_gene"
     opts=''
 
     args=[alignment_file,"--min-percid", .9,"--min-qcover", .8, "--min-scover", .8, '--output', output]
