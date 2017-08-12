@@ -114,7 +114,7 @@ def make_directory(output_dir, force = False):
         except EnvironmentError:
             sys.exit("CRITICAL ERROR: Unable to create output directory.")
     else:
-    	print("Directory exists, use force = True to remove and recreate it ")    
+    	print(("Output directory %s exists and files will be overwrite...") %(output_dir))   
     
     if not os.access(output_dir, os.W_OK):
         sys.exit("CRITICAL ERROR: The output directory is not " + 
