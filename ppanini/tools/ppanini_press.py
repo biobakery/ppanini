@@ -49,6 +49,12 @@ def get_args ():
         metavar="<" + str(config.threads) + ">", 
         type=int,
         default=config.threads)
+    parser.add_argument(
+        "--scale",
+        dest= 'scale', 
+        help="scale the abundance table\n",
+        choices=["rpk","count"], 
+        default='rpk')
     
     args = parser.parse_args()
     return args
@@ -95,7 +101,7 @@ def main():
     
         
     # Join gene families and write them to the output directory as gene_families_table.txt
-    gene_families_table = utilities.gene2genefamilies(args.gene_counts, mapping_cluster, hits_map)
+    gene_families_table = utilities.gene2genefamilies(args.gene_counts, mapping_cluster, hits_map, args.scale)
 
 
 if __name__ == '__main__':

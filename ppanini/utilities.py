@@ -916,7 +916,7 @@ def mapping_clusters_genes(cluster_gene_file):
     execute_command(exe,args,[cluster_gene_file], [mapper_cluster_genes])
 
     return mapper_cluster_genes
-def gene2genefamilies(tables, mapping_cluster, mapping_uniref):
+def gene2genefamilies(tables, mapping_cluster, mapping_uniref, scale):
     """
    #ppanini_join_tables -i tables/ 
     #-o hmp_sub_nares_genefamilies_abund.tsv 
@@ -929,7 +929,7 @@ def gene2genefamilies(tables, mapping_cluster, mapping_uniref):
     # align user input to database
     exe="ppanini_join_tables"
     opts=''
-    args=["-i", tables,"-o", gene_families_table, "--mapping-cluster", mapping_cluster,"--mapping-uniref", mapping_uniref ]
+    args=["-i", tables,"-o", gene_families_table, "--mapping-cluster", mapping_cluster,"--mapping-uniref", mapping_uniref, "--scale", scale ]
 
     message="Running " + exe + " ........"
     print("\n"+message+"\n")
