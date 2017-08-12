@@ -936,7 +936,7 @@ def gene2genefamilies(tables, mapping_cluster, mapping_uniref):
     
     args+=opts
 
-    execute_command(exe,args,[tables, mapping_cluster, mapping_uniref ], gene_families_table)
+    execute_command(exe,args,[mapping_cluster, mapping_uniref ], [gene_families_table])
 
     return gene_families_table
     
