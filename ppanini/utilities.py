@@ -929,7 +929,6 @@ def gene2genefamilies(tables, mapping_cluster, mapping_uniref):
     # align user input to database
     exe="ppanini_join_tables"
     opts=''
-    #cd-hit -d 0 -c .9 -aL .8 -G 0 -T 2 -i ${infer_output}/no_hits_reads.faa -o ${infer_output}/no_hits_reads.clust90
     args=["-i", tables,"-o", gene_families_table, "--mapping-cluster", mapping_cluster,"--mapping-uniref", mapping_uniref ]
 
     message="Running " + exe + " ........"
