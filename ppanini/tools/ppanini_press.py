@@ -88,8 +88,11 @@ def main():
     hits_map, no_hits_map = utilities.Infer_aligmnets(alignment_file, config.temp_dir)
     
     
-    # select sequence for sufficient hits and insufficient hits
+    # select sequence for insufficient hits
     no_hits_genes_faa = utilities.select_sequnces(genes_file, no_hits_map, output_name = 'no_hits.faa')
+    
+    # select sequence for sufficient hits 
+    hits_genes_faa = utilities.select_sequnces(genes_file, hits_map, output_name = 'hits.faa')
 
     # Cluster no sufficient hits using CD-Hit
     cluster_gene_file, cluster_alignments = utilities.cluster_genes(no_hits_genes_faa)
