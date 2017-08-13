@@ -43,10 +43,10 @@ bowtie2_version={
 
 # prodigal options
 prodigal_opts=["-q"]
-threads = 8
+threads = 1
 
-bowtie2_build_opts=["-q","--threads "+str(threads)]
-bowtie2_align_opts=["--sensitive", "--threads "+str(threads)]
+bowtie2_build_opts=["-q"] # "--threads "+str(threads)
+bowtie2_align_opts=["--sensitive"] # "--threads "+str(threads)
 bowtie2_index_name="_bowtie2_index"
 
 featureCounts_opts=["-T","8","-g","ID","-t","CDS"]
