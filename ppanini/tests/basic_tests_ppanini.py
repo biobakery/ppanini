@@ -75,8 +75,8 @@ class TestPPANINIBasicFunctions(unittest.TestCase):
 			test_get_centroids_table(self, gc_dm)
 
 
-		test_get_centroids_fromUCLUST(self, gis_dm)
-		test_get_centroids(self, uniref_dm, gis_dm)
+		#test_get_centroids_fromUCLUST(self, gis_dm)
+		#test_get_centroids(self, uniref_dm, gis_dm)
 		shutil.rmtree(config.temp_folder)
 	
 	def test_get_clusters(self):

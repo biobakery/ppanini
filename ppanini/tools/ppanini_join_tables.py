@@ -190,6 +190,11 @@ def get_args():
         help="Mapping file: cluster to genes file\n", 
         default='')
     parser.add_argument(
+        "-r","--resume", 
+        help="bypass commands if the output files exist\n", 
+        action="store_true",
+        default=config.resume)
+    parser.add_argument(
         "--scale",
         dest= 'scale', 
         help="scale the abundance table\n",
@@ -203,7 +208,7 @@ def get_args():
 def main():
     # Parse arguments from command line
     args=get_args()
-    
+    config.resume = args.resume
     # check for format of the gene tables
     input_dir=os.path.abspath(args.input)
     

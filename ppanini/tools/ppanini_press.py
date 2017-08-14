@@ -65,6 +65,7 @@ def main():
     
     config.temp_dir= args.output
     config.threads = args.threads
+    config.resume = args.resume
     #Steps:   
     
     #make a directory or outputs

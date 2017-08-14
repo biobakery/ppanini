@@ -85,7 +85,7 @@ setuptools.setup(
             'ppanini_press = ppanini.tools.ppanini_press:main',
             'ppanini_fasta_select = ppanini.tools.fasta_select:main'            
         ]},
-    test_suite= 'ppanini.tests.ppanini_test.get_unittests()',
-    zip_safe = True
+    test_suite= 'ppanini_test.get_unittests()',
+    zip_safe = False
  )
 

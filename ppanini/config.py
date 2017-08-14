@@ -49,7 +49,7 @@ bowtie2_build_opts=["-q"] # "--threads "+str(threads)
 bowtie2_align_opts=["--sensitive"] # "--threads "+str(threads)
 bowtie2_index_name="_bowtie2_index"
 
-featureCounts_opts=["-T","8","-g","ID","-t","CDS"]
+featureCounts_opts=["-T",threads,"-g","ID","-t","CDS"]
 
 
 # translated alignment options
