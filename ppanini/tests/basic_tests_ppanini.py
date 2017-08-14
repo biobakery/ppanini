@@ -43,48 +43,5 @@ class TestPPANINIBasicFunctions(unittest.TestCase):
 		self.assertEquals(numpy.array(gis_dm.values()).shape, (91, 38)) 
 
 
-		def test_get_centroids_fromUCLUST(self, gis_dm):
-			"""Tests the function get_centroids_fromUCLUST"""
-
-			config.uclust_file = test_config.demo_ppanini_clusters
-			cluster_dict = pp.get_centroids_fromUCLUST(gis_dm.keys(), config)
-			
-			#Type of output
-			self.assertTrue(type(cluster_dict)==dict) 
-			#For this dataset, 91 centroids
-			self.assertEqual(len(cluster_dict), 91) 
-			#All centroids should contain themselves
-			self.assertEqual(sum(1 for i in cluster_dict if i in cluster_dict[i]), 91) 
-		
-		def test_get_centroids(self, uniref_dm, gi_dm):
-			"""Tests the function get_centroids"""
-			
-			def test_get_centroids_table(self,gc_dm):
-				"""Tests the function get_centroids_table"""
-				
-				[norm_data_matrix, centroids_list]= pp.get_centroids_table(gc_dm, metadata, config)
-				#Number of centroids and rows in dm
-				self.assertEqual(norm_data_matrix.shape[0], len(centroids_list)) 
-
-			gc_dm = pp.get_centroids(uniref_dm, gi_dm, config)
-			#gc_dm contains all the UniRef90 clusters
-			self.assertEqual(sum([1 for i in uniref_dm if i in gc_dm]), len(uniref_dm))
-			#gc_dm is <= uniref90 + gi centroids
-			self.assertLessEqual(len(gc_dm), len(uniref_dm)+len(gi_dm)) 
-
-			test_get_centroids_table(self, gc_dm)
-
-
-		#test_get_centroids_fromUCLUST(self, gis_dm)
-		#test_get_centroids(self, uniref_dm, gis_dm)
 		shutil.rmtree(config.temp_folder)
 	
-	def test_get_clusters(self):
-		"""Tests the function get_clusters"""
-
-		usearch_path = config.usearch
-		vsearch_path = config.vsearch
-		config.usearch =''
-		config.vsearch =''
-		with self.assertRaises(Exception): ##Test if usearch/vsearch not present; it throws an exception
-			pp.get_clusters(config)

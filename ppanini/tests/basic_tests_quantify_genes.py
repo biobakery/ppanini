@@ -7,7 +7,6 @@ import logging
 import ppanini
 
 from ppanini.tests import test_config
-from ppanini.utils import preppanini
 
 
 demo_faa = test_config.demo_faa
