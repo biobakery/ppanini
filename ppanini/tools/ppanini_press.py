@@ -74,7 +74,8 @@ def main():
         if gene_file.endswith('.faa'):
             temp_out_files.append(args.gene_path+'/'+gene_file)
     genes_file = utilities.name_temp_file('genes.faa')
-    utilities.execute_command("cat", temp_out_files, temp_out_files, genes_file)
+    
+    utilities.execute_command("cat", temp_out_files, temp_out_files, [genes_file], genes_file)
     
     # Run diamond
     print (genes_file, args.uniref )
