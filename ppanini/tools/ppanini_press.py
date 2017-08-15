@@ -63,12 +63,14 @@ def get_args ():
 def main():
     args = get_args()
     
-    config.temp_dir= args.output
+    config.temp_dir= args.output+'/'+os.path.basename(os.path.normpath(args.output))+'_temp'
+    config.output_folder= args.output
     config.threads = args.threads
     config.resume = args.resume
     #Steps:   
     
     #make a directory or outputs
+    utilities.make_directory(config.output_folder)
     utilities.make_directory(config.temp_dir)
     
     # Concatenate all FAA files from prodigal outputs
@@ -78,8 +80,7 @@ def main():
         if gene_file.endswith('.faa'):
             temp_out_files.append(args.gene_sequnces+'/'+gene_file)
     genes_file = utilities.name_temp_file('genes.faa')
-    utilities.execute_command("cat",temp_out_files,temp_out_files,[genes_file],
-        genes_file)
+    utilities.execute_command("cat", temp_out_files, temp_out_files, genes_file)
     
     # Run diamond
     alignment_file = utilities.diamond_alignment(genes_file, args.uniref )

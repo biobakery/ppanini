@@ -56,6 +56,8 @@ def get_args ():
 def main():
     args = get_args()
     config.threads = args.threads
+    config.resume = args.resume
+
     # Set the basename of the output files if specified as an option
     if args.output_basename:
         config.file_basename=args.output_basename
@@ -71,10 +73,17 @@ def main():
     
         config.file_basename=input_file_basename
     if args.output:
-    	config.temp_dir = args.output
+        config.output_folder = args.output
+    	config.temp_dir= config.output_folder+'/'+os.path.basename(os.path.normpath(config.output_folder))+'_temp'
     else:		
-    	args.output = config.file_basename
-    	config.temp_dir= args.output
+    	config.output_folder = config.file_basename
+    	config.temp_dir= config.output_folder+'/'+os.path.basename(os.path.normpath(config.output_folder))+'_temp'
+
+    #Steps:   
+    
+    #make a directory or outputs
+    utilities.make_directory(config.output_folder)
+    utilities.make_directory(config.temp_dir)
     #Steps
     #Commands to generate gene families abundance from assemblies and sequences files
     
@@ -108,8 +117,12 @@ def main():
     # make directory for featureCounts abundance output
     config.temp_dir = args.output+'/featureCounts_output/'
     utilities.make_directory(config.temp_dir)
+    
     # gene abundance using featureCounts
     abundance_file = utilities.abundance(genes_file_gff, alignment_file)
+    
+    # move the three main output under main output folder from temp files
+    utilities.execute_command("mv", abundance_file, config.output_folder, config.output_folder+'/'+os.path.basename(os.path.normpath(abundance_file)))
 
 
 if __name__ == '__main__':

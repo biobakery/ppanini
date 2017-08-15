@@ -18,7 +18,7 @@ niches = []
 niche_flag = None
 ppanini_niche_score_labels = []
 
-temp_folder = ''
+#temp_folder = ''
 centroids_list = ''
 essantial_genes_uniref90_id = None
 genomic_score = False
