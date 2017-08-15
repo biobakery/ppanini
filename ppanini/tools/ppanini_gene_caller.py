@@ -93,7 +93,8 @@ def main():
     new_contig_file = utilities.append_filename2cotignames(args.contig)
     
     # make directory for prodigal output
-    config.temp_dir +='/prodigal_output/'
+    temp_dir = config.temp_dir
+    config.temp_dir = temp_dir+'/prodigal_output/'
     utilities.make_directory(config.temp_dir) 
     
     #config.file_basename = ''
@@ -101,7 +102,7 @@ def main():
     genes_file_gff, genes_file_fna, genes_file_faa = utilities.genecall(new_contig_file)
     
     # make directory for bowtie2 output
-    config.temp_dir = args.output+'/bowtie2_output/'
+    config.temp_dir = temp_dir+'/bowtie2_output/'
     utilities.make_directory(config.temp_dir)
     
     # make index database using bowtie2-build
@@ -111,7 +112,7 @@ def main():
     alignment_file = utilities.alignment(args.fastq, index_name)
     
     # make directory for featureCounts abundance output
-    config.temp_dir = args.output+'/featureCounts_output/'
+    config.temp_dir = temp_dir+'/featureCounts_output/'
     utilities.make_directory(config.temp_dir)
     
     # gene abundance using featureCounts
