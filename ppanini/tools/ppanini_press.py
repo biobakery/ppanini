@@ -78,7 +78,6 @@ def main():
     utilities.execute_command("cat", temp_out_files, temp_out_files, [genes_file], genes_file)
     
     # Run diamond
-    print (genes_file, args.uniref )
     alignment_file = utilities.diamond_alignment(genes_file, args.uniref )
     
     
