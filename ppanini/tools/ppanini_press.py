@@ -16,16 +16,10 @@ def get_args ():
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser.add_argument( 
-        "-i", "--genes-path",
-        dest = 'gene_sequnces', 
+        "-i", "--gene-path",
+        dest = 'gene_path', 
         required = True,
-        help="a directory path to Prodigal outputs for all samples which includes gff and faa files",
-        )
-    parser.add_argument( 
-        "-g", "--genes-counts",
-        dest = 'gene_counts', 
-        required = True,
-        help=" a directory path to featureCounts outputs for all samples which includes sample.txt files",
+        help="a directory path to ppanini_gene_caller outputs which includes txt, gff, and faa files for each sample.",
         )
     parser.add_argument( 
         "-u", "--uniref-db", 
@@ -75,10 +69,10 @@ def main():
     
     # Concatenate all FAA files from prodigal outputs
     temp_out_files=[]
-    for gene_file in os.listdir(args.gene_sequnces):          
+    for gene_file in os.listdir(args.gene_path):          
         # only use FAA files
         if gene_file.endswith('.faa'):
-            temp_out_files.append(args.gene_sequnces+'/'+gene_file)
+            temp_out_files.append(args.gene_path+'/'+gene_file)
     genes_file = utilities.name_temp_file('genes.faa')
     utilities.execute_command("cat", temp_out_files, temp_out_files, genes_file)
     
@@ -106,7 +100,7 @@ def main():
     
         
     # Join gene families and write them to the output directory as gene_families_table.txt
-    gene_families_table = utilities.gene2genefamilies(args.gene_counts, mapping_cluster, hits_map, args.scale)
+    gene_families_table = utilities.gene2genefamilies(args.gene_path, mapping_cluster, hits_map, args.scale)
 
 
 if __name__ == '__main__':

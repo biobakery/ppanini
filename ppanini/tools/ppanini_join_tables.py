@@ -288,7 +288,7 @@ def main():
                 print("Processing file: " + os.path.join(input_dir,file))
             util.biom_to_tsv(os.path.join(input_dir,file),new_file)
             gene_tables.append(new_file)
-        else:
+        elif file.endswith('.txt') or file.endswith('.tsv') or file.endswith('.csv'):
             gene_tables.append(os.path.join(input_dir,file))
             
     # sort the gene tables so they are in the same order on all platforms
