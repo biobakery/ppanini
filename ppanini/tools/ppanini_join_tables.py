@@ -19,7 +19,7 @@ import os
 import shutil
 import re
 from ..utilities import gzip_bzip2_biom_open_readlines, process_gene_table_with_header, rev_load_polymap, load_polymap_dic
-
+from . import config
 
 GENE_TABLE_DELIMITER="\t"
 # ---------------------------------------------------------------
@@ -87,6 +87,7 @@ def join_gene_tables(gene_tables,output,verbose=None, mapper= None, scale = None
                     data_points = [data[6]]
                 else:system.exit("scale is not valid!")
                 print (data[1]+'_'+data[0])
+                
                 # bind sample name and gene id to use as gene name
                 gene = data[1]+'_'+data[0].split("_")[1]
                 
