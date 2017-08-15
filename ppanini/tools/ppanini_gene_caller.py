@@ -63,7 +63,7 @@ def main():
         config.file_basename=args.output_basename
     else:
         # Determine the basename of the input file to use as output file basename
-        input_file_basename=os.path.basename(args.contig)
+        input_file_basename=os.path.basename(args.fastq)
         # Remove gzip extension if present
         if re.search('.gz$',input_file_basename):
             input_file_basename='.'.join(input_file_basename.split('.')[:-1])
@@ -73,7 +73,7 @@ def main():
     
         config.file_basename=input_file_basename
     config.output_folder = args.output
-    config.temp_dir= config.output_folder+'/'+config.file_basename+'/'+os.path.basename(os.path.normpath(config.output_folder))+'_temp'
+    config.temp_dir= config.output_folder+'/'+config.file_basename+'_temp'
     
     #Steps:   
     
