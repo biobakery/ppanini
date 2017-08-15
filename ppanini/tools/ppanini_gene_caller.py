@@ -27,7 +27,7 @@ def get_args ():
         )
     parser.add_argument( 
         "-o", "--output", 
-        default=None,
+        required = True,
         help="Path for outputs",
         )
     parser.add_argument(
@@ -72,13 +72,9 @@ def main():
             input_file_basename='.'.join(input_file_basename.split('.')[:-1])
     
         config.file_basename=input_file_basename
-    if args.output:
-        config.output_folder = args.output
-    	config.temp_dir= config.output_folder+'/'+os.path.basename(os.path.normpath(config.output_folder))+'_temp'
-    else:		
-    	config.output_folder = config.file_basename
-    	config.temp_dir= config.output_folder+'/'+os.path.basename(os.path.normpath(config.output_folder))+'_temp'
-
+    config.output_folder = args.output
+    config.temp_dir= config.output_folder+'/'+config.file_basename+'/'+os.path.basename(os.path.normpath(config.output_folder))+'_temp'
+    
     #Steps:   
     
     #make a directory or outputs
