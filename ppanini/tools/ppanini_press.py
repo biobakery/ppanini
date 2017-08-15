@@ -22,8 +22,8 @@ def get_args ():
         help="a directory path to ppanini_gene_caller outputs which includes txt, gff, and faa files for each sample.",
         )
     parser.add_argument( 
-        "-u", "--uniref-db", 
-        dest = 'uniref',
+        "-u", "--uniref", 
+        #dest = 'uniref',
         required = True,
         help="UniRe90 database",
         )
@@ -77,6 +77,7 @@ def main():
     utilities.execute_command("cat", temp_out_files, temp_out_files, genes_file)
     
     # Run diamond
+    print (genes_file, args.uniref )
     alignment_file = utilities.diamond_alignment(genes_file, args.uniref )
     
     

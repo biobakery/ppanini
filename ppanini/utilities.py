@@ -946,9 +946,11 @@ def name_temp_file(file_name):
     Return the full path to a new temp file 
     using the sample name and temp dir location
     """
-
-    return os.path.join(config.temp_dir,
-       config.file_basename + file_name)    
+    if config.file_basename != '':
+        return os.path.join(config.temp_dir,
+           config.file_basename + file_name) 
+    else:
+         return os.path.join(config.temp_dir, file_name)  
 
 def return_exe_path(exe):
     """
