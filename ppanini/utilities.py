@@ -810,7 +810,7 @@ def diamond_alignment(genes_file, uniref_db):
         args=[config.diamond_cmmd_nucleotide_search]
         
     opts=config.diamond_opts'''
-    alignment_file = name_temp_file(config.temp_dir+'/genes.uniref90hits')
+    alignment_file = name_temp_file('genes.uniref90hits')
     bypass=check_outfiles([alignment_file])
     args+=["blastp", "--quiet", "--query", genes_file,#"--evalue",config.evalue_threshold, 
 		"--outfmt",  "6", "qseqid", "sseqid", "pident", "length",  "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore", "qlen", "slen",
