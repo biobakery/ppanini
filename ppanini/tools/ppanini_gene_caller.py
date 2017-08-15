@@ -119,7 +119,7 @@ def main():
     abundance_file = utilities.abundance(genes_file_gff, alignment_file)
     
     # move the three main output under main output folder from temp files
-    utilities.execute_command("mv", abundance_file, config.output_folder, config.output_folder+'/'+os.path.basename(os.path.normpath(abundance_file)))
+    #utilities.execute_command("mv", abundance_file, config.output_folder, config.output_folder+'/'+os.path.basename(os.path.normpath(abundance_file)))
 
 
 if __name__ == '__main__':
