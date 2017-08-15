@@ -119,10 +119,9 @@ def main():
     abundance_file = utilities.abundance(genes_file_gff, alignment_file)
     
     # move the three main output under main output folder from temp files
-    print(abundance_file, genes_file_gff, genes_file_faa )
-    utilities.execute_command("mv",[], abundance_file, config.output_folder+'/'+os.path.basename(os.path.normpath(abundance_file))+'.txt')
-    utilities.execute_command("mv",[], genes_file_gff, config.output_folder+'/'+os.path.basename(os.path.normpath(genes_file_gff))+'.gff')
-    utilities.execute_command("mv",[], genes_file_faa, config.output_folder+'/'+os.path.basename(os.path.normpath(genes_file_faa))+'.faa')
+    utilities.execute_command("mv", abundance_file, abundance_file, config.output_folder+'/'+os.path.basename(os.path.normpath(abundance_file))+'.txt')
+    utilities.execute_command("mv", genes_file_gff, genes_file_gff, config.output_folder+'/'+os.path.basename(os.path.normpath(genes_file_gff))+'.gff')
+    utilities.execute_command("mv", genes_file_faa, genes_file_faa, config.output_folder+'/'+os.path.basename(os.path.normpath(genes_file_faa))+'.faa')
     print ("Three main output files for ppanini_press are written in: \n%s\n%s\n%s")% (config.output_folder+'/'+os.path.basename(os.path.normpath(abundance_file))+'.txt',
                                                 config.output_folder+'/'+os.path.basename(os.path.normpath(genes_file_gff))+'.gff', 
                                                 config.output_folder+'/'+os.path.basename(os.path.normpath(genes_file_faa))+'.faa')
