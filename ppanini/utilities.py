@@ -1272,7 +1272,7 @@ def rev_load_polymap ( path_in= '' , path_out ='' , start=0, skip=None, allowed_
     	path_in = sys.argv[1]
     	path_out = sys.argv[2]
     polymap_all = {}
-    print( "Loading mapping file from:", path_in, file=sys.stderr )
+    print( "--- Loading mapping file from:", path_in, file=sys.stderr )
     size_warn( path_in )
     for line in gzip_bzip2_biom_open_readlines( path_in ):
         row = line.split("\t")
@@ -1292,7 +1292,7 @@ def rev_load_polymap ( path_in= '' , path_out ='' , start=0, skip=None, allowed_
             writer = csv.writer(csv_file, delimiter='\t')
             for key, values in polymap_all.items():
                writer.writerow([key, ";".join(values)])                                          
-        print("Mappping is done")
+        print("--- Mappping is done")
     else:
         #print (polymap_all)
         return polymap_all
@@ -1308,7 +1308,7 @@ def load_polymap_dic ( path, start=0, skip=None, allowed_keys=None, allowed_valu
     Dictionary : UniRefID is key and value is GOID1;GOID2
     """
     polymap_all = {}
-    print( "Loading mapping file from:", path, file=sys.stderr )
+    print( "--- Loading mapping file from:", path, file=sys.stderr )
     size_warn( path )
     for line in gzip_bzip2_biom_open_readlines( path ):
         row = line.split("\t")
@@ -1331,7 +1331,7 @@ def load_polymap ( path, start=0, skip=None, allowed_keys=None, allowed_values=N
     Inner values are not important (set to 1)
     """
     polymap = {}
-    print( "Loading mapping file from:", path, file=sys.stderr )
+    print( "--- Loading mapping file from:", path, file=sys.stderr )
     size_warn( path )
     for line in gzip_bzip2_biom_open_readlines( path ):
         row = line.split("\t")

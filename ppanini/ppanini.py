@@ -86,8 +86,8 @@ def read_gene_table(config=config):
             		uniref_dm[u90_annot] = data_row	
 	
     if config.verbose == 'DEBUG':
-    	print ("Gene Table contains %s metadata lines ." % count_metadata_lines)
-        print ("Gene Table contains %s gene or centroid lines." % count_gene_lines)
+    	print ("--- Gene Table contains %s metadata lines." % count_metadata_lines)
+        print ("--- Gene Table contains %s gene families." % count_gene_lines)
     
     return [uniref_dm, gis_dm, metadata]
 
@@ -127,7 +127,7 @@ def summerize_centroids(uniref_dm, gi_dm, config=config):
 
     for centroid in uniref_dm:
     	gc_dm[centroid] = uniref_dm[centroid]
-    print ("Number of centroids: %d"%(len(gc_dm)))
+    print ("--- Number of centroids: %d"%(len(gc_dm)))
     return gc_dm
 
 
@@ -191,7 +191,7 @@ def get_prevalence_abundance(centroids_data_matrix, metadata):
         set_niches.remove('#Niche')
         config.niches = set_niches
     if niche_line and len(set_niches) > 1  :
-        print ("Niches have been provided in abundance table are:", set_niches)
+        print ("--- Niches have been provided in abundance table are:", set_niches)
         niche_flag = True
         summary_table = get_niche_prevalence_abundance (centroids_data_matrix, niche_line)
     
@@ -445,7 +445,6 @@ def run():
     if config.temp_dir == '':
     	config.temp_dir = config.basename
     
-    print(config.temp_dir)
     config.temp_folder = config.temp_dir+'/temp'
 
     utilities.create_folders([config.temp_dir, config.temp_folder])
