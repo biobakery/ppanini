@@ -458,34 +458,25 @@ def run():
     					datefmt='%m/%d/%Y %I:%M:%S %p')
     
     if config.verbose =='DEBUG':
-    	print "Reading the gene table..."
+    	print "--- Reading the gene table..."
     [uniref_dm, gi_dm, metadata]= read_gene_table()
     #print uniref_dm, gi_dm, metadata
-    if config.verbose =='DEBUG':
-    	print "DONE"
     
     if config.verbose =='DEBUG':
-    	print "Summerize gene families table ..."
+    	print "--- Summarize gene families table ..."
     all_centroids = summerize_centroids(uniref_dm, gi_dm)
     
-    if config.verbose =='DEBUG':
-    	print "DONE"
     
     if config.verbose =='DEBUG':
-    	print "Normalize gene families table ..."
+    	print "--- Normalize gene families table ..."
     centroids_data_table = normalize_centroids_table(all_centroids, metadata)
     #config.centroids_list = centroids_list
     
+   
     if config.verbose =='DEBUG':
-    	print "DONE"
-    
-    if config.verbose =='DEBUG':
-    	print "Getting prevalence abundance ..."
+    	print "--- Getting prevalence abundance ..."
     summary_table = get_prevalence_abundance(centroids_data_table, \
     												metadata = metadata)
-    
-    if config.verbose =='DEBUG':
-    	print "DONE"
         
     if config.genomic_score: # an option should be added for this
         metagenomic_table  = utilities.read_parsed("/Users/rah/Documents/PPANINI/ppanini_old_files/PARSED_BLAST_RESULTS/AN_mg.m8")
@@ -497,31 +488,31 @@ def run():
     # add Go terms to the table
     if not config.uniref2go == '':
         if config.verbose =='DEBUG':
-            print("Mapping UniRef90 to GO terms!")
+            print("--- Mapping UniRef90 to GO terms!")
         utilities.uniref2go(config.summary_table, uniref_go_path = config.uniref2go)
     else:
         if config.verbose =='DEBUG':
-            print("Mapping UniRef90 to GO terms!")
+            print("--- Mapping UniRef90 to GO terms!")
         resource_package = __name__  # Could be any module/package name
         resource_path = '/'.join(('data', 'map_uniref90_infogo1000.txt.gz'))
         template = pkg_resources.resource_filename(resource_package, resource_path)
-        print (template)
-        utilities.uniref2go(config.summary_table, uniref_go_path = template)
+        utilities.uniref2go(config.summary_table, uniref_go_path = template)   
     
 def _main():
     read_parameters()
     run()
     
     if config.verbose =='DEBUG':
-        print "Prioritize gene families ..."
+        print "--- Prioritize gene families ..."
     imp_centroids = get_important_centroids()
-    if config.verbose =='DEBUG':
-        print "DONE"	
     
     # set the path for ppanini table out
     ppanini_output_file_path = config.temp_dir+'/'+config.basename+'_table.txt' 
     # Write PPANINI output table
     imp_centroids.to_csv(ppanini_output_file_path, sep='\t')
+    if config.verbose =='DEBUG':
+        print ("--- The PPANINI output is written in %s ..." % (config.output_folder))
+        print "--- PPANINI process is successfully completed ..."
 
 if __name__ == '__main__':
 	_main()

@@ -6,22 +6,25 @@ import time
 import argparse
 import pdb
 import pandas as pd
-try:
-    import matplotlib
-    matplotlib.use( "Agg" )
-    matplotlib.rcParams["pdf.fonttype"] = 42
-    matplotlib.rcParams["font.family"] = "Arial"
-    import matplotlib.pyplot as plt
-    from matplotlib import colors
-    import matplotlib.patches as patches
-    import numpy as np
-    import scipy.cluster.hierarchy as sch
-except:
-    sys.exit( "This script requires the Python scientific stack: numpy, scipy, and matplotlib." )
-  
-#from . import utils
 
-#from .. import utilities
+import matplotlib
+matplotlib.use( "Agg" )
+import matplotlib.pyplot as plt
+from matplotlib import colors
+import matplotlib.patches as patches
+import numpy as np
+import scipy.cluster.hierarchy as sch
+
+from matplotlib import font_manager
+import warnings
+
+with warnings.catch_warnings():
+    warnings.simplefilter("error")
+    try:
+        font_file = font_manager.findfont(font_manager.FontProperties(family='Arial'))
+        matplotlib.rcParams["font.family"] = "Arial"
+    except UserWarning:
+        pass 
 
 def get_args( ):
     parser = argparse.ArgumentParser(

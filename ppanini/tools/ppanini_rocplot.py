@@ -12,8 +12,6 @@ from os.path import basename
 try:
     import matplotlib
     matplotlib.use( "Agg" )
-    matplotlib.rcParams["pdf.fonttype"] = 42
-    matplotlib.rcParams["font.family"] = "Arial"
     import matplotlib.pyplot as plt
     from matplotlib import colors
     import matplotlib.pyplot as plt
@@ -29,6 +27,18 @@ import math
 from scipy.stats import percentileofscore
 import sys
 import csv
+
+from matplotlib import font_manager
+import warnings
+
+with warnings.catch_warnings():
+    warnings.simplefilter("error")
+    try:
+        font_file = font_manager.findfont(font_manager.FontProperties(family='Arial'))
+        matplotlib.rcParams["font.family"] = "Arial"
+    except UserWarning:
+        pass 
+
 from . import plot_metagenome_genome 
 from .. import utilities
 

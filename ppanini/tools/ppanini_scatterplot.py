@@ -7,21 +7,29 @@ import numpy as np
 import argparse
 import pdb
 import pandas as pd
-try:
-	import matplotlib
-	matplotlib.use( "Agg" )
-	matplotlib.rcParams["pdf.fonttype"] = 42
-	matplotlib.rcParams["font.family"] = "Arial"
-	import matplotlib.pyplot as plt
-	from matplotlib import colors
-	import matplotlib.patches as patches
-	import matplotlib.pyplot as plt
-	from scipy.stats import gaussian_kde
-	import matplotlib.cm as cm
-except:
-    sys.exit( "This script requires the Python scientific stack: matplotlib." )
 
-#from . import utils
+import matplotlib
+matplotlib.use( "Agg" )
+matplotlib.rcParams["pdf.fonttype"] = 42
+matplotlib.rcParams["font.family"] = "Arial"
+import matplotlib.pyplot as plt
+from matplotlib import colors
+import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+from scipy.stats import gaussian_kde
+import matplotlib.cm as cm
+
+from matplotlib import font_manager
+import warnings
+
+with warnings.catch_warnings():
+    warnings.simplefilter("error")
+    try:
+        font_file = font_manager.findfont(font_manager.FontProperties(family='Arial'))
+        matplotlib.rcParams["font.family"] = "Arial"
+    except UserWarning:
+        pass 
+
 
 from .. import utilities
 

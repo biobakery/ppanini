@@ -924,7 +924,7 @@ def gene2genefamilies(tables, mapping_cluster, mapping_uniref, scale):
     #--mapping-uniref ./hmp_nares_map_uniref_gene.txt
     """
     # name the genes cluster output 
-    gene_families_table = name_temp_file('gene_families_table.txt')
+    gene_families_table = name_temp_file('gene_families.txt')
 
     # align user input to database
     exe="ppanini_join_tables"
