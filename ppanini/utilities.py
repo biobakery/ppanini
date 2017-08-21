@@ -884,7 +884,7 @@ def cluster_genes(genes_fasta_file):
     exe="cd-hit"
     opts=''
     #cd-hit -d 0 -c .9 -aL .8 -G 0 -T 2 -i ${infer_output}/no_hits_reads.faa -o ${infer_output}/no_hits_reads.clust90
-    args=["-i", genes_fasta_file,"-o", cluster_alignments, "-d", 0, "-c", .9, "-aL", .8, "-G", 0, "-T", 2]
+    args=["-i", genes_fasta_file,"-o", cluster_alignments, "-d", 0, "-c", .9, "-aL", .8, "-G", 0, "-T", config.threads, "-M", 2000]
 
     # run the prodigal gene caller
     message="Running " + exe + " ........"
