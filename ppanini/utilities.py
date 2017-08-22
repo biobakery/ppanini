@@ -676,8 +676,8 @@ def abundance(genes_file, alignment_file):
 	args+=opts
 	
 	# create temp file for stdout and stderr
-	tmpfile=unnamed_temp_file("featureCounts_stdout_")
-	tmpfile2=unnamed_temp_file("featureCounts_stderr_")
+	#tmpfile=unnamed_temp_file("featureCounts_stdout_")
+	#tmpfile2=unnamed_temp_file("featureCounts_stderr_")
 	
 	execute_command(exe,args,[genes_file, alignment_file],[abundance_file])#,
 		#stdout_file=tmpfile, stderr_file=tmpfile2)
@@ -714,11 +714,11 @@ def index(custom_database):
     args+=opts
     
     # create temp file for stdout and stderr
-    tmpfile=unnamed_temp_file("bowtie2_stdout_")
-    tmpfile2=unnamed_temp_file("bowtie2_stderr_")
+    #tmpfile=unnamed_temp_file("bowtie2_stdout_")
+    #tmpfile2=unnamed_temp_file("bowtie2_stderr_")
     
-    execute_command(exe,args,[custom_database],outfiles,
-        stdout_file=tmpfile, stderr_file=tmpfile2)
+    execute_command(exe,args,[custom_database],outfiles)
+        #stdout_file=tmpfile, stderr_file=tmpfile2)
 
     return index_name
 

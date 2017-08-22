@@ -68,22 +68,22 @@ def summerize_gene_table(ppanini_input, ppanini_output, output_path = None ):
     
     # add GO to the names of gene families 
     # that have a GO term in the PPANINI output file 
-    mapper = {}
-    
+    mapper = []
     # check if the gene family has mapped to any GO term using PPANINI output file
     # add category names in the beginning of gene families
     for gene_family in df_in.index:
-        mapper[gene_family] = df_out.loc[gene_family, 'GO']
-        if mapper[gene_family] !=  mapper[gene_family]: # if mapper[gene_family] is nan then is not equal to itself :)
+        go_term = df_out.loc[gene_family, 'GO']
+        if go_term !=  go_term: # if mapper[gene_family] is nan then is not equal to itself :)
             if gene_family.startswith('UniRef'):
-                mapper[gene_family] = 'UniRef'+gene_family
+                mapper.append('Protein_'+gene_family)
             else:
-                mapper[gene_family] = 'Cluster'+gene_family
+                mapper.append('Unannotated_'+gene_family)
         else:
-            mapper[gene_family] = 'GO' + gene_family
-    # update gene family names       
-    df_in.index = mapper.values()        
-
+            mapper.append('Function_' + gene_family)
+    # update gene family names 
+    print df_in.index[4]      
+    df_in.index = mapper        
+    print df_in.index[4]
     summary_table = pd.DataFrame(index = df_in.columns, columns=['Unannotated', 'UniRef', 'GO'], dtype=float)
     summary_table[:] = 0.0000
     for sample in list(df_in.columns):
@@ -91,13 +91,12 @@ def summerize_gene_table(ppanini_input, ppanini_output, output_path = None ):
         # skip sample with all rows zero
         if sum1 == 0.00:
             continue
-        summary_table.loc[sample, 'GO'] = df_in.loc[df_in.index.str.startswith('GO'),sample].sum() /sum1 
-        summary_table.loc[sample, 'UniRef'] = df_in.loc[df_in.index.str.startswith('UniRef'), sample].sum() /sum1 
-        summary_table.loc[sample, 'Unannotated'] = df_in.loc[df_in.index.str.startswith('Cluster'), sample].sum()/sum1
-
+        sum1 *= 1.00
+        summary_table.loc[sample, 'GO'] = df_in.loc[df_in.index.str.startswith('Function_'),sample].sum() * 1.00 /sum1 
+        summary_table.loc[sample, 'UniRef'] = df_in.loc[df_in.index.str.startswith('Protein_'), sample].sum() * 1.00 /sum1 
+        summary_table.loc[sample, 'Unannotated'] = df_in.loc[df_in.index.str.startswith('Unannotated_'), sample].sum() * 1.00/sum1
     summary_table.sort_values(by=['Unannotated', 'UniRef', 'GO' ], ascending=[0, 0 , 0], inplace= True) #
     
-    #print summary_table
     if output_path == None:
         output_path = './ppanini_barplot'
     summary_table.to_csv(output_path+'.txt', sep='\t')
