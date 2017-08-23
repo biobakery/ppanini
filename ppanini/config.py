@@ -1,6 +1,6 @@
 
 #default values for user options
-version = '0.7.0'
+version = '0.7.1'
 input_table = ''
 output_folder = ''
 basename = 'ppanini'

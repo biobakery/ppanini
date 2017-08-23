@@ -102,6 +102,12 @@ def main():
         
     # Join gene families and write them to the output directory as gene_families_table.txt
     gene_families_table = utilities.gene2genefamilies(args.gene_path, mapping_cluster, hits_map, args.scale)
+    
+    # move the the gene families output table under main output folder from temp files
+    
+    shutil.move(gene_families_table, config.output_folder+'/'+os.path.basename(os.path.normpath(gene_families_table)))
+
+    print ("The gene families output table for ppanin is written in: \n%s")% (config.output_folder+'/'+os.path.basename(os.path.normpath(gene_families_table)))
 
 
 if __name__ == '__main__':
