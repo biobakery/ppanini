@@ -81,9 +81,7 @@ def summerize_gene_table(ppanini_input, ppanini_output, output_path = None ):
         else:
             mapper.append('Function_' + gene_family)
     # update gene family names 
-    print df_in.index[4]      
     df_in.index = mapper        
-    print df_in.index[4]
     summary_table = pd.DataFrame(index = df_in.columns, columns=['Unannotated', 'UniRef', 'GO'], dtype=float)
     summary_table[:] = 0.0000
     for sample in list(df_in.columns):
