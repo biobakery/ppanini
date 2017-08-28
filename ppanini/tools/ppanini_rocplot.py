@@ -39,11 +39,11 @@ with warnings.catch_warnings():
     except UserWarning:
         pass 
 
-from . import plot_metagenome_genome 
+#from . import plot_metagenome_genome 
 from .. import utilities
 
 from .. import config
-from . import plot_metagenome_genome
+#from . import plot_metagenome_genome
 def fpr_tpr_genome(metagenomic_table, no_uniq_genomes, essential_genes):
     # calculate genomic score 
     gp = np.zeros(len(metagenomic_table))

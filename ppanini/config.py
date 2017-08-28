@@ -44,6 +44,7 @@ bowtie2_version={
 # prodigal options
 prodigal_opts=["-q"]
 threads = 1
+one_contig = False
 
 bowtie2_build_opts=["-q"] # "--threads "+str(threads)
 bowtie2_align_opts=["--sensitive"] # "--threads "+str(threads)

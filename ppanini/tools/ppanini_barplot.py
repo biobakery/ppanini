@@ -73,9 +73,12 @@ def summerize_gene_table(ppanini_input, ppanini_output, output_path = None ):
     # add category names in the beginning of gene families
     for gene_family in df_in.index:
         go_term = df_out.loc[gene_family, 'GO']
+        
         if go_term !=  go_term: # if mapper[gene_family] is nan then is not equal to itself :)
-            if gene_family.startswith('UniRef'):
+            if gene_family.startswith('UniRef') and not gene_family.endswith('unknown'):
                 mapper.append('Protein_'+gene_family)
+            elif gene_family == 'UNMAPPED': 
+                mapper.append('Unannotated_'+gene_family)
             else:
                 mapper.append('Unannotated_'+gene_family)
         else:

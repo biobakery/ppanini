@@ -49,6 +49,11 @@ def get_args ():
         metavar="<" + str(config.threads) + ">", 
         type=int,
         default=config.threads)
+    parser.add_argument(
+        "--one-contig",
+        dest ="one_contig", 
+        help="If there is only contig file for all samples, then this option should eb provided", 
+        action="store_true")
     
     args = parser.parse_args()
     return args
@@ -58,6 +63,7 @@ def main():
     args = get_args()
     config.threads = args.threads
     config.resume = args.resume
+    config.one_contig = args.one_contig
 
     # Set the basename of the output files if specified as an option
     if args.output_basename:
@@ -90,17 +96,26 @@ def main():
     #make a directory or outputs
     utilities.make_directory(config.temp_dir) 
     
-    # contig as input
-    new_contig_file = utilities.append_filename2cotignames(args.contig)
-    
-    # make directory for prodigal output
-    temp_dir = config.temp_dir
-    config.temp_dir = temp_dir+'/prodigal_output/'
-    utilities.make_directory(config.temp_dir) 
-    
-    #config.file_basename = ''
-    # gene call using prodigal
-    genes_file_gff, genes_file_fna, genes_file_faa = utilities.genecall(new_contig_file)
+    # if only one contig is used then no changing in names is needed 
+    if not args.one_contig:
+        new_contig_file = utilities.append_filename2cotignames(args.contig)
+        
+        # make directory for prodigal output
+        temp_dir = config.temp_dir
+        config.temp_dir = temp_dir+'/prodigal_output/'
+        utilities.make_directory(config.temp_dir) 
+        
+    else:
+        # check if there is already a prodigal output
+        if not os.path.isfile(config.output_folder+"/prodigal.gff"): # if there is no prodigal output
+            new_contig_file = args.contig    
+            # gene call using prodigal
+            genes_file_gff, genes_file_fna, genes_file_faa = utilities.genecall(new_contig_file)
+        else:
+            genes_file_gff = config.output_folder+ '/prodigal.gff'
+            #genes_file_fna = config.output_folder+ '/prodigal.fna'
+            genes_file_faa = config.output_folder + '/prodigal.faa'
+        
     
     # make directory for bowtie2 output
     config.temp_dir = temp_dir+'/bowtie2_output/'
@@ -120,16 +135,23 @@ def main():
     abundance_file = utilities.abundance(genes_file_gff, alignment_file)
     
     # move the three main output under main output folder from temp files
-    
+    # if there is more than one contig and the prodigal outputs ahvn't been produces (first sample run)
     shutil.move(abundance_file, config.output_folder+'/'+os.path.basename(os.path.normpath(abundance_file)))
-    
-    shutil.move(genes_file_gff, config.output_folder+'/'+os.path.basename(os.path.normpath(genes_file_gff)))
-    
-    shutil.move(genes_file_faa, config.output_folder+'/'+os.path.basename(os.path.normpath(genes_file_faa)))
-    print ("Three main output files for ppanini_press are written in: \n%s\n%s\n%s")% (config.output_folder+'/'+os.path.basename(os.path.normpath(abundance_file)),
-                                            config.output_folder+'/'+os.path.basename(os.path.normpath(genes_file_gff)), 
-                                            config.output_folder+'/'+os.path.basename(os.path.normpath(genes_file_faa)))
-    
-    
+    if not os.path.isfile(config.output_folder+"/prodigal.gff"):
+        if config.one_contig:
+            
+            shutil.move(genes_file_gff, config.output_folder+'/prodigal.gff')
+            shutil.move(genes_file_faa, config.output_folder+'/prodigal.faa')
+            print ("Three main output files for ppanini_press are written in: \n%s\n%s\n%s")% (config.output_folder+'/'+os.path.basename(os.path.normpath(abundance_file)),
+                                                config.output_folder+'/prodigal.gff', 
+                                                config.output_folder+'/prodigal.faa')
+        else:
+            shutil.move(genes_file_gff, config.output_folder+'/'+os.path.basename(os.path.normpath(genes_file_gff)))
+            shutil.move(genes_file_faa, config.output_folder+'/'+os.path.basename(os.path.normpath(genes_file_faa)))
+            print ("Three main output files for ppanini_press are written in: \n%s\n%s\n%s")% (config.output_folder+'/'+os.path.basename(os.path.normpath(abundance_file)),
+                                                config.output_folder+'/'+os.path.basename(os.path.normpath(genes_file_gff)), 
+                                                config.output_folder+'/'+os.path.basename(os.path.normpath(genes_file_faa)))
+        
+        
 if __name__ == '__main__':
 	main()
