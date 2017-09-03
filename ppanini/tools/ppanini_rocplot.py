@@ -77,6 +77,12 @@ def load_multiple_roc(args):
     essential_genes = essential_genes_uniref90_id_299_eco + essential_genes_uniref90_id_deg
     args.plot_mg = True
     args.plot_g = False
+    if not args.master:
+        fpr, tpr = get_fpr_tpr(input_ppanini=args.ppanini_output,\
+                               essential_genes= essential_genes, beta =args.beta)
+        roc_info.append([args.output+' metagenomic priority',fpr, tpr])
+        roc_plot(roc_info, figure_name=args.outfile, size = args.size) 
+        return
     
     if args.plot_mg:
         #try:
@@ -173,7 +179,7 @@ def get_fpr_tpr(input_ppanini, essential_genes, beta =.5):
     #print abun[0:]
     ground_truth = [1 if (gene_id  in essential_genes) else 0 for gene_id in centroids_list ]
    
-    ground_truth = [1 if (gene_id  in essential_genes) else 0 for gene_id in centroids_list ]
+    #ground_truth = [1 if (gene_id  in essential_genes) else 0 for gene_id in centroids_list ]
     #scipy.stats.rankdata()
     score[beta] = ppanini_score
 

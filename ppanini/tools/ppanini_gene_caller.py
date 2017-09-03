@@ -96,7 +96,7 @@ def main():
     #make a directory or outputs
     utilities.make_directory(config.temp_dir) 
     
-    # if only one contig is used then no changing in names is needed 
+    
     if not args.one_contig:
         new_contig_file = utilities.append_filename2cotignames(args.contig)
         
@@ -104,7 +104,9 @@ def main():
         temp_dir = config.temp_dir
         config.temp_dir = temp_dir+'/prodigal_output/'
         utilities.make_directory(config.temp_dir) 
-        
+        genes_file_gff, genes_file_fna, genes_file_faa = utilities.genecall(new_contig_file)
+    
+    # if only one contig is used then no changing in names is needed     
     else:
         # check if there is already a prodigal output
         if not os.path.isfile(config.output_folder+"/prodigal.gff"): # if there is no prodigal output
