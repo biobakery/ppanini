@@ -96,7 +96,7 @@ def main():
     #make a directory or outputs
     utilities.make_directory(config.temp_dir) 
     
-    
+    # if each sample has its own contig
     if not args.one_contig:
         new_contig_file = utilities.append_filename2cotignames(args.contig)
         
@@ -120,6 +120,7 @@ def main():
         
     
     # make directory for bowtie2 output
+    temp_dir = config.temp_dir
     config.temp_dir = temp_dir+'/bowtie2_output/'
     utilities.make_directory(config.temp_dir)
     
