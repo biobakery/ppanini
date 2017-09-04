@@ -108,9 +108,9 @@ def main():
     
     # if only one contig is used then no changing in names is needed     
     else:
+        new_contig_file = args.contig 
         # check if there is already a prodigal output
-        if not os.path.isfile(config.output_folder+"/prodigal.gff"): # if there is no prodigal output
-            new_contig_file = args.contig    
+        if not os.path.isfile(config.output_folder+"/prodigal.gff"): # if there is no prodigal output   
             # gene call using prodigal
             genes_file_gff, genes_file_fna, genes_file_faa = utilities.genecall(new_contig_file)
         else:
