@@ -71,25 +71,34 @@ def main():
     temp_out_files=[]
     for gene_file in os.listdir(args.gene_path):          
         # only use FAA files
-        if gene_file.endswith('.faa'):
+        if gene_file.endswith('_no_hits.faa'):
             temp_out_files.append(args.gene_path+'/'+gene_file)
-    genes_file = utilities.name_temp_file('genes.faa')
+    no_hits_genes_file = utilities.name_temp_file('no_hits_genes.faa')
     
-    utilities.execute_command("cat", temp_out_files, temp_out_files, [genes_file], genes_file)
+    utilities.execute_command("cat", temp_out_files, temp_out_files, [no_hits_genes_file], no_hits_genes_file)
     
+    # concatenate uniref mapping files for all samples
+    temp_hits_map=[]
+    for gene_file in os.listdir(args.gene_path):          
+        # only use FAA files
+        if gene_file.endswith('_hits_map.txt'):
+            temp_out_files.append(args.gene_path+'/'+gene_file)
+    hits_map = utilities.name_temp_file('hits_map.txt')
+    
+    utilities.execute_command("cat", temp_hits_map, temp_hits_map, [hits_map], hits_map)
     # Run diamond
-    alignment_file = utilities.diamond_alignment(genes_file, args.uniref )
+    #alignment_file = utilities.diamond_alignment(genes_file, args.uniref )
     
     
     # Infer abundance for sufficient hits to  uniref90 and no_hits
-    hits_map, no_hits_map = utilities.Infer_aligmnets(alignment_file, config.temp_dir)
+    #hits_map, no_hits_map = utilities.Infer_aligmnets(alignment_file, config.temp_dir)
     
     
     # select sequence for insufficient hits
-    no_hits_genes_faa = utilities.select_sequnces(genes_file, no_hits_map, output_name = 'no_hits.faa')
+    #no_hits_genes_faa = utilities.select_sequnces(genes_file, no_hits_map, output_name = 'no_hits.faa')
     
     # select sequence for sufficient hits 
-    hits_genes_faa = utilities.select_sequnces(genes_file, hits_map, output_name = 'hits.faa')
+    #hits_genes_faa = utilities.select_sequnces(genes_file, hits_map, output_name = 'hits.faa')
 
     # Cluster no sufficient hits using CD-Hit
     cluster_gene_file, cluster_alignments = utilities.cluster_genes(no_hits_genes_faa)

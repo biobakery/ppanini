@@ -38,6 +38,12 @@ def get_args ():
         "input file basename]",
         default=config.file_basename,
         metavar="<sample_name>")
+    parser.add_argument( 
+        "-u", "--uniref", 
+        #dest = 'uniref',
+        required = True,
+        help="UniRe90 database",
+        )
     parser.add_argument(
         "-r","--resume", 
         help="bypass commands if the output files exist\n", 
@@ -136,6 +142,25 @@ def main():
     
     # gene abundance using featureCounts
     abundance_file = utilities.abundance(genes_file_gff, alignment_file)
+    
+    # Run diamond
+    alignment_file = utilities.diamond_alignment(genes_file_faa, args.uniref )
+    
+    
+    # Infer abundance for sufficient hits to  uniref90 and no_hits
+    hits_map, no_hits_map = utilities.Infer_aligmnets(alignment_file, config.temp_dir)
+    
+    # wirite mape file to the ouput
+    with open(config.output_folder+'/'+config.file_basename+'_hits_map.txt' , 'w') as foo:
+        foo.writelines([str.join('\t', hits_map)+'\n']) #header
+
+    
+    # select sequence for insufficient hits
+    no_hits_genes_faa = utilities.select_sequnces(genes_file, no_hits_map, output_name = config.file_basename+'_no_hits.faa')
+    
+    # select sequence for sufficient hits 
+    hits_genes_faa = utilities.select_sequnces(genes_file, hits_map, output_name = config.file_basename+'_hits.faa')
+    
     
     # move the three main output under main output folder from temp files
     # if there is more than one contig and the prodigal outputs ahvn't been produces (first sample run)
