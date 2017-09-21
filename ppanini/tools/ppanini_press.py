@@ -22,12 +22,6 @@ def get_args ():
         help="a directory path to ppanini_gene_caller outputs which includes txt, gff, and faa files for each sample.",
         )
     parser.add_argument( 
-        "-u", "--uniref", 
-        #dest = 'uniref',
-        required = True,
-        help="UniRe90 database",
-        )
-    parser.add_argument( 
         "-o", "--output", 
         default=None,
         help="Path for outputs",
