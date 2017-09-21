@@ -126,7 +126,6 @@ def main():
         
     
     # make directory for bowtie2 output
-    temp_dir = config.temp_dir
     config.temp_dir = temp_dir+'/bowtie2_output/'
     utilities.make_directory(config.temp_dir)
     
