@@ -153,10 +153,10 @@ def main():
     #    foo.writelines(hits_map) #header
     
     # select sequence for insufficient hits
-    no_hits_genes_faa = utilities.select_sequnces(genes_file, no_hits_map, output_name = '_no_hits.faa')
+    no_hits_genes_faa = utilities.select_sequnces(genes_file_faa, no_hits_map, output_name = '_no_hits.faa')
     
     # select sequence for sufficient hits 
-    hits_genes_faa = utilities.select_sequnces(genes_file, hits_map, output_name = '_hits.faa')
+    hits_genes_faa = utilities.select_sequnces(genes_file_faa, hits_map, output_name = '_hits.faa')
     
     
     # move the three main output under main output folder from temp files
