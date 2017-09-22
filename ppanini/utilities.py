@@ -835,8 +835,8 @@ def Infer_aligmnets(alignment_file, output):
     Run infer_abundance to get sufficnet maaped genes (hits) and insufficient genes (no_hits)
     """
     # name the hits and no hits file
-    hits_map = name_temp_file('hits.txt')
-    no_hits_map = name_temp_file('no_hits.txt')
+    hits_map = name_temp_file('_hits.txt')
+    no_hits_map = name_temp_file('_no_hits.txt')
     # align user input to database
     exe="ppanini_infer_gene"
     opts=''
