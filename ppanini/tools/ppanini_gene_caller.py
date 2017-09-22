@@ -140,12 +140,12 @@ def main():
     utilities.make_directory(config.temp_dir)
     
     # gene abundance using featureCounts
+    config.temp_dir = temp_dir
     abundance_file = utilities.abundance(genes_file_gff, alignment_file)
     
     # Run diamond
     alignment_file = utilities.diamond_alignment(genes_file_faa, args.uniref )
     
-    config.temp_dir = temp_dir
     # Infer abundance for sufficient hits to  uniref90 and no_hits
     hits_map, no_hits_map = utilities.Infer_aligmnets(alignment_file, config.temp_dir)
     
