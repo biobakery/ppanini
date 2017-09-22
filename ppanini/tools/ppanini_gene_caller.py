@@ -164,13 +164,20 @@ def main():
     shutil.move(abundance_file, config.output_folder+'/'+os.path.basename(os.path.normpath(abundance_file)))
     if not os.path.isfile(config.output_folder+"/prodigal.gff"):
         if config.one_contig:
-            
+            shutil.move(no_hits_genes_faa, config.output_folder+'/no_hits.faa')
+            shutil.move(hits_genes_faa, config.output_folder+'/hits.faa')
+            shutil.move(no_hits_genes_faa, config.output_folder+'/no_hits.txt')
+            shutil.move(hits_genes_faa, config.output_folder+'/hits.txt')
             shutil.move(genes_file_gff, config.output_folder+'/prodigal.gff')
             shutil.move(genes_file_faa, config.output_folder+'/prodigal.faa')
             print ("Three main output files for ppanini_press are written in: \n%s\n%s\n%s")% (config.output_folder+'/'+os.path.basename(os.path.normpath(abundance_file)),
                                                 config.output_folder+'/prodigal.gff', 
                                                 config.output_folder+'/prodigal.faa')
         else:
+            shutil.move(no_hits_genes_faa, config.output_folder+'/'+config.file_basename+'_no_hits.faa')
+            shutil.move(hits_genes_faa, config.output_folder+'/'+config.file_basename+'_hits.faa')
+            shutil.move(no_hits_genes_faa, config.output_folder+'/'+config.file_basename+'_no_hits.txt')
+            shutil.move(hits_genes_faa, config.output_folder+'/'+config.file_basename+'_hits.txt')
             shutil.move(genes_file_gff, config.output_folder+'/'+os.path.basename(os.path.normpath(genes_file_gff)))
             shutil.move(genes_file_faa, config.output_folder+'/'+os.path.basename(os.path.normpath(genes_file_faa)))
             print ("Three main output files for ppanini_press are written in: \n%s\n%s\n%s")% (config.output_folder+'/'+os.path.basename(os.path.normpath(abundance_file)),
