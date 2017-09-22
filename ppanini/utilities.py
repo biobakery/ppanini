@@ -841,7 +841,7 @@ def Infer_aligmnets(alignment_file, output):
     exe="ppanini_infer_gene"
     opts=''
 
-    args=[alignment_file,"--min-percid", .9,"--min-qcover", .8, "--min-scover", .8, '--output', output]
+    args=[alignment_file,"--min-percid", .9,'--min-qcover', .8, "--min-scover", .8, '--output', output]
 
     # run the prodigal gene caller
     message="Running " + exe + " ........"
