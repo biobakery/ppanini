@@ -101,13 +101,12 @@ def main():
     
     #make a directory or outputs
     utilities.make_directory(config.temp_dir) 
-    
+    temp_dir = config.temp_dir
     # if each sample has its own contig
     if not args.one_contig:
         new_contig_file = utilities.append_filename2cotignames(args.contig)
         
         # make directory for prodigal output
-        temp_dir = config.temp_dir
         config.temp_dir = temp_dir+'/prodigal_output/'
         utilities.make_directory(config.temp_dir) 
         genes_file_gff, genes_file_fna, genes_file_faa = utilities.genecall(new_contig_file)
@@ -154,10 +153,10 @@ def main():
     #    foo.writelines(hits_map) #header
     
     # select sequence for insufficient hits
-    no_hits_genes_faa = utilities.select_sequnces(genes_file, no_hits_map, output_name = config.file_basename+'_no_hits.faa')
+    no_hits_genes_faa = utilities.select_sequnces(genes_file, no_hits_map, output_name = '_no_hits.faa')
     
     # select sequence for sufficient hits 
-    hits_genes_faa = utilities.select_sequnces(genes_file, hits_map, output_name = config.file_basename+'_hits.faa')
+    hits_genes_faa = utilities.select_sequnces(genes_file, hits_map, output_name = '_hits.faa')
     
     
     # move the three main output under main output folder from temp files
