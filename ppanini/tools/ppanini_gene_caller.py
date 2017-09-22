@@ -151,7 +151,7 @@ def main():
     
     # wirite mape file to the ouput
     with open(config.output_folder+'/'+config.file_basename+'_hits_map.txt' , 'w') as foo:
-        foo.writelines([str.join('\t', hits_map)+'\n']) #header
+        foo.writelines(hits_map) #header
     
     # select sequence for insufficient hits
     no_hits_genes_faa = utilities.select_sequnces(genes_file, no_hits_map, output_name = config.file_basename+'_no_hits.faa')
