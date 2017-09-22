@@ -149,9 +149,9 @@ def main():
     # Infer abundance for sufficient hits to  uniref90 and no_hits
     hits_map, no_hits_map = utilities.Infer_aligmnets(alignment_file, config.temp_dir)
     
-    # wirite mape file to the ouput
-    with open(config.output_folder+'/'+config.file_basename+'_hits_map.txt' , 'w') as foo:
-        foo.writelines(hits_map) #header
+    # write map file to the output
+    #with open(config.output_folder+'/'+config.file_basename+'_hits_map.txt' , 'w') as foo:
+    #    foo.writelines(hits_map) #header
     
     # select sequence for insufficient hits
     no_hits_genes_faa = utilities.select_sequnces(genes_file, no_hits_map, output_name = config.file_basename+'_no_hits.faa')
