@@ -75,7 +75,7 @@ def main():
         if gene_file.endswith('_hits.faa'):
             temp_hits_faa.append(args.gene_path+'/hits/'+gene_file)
         elif gene_file.endswith('_hits.txt'):
-            temp_hits_map.append(args.gene_path+'/'+gene_file)
+            temp_hits_map.append(args.gene_path+'/hits/'+gene_file)
     no_hits_faa = utilities.name_temp_file('no_hits_genes.faa')
     no_hits_map = utilities.name_temp_file('no_hits_map.txt')
     hits_faa = utilities.name_temp_file('hits_genes.faa')
