@@ -3,6 +3,7 @@ import sys
 import re
 import argparse
 import logging
+import shutil
 
 #from .. import quantify_genes
 from .. import utilities
