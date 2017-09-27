@@ -50,7 +50,7 @@ bowtie2_build_opts=["-q"] # "--threads "+str(threads)
 bowtie2_align_opts=["--sensitive"] # "--threads "+str(threads)
 bowtie2_index_name="_bowtie2_index"
 cd_hit_memory = 2000
-cd_hit_opts=["-d", 0, "-c", .9, "-aL", .8, "-G", 0, "-T", threads, "-M", cd_hit_memory]
+
 featureCounts_opts=["-T",threads,"-g","ID","-t","CDS"]
 
 
