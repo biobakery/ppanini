@@ -666,7 +666,7 @@ def abundance(genes_file, alignment_file):
 	exe="featureCounts"
 	opts=config.featureCounts_opts
 
-	args=["-a",genes_file, "-o", abundance_file, alignment_file]
+	args=["-a",genes_file, "-o", abundance_file, alignment_file, "-T", config.threads]
 
 	
 	message="Running " + exe + " ........"
@@ -907,7 +907,7 @@ def mapping_clusters_genes(cluster_gene_file):
 
     # align user input to database
     exe="ppanini_cluster2genes"
-    args=["-i", cluster_gene_file,"-o", config.temp_dir]
+    args=["-i", cluster_gene_file,"-o", config.temp_dir, "-T", config.threads, "-M", config.cd_hit_memory]
     args+=config.cd_hit_opts 
     # run the ppanini_cluster2genes
     message="Running " + exe + " ........"
