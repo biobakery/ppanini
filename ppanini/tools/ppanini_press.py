@@ -52,7 +52,7 @@ def get_args ():
 def main():
     args = get_args()
     
-    config.temp_dir= args.output+'/'+os.path.basename(os.path.normpath(args.output))+'_temp'
+    config.temp_dir= args.output+'/temp'
     config.output_folder= args.output
     config.threads = args.threads
     config.resume = args.resume
