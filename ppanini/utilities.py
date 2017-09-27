@@ -666,7 +666,7 @@ def abundance(genes_file, alignment_file):
 	exe="featureCounts"
 	opts=config.featureCounts_opts
 
-	args=["-a",genes_file, "-o", abundance_file, alignment_file, "-T", config.threads]
+	args=["-a",genes_file, "-o", abundance_file, alignment_file, "-T",threads777]
 
 	
 	message="Running " + exe + " ........"
@@ -883,10 +883,9 @@ def cluster_genes(genes_fasta_file):
 
     # align user input to database
     exe="cd-hit"
-    opts=config.cd_hit_opts
     #cd-hit -d 0 -c .9 -aL .8 -G 0 -T 2 -i ${infer_output}/no_hits_reads.faa -o ${infer_output}/no_hits_reads.clust90
-    args=["-i", genes_fasta_file,"-o", cluster_alignments]
-
+    args=["-i", genes_fasta_file,"-o", cluster_alignments, "-T", config.threads, "-M", config.cd_hit_memory]
+    args+=config.cd_hit_opts
     # run the prodigal gene caller
     message="Running " + exe + " ........"
     print("\n"+message+"\n")
@@ -907,8 +906,8 @@ def mapping_clusters_genes(cluster_gene_file):
 
     # align user input to database
     exe="ppanini_cluster2genes"
-    args=["-i", cluster_gene_file,"-o", config.temp_dir, "-T", config.threads, "-M", config.cd_hit_memory]
-    args+=config.cd_hit_opts 
+    args=["-i", cluster_gene_file,"-o", config.temp_dir]
+     
     # run the ppanini_cluster2genes
     message="Running " + exe + " ........"
     print("\n"+message+"\n")
