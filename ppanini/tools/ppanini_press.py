@@ -35,7 +35,7 @@ def get_args ():
     parser.add_argument(
         "--threads", 
         help="number of threads/processes\n[DEFAULT: " + str(config.threads) + "]", 
-        metavar="<" + str(config.threads) + ">", 
+        #metavar="<" + str(config.threads) + ">", 
         type=int,
         default=config.threads)
     parser.add_argument(
@@ -61,6 +61,7 @@ def main():
     config.output_folder= args.output
     config.threads = args.threads
     config.resume = args.resume
+    config.cd_hit_memory = args.cd_hit_memory
     #Steps:   
     
     #make a directory or outputs
