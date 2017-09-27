@@ -908,7 +908,7 @@ def mapping_clusters_genes(cluster_gene_file):
     # align user input to database
     exe="ppanini_cluster2genes"
     args=["-i", cluster_gene_file,"-o", config.temp_dir]
-
+    args+=config.cd_hit_opts 
     # run the ppanini_cluster2genes
     message="Running " + exe + " ........"
     print("\n"+message+"\n")

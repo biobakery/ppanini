@@ -44,6 +44,11 @@ def get_args ():
         help="scale the abundance table\n",
         choices=["rpk","count"], 
         default='rpk')
+    parser.add_argument(
+        "--memory",
+        dest= 'cd_hit_memory', 
+        help="memory fro -M option in CD-Hit \n",
+        default=config_cd_hit_memory)
     
     args = parser.parse_args()
     return args
