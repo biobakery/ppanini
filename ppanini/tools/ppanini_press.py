@@ -47,7 +47,7 @@ def get_args ():
     parser.add_argument(
         "--memory",
         dest= 'cd_hit_memory', 
-        help="memory fro -M option in CD-Hit \n",
+        help="memory for -M option in CD-Hit \n",
         default=config.cd_hit_memory)
     
     args = parser.parse_args()

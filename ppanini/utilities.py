@@ -666,7 +666,7 @@ def abundance(genes_file, alignment_file):
 	exe="featureCounts"
 	opts=config.featureCounts_opts
 
-	args=["-a",genes_file, "-o", abundance_file, alignment_file, "-T",threads777]
+	args=["-a",genes_file, "-o", abundance_file, alignment_file, "-T",config.threads]
 
 	
 	message="Running " + exe + " ........"

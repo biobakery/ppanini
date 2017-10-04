@@ -58,7 +58,7 @@ def get_args ():
     parser.add_argument(
         "--one-contig",
         dest ="one_contig", 
-        help="If there is only contig file for all samples, then this option should eb provided", 
+        help="If there is only one contig file for all samples, then this option should be provided", 
         action="store_true")
     
     args = parser.parse_args()
