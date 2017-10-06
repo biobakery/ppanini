@@ -1358,6 +1358,10 @@ def check_cmd (cmd):
     except:
         print ("No executable %s! Please install it! ", cmd)
           
-        
+def ncolors( n, colormap="jet" ):
+        """utility for defining N evenly spaced colors across a color map"""
+        cmap = plt.get_cmap( colormap )
+        cmap_max = cmap.N
+        return [cmap( int( k * cmap_max / (n - 1) ) ) for k in range( n )]        
         
         
