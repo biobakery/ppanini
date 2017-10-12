@@ -45,6 +45,12 @@ def get_args( ):
                          dest = "summary_table",
                          #action="store_true",
                          help="Summary table", )
+    parser.add_argument( "--scale",
+                         dest = "scale",
+                         #action="store_true",
+                         choices= ['abundance', 'counts'],
+                         default = 'abundance',
+                         help="Scale: abundance or counts [default: abundance]", )
     parser.add_argument( "-o", "--output",
                          dest = "plot_output",
                          metavar = "<feature id>",
@@ -58,8 +64,7 @@ def load_summary_table(summary_table_file_path):
         sys.exit("Input Error First File!") 
     return df_in
 
-def summerize_gene_table(ppanini_input, ppanini_output, output_path = None ):
-     
+def summerize_gene_table(ppanini_input, ppanini_output, scale = 'abundance', output_path = None ):
     try: 
         df_in = pd.read_csv(str(ppanini_input), sep='\t', header=0, index_col =0)
         df_out = pd.read_csv(str(ppanini_output), sep='\t', header=0, index_col =0)
@@ -87,15 +92,27 @@ def summerize_gene_table(ppanini_input, ppanini_output, output_path = None ):
     df_in.index = mapper        
     summary_table = pd.DataFrame(index = df_in.columns, columns=['Unannotated', 'UniRef', 'GO'], dtype=float)
     summary_table[:] = 0.0000
+    sum1 =0.0
     for sample in list(df_in.columns):
-        sum1 = sum(df_in[sample])
-        # skip sample with all rows zero
-        if sum1 == 0.00:
-            continue
-        sum1 *= 1.00
-        summary_table.loc[sample, 'GO'] = df_in.loc[df_in.index.str.startswith('Function_'),sample].sum() * 1.00 /sum1 
-        summary_table.loc[sample, 'UniRef'] = df_in.loc[df_in.index.str.startswith('Protein_'), sample].sum() * 1.00 /sum1 
-        summary_table.loc[sample, 'Unannotated'] = df_in.loc[df_in.index.str.startswith('Unannotated_'), sample].sum() * 1.00/sum1
+        
+        if scale == 'abundance':
+            sum1 = sum(df_in[sample])
+            # skip sample with all rows zero
+            if sum1 == 0.0:
+                continue
+            summary_table.loc[sample, 'GO'] = df_in.loc[df_in.index.str.startswith('Function_'),sample].sum() * 1.00 /sum1 
+            summary_table.loc[sample, 'UniRef'] = df_in.loc[df_in.index.str.startswith('Protein_'), sample].sum() * 1.00 /sum1 
+            summary_table.loc[sample, 'Unannotated'] = df_in.loc[df_in.index.str.startswith('Unannotated_'), sample].sum() * 1.00/sum1
+        elif scale == 'counts':
+            sum1 = sum(df_in[sample]>0.00)
+            # skip sample with all rows zero
+            #print sum1
+            if sum1 == 0.0:
+                continue
+            summary_table.loc[sample, 'GO'] = sum(df_in.loc[df_in.index.str.startswith('Function_'),sample]> 0.0) * 1.00 /sum1 
+            summary_table.loc[sample, 'UniRef'] = sum(df_in.loc[df_in.index.str.startswith('Protein_'), sample]> 0.0) * 1.00 /sum1 
+            summary_table.loc[sample, 'Unannotated'] = sum(df_in.loc[df_in.index.str.startswith('Unannotated_'), sample]>0.0) * 1.00/sum1
+            
     summary_table.sort_values(by=['Unannotated', 'UniRef', 'GO' ], ascending=[0, 0 , 0], inplace= True) #
     
     if output_path == None:
@@ -204,7 +221,7 @@ def main():
     if user_args.summary_table:
         df = load_summary_table(user_args.summary_table)
     else:
-        df = summerize_gene_table(user_args.ppanini_input, user_args.ppanini_output, user_args.plot_output)
+        df = summerize_gene_table(ppanini_input = user_args.ppanini_input, ppanini_output = user_args.ppanini_output, scale = user_args.scale, output_path = user_args.plot_output)
     stack_barplot(df, user_args.plot_output )
 if __name__ == '__main__':
     main()    
