@@ -43,7 +43,7 @@ def read_gene_table(config=config):
     logger.debug('read_gene_table')
     #gene_table = pd.read_csv(config.input_table, sep='\t', index_col=0)
 
-    gene_table = utilities.try_open(config.input_table)
+    gene_table = utilities.gzip_bzip2_biom_open_readlines(config.input_table)
     metadata = []
     uniref_dm, gis_dm = {}, {}
     count_metadata_lines = 0
