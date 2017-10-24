@@ -87,7 +87,7 @@ def try_open( path, *args ):
         else:
             fh = open( path, *args )
     except:
-        sys.exit( "Problem opening", path )
+        sys.exit( "Problem opening:"+ path )
     return fh   
 # ---------------------------------------------------------------
 # text manipulation
