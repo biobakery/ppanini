@@ -255,127 +255,128 @@ def master_plot(path, size = 5):
 '''
 def scatter_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes, 
 									title, scale = None, output_path = None, size = 3):
-	if axe == None:
-		fig, axe = plt.subplots(1, figsize=(size, size))
-	#mp_gp = {}
-	genes = ppanini_table.index
-	#abund = ppanini_table['abundance']
-	#prev = ppanini_table['prevalence']
-	ppanini_score = ppanini_table['ppanini_score']
-	#abund = np.array(abund)/max(abund)
-	#prev = np.array(prev)/max(prev)
-	
-	gp = []
-	mp = []
-	temp_gp = []
-	temp_mp = []
-	for i in range(len(genes)):
-		gene = genes[i]
-		try:
-			gp += [len(table[gene])]
-		except:
-			gp += [0]
-		#mp += [min((abund[i], alpha[i]))]
-		mp +=[ppanini_score[i]]
-	gp = np.array(gp)/float(no_uniq_genomes)
-	#gp = np.where(gp != 0.0, gp, 10**-3)
-	#gp[gp == 0] = np.nan
-	#mp = np.where(mp != 0.0, mp, 10**-3)
-	#mp[mp == 0] = np.nan
-	for i in range(len(gp)):
-		if np.isnan(gp[i]) or np.isnan(mp[i]) or gp[i]==0 or mp[i]==0 :
-			continue
-		temp_gp += [gp[i]]
-		temp_mp += [mp[i]]
-	
-	gp = np.array(temp_gp) 
-	mp = np.array(temp_mp)
-	if scale == 'log':
-		gp = np.log(gp)
-		mp = np.log(mp)
-	elif scale == 'sqrt':
-		gp = np.sqrt(gp)
-		mp = np.sqrt(mp)
-	
-			
-	#fig, axe = plt.subplots()
-	def ncolors( n, colormap="jet" ):
-		"""utility for defining N evenly spaced colors across a color map"""
-		cmap = plt.get_cmap( colormap )
-		cmap_max = cmap.N
-		return [cmap( int( k * cmap_max / (n - 1) ) ) for k in range( n )]
-	my_color = ncolors(4)
-	#x_dic= {'Gut': '#b87333', 'Skin':'#ffff00', 'Oral':'#009fff', 'Vaginal':'#ff4d00'}
-	color_dic= {'Stool': my_color[0], 'Anterior nares':my_color[2], 'Buccal mucosa':my_color[1], 'Posterior fornix':my_color[3]}
-	
-	# Calculate the point density
-	x = np.array(gp) 
-	y = np.array(mp)
-	xy = np.vstack([x,y])
-	z = gaussian_kde(xy)(xy)
-	
-	# Sort the points by density, so that the densest points are plotted last
-	idx = z.argsort()
-	#print idx, x, y
-	x, y, z = x[idx], y[idx], z[idx]
-	
-	#fig, ax = plt.subplots()
-	#ax.scatter(x, y, c=z, s=50, edgecolor='')
-	#plt.show()
-	#plt.hist2d(x, y, (50, 50), cmap=plt.cm.jet)
-	#plt.colorbar()
-	#plt.show()
-	
-	axe.scatter(x, \
-			   y, \
-			   c=z,\
-			   s=45,\
-			   #c= color_dic[title],\
-			   cmap='jet', \
-			   #edgecolor='',\
-			   #cmap= color_dic[title],\
-			   #'darkgoldenrod', \
-			   ##'slategray'
-			   alpha=0.25, \
-			   linewidths=0.01, \
-			   zorder=0, \
-			   marker='o',\
-			   label='')
-	def density_estimation(m1, m2):
-		values = np.vstack([m1, m2])
-		kernel = gaussian_kde(values)                                                                 
-		sf = kernel.scotts_factor()
-		bwx = sf * np.std(m1)
-		bwy = sf * np.std(m2)
-		X, Y = np.mgrid[(np.min(m1)-3*bwx):(np.max(m1)+3*bwx):100j, (np.min(m2)-3*bwy):(np.max(m2)+3*bwy):100j]                                                     
-		positions = np.vstack([X.ravel(), Y.ravel()])                                                       
-		Z = np.reshape(kernel(positions).T, X.shape)
-		return X, Y, Z
-	X, Y, Z = density_estimation(gp, mp)
-	axe.contour(X, Y, Z)
-	if scale == 'log':
-		axe.set_ylabel('Metagenomic priority (log)', fontsize=8)
-		axe.set_xlabel('Genomic priority (log)', fontsize=8)
-	elif scale == 'sqrt':
-		axe.set_ylabel('Metagenomic priority (sqrt)', fontsize=8)
-		axe.set_xlabel('Genomic priority (sqrt)', fontsize=8)
-	else:
-		axe.set_ylabel('Metagenomic priority', fontsize=8)
-		axe.set_xlabel('Genomic priority')
-	axe.get_xaxis().set_tick_params(which='both', labelsize=6,top='off',  direction='out')
-	axe.get_yaxis().set_tick_params(which='both', labelsize=6, right='off', direction='out')
-	axe.yaxis.set_label_position('left') 
-	if title:
-		axe.set_title(title, loc='left', fontdict={'fontsize':'9','fontweight' :'bold'})
-	plt.xlim([min(gp) , max(gp)])
-	plt.ylim(min(mp), max(mp))
-	axe.autoscale_view('tight')
-	plt.tight_layout()
-	if output_path:
-		plt.savefig(output_path+'.pdf', bbox_inches='tight', pad_inches = 0, dpi=300)
-		plt.savefig(output_path+'.png', bbox_inches='tight', pad_inches = 0, dpi=300)
-		plt.savefig(output_path+'.svgz', bbox_inches='tight', pad_inches = 0, dpi=300)
-
+    if axe == None:
+    	fig, axe = plt.subplots(1, figsize=(size, size))
+    #mp_gp = {}
+    genes = ppanini_table.index
+    #abund = ppanini_table['abundance']
+    #prev = ppanini_table['prevalence']
+    ppanini_score = ppanini_table['ppanini_score']
+    #abund = np.array(abund)/max(abund)
+    #prev = np.array(prev)/max(prev)
+    
+    gp = []
+    mp = []
+    temp_gp = []
+    temp_mp = []
+    for i in range(len(genes)):
+    	gene = genes[i]
+    	try:
+    		gp += [len(table[gene])]
+    	except:
+    		gp += [0]
+    	#mp += [min((abund[i], alpha[i]))]
+    	mp +=[ppanini_score[i]]
+    gp = np.array(gp)/float(no_uniq_genomes)
+    #gp = np.where(gp != 0.0, gp, 10**-3)
+    #gp[gp == 0] = np.nan
+    #mp = np.where(mp != 0.0, mp, 10**-3)
+    #mp[mp == 0] = np.nan
+    for i in range(len(gp)):
+    	if np.isnan(gp[i]) or np.isnan(mp[i]) or gp[i]==0 or mp[i]==0 :
+    		continue
+    	temp_gp += [gp[i]]
+    	temp_mp += [mp[i]]
+    
+    gp = np.array(temp_gp) 
+    mp = np.array(temp_mp)
+    if scale == 'log':
+    	gp = np.log(gp)
+    	#mp = np.log(mp)
+    elif scale == 'sqrt':
+    	gp = np.sqrt(gp)
+    	#mp = np.sqrt(mp) 		
+    #fig, axe = plt.subplots()
+    def ncolors( n, colormap="jet" ):
+    	"""utility for defining N evenly spaced colors across a color map"""
+    	cmap = plt.get_cmap( colormap )
+    	cmap_max = cmap.N
+    	return [cmap( int( k * cmap_max / (n - 1) ) ) for k in range( n )]
+    my_color = ncolors(4)
+    #x_dic= {'Gut': '#b87333', 'Skin':'#ffff00', 'Oral':'#009fff', 'Vaginal':'#ff4d00'}
+    color_dic= {'Stool': my_color[0], 'Anterior nares':my_color[2], 'Buccal mucosa':my_color[1], 'Posterior fornix':my_color[3]}
+    
+    # Calculate the point density
+    x = np.array(gp) 
+    y = np.array(mp)
+    xy = np.vstack([x,y])
+    z = gaussian_kde(xy)(xy)
+    
+    # Sort the points by density, so that the densest points are plotted last
+    idx = z.argsort()
+    #print idx, x, y
+    x, y, z = x[idx], y[idx], z[idx]
+    
+    #fig, ax = plt.subplots()
+    #ax.scatter(x, y, c=z, s=50, edgecolor='')
+    #plt.show()
+    #plt.hist2d(x, y, (50, 50), cmap=plt.cm.jet)
+    #plt.colorbar()
+    #plt.show()
+    
+    axe.scatter(x, \
+    		   y, \
+    		   c=z,\
+    		   s=30,\
+    		   #c= color_dic[title],\
+    		   cmap='jet', \
+    		   #edgecolor='',\
+    		   #cmap= color_dic[title],\
+    		   #'darkgoldenrod', \
+    		   ##'slategray'
+    		   alpha=0.20, \
+    		   linewidths=0.2, \
+               #edgecolors= 'black',
+    		   zorder=0, \
+    		   marker='o',\
+    		   label='')
+    def density_estimation(m1, m2):
+    	values = np.vstack([m1, m2])
+    	kernel = gaussian_kde(values)                                                                 
+    	sf = kernel.scotts_factor()
+    	bwx = sf * np.std(m1)
+    	bwy = sf * np.std(m2)
+    	X, Y = np.mgrid[(np.min(m1)-3*bwx):(np.max(m1)+3*bwx):100j, (np.min(m2)-3*bwy):(np.max(m2)+3*bwy):100j]                                                     
+    	positions = np.vstack([X.ravel(), Y.ravel()])                                                       
+    	Z = np.reshape(kernel(positions).T, X.shape)
+    	return X, Y, Z
+    X, Y, Z = density_estimation(gp, mp)
+    axe.contour(X, Y, Z, linewidths = 1, alpha = .75)
+    if scale == 'log':
+    	axe.set_ylabel('Metagenomic priority (log)', fontsize=6)
+    	axe.set_xlabel('Genomic priority (log)', fontsize=6)
+    elif scale == 'sqrt':
+    	axe.set_ylabel('Metagenomic priority (sqrt)', fontsize=6)
+    	axe.set_xlabel('Genomic priority (sqrt)', fontsize=6)
+    else:
+    	axe.set_ylabel('Metagenomic priority', fontsize=6)
+    	axe.set_xlabel('Genomic priority', fontsize=6)
+    axe.set_ylabel('Metagenomic priority', fontsize=6)
+    axe.get_xaxis().set_tick_params(which='both', labelsize=4,top='off',  direction='out')
+    axe.get_yaxis().set_tick_params(which='both', labelsize=4, right='off', direction='out')
+    axe.yaxis.set_label_position('left') 
+    if title:
+    	axe.set_title(title, loc='left', fontdict={'fontsize':'8','fontweight' :'bold'})
+    plt.xlim([min(gp) , max(gp)])
+    plt.ylim(min(mp), max(mp))
+    axe.autoscale_view('tight')
+    plt.tight_layout()
+    
+    if output_path:
+    	plt.savefig(output_path+'.pdf', bbox_inches='tight', pad_inches = 0, dpi=300)
+    	plt.savefig(output_path+'.png', bbox_inches='tight', pad_inches = 0, dpi=300)
+    	plt.savefig(output_path+'.svgz', bbox_inches='tight', pad_inches = 0, dpi=300)
+    return axe
 def hexbin_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes, title, scale = None):
 	if axe is None:
 		axe = plt.gca()

@@ -148,10 +148,10 @@ def read_fasta(fasta_filename):
 					fasta_seq[name] +=  re.sub('[\r\t\n]','', line)
 	#print fasta_seq
 	return fasta_seq
-def parse_table(m8_filename, fasta_filename):
+def parse_table(filename, fasta_filename):
 	'''Parse the BLAST results to give gene hits to genomes
 	Input: 
-	m8_filename = filename of blast results
+	filename = filename of blast results
 	fasta_filename = filename of corresponding fasta file
 	
 	Output: 
@@ -162,7 +162,7 @@ def parse_table(m8_filename, fasta_filename):
 	for seq in fasta_dict:
 		fasta_dict[seq] = float(len(fasta_dict[seq]))
 	table = {}
-	foo = open(m8_filename)
+	foo = open(filename)
 	for line in foo:
 		split_i = line.split('\t')
 		try:
@@ -177,22 +177,22 @@ def parse_table(m8_filename, fasta_filename):
 			elif sp not in table[split_i[0]]:
 				table[split_i[0]] += sp
 	return table
-def count_genomes(m8_filename):
-	table = pd.DataFrame.from_csv(m8_filename, sep='\t', index_col=None, header =None)
+def count_genomes(filename):
+	table = pd.DataFrame.from_csv(filename, sep='\t', index_col=None, header =None)
 	table.columns =['gene', 'genome']
 	gene_count_genome = table['gene'].value_counts()
 	return gene_count_genome
-def gene2genomes(m8_filename):
+def gene2genomes(filename):
 	'''Read parsed table for {gene: genomes}
 	Input: 
-	m8_filename = filename of blast results
+	filename = filename of blast results
 
 	Output: 
 	table = {gene: [List of genomes]}'''
 	
 	table ={}
 	
-	foo = open(m8_filename)
+	foo = open(filename)
 
 	for line in foo:
 		split_i = [i.strip() for i in line.split('\t')]
@@ -1296,7 +1296,7 @@ def rev_load_polymap ( path_in= '' , path_out ='' , start=0, skip=None, allowed_
         return polymap_all
 
 
-def load_polymap_dic ( path, start=0, skip=None, allowed_keys=None, allowed_values=None ):
+def load_polymap_dic ( path, key_ind=0, value_ind = 1, skip=None, allowed_keys=None, allowed_values=None ):
     """
     Loads a file to a dictionry 
     INPUT:
@@ -1310,8 +1310,8 @@ def load_polymap_dic ( path, start=0, skip=None, allowed_keys=None, allowed_valu
     size_warn( path )
     for line in gzip_bzip2_biom_open_readlines( path ):
         row = line.split("\t")
-        key = row[start]
-        polymap_all[key] = row[1]
+        key = row[key_ind]
+        polymap_all[key] = row[value_ind]
     '''with open(path) as csv_file:
         reader = csv.reader(csv_file)
         polymap_all = dict(reader)'''

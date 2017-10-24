@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 import os
 import sys
 import re
@@ -123,7 +125,9 @@ def summerize_gene_table(ppanini_input, ppanini_output, scale = 'abundance', out
 def stack_barplot(df, output_path = None, axe = None, legend = True, legend_title = "Characterization:", title= None):
        
     # Create the general blog and the "subplots" i.e. the bars
+    save_flag = False
     if axe == None:
+        save_flag = True
         fig, axe = plt.subplots(1, figsize=(6,4))
 
 
@@ -183,7 +187,7 @@ def stack_barplot(df, output_path = None, axe = None, legend = True, legend_titl
             linewidth=0)
    
     # set the x ticks with names
-    plt.xticks(tick_pos, df.index)
+    #plt.xticks(tick_pos, df.index)
     
     # Set the label and legends
     # Put a legend below current axis
@@ -197,24 +201,24 @@ def stack_barplot(df, output_path = None, axe = None, legend = True, legend_titl
     #lgd.get_title().set_position((20, 0))
     axe.set_ylabel("Fraction of abundance")
     axe.set_xlabel("Samples (N=%d)" % (len(df.index)))
-    axe.get_xaxis().set_tick_params(which='both', labelsize=8,top='off', labelbottom='off', bottom= 'off', direction='out')
-    axe.get_yaxis().set_tick_params(which='both', labelsize=8, right='off', direction='out')
-    
-    params = {'legend.fontsize': 8}#, 'legend.linewidth': 0}
-    plt.rcParams.update(params)
-    #plt.legend(loc='best', frameon=False )
-    plt.xlim([min(tick_pos)-bar_width, max(tick_pos)])
-    plt.ylim(0, 1)
+    axe.get_xaxis().set_tick_params(which='both', labelsize=6,top='off', labelbottom='off', bottom= 'off', direction='out')
+    axe.get_yaxis().set_tick_params(which='both', labelsize=6, right='off', direction='out')
     axe.autoscale_view('tight')
-    plt.tight_layout()
-    #fig.subplots_adjust(left=0,right=1,bottom=0,top=1)
-    #plt.show()
-    # Set a buffer around the edge
-    if output_path == None:
-        output_path = './ppanini_barplot'
-    plt.savefig(output_path+".pdf", dpi=300, format='pdf', bbox_inches='tight', pad_inches = 0) #dpi=300, format='png', bbox_extra_artists=(lgd,),
-    plt.savefig(output_path+".png", dpi=300, format='png', bbox_inches='tight', pad_inches = 0)
-    plt.savefig(output_path+".svgz", dpi=300, format='svgz', bbox_inches='tight', pad_inches = 0)
+    if save_flag:
+        params = {'legend.fontsize': 6}#, 'legend.linewidth': 0}
+        plt.rcParams.update(params)
+        #plt.legend(loc='best', frameon=False )
+        plt.xlim([min(tick_pos)-bar_width, max(tick_pos)])
+        plt.ylim(0, 1)
+        
+        plt.tight_layout()
+    
+        #Set a buffer around the edge
+        if output_path == None:
+            output_path = './ppanini_barplot'
+        plt.savefig(output_path+".pdf", dpi=300, format='pdf', bbox_inches='tight', pad_inches = 0) #dpi=300, format='png', bbox_extra_artists=(lgd,),
+        plt.savefig(output_path+".png", dpi=300, format='png', bbox_inches='tight', pad_inches = 0)
+        plt.savefig(output_path+".svgz", dpi=300, format='svgz', bbox_inches='tight', pad_inches = 0)
     return axe
 def main():
     user_args = get_args()
