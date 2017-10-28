@@ -49,7 +49,7 @@ def read_gene_table(config=config):
     count_metadata_lines = 0
     count_gene_lines = 0
     for line in gene_table:
-    	if line.startswith('#') or line.startswith('') :
+    	if line.startswith('#') or line.startswith('\t') :
             metadata += [line]
             count_metadata_lines +=1
     	else:
