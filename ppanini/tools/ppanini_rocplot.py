@@ -47,19 +47,16 @@ from .. import config
 #from . import plot_metagenome_genome
 def fpr_tpr_genome(metagenomic_table, n_uniq_genomes, essential_genes, pan_genome_score):
     # calculate genomic score 
-    gp_niche = np.zeros(len(pan_genome_score))
+    gp_niche = np.zeros(len(metagenomic_table))
     uniq_genomes = []
-    #genes = metagenomic_table.keys()#['gene']
+    genes = metagenomic_table.keys()#['gene']
     #print metagenomic_table.values()[1:100]
-    i=0
-    for gene in pan_genome_score:
-        if gene in metagenomic_table:
-            gp_niche[i] = len(metagenomic_table[gene])
-        i += 1
-    gp_niche = np.array(gp_niche)/float(n_uniq_genomes)  
-    gp_pangenome = [float(pan_genome_score[gene]) for gene in pan_genome_score]# else float(0.0) for gene in genes]
+    gp_niche = [len(metagenomic_table[gene])/float(n_uniq_genomes) for gene in genes]
+
+    gp_niche = np.array(gp_niche)#/float(n_uniq_genomes)  
+    gp_pangenome = [float(pan_genome_score[gene]) if gene in pan_genome_score else float(0.0) for gene in genes]
     gp = [x + y for x, y in zip(gp_niche, gp_pangenome)]
-    ground_truth = [1 if (gene_id  in essential_genes) else 0 for gene_id in pan_genome_score ]
+    ground_truth = [1 if (gene_id  in essential_genes) else 0 for gene_id in genes ]
     fpr, tpr, _  = roc_curve( ground_truth, gp, pos_label = 1)
     return fpr, tpr
     
@@ -68,7 +65,7 @@ def load_multiple_roc(args):
     roc_info = [] 
     path = args.path
    #UniRef90_output_deg_p_gene.m8'
-    '''with open(args.essentail_gene_file1) as f:
+    with open(args.essentail_gene_file1) as f:
         lines = f.read().splitlines()
     essential_genes_uniref90_id_deg = [line.split('\t')[1] for line in lines]
     
@@ -77,11 +74,16 @@ def load_multiple_roc(args):
         lines = f.read().splitlines()
     essential_genes_uniref90_id_299_eco = [line.split('\t')[1] for line in lines]
     essential_genes = essential_genes_uniref90_id_299_eco + essential_genes_uniref90_id_deg
-    '''
-    cog_uniref_map = load_polymap ('/Users/rah/Documents/Hutlab/ppanini_paper/input/essential_gene/keio_essential_uniref90.tsv')
+    
+    '''cog_uniref_map = load_polymap ('/Users/rah/Documents/Hutlab/ppanini_paper/input/essential_gene/keio_essential_uniref90.tsv')
+    i= 0
     essential_genes =[]
     for cog in cog_uniref_map:
-        essential_genes += cog_uniref_map[cog]
+        i +=1
+        if i < 6:
+            essential_genes += cog_uniref_map[cog]
+        else:
+            break'''
     fpr, tpr = get_fpr_tpr(input_ppanini=args.ppanini_output,\
                            essential_genes= essential_genes, beta =args.beta)
     roc_info.append([args.output+' metagenomic priority',fpr, tpr])
@@ -125,7 +127,7 @@ def get_fpr_tpr(input_ppanini, essential_genes, beta =.5):
     sorted_abun = sorted(abun)
     #print prev[0:101]
     #print abun[0:]
-    ground_truth = [1 if (gene_id  in essential_genes) else 0 for gene_id in centroids_list ]
+    ground_truth = [1 if gene_id  in essential_genes else 0 for gene_id in centroids_list ]
    
     #ground_truth = [1 if (gene_id  in essential_genes) else 0 for gene_id in centroids_list ]
     #scipy.stats.rankdata()

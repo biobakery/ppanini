@@ -200,9 +200,11 @@ def stack_barplot(df, output_path = None, axe = None, legend = True, legend_titl
     #lgd.get_title().set_ha('center')
     #lgd.get_title().set_position((20, 0))
     axe.set_ylabel("Fraction of abundance")
-    axe.set_xlabel("Samples (N=%d)" % (len(df.index)))
+    axe.set_xlabel("Samples (N=%d)" % (len(df.index)), size= 7)
     axe.get_xaxis().set_tick_params(which='both', labelsize=6,top='off', labelbottom='off', bottom= 'off', direction='out')
     axe.get_yaxis().set_tick_params(which='both', labelsize=6, right='off', direction='out')
+    axe.set_xlim([min(tick_pos)-bar_width, max(tick_pos)])
+    axe.set_ylim([0, 1])
     axe.autoscale_view('tight')
     if save_flag:
         params = {'legend.fontsize': 6}#, 'legend.linewidth': 0}

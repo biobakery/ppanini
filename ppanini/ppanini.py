@@ -127,7 +127,7 @@ def summerize_centroids(uniref_dm, gi_dm, config=config):
 
     for centroid in uniref_dm:
     	gc_dm[centroid] = uniref_dm[centroid]
-    print ("--- Number of centroids: %d"%(len(gc_dm)))
+    print ("--- Number of gene families: %d"%(len(gc_dm)))
     return gc_dm
 
 
@@ -230,7 +230,7 @@ def get_no_niche_prevalence_abundance(centroids_data_matrix):
     summary_table['abund_percentile'] = scipy.stats.rankdata(summary_table['mean_abundance'], method='average')/summary_table.shape[0]* 100.0
     
     # Calculate PPANINI score
-    summary_table['ppanini_score'] = 1/((1/(config.beta*(summary_table['prevalence_percentile'])))+(1/((1-config.beta)*(summary_table['abund_percentile']))))   
+    summary_table['ppanini_score'] = 1/((config.beta/summary_table['prevalence_percentile'])+((1-config.beta)/summary_table['abund_percentile']))   
     
     return summary_table 
 
@@ -294,7 +294,7 @@ def get_niche_prevalence_abundance(centroids_data_matrix, niche_line):
     # Calculate PPANINI score of reach niche
     
     for niche in config.niches:
-        summary_table['ppanini_score_'+niche] = 1/((1/(config.beta*(summary_table['prevalence_percentile_'+niche])))+(1/((1-config.beta)*(summary_table['abund_percentile']))))   
+        summary_table['ppanini_score_'+niche] = 1/((config.beta/summary_table['prevalence_percentile_'+niche])+((1-config.beta)/summary_table['abund_percentile']))   
         
     return summary_table 
 

@@ -34,17 +34,17 @@ with warnings.catch_warnings():
 from .. import utilities
 
 
-def plot_scatter(table, m8_filename, no_uniq_genomes):
+def plot_scatter(table, txt_filename, no_uniq_genomes):
 	'''Plots Scatter plot for genome hits per gene
 	Input:
-	m8_filename = filename of blast results
+	txt_filename = filename of blast results
 	table = {gene: [List of genomes]}
 	no_uniq_genomes = Number of Unique Genomes in Metagenomic niche'''
 
 	labels = {'xlabel': 'Prioritized Centroids',\
 			  'ylabel':'No. of Genomes (Log10)', \
 			  'title':'Metagenome vs. Genome Prioritization',\
-			  'filename': m8_filename+'_prioritizationScatter.pdf'}	
+			  'filename': txt_filename+'_prioritizationScatter.pdf'}	
 
 	all_genes = []
 	for gene in table:
@@ -70,16 +70,16 @@ def plot_scatter(table, m8_filename, no_uniq_genomes):
 	plt.savefig(labels['filename'])
 	plt.savefig(labels['filename']+'.png')
 
-def plot_hexbin(table, m8_filename):
+def plot_hexbin(table, txt_filename):
 	'''Plots HexBin plots for the genome hits per gene
 	Input:
-	m8_filename = filename of blast results
+	txt_filename = filename of blast results
 	table = {gene: [List of genomes]}'''
 
 	labels = {'xlabel': 'Prioritized Centroids',\
 			  'ylabel':'No. of Genomes', \
 			  'title':'Metagenome vs. Genome Prioritization',\
-			  'filename': m8_filename+'_prioritizationHEXBIN.pdf'}
+			  'filename': txt_filename+'_prioritizationHEXBIN.pdf'}
 	plt.figure()
 	plt.xlabel(labels['xlabel'])
 	plt.ylabel(labels['ylabel'])
@@ -97,17 +97,17 @@ def plot_hexbin(table, m8_filename):
 	
 	plt.savefig(labels['filename'])
 
-def plot_hist(table, m8_filename, no_uniq_genomes):
+def plot_hist(table, txt_filename, no_uniq_genomes):
 	'''Plots histogram for the genome hits per gene
 	Input:
-	m8_filename = filename of blast results
+	txt_filename = filename of blast results
 	table = {gene: [List of genomes]}
 	no_uniq_genomes = Number of Unique Genomes in Metagenomic niche'''
 
 	labels = {'ylabel': 'Centroids',\
 			  'xlabel':'Genomes', \
 			  'title':'Metagenome vs. Genome Prioritization',\
-			  'filename': m8_filename+'_prioritizationHIST.pdf'}
+			  'filename': txt_filename+'_prioritizationHIST.pdf'}
 	
 	all_genes = []
 	for gene in table:
@@ -150,32 +150,32 @@ def master_plot(path, size = 5):
 		
 	# Read stool samples information
 	# Stool
-	metagenomic_table_stool =  utilities.gene2genomes(path +'stool.m8')
+	metagenomic_table_stool =  utilities.gene2genomes(path +'stool.txt')
 	ppanini_output_stool = utilities.pd.DataFrame.from_csv(path +'/stool_ppanini_table.txt',
 											 sep='\t', index_col=0, header =0)
-	no_uniq_genomes_stool  = utilities.number_of_unique_genomes(path +'/stool.m8')
+	no_uniq_genomes_stool  = utilities.number_of_unique_genomes(path +'/stool.txt')
 	scatter_plot_metagenomic_priority(axarr[0, 0], ppanini_output_stool, metagenomic_table_stool, no_uniq_genomes_stool, title = 'Stool', scale = data_scale)
 	
 	# Buccal mucosa
-	metagenomic_table_mucosa =  utilities.gene2genomes(path +'/mucosa.m8')
+	metagenomic_table_mucosa =  utilities.gene2genomes(path +'/mucosa.txt')
 	ppanini_output_mucosa = utilities.pd.DataFrame.from_csv(path +'/mucosa_ppanini_table.txt',
 											 sep='\t', index_col=0, header =0)
-	no_uniq_genomes_mucosa  = utilities.number_of_unique_genomes(path +'mucosa.m8')
+	no_uniq_genomes_mucosa  = utilities.number_of_unique_genomes(path +'mucosa.txt')
 	scatter_plot_metagenomic_priority(axarr[0, 1], ppanini_output_mucosa, metagenomic_table_mucosa, no_uniq_genomes_mucosa, title = 'Buccal mucosa', scale = data_scale)
 	
 	# Posterior fornix 
-	metagenomic_table_fornix =  utilities.gene2genomes(path +'fornix.m8')
+	metagenomic_table_fornix =  utilities.gene2genomes(path +'fornix.txt')
 	ppanini_output_fornix = utilities.pd.DataFrame.from_csv(path +'/fornix_ppanini_table.txt',
 											 sep='\t', index_col=0, header =0)
-	no_uniq_genomes_fornix  = utilities.number_of_unique_genomes(path +'fornix.m8')
+	no_uniq_genomes_fornix  = utilities.number_of_unique_genomes(path +'fornix.txt')
 	scatter_plot_metagenomic_priority(axarr[1, 0], ppanini_output_fornix, metagenomic_table_fornix, no_uniq_genomes_fornix, title = 'Posterior fornix', scale = data_scale)
 	
 	
 	# Anterior nares
-	metagenomic_table_nares =  utilities.gene2genomes(path +'nares.m8')
+	metagenomic_table_nares =  utilities.gene2genomes(path +'nares.txt')
 	ppanini_output_nares = utilities.pd.DataFrame.from_csv(path +'/nares_ppanini_table.txt',
 											 sep='\t', index_col=0, header =0)
-	no_uniq_genomes_nares  = utilities.number_of_unique_genomes(path +'/nares.m8')
+	no_uniq_genomes_nares  = utilities.number_of_unique_genomes(path +'/nares.txt')
 	scatter_plot_metagenomic_priority(axarr[1, 1], ppanini_output_nares, metagenomic_table_nares, no_uniq_genomes_nares, title = 'Anterior nares', scale = data_scale)
 	
 	# Invisible y axis labels for second column
@@ -367,8 +367,8 @@ def scatter_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes
     axe.yaxis.set_label_position('left') 
     if title:
     	axe.set_title(title, loc='left', fontdict={'fontsize':'8','fontweight' :'bold'})
-    plt.xlim([min(gp) , max(gp)])
-    plt.ylim(min(mp), max(mp))
+    axe.xlim([min(gp) , max(gp)])
+    axe.ylim(min(mp), max(mp))
     axe.autoscale_view('tight')
     plt.tight_layout()
     
