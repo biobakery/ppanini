@@ -226,8 +226,8 @@ def get_no_niche_prevalence_abundance(centroids_data_matrix):
     summary_table['alpha_prevalence'] = df.count(axis = 1)/df.shape[1]
     
     # Calculate percentile for prevalence and abundance
-    summary_table['prevalence_percentile'] = scipy.stats.rankdata(summary_table['alpha_prevalence'], method='average')/summary_table.shape[0] * 100.0
-    summary_table['abund_percentile'] = scipy.stats.rankdata(summary_table['mean_abundance'], method='average')/summary_table.shape[0]* 100.0
+    summary_table['prevalence_percentile'] = scipy.stats.rankdata(summary_table['alpha_prevalence'], method='average')/summary_table.shape[0]
+    summary_table['abund_percentile'] = scipy.stats.rankdata(summary_table['mean_abundance'], method='average')/summary_table.shape[0]
     
     # Calculate PPANINI score
     summary_table['ppanini_score'] = 1/((config.beta/summary_table['prevalence_percentile'])+((1-config.beta)/summary_table['abund_percentile']))   
@@ -280,15 +280,15 @@ def get_niche_prevalence_abundance(centroids_data_matrix, niche_line):
     for niche in config.niches:
         #print niches[niche], niche, centroids_data_matrix
         summary_table['alpha_prevalence_'+niche] = centroids_data_matrix.loc[:,niches[niche]].astype(bool).sum(axis=1)/len(niches[niche])
-        summary_table['prevalence_percentile_'+niche] = scipy.stats.rankdata(summary_table['alpha_prevalence_'+niche], method='average')/len(niches[niche]) * 100.0
+        summary_table['prevalence_percentile_'+niche] = scipy.stats.rankdata(summary_table['alpha_prevalence_'+niche], method='average')/len(niches[niche]) 
         
         summary_table['alpha_abundance_'+niche] = df.loc[:, niches[niche]].mean(axis=1)
-        summary_table['abundance_percentile_'+niche] = scipy.stats.rankdata(summary_table['alpha_prevalence_'+niche], method='average')/len(niches[niche]) * 100.0
+        summary_table['abundance_percentile_'+niche] = scipy.stats.rankdata(summary_table['alpha_prevalence_'+niche], method='average')/len(niches[niche]) 
 
     # update mean abundance
     summary_table.loc['mean_abundance'] = summary_table.loc[:,abundance_cols].max(axis=1) 
     
-    summary_table['abund_percentile'] = scipy.stats.rankdata(summary_table['mean_abundance'], method='average')/summary_table.shape[0]* 100.0
+    summary_table['abund_percentile'] = scipy.stats.rankdata(summary_table['mean_abundance'], method='average')/summary_table.shape[0]
 
     
     # Calculate PPANINI score of reach niche
