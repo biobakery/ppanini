@@ -145,7 +145,7 @@ def normalize_centroids_table(all_centroids, metadata):
     norm_data_matrix = centroids_data_matrix.apply(lambda x: x/x.sum(), axis=0)
     #centroids_data_matrix.div(centroids_data_matrix.sum(axis=1), axis=1)#centroids_data_matrix/sum(centroids_data_matrix)
     #norm_data_matrix = norm_data_matrix*1e6
-    gene_centroids_table_file_path = config.temp_folder+'/'+config.basename+'_gene_centroids_norm.txt'
+    gene_centroids_table_file_path = config.temp_folder+'/'+config.basename+'_abundance_table_norm.txt'
     
     # write metadat
     #with open(gene_centroids_table_file_path,'w') as foo:
