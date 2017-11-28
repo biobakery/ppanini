@@ -353,22 +353,27 @@ def scatter_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes
     X, Y, Z = density_estimation(gp, mp)
     axe.contour(X, Y, Z, linewidths = 1, alpha = .75)
     if scale == 'log':
-    	axe.set_ylabel('Metagenomic priority (log)', fontsize=6)
+    	axe.set_ylabel('PPANINI score (log)', fontsize=6)
     	axe.set_xlabel('Genomic priority (log)', fontsize=6)
     elif scale == 'sqrt':
-    	axe.set_ylabel('Metagenomic priority (sqrt)', fontsize=6)
+    	axe.set_ylabel('PPANINI score (sqrt)', fontsize=6)
     	axe.set_xlabel('Genomic priority (sqrt)', fontsize=6)
     else:
-    	axe.set_ylabel('Metagenomic priority', fontsize=6)
+    	axe.set_ylabel('PPANINI score', fontsize=6)
     	axe.set_xlabel('Genomic priority', fontsize=6)
-    axe.set_ylabel('Metagenomic priority', fontsize=6)
+    axe.set_ylabel('PPANINI score', fontsize=6)
     axe.get_xaxis().set_tick_params(which='both', labelsize=4,top='off',  direction='out')
     axe.get_yaxis().set_tick_params(which='both', labelsize=4, right='off', direction='out')
     axe.yaxis.set_label_position('left') 
     if title:
     	axe.set_title(title, loc='left', fontdict={'fontsize':'8','fontweight' :'bold'})
-    axe.xlim([min(gp) , max(gp)])
-    axe.ylim(min(mp), max(mp))
+    try:
+        axe.xlim([min(gp) , max(gp)])
+        axe.ylim(min(mp), max(mp))
+    except:
+        plt.xlim([min(gp) , max(gp)])
+        plt.ylim(min(mp), max(mp))
+        
     axe.autoscale_view('tight')
     plt.tight_layout()
     
@@ -415,10 +420,10 @@ def hexbin_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes,
 				   cmap='YlOrBr',#'Blues',
 				   gridsize=10)
 	if scale == 'log':
-		axe.set_ylabel('Metagenomic Priority (log)',  fontsize=10)
+		axe.set_ylabel('PPANINI score (log)',  fontsize=10)
 		axe.set_xlabel('Genomic Priority (log)', fontsize=10)
 	else:
-		axe.set_ylabel('Metagenomic Priority', fontsize=10)
+		axe.set_ylabel('PPANINI score', fontsize=10)
 		axe.set_xlabel('Genomic Priority', fontsize=10)
 	axe.set_title(title, loc='left', fontdict={'fontsize':'10','fontweight' :'bold'})
 	axe.get_xaxis().set_tick_params(which='both', labelsize=8,top='off',  direction='out')
@@ -431,7 +436,154 @@ def priority_scatter(args):
 											 sep='\t', index_col=0, header =0)
 	no_uniq_genomes = utilities.number_of_unique_genomes(args.diamond_output)
 	scatter_plot_metagenomic_priority(None, ppanini_output, diamond_output, no_uniq_genomes, title = None, scale = 'log', output_path=args.path+'/'+args.outfile, size = args.size)
-	
+def scatter_plot_prev_abund(axe, ppanini_table, title, scale = None, output_path = None, size = 3):
+    if axe == None:
+        fig, axe = plt.subplots(1, figsize=(size, size))
+    #mp_gp = {}
+    import random
+    num_rand = 10000
+
+    idxs = random.sample(range(len(ppanini_table.index)), min(num_rand, len(ppanini_table.index)))
+
+    genes = ppanini_table.index[idxs]
+    #abund = ppanini_table['abundance']
+    ppanaini_scores = ppanini_table['ppanini_score'][idxs]
+    #print ppanaini_scores
+    prev = np.array(ppanini_table['alpha_prevalence'][idxs])
+    abund = np.array(ppanini_table['mean_abundance'][idxs])
+    all_prev = np.log(np.array(ppanini_table['alpha_prevalence']))
+    all_abund = np.log(np.array(ppanini_table['mean_abundance']))
+    if scale == 'log':
+        prev = np.log(prev)
+        abund = np.log(abund)
+    go_term = ppanini_table['GO'][idxs]
+    
+    color_dic= {"Only Uniref": 'blue', "Uniref and GO term":'limegreen', 
+                "Unannotated":'gold'}
+    
+    # Calculate the point density
+    x = np.array(prev)#[val for (val,val2) in zip(prev, abund) if val != 'NaN' and val2 != 'NaN']
+    y = np.array(abund) #[val2 for (val,val2) in zip(prev, abund) if val != 'NaN' and val2 != 'NaN']
+    xy = np.vstack([x,y])
+    #z = gaussian_kde(xy)(xy)
+    
+    points_color = np.array([color_dic["Uniref and GO term"] if go_val == go_val else 
+    color_dic["Only Uniref"] if gene.startswith('UniRef')  else color_dic["Unannotated"] for
+    (go_val, gene) in zip(go_term, genes)])
+    points_marker = np.array(['s' if val >= 0.75 else 'o' if val < 0.75 else '+'
+                               for val in ppanaini_scores])
+    points_alpha = np.array([.3 if val >= 0.75 else .1 for val in ppanaini_scores])
+    #print ppanaini_scores
+    # Sort the points by density, so that the densest points are plotted last
+    #idx = z.argsort()
+    #print idx, x, y
+    #x, y, z = x[idx], y[idx], z[idx]
+    
+    #fig, ax = plt.subplots()
+    #ax.scatter(x, y, c=z, s=50, edgecolor='')
+    #plt.show()
+    #plt.hist2d(x, y, (50, 50), cmap=plt.cm.jet)
+    #plt.colorbar()
+    #plt.show()
+    for xp, yp, mp, cp, ap in zip(x, y, points_marker, points_color, points_alpha):
+        if cp != color_dic["Only Uniref"]:
+            continue
+        axe.scatter(xp, \
+                   yp, \
+                   s=20,\
+                   c= cp,\
+                   cmap='jet', \
+                   #edgecolor='',\
+                   #cmap= color_dic[title],\
+                   #'darkgoldenrod', \
+                   ##'slategray'
+                   alpha=ap, \
+                   linewidths=0.2, \
+                   #edgecolors= 'black',
+                   zorder=0, \
+                   marker=mp,\
+                   label='')
+    for xp, yp, mp, cp, ap in zip(x, y, points_marker, points_color, points_alpha):
+        if cp != color_dic["Unannotated"]:
+            continue
+        axe.scatter(xp, \
+                   yp, \
+                   s=20,\
+                   c= cp,\
+                   cmap='jet', \
+                   #edgecolor='',\
+                   #cmap= color_dic[title],\
+                   #'darkgoldenrod', \
+                   ##'slategray'
+                   alpha=ap, \
+                   linewidths=0.2, \
+                   #edgecolors= 'black',
+                   zorder=0, \
+                   marker=mp,\
+                   label='')
+    for xp, yp, mp, cp, ap in zip(x, y, points_marker, points_color, points_alpha):
+        if cp != color_dic["Uniref and GO term"]:
+            continue
+        axe.scatter(xp, \
+                   yp, \
+                   s=20,\
+                   c= cp,\
+                   cmap='jet', \
+                   #edgecolor='',\
+                   #cmap= color_dic[title],\
+                   #'darkgoldenrod', \
+                   ##'slategray'
+                   alpha=ap, \
+                   linewidths=0.2, \
+                   #edgecolors= 'black',
+                   zorder=0, \
+                   marker=mp,\
+                   label='')
+    #print np.nanpercentile(x, 75), np.nanpercentile(y, 75)
+    axe.axvline(x= np.nanpercentile(all_prev[~np.isnan(all_prev)], 75), color='black', linestyle='--', linewidth = .75)
+    axe.axhline(y= np.nanpercentile(all_abund[~np.isnan(all_abund)], 75), color='black', linestyle='--', linewidth = .75)
+    def density_estimation(m1, m2):
+        values = np.vstack([m1, m2])
+        kernel = gaussian_kde(values)                                                                 
+        sf = kernel.scotts_factor()
+        bwx = sf * np.std(m1)
+        bwy = sf * np.std(m2)
+        X, Y = np.mgrid[(np.min(m1)-3*bwx):(np.max(m1)+3*bwx):100j, (np.min(m2)-3*bwy):(np.max(m2)+3*bwy):100j]                                                     
+        positions = np.vstack([X.ravel(), Y.ravel()])                                                       
+        Z = np.reshape(kernel(positions).T, X.shape)
+        return X, Y, Z
+    #X, Y, Z = density_estimation(prev, abund)
+    #axe.contour(X, Y, Z, linewidths = 1, alpha = .75)
+    if scale == 'log':
+        axe.set_ylabel('Mean abundance (log)', fontsize=6)
+        axe.set_xlabel('prevalence (log)', fontsize=6)
+    elif scale == 'sqrt':
+        axe.set_ylabel('Mean abundance (sqrt)', fontsize=6)
+        axe.set_xlabel('prevalence (sqrt)', fontsize=6)
+    else:
+        axe.set_ylabel('Mean abundance', fontsize=6)
+        axe.set_xlabel('prevalence', fontsize=6)
+    #axe.set_ylabel('Mean abundance', fontsize=6)
+    axe.get_xaxis().set_tick_params(which='both', labelsize=4,top='off',  direction='out')
+    axe.get_yaxis().set_tick_params(which='both', labelsize=4, right='off', direction='out')
+    axe.yaxis.set_label_position('left') 
+    if title:
+        axe.set_title(title, loc='left', fontdict={'fontsize':'8','fontweight' :'bold'})
+    try:
+        axe.xlim([min(prev) , max(prev)])
+        axe.ylim(min(abund), max(abund))
+    except:
+        plt.xlim([min(prev) , max(prev)])
+        plt.ylim(min(abund), max(abund))
+        
+    axe.autoscale_view('tight')
+    plt.tight_layout()
+    
+    if output_path:
+        plt.savefig(output_path+'.pdf', bbox_inches='tight', pad_inches = 0, dpi=300)
+        plt.savefig(output_path+'.png', bbox_inches='tight', pad_inches = 0, dpi=300)
+        plt.savefig(output_path+'.svgz', bbox_inches='tight', pad_inches = 0, dpi=300)
+    return axe	
 
 def get_args( ):
     parser = argparse.ArgumentParser(

@@ -45,7 +45,7 @@ from ..utilities import load_polymap_dic,load_polymap
 
 from .. import config
 #from . import plot_metagenome_genome
-def fpr_tpr_genome(metagenomic_table, n_uniq_genomes, essential_genes, pan_genome_score):
+def fpr_tpr_genome(metagenomic_table, n_uniq_genomes, essential_genes, pan_genome_score = None):
     # calculate genomic score 
     gp_niche = np.zeros(len(metagenomic_table))
     uniq_genomes = []
@@ -53,9 +53,12 @@ def fpr_tpr_genome(metagenomic_table, n_uniq_genomes, essential_genes, pan_genom
     #print metagenomic_table.values()[1:100]
     gp_niche = [len(metagenomic_table[gene])/float(n_uniq_genomes) for gene in genes]
 
-    gp_niche = np.array(gp_niche)#/float(n_uniq_genomes)  
-    gp_pangenome = [float(pan_genome_score[gene]) if gene in pan_genome_score else float(0.0) for gene in genes]
-    gp = [x + y for x, y in zip(gp_niche, gp_pangenome)]
+    gp_niche = np.array(gp_niche)#/float(n_uniq_genomes) 
+    if  pan_genome_score:
+        gp_pangenome = [float(pan_genome_score[gene]) if gene in pan_genome_score else float(0.0) for gene in genes]
+        gp = [x + y for x, y in zip(gp_niche, gp_pangenome)]
+    else:
+        gp = gp_niche
     ground_truth = [1 if (gene_id  in essential_genes) else 0 for gene_id in genes ]
     fpr, tpr, _  = roc_curve( ground_truth, gp, pos_label = 1)
     return fpr, tpr

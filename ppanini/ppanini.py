@@ -99,21 +99,10 @@ def summerize_centroids(uniref_dm, gi_dm, config=config):
     		
     Output: gc_dm = {gene_centroid : numpy.array(abundance), ...}'''
     
-    logger.debug('get_centroids')
-    
-    centroids_fasta = {}
-    
-    if not config.bypass_clustering:
-    	if config.uclust_file == '':
-    		centroid_gis = get_clusters() #all UniRef90_unknowns are clustered across samples
-    	else:
-    		centroid_gis = get_centroids_fromUCLUST(gi_dm.keys())
-    else:
-    	#centroid_gis = gi_dm
-        #this section need to be improved?
-        centroid_gis = {}
-        for gene in gi_dm:
-            centroid_gis[gene] = [gene]
+    logger.debug('summerize_centroids')   
+    centroid_gis = {}
+    for gene in gi_dm:
+        centroid_gis[gene] = [gene]
         
     gc_dm = {}
     
@@ -143,7 +132,8 @@ def normalize_centroids_table(all_centroids, metadata):
     logger.debug('get_centroids_table')
     #print all_centroids
     centroids_data_matrix = pd.DataFrame.from_dict(all_centroids).T
-    
+    samples = metadata[0].split('\t')
+    centroids_data_matrix.columns = samples[1:]
     # remove centroids with all zero abundances  
     #centroids_data_matrix = centroids_data_matrix[(centroids_data_matrix.T != 0).any()]  
     
@@ -162,7 +152,7 @@ def normalize_centroids_table(all_centroids, metadata):
     #	foo.writelines(metadata)
         
     # write normalized abundance
-    norm_data_matrix.to_csv(gene_centroids_table_file_path, sep='\t', mode='w', header=False)
+    norm_data_matrix.to_csv(gene_centroids_table_file_path, sep='\t', mode='w', header=True)
     return norm_data_matrix
 
 def get_prevalence_abundance(centroids_data_matrix, metadata):
@@ -353,7 +343,7 @@ def write_prev_abund_matrix(summary_table, out_file):
     	keys = summary_table[i]._asdict().keys()
     	break
     with open(out_file,'w') as foo:
-    	foo.writelines(['#Centroids\t' + str.join('\t', list(keys)) + '\n'])
+    	foo.writelines(['#gene_families\t' + str.join('\t', list(keys)) + '\n'])
     	for centroid in summary_table:
     		foo.writelines([str.join('\t', [centroid] + [str(summary_table[centroid][key]) for key in range(len(keys))]) + '\n'])
 
