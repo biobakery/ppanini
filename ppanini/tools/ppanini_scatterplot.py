@@ -253,35 +253,34 @@ def master_plot(path, size = 5):
 	
 	plt.savefig(path + '/fig4b_s'+'sclae_'+str(data_scale)+'.pdf', bbox_inches='tight', pad_inches = 0, dpi=300) 
 '''
-def scatter_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes, 
-									title, scale = None, output_path = None, size = 3):
+def scatter_plot_metagenomic_priority(axe, ppanini_table, title = None, score_type = 'universe', pan_genome_score = None, scale = None, output_path = None, size = 3):
     if axe == None:
     	fig, axe = plt.subplots(1, figsize=(size, size))
     #mp_gp = {}
     genes = ppanini_table.index
     #abund = ppanini_table['abundance']
     #prev = ppanini_table['prevalence']
-    ppanini_score = ppanini_table['ppanini_score']
+    mp = ppanini_table['ppanini_score']
     #abund = np.array(abund)/max(abund)
     #prev = np.array(prev)/max(prev)
     
-    gp = []
-    mp = []
-    temp_gp = []
-    temp_mp = []
-    for i in range(len(genes)):
-    	gene = genes[i]
-    	try:
-    		gp += [len(table[gene])]
-    	except:
-    		gp += [0]
-    	#mp += [min((abund[i], alpha[i]))]
-    	mp +=[ppanini_score[i]]
-    gp = np.array(gp)/float(no_uniq_genomes)
-    #gp = np.where(gp != 0.0, gp, 10**-3)
-    #gp[gp == 0] = np.nan
-    #mp = np.where(mp != 0.0, mp, 10**-3)
-    #mp[mp == 0] = np.nan
+    if score_type == 'universe':
+        
+        if  pan_genome_score:
+            gp_pangenome = [float(pan_genome_score[gene]) if gene in pan_genome_score else float(0.0) for gene in genes]
+            #gp = [x + y for x, y in zip(gp_niche, gp_pangenome)]
+            gp = gp_pangenome
+        else:
+            sys.exit("Please provide pangenome score dictionary")
+    elif score_type == 'niche':
+        gp_niche = np.zeros(len(metagenomic_table))
+        uniq_genomes = []
+        gp_niche = [len(metagenomic_table[gene])/float(n_uniq_genomes) for gene in genes]
+        gp_niche = np.array(gp_niche)
+        gp = gp_niche
+    temp_gp=[]
+    temp_mp=[]
+     
     for i in range(len(gp)):
     	if np.isnan(gp[i]) or np.isnan(mp[i]) or gp[i]==0 or mp[i]==0 :
     		continue
@@ -309,22 +308,22 @@ def scatter_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes
     # Calculate the point density
     x = np.array(gp) 
     y = np.array(mp)
-    xy = np.vstack([x,y])
+    '''xy = np.vstack([x,y])
     z = gaussian_kde(xy)(xy)
     
     # Sort the points by density, so that the densest points are plotted last
-    idx = z.argsort()
+    idx = z.argsort()'''
     #print idx, x, y
-    x, y, z = x[idx], y[idx], z[idx]
-    
-    #fig, ax = plt.subplots()
-    #ax.scatter(x, y, c=z, s=50, edgecolor='')
-    #plt.show()
-    #plt.hist2d(x, y, (50, 50), cmap=plt.cm.jet)
-    #plt.colorbar()
-    #plt.show()
-    
-    axe.scatter(x, \
+    #x, y, z = x[idx], y[idx], z[idx]
+    axe.hist2d(x, \
+               y, \
+               #extent=[np.min(xp_all), np.max(xp_all), np.min(yp_all), np.max(yp_all)],
+               cmap='binary',#color_dic[characterization_cat],#'jet'#,'YlOrBr'
+               #alpha=0.1,
+               bins=15
+                )
+
+    '''axe.scatter(x, \
     		   y, \
     		   c=z,\
     		   s=30,\
@@ -339,7 +338,7 @@ def scatter_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes
                #edgecolors= 'black',
     		   zorder=0, \
     		   marker='o',\
-    		   label='')
+    		   label='')'''
     def density_estimation(m1, m2):
     	values = np.vstack([m1, m2])
     	kernel = gaussian_kde(values)                                                                 
@@ -350,8 +349,8 @@ def scatter_plot_metagenomic_priority(axe, ppanini_table, table, no_uniq_genomes
     	positions = np.vstack([X.ravel(), Y.ravel()])                                                       
     	Z = np.reshape(kernel(positions).T, X.shape)
     	return X, Y, Z
-    X, Y, Z = density_estimation(gp, mp)
-    axe.contour(X, Y, Z, linewidths = 1, alpha = .75)
+    #X, Y, Z = density_estimation(gp, mp)
+    #axe.contour(X, Y, Z, linewidths = 1, alpha = .75)
     if scale == 'log':
     	axe.set_ylabel('PPANINI score (log)', fontsize=6)
     	axe.set_xlabel('Genomic priority (log)', fontsize=6)
@@ -435,13 +434,15 @@ def priority_scatter(args):
 	ppanini_output = utilities.pd.DataFrame.from_csv(args.ppanini_output,
 											 sep='\t', index_col=0, header =0)
 	no_uniq_genomes = utilities.number_of_unique_genomes(args.diamond_output)
-	scatter_plot_metagenomic_priority(None, ppanini_output, diamond_output, no_uniq_genomes, title = None, scale = 'log', output_path=args.path+'/'+args.outfile, size = args.size)
-def scatter_plot_prev_abund(axe, ppanini_table, title, scale = None, output_path = None, size = 3):
+	scatter_plot_metagenomic_priority(None, ppanini_output, diamond_output, no_uniq_genomes, title = None,scale = None , output_path=args.path+'/'+args.outfile, size = args.size)
+
+
+def scatter_plot_prev_abund(axe, ppanini_table, title, characterization_cat ='', essential_genes = '', xscale = 'log', yscale = 'log', output_path = None, size = 3):
     if axe == None:
         fig, axe = plt.subplots(1, figsize=(size, size))
     #mp_gp = {}
     import random
-    num_rand = 10000
+    num_rand = len(ppanini_table.index) #
 
     idxs = random.sample(range(len(ppanini_table.index)), min(num_rand, len(ppanini_table.index)))
 
@@ -451,40 +452,86 @@ def scatter_plot_prev_abund(axe, ppanini_table, title, scale = None, output_path
     #print ppanaini_scores
     prev = np.array(ppanini_table['alpha_prevalence'][idxs])
     abund = np.array(ppanini_table['mean_abundance'][idxs])
-    all_prev = np.log(np.array(ppanini_table['alpha_prevalence']))
-    all_abund = np.log(np.array(ppanini_table['mean_abundance']))
-    if scale == 'log':
-        prev = np.log(prev)
-        abund = np.log(abund)
+    if xscale == 'log':
+        all_prev = np.log(np.array(ppanini_table['alpha_prevalence']))
+    else: 
+        all_prev = np.array(ppanini_table['alpha_prevalence'])
+    if yscale == 'log':
+        all_abund = np.log(np.array(ppanini_table['mean_abundance']))
+    else:
+        all_abund = np.array(ppanini_table['mean_abundance'])
+    
     go_term = ppanini_table['GO'][idxs]
     
-    color_dic= {"Only Uniref": 'blue', "Uniref and GO term":'limegreen', 
-                "Unannotated":'gold'}
+    color_dic= {"Only Uniref": 'Blues', "Uniref and GO term":'Greens', 
+                "Unannotated":'YlOrRd'}
+    
+    if xscale == 'log':
+        prev = np.log(prev)
+    if yscale == 'log':
+        abund = np.log(abund)
     
     # Calculate the point density
     x = np.array(prev)#[val for (val,val2) in zip(prev, abund) if val != 'NaN' and val2 != 'NaN']
     y = np.array(abund) #[val2 for (val,val2) in zip(prev, abund) if val != 'NaN' and val2 != 'NaN']
     xy = np.vstack([x,y])
-    #z = gaussian_kde(xy)(xy)
-    
+    #z = gaussian_kde(xy)(xy)   
     points_color = np.array([color_dic["Uniref and GO term"] if go_val == go_val else 
     color_dic["Only Uniref"] if gene.startswith('UniRef')  else color_dic["Unannotated"] for
     (go_val, gene) in zip(go_term, genes)])
-    points_marker = np.array(['s' if val >= 0.75 else 'o' if val < 0.75 else '+'
-                               for val in ppanaini_scores])
-    points_alpha = np.array([.3 if val >= 0.75 else .1 for val in ppanaini_scores])
-    #print ppanaini_scores
-    # Sort the points by density, so that the densest points are plotted last
-    #idx = z.argsort()
-    #print idx, x, y
-    #x, y, z = x[idx], y[idx], z[idx]
     
-    #fig, ax = plt.subplots()
-    #ax.scatter(x, y, c=z, s=50, edgecolor='')
-    #plt.show()
-    #plt.hist2d(x, y, (50, 50), cmap=plt.cm.jet)
-    #plt.colorbar()
-    #plt.show()
+    
+    display_essential = np.array([True if characterization_cat == "Uniref and GO term" and go_val == go_val  and gene in essential_genes else 
+    True if characterization_cat == "Only Uniref" and gene.startswith('UniRef') and go_val != go_val and gene in essential_genes else False for
+    (go_val, gene) in zip(go_term, genes)])
+    
+    points_marker = np.array(['^' if val >= 0.75 else 'v' if val < 0.75 else '+'
+                               for val in ppanaini_scores])
+    xp_all =  []
+    yp_all =[]
+    points_alpha = np.array([.35 if val >= 0.75 else .1 for val in ppanaini_scores])
+    
+    for xp, yp, mp, cp, ap in zip(x, y, points_marker, points_color, points_alpha):
+        if cp == color_dic[characterization_cat] and xp == xp and yp == yp and xp and yp:
+            xp_all.append(xp)
+            yp_all.append(yp)
+            
+    axe.hist2d(xp_all, \
+                   yp_all, \
+                   #extent=[np.min(xp_all), np.max(xp_all), np.min(yp_all), np.max(yp_all)],
+                   cmap=color_dic[characterization_cat],#'jet'#,'YlOrBr'
+                   #alpha=0.1,
+                   bins=15
+                   )
+    #display_essential = display_essential[random.sample(range(len(ppanini_table.index)), min(2000, len(display_essential)))]
+    for xp, yp, mp, ap, de in zip(x, y, points_marker, points_alpha, display_essential):
+        if de:
+            axe.scatter(xp, \
+                       yp, \
+                       s= 7,\
+                       c= 'silver',\
+                       cmap='jet', \
+                       #edgecolor='',\
+                       #cmap= color_dic[title],\
+                       #'darkgoldenrod', \
+                       ##'slategray'
+                       alpha=ap, \
+                       linewidths=0.1, \
+                       edgecolors= 'grey',
+                       #zorder=0, \
+                       marker=mp,\
+                       label='')
+    
+    '''axe.hexbin(xp_all, \
+                   yp_all, \
+                   #extent=[np.min(xp_all), np.max(xp_all), np.min(yp_all), np.max(yp_all)],
+                   cmap=color_dic[characterization_cat],#'jet'#,'YlOrBr'
+                   #alpha=0.1,
+                   gridsize=15,
+                   marginals=False)'''
+    
+    '''
+    
     for xp, yp, mp, cp, ap in zip(x, y, points_marker, points_color, points_alpha):
         if cp != color_dic["Only Uniref"]:
             continue
@@ -538,10 +585,12 @@ def scatter_plot_prev_abund(axe, ppanini_table, title, scale = None, output_path
                    #edgecolors= 'black',
                    zorder=0, \
                    marker=mp,\
-                   label='')
+                   label='')'''
     #print np.nanpercentile(x, 75), np.nanpercentile(y, 75)
+    axe.text(0.55, 0.1, "number of gene families:%d" % (len(xp_all)), fontsize=5, va="center", ha="center", transform=axe.transAxes)
     axe.axvline(x= np.nanpercentile(all_prev[~np.isnan(all_prev)], 75), color='black', linestyle='--', linewidth = .75)
     axe.axhline(y= np.nanpercentile(all_abund[~np.isnan(all_abund)], 75), color='black', linestyle='--', linewidth = .75)
+
     def density_estimation(m1, m2):
         values = np.vstack([m1, m2])
         kernel = gaussian_kde(values)                                                                 
@@ -554,16 +603,18 @@ def scatter_plot_prev_abund(axe, ppanini_table, title, scale = None, output_path
         return X, Y, Z
     #X, Y, Z = density_estimation(prev, abund)
     #axe.contour(X, Y, Z, linewidths = 1, alpha = .75)
-    if scale == 'log':
-        axe.set_ylabel('Mean abundance (log)', fontsize=6)
+    if yscale == 'log':
+        axe.set_ylabel('Relative abundance (log)', fontsize=6)
+    if xscale == 'log':
         axe.set_xlabel('prevalence (log)', fontsize=6)
-    elif scale == 'sqrt':
-        axe.set_ylabel('Mean abundance (sqrt)', fontsize=6)
+    elif yscale == 'sqrt':
+        axe.set_ylabel('Relative abundance (sqrt)', fontsize=6)
+    elif xscale == 'sqrt':
         axe.set_xlabel('prevalence (sqrt)', fontsize=6)
     else:
-        axe.set_ylabel('Mean abundance', fontsize=6)
+        axe.set_ylabel('Relative abundance', fontsize=6)
         axe.set_xlabel('prevalence', fontsize=6)
-    #axe.set_ylabel('Mean abundance', fontsize=6)
+    #axe.set_ylabel('Relative abundance', fontsize=6)
     axe.get_xaxis().set_tick_params(which='both', labelsize=4,top='off',  direction='out')
     axe.get_yaxis().set_tick_params(which='both', labelsize=4, right='off', direction='out')
     axe.yaxis.set_label_position('left') 
@@ -576,7 +627,7 @@ def scatter_plot_prev_abund(axe, ppanini_table, title, scale = None, output_path
         plt.xlim([min(prev) , max(prev)])
         plt.ylim(min(abund), max(abund))
         
-    axe.autoscale_view('tight')
+    #axe.autoscale_view('tight')
     plt.tight_layout()
     
     if output_path:

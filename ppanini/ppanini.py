@@ -209,11 +209,12 @@ def get_no_niche_prevalence_abundance(centroids_data_matrix):
     summary_table = pd.DataFrame(index=centroids_data_matrix.index, columns=ppanini_table_row._fields)
        
     # Calculate mean abundance of non zero values
-    df = centroids_data_matrix.replace(0, numpy.NaN)
+    #df = centroids_data_matrix.replace(0, numpy.NaN)
+    df = centroids_data_matrix
     summary_table['mean_abundance'] = df.mean(axis = 1)
 
         # Alpha prevalence 
-    summary_table['alpha_prevalence'] = df.count(axis = 1)/df.shape[1]
+    summary_table['alpha_prevalence'] = df.astype(bool).sum(axis=1)/df.shape[1]# df.count(axis = 1)/df.shape[1]
     
     # Calculate percentile for prevalence and abundance
     summary_table['prevalence_percentile'] = scipy.stats.rankdata(summary_table['alpha_prevalence'], method='average')/summary_table.shape[0]

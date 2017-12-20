@@ -45,21 +45,30 @@ from ..utilities import load_polymap_dic,load_polymap
 
 from .. import config
 #from . import plot_metagenome_genome
-def fpr_tpr_genome(metagenomic_table, n_uniq_genomes, essential_genes, pan_genome_score = None):
+def fpr_tpr_genome(input_ppanini, essential_genes, metagenomic_table = None , n_uniq_genomes = None, score_type = 'universe', pan_genome_score = None):
     # calculate genomic score 
-    gp_niche = np.zeros(len(metagenomic_table))
-    uniq_genomes = []
-    genes = metagenomic_table.keys()#['gene']
+    
+    ppanini_table = pd.DataFrame.from_csv(input_ppanini, sep='\t', index_col=0, header =0)
+    genes = list(ppanini_table.index )
+    #['gene']
     #print metagenomic_table.values()[1:100]
-    gp_niche = [len(metagenomic_table[gene])/float(n_uniq_genomes) for gene in genes]
-
-    gp_niche = np.array(gp_niche)#/float(n_uniq_genomes) 
-    if  pan_genome_score:
-        gp_pangenome = [float(pan_genome_score[gene]) if gene in pan_genome_score else float(0.0) for gene in genes]
-        gp = [x + y for x, y in zip(gp_niche, gp_pangenome)]
-    else:
+    #/float(n_uniq_genomes) 
+    #genes = metagenomic_table.keys()
+    if score_type == 'universe':
+        
+        if  pan_genome_score:
+            gp_pangenome = [float(pan_genome_score[gene]) if gene in pan_genome_score else float(0.0) for gene in genes]
+            #gp = [x + y for x, y in zip(gp_niche, gp_pangenome)]
+            gp = gp_pangenome
+        else:
+            sys.exit("Please provide pangenome score dictionary")
+    elif score_type == 'niche':
+        gp_niche = np.zeros(len(metagenomic_table))
+        uniq_genomes = []
+        gp_niche = [len(metagenomic_table[gene])/float(n_uniq_genomes) for gene in genes]
+        gp_niche = np.array(gp_niche)
         gp = gp_niche
-    ground_truth = [1 if (gene_id  in essential_genes) else 0 for gene_id in genes ]
+    ground_truth = [1 if gene_id  in essential_genes else 0 for gene_id in genes ]
     fpr, tpr, _  = roc_curve( ground_truth, gp, pos_label = 1)
     return fpr, tpr
     
@@ -95,7 +104,7 @@ def load_multiple_roc(args):
                                       key_ind=0, value_ind = 2)
     metagenomic_table_soil =  utilities.gene2genomes(path + '/'+args.niche+'.txt')
     n_uniq_genomes_soil  = utilities.number_of_unique_genomes(path + '/'+args.niche+'.txt')
-    fpr, tpr =fpr_tpr_genome(metagenomic_table_soil, n_uniq_genomes_soil, essential_genes, pan_genome_score)
+    fpr, tpr =fpr_tpr_genome(metagenomic_table_soil, n_uniq_genomes_soil, essential_genes, pan_genome_score = pan_genome_score)
     roc_info.append(['Prairie soil - genomics priority',fpr, tpr])         
     try:
         roc_plot(roc_info, figure_name=args.outfile, size = args.size) 
@@ -116,24 +125,22 @@ def get_fpr_tpr(input_ppanini, essential_genes, beta =.5):
     #print ppanini_table['ppanini_score'][1:10]
     
     #ppanini_table = ppanini_table[ppanini_table['ppanini_score'] > 18.75]
-    centroids_list = list(ppanini_table.index  )
-    #n = len(centroids_list)-1
-    #print config.centroids_list[0:10]
+    gene_families = list(ppanini_table.index  )
+    #n = len(gene_families)-1
+    #print config.gene_families[0:10]
     prev = ppanini_table['prevalence_percentile']
     #prev = [float(val) for val in prev]
     
     #sorted_prev = sorted(prev)
     abun = ppanini_table['abund_percentile']
-    #ppanini_score = [1/((1/(beta*prev[i])+(1/((1-beta)* abun[i])))) for i in range(len(prev))] #
-    ppanini_score = ppanini_table['ppanini_score']
+       
+    if beta == 0.5:
+        ppanini_score = ppanini_table['ppanini_score']
+    else:
+        ppanini_score = 1/((beta/ppanini_table['prevalence_percentile'])+((1.0-beta)/ppanini_table['abund_percentile']))
     abun = [float(val) for val in abun]
     sorted_abun = sorted(abun)
-    #print prev[0:101]
-    #print abun[0:]
-    ground_truth = [1 if gene_id  in essential_genes else 0 for gene_id in centroids_list ]
-   
-    #ground_truth = [1 if (gene_id  in essential_genes) else 0 for gene_id in centroids_list ]
-    #scipy.stats.rankdata()
+    ground_truth = [1 if gene_id  in essential_genes else 0 for gene_id in gene_families ]
     score[beta] = ppanini_score
 
     
