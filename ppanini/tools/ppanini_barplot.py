@@ -119,7 +119,7 @@ def summerize_gene_table(ppanini_input, ppanini_output, scale = 'abundance', out
     
     if output_path == None:
         output_path = './ppanini_barplot'
-    summary_table.to_csv(output_path+'.txt', sep='\t')
+    summary_table.to_csv(output_path+'/ppanini_barplot.txt', sep='\t')
     return summary_table
 
 def stack_barplot(df, output_path = None, axe = None, legend = True, legend_title = "Characterization:", title= None):
@@ -218,9 +218,9 @@ def stack_barplot(df, output_path = None, axe = None, legend = True, legend_titl
         #Set a buffer around the edge
         if output_path == None:
             output_path = './ppanini_barplot'
-        plt.savefig(output_path+".pdf", dpi=300, format='pdf', bbox_inches='tight', pad_inches = 0) #dpi=300, format='png', bbox_extra_artists=(lgd,),
-        plt.savefig(output_path+".png", dpi=300, format='png', bbox_inches='tight', pad_inches = 0)
-        plt.savefig(output_path+".svgz", dpi=300, format='svgz', bbox_inches='tight', pad_inches = 0)
+        plt.savefig(output_path+"/ppanini_barplot.pdf", dpi=300, format='pdf', bbox_inches='tight', pad_inches = 0) #dpi=300, format='png', bbox_extra_artists=(lgd,),
+        plt.savefig(output_path+"/ppanini_barplot.png", dpi=300, format='png', bbox_inches='tight', pad_inches = 0)
+        plt.savefig(output_path+"/ppanini_barplot.svgz", dpi=300, format='svgz', bbox_inches='tight', pad_inches = 0)
     return axe
 def main():
     user_args = get_args()
