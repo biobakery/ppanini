@@ -45,7 +45,7 @@ def read_gene_table(config=config):
 
     gene_table = utilities.gzip_bzip2_biom_open_readlines(config.input_table)
     metadata = []
-    uniref_dm, gis_dm = {}, {}
+    abundance_table= {}
     count_metadata_lines = 0
     count_gene_lines = 0
     for line in gene_table:
@@ -57,38 +57,15 @@ def read_gene_table(config=config):
             
             split_i = line.split('\t')
             annot = split_i[0].split('|') #geneID column split 
-            try:
-            	u90_annot = [i for i in annot if 'UniRef90' in i][0]
-            except: #Incase Gene table is not annotated with UniRef90
-            	u90_annot = 'UniRef90_unknown'
-            try:
-            	u50_annot = [i for i in annot if 'UniRef50' in i][0]
-            except: #Incase Gene table is not annotated with UniRef50
-            	u50_annot = 'UniRef50_unknown'
             data_row = numpy.array([float(i) if i!='' else 0.0 for i in split_i[1:]])
-    		
-            if 'UniRef90_unknown' == u90_annot:
-            	if 'UniRef50_unknown' == u50_annot:
-            		try: #same name
-            			gis_dm[annot[0]] += data_row
-            		except:
-            			gis_dm[annot[0]] = data_row
-            	else: #same uniref90 id
-            		try:
-            			uniref_dm[u50_annot] += data_row
-            		except KeyError:
-            			uniref_dm[u50_annot] = data_row
-            else: #same uniref90 id
-            	try:
-            		uniref_dm[u90_annot] += data_row
-            	except KeyError:
-            		uniref_dm[u90_annot] = data_row	
-	
+            try:
+            	abundance_table[annot[0]] += data_row
+            except KeyError:
+            	abundance_table[annot[0]] = data_row	
     if config.verbose == 'DEBUG':
     	print ("--- Gene Table contains %s metadata lines." % count_metadata_lines)
         print ("--- Gene Table contains %s gene families." % count_gene_lines)
-    
-    return [uniref_dm, gis_dm, metadata]
+    return [abundance_table, metadata]
 
 def summerize_centroids(uniref_dm, gi_dm, config=config):
     '''Returns the dict of all centroids containing clusters of gene IDs
@@ -99,19 +76,14 @@ def summerize_centroids(uniref_dm, gi_dm, config=config):
     Output: gc_dm = {gene_centroid : numpy.array(abundance), ...}'''
     
     logger.debug('summerize_centroids')   
-    centroid_gis = {}
-    for gene in gi_dm:
-        centroid_gis[gene] = [gene]
-        
+    
     gc_dm = {}
     
-    for centroid in centroid_gis:
-        for gene in centroid_gis[centroid]:
-            if gene in gi_dm:
-                try:
-                	gc_dm[centroid] += gi_dm[gene]
-                except:
-                    gc_dm[centroid] = gi_dm[gene]
+    for gene in gi_dm:
+        try:
+        	gc_dm[centroid] += gi_dm[gene]
+        except:
+            gc_dm[centroid] = gi_dm[gene]
 
     for centroid in uniref_dm:
     	gc_dm[centroid] = uniref_dm[centroid]
@@ -447,20 +419,12 @@ def run():
     					datefmt='%m/%d/%Y %I:%M:%S %p')
     
     if config.verbose =='DEBUG':
-    	print "--- Reading the gene table..."
-    [uniref_dm, gi_dm, metadata]= read_gene_table()
-    #print uniref_dm, gi_dm, metadata
-    
-    if config.verbose =='DEBUG':
-    	print "--- Summarize gene families table ..."
-    all_centroids = summerize_centroids(uniref_dm, gi_dm)
-    
-    
+    	print "--- Reading the gene families table..."
+    [abundance_table, metadata]= read_gene_table()
+        
     if config.verbose =='DEBUG':
     	print "--- Normalize gene families table ..."
-    centroids_data_table = normalize_centroids_table(all_centroids, metadata)
-    #config.centroids_list = centroids_list
-    
+    centroids_data_table = normalize_centroids_table(abundance_table, metadata)
    
     if config.verbose =='DEBUG':
     	print "--- Getting prevalence abundance ..."
