@@ -65,8 +65,8 @@ def read_gene_table(config=config):
             	u50_annot = [i for i in annot if 'UniRef50' in i][0]
             except: #Incase Gene table is not annotated with UniRef50
             	u50_annot = 'UniRef50_unknown'
-            
-            data_row = numpy.array([float(i) for i in split_i[1:]])
+            print split_i
+            data_row = numpy.array([float(i) if i!='' else 0.0 for i in split_i[1:]])
     		
             if 'UniRef90_unknown' == u90_annot:
             	if 'UniRef50_unknown' == u50_annot:
