@@ -91,7 +91,7 @@ def summerize_centroids(uniref_dm, gi_dm, config=config):
     return gc_dm
 
 
-def normalize_centroids_table(all_centroids, metadata):
+def normalize_abundance_table(all_centroids, metadata):
     '''Returns data matrix containing gene centroids and abundance per sample
     
     Input:	metadata = [metadata strings]; Rows with # as first character in table
@@ -188,9 +188,11 @@ def get_no_niche_prevalence_abundance(centroids_data_matrix):
     summary_table['alpha_prevalence'] = df.astype(bool).sum(axis=1)/df.shape[1]# df.count(axis = 1)/df.shape[1]
     
     # Calculate percentile for prevalence and abundance
-    summary_table['prevalence_percentile'] = scipy.stats.rankdata(summary_table['alpha_prevalence'], method='average')/summary_table.shape[0]
-    summary_table['abund_percentile'] = scipy.stats.rankdata(summary_table['mean_abundance'], method='average')/summary_table.shape[0]
+    summary_table['prevalence_percentile'] = scipy.stats.rankdata(summary_table['alpha_prevalence'], method='average') #/summary_table.shape[0]
+    summary_table['prevalence_percentile'] = summary_table['prevalence_percentile']/summary_table['prevalence_percentile'].max() 
     
+    summary_table['abund_percentile'] = scipy.stats.rankdata(summary_table['mean_abundance'], method='average') #/summary_table.shape[0]
+    summary_table['abund_percentile'] = summary_table['abund_percentile'] / summary_table['abund_percentile'].max()
     # Calculate PPANINI score
     summary_table['ppanini_score'] = 1/((config.beta/summary_table['prevalence_percentile'])+((1-config.beta)/summary_table['abund_percentile']))   
     
@@ -424,11 +426,11 @@ def run():
         
     if config.verbose =='DEBUG':
     	print "--- Normalize gene families table ..."
-    centroids_data_table = normalize_centroids_table(abundance_table, metadata)
+    normalized_abundance_table = normalize_abundance_table(abundance_table, metadata)
    
     if config.verbose =='DEBUG':
     	print "--- Getting prevalence abundance ..."
-    summary_table = get_prevalence_abundance(centroids_data_table, \
+    summary_table = get_prevalence_abundance(normalized_abundance_table, \
     												metadata = metadata)
         
     if config.genomic_score: # an option should be added for this
