@@ -442,7 +442,7 @@ def scatter_plot_prev_abund(axe, ppanini_table, title, characterization_cat ='',
         fig, axe = plt.subplots(1, figsize=(size, size))
     #mp_gp = {}
     import random
-    num_rand = 1000 #len(ppanini_table.index) #
+    num_rand = len(ppanini_table.index) #
 
     idxs = random.sample(range(len(ppanini_table.index)), min(num_rand, len(ppanini_table.index)))
 
