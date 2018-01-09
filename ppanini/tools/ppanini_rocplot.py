@@ -19,7 +19,11 @@ except:
     sys.exit( "This script requires the Python scientific stack: matplotlib." )
 from sklearn import svm, datasets
 from sklearn.metrics import roc_curve, auc
-from sklearn.model_selection import train_test_split
+try:
+    from sklearn.model_selection import train_test_split
+except:
+    #older version
+    from sklearn.cross_validation import train_test_split
 from sklearn.preprocessing import label_binarize
 from sklearn.multiclass import OneVsRestClassifier
 import scipy.stats

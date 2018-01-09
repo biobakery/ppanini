@@ -263,7 +263,7 @@ def scatter_plot_metagenomic_priority(axe, ppanini_table, title = None, score_ty
     mp = ppanini_table['ppanini_score']
     #abund = np.array(abund)/max(abund)
     #prev = np.array(prev)/max(prev)
-    
+    draw_contour = True
     if score_type == 'universe':
         
         if  pan_genome_score:
@@ -308,37 +308,39 @@ def scatter_plot_metagenomic_priority(axe, ppanini_table, title = None, score_ty
     # Calculate the point density
     x = np.array(gp) 
     y = np.array(mp)
-    '''xy = np.vstack([x,y])
-    z = gaussian_kde(xy)(xy)
-    
-    # Sort the points by density, so that the densest points are plotted last
-    idx = z.argsort()'''
-    #print idx, x, y
-    #x, y, z = x[idx], y[idx], z[idx]
-    axe.hist2d(x, \
-               y, \
-               #extent=[np.min(xp_all), np.max(xp_all), np.min(yp_all), np.max(yp_all)],
-               cmap='binary',#color_dic[characterization_cat],#'jet'#,'YlOrBr'
-               #alpha=0.1,
-               bins=15
-                )
-
-    '''axe.scatter(x, \
-    		   y, \
-    		   c=z,\
-    		   s=30,\
-    		   #c= color_dic[title],\
-    		   cmap='jet', \
-    		   #edgecolor='',\
-    		   #cmap= color_dic[title],\
-    		   #'darkgoldenrod', \
-    		   ##'slategray'
-    		   alpha=0.20, \
-    		   linewidths=0.2, \
-               #edgecolors= 'black',
-    		   zorder=0, \
-    		   marker='o',\
-    		   label='')'''
+    if draw_contour:
+        xy = np.vstack([x,y])
+        z = gaussian_kde(xy)(xy)
+        
+        # Sort the points by density, so that the densest points are plotted last
+        idx = z.argsort()
+        #print idx, x, y
+        x, y, z = x[idx], y[idx], z[idx]
+    if not draw_contour:
+        axe.hist2d(x, \
+                   y, \
+                   #extent=[np.min(xp_all), np.max(xp_all), np.min(yp_all), np.max(yp_all)],
+                   cmap='binary',#color_dic[characterization_cat],#'jet'#,'YlOrBr'
+                   #alpha=0.1,
+                   bins=15
+                    )
+    if draw_contour:
+        axe.scatter(x, \
+        		   y, \
+        		   c=z,\
+        		   s=30,\
+        		   #c= color_dic[title],\
+        		   cmap='jet', \
+        		   #edgecolor='',\
+        		   #cmap= color_dic[title],\
+        		   #'darkgoldenrod', \
+        		   ##'slategray'
+        		   alpha=0.20, \
+        		   linewidths=0.2, \
+                   #edgecolors= 'black',
+        		   zorder=0, \
+        		   marker='o',\
+        		   label='')
     def density_estimation(m1, m2):
     	values = np.vstack([m1, m2])
     	kernel = gaussian_kde(values)                                                                 
@@ -349,8 +351,9 @@ def scatter_plot_metagenomic_priority(axe, ppanini_table, title = None, score_ty
     	positions = np.vstack([X.ravel(), Y.ravel()])                                                       
     	Z = np.reshape(kernel(positions).T, X.shape)
     	return X, Y, Z
-    #X, Y, Z = density_estimation(gp, mp)
-    #axe.contour(X, Y, Z, linewidths = 1, alpha = .75)
+    if draw_contour:
+        X, Y, Z = density_estimation(gp, mp)
+        axe.contour(X, Y, Z, linewidths = 1, alpha = .75)
     if scale == 'log':
     	axe.set_ylabel('PPANINI score (log)', fontsize=6)
     	axe.set_xlabel('Genomic priority (log)', fontsize=6)
