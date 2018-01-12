@@ -84,7 +84,7 @@ def main():
     with open(args.output+'/uniref_gene_map.txt', 'wt') as csv_file:
             writer = csv.writer(csv_file, delimiter='\t')
             for gene in unirefs:
-               writer.writerow([list(unirefs[gene])[0]], gene)
+               writer.writerow([list(unirefs[gene])[0], gene])
     
     # make dictionary for genes that don't pass the threshold against uniref    
     for row in iter_rows( args.hits ):
