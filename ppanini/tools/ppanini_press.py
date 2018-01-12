@@ -98,6 +98,7 @@ def main():
     utilities.execute_command("cat", temp_hits_faa, temp_hits_faa, [hits_faa], hits_faa)    
     utilities.execute_command("cat", temp_hits_name, temp_hits_name, [hits_name], hits_name)
     utilities.execute_command("cat", temp_hits_name, temp_hits_name, [hits_name], hits_name)
+    utilities.execute_command("cat", temp_uniref_gene_file, temp_uniref_gene_file, [uniref_gene_file], uniref_gene_file)
 
     # Cluster no sufficient hits using CD-Hit
     cluster_gene_file, cluster_alignments = utilities.cluster_genes(no_hits_faa)
