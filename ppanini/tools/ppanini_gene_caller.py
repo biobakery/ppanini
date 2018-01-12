@@ -106,7 +106,7 @@ def main():
     temp_dir = config.temp_dir
     # if each sample has its own contig
     if not args.one_contig:
-        new_contig_file = utilities.append_filename2cotignames(args.contig)
+        new_contig_file = utilities.append_filename2contignames(args.contig)
         
         # make directory for prodigal output
         config.temp_dir = temp_dir+'/prodigal_output/'

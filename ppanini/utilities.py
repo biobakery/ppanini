@@ -597,7 +597,7 @@ def unnamed_temp_file(prefix=None):
     return(new_file)
     
 
-def append_filename2cotignames(fna_file):
+def append_filename2contignames(fna_file):
     """
     Bind the file name to the contig names
     """
@@ -666,14 +666,14 @@ def abundance(genes_file, alignment_file):
 	exe="featureCounts"
 	opts=config.featureCounts_opts
 
-	args=["-a",genes_file, "-o", abundance_file, alignment_file, "-T",config.threads]
+	args=["-a",genes_file, "-o", abundance_file, "-T", config.threads, alignment_file]
 
 	
 	message="Running " + exe + " ........"
 	logger.info(message)
 	print("\n"+message+"\n")
 
-	args+=opts
+	args=opts + args
 	
 	# create temp file for stdout and stderr
 	#tmpfile=unnamed_temp_file("featureCounts_stdout_")

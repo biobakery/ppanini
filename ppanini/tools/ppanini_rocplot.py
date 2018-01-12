@@ -22,7 +22,7 @@ from sklearn.metrics import roc_curve, auc
 try:
     from sklearn.model_selection import train_test_split
 except:
-    #older version
+    #for sklearn older version
     from sklearn.cross_validation import train_test_split
 from sklearn.preprocessing import label_binarize
 from sklearn.multiclass import OneVsRestClassifier

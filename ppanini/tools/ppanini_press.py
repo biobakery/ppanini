@@ -69,42 +69,35 @@ def main():
     utilities.make_directory(config.temp_dir)
     
     # Concatenate all FAA files from prodigal outputs
-    temp_no_hits_map = []
+    temp_no_hits_name = []
     temp_no_hits_faa = []
-    temp_hits_map = []
+    temp_hits_name = []
     temp_hits_faa = []
+    temp_uniref_gene_file = []
     for gene_file in os.listdir(args.gene_path+'/no_hits/'):          
         if gene_file.endswith('_no_hits.faa'):
             temp_no_hits_faa.append(args.gene_path+'/no_hits/'+gene_file)
         elif gene_file.endswith('_no_hits.txt'):
-            temp_no_hits_map.append(args.gene_path+'/no_hits/'+gene_file)
+            temp_no_hits_name.append(args.gene_path+'/no_hits/'+gene_file)
     for gene_file in os.listdir(args.gene_path+'/hits/'):  
         if gene_file.endswith('_hits.faa'):
             temp_hits_faa.append(args.gene_path+'/hits/'+gene_file)
         elif gene_file.endswith('_hits.txt'):
-            temp_hits_map.append(args.gene_path+'/hits/'+gene_file)
+            temp_hits_name.append(args.gene_path+'/hits/'+gene_file)
+    for map_file in os.listdir(args.gene_path+'/hits/'):  
+        if gene_file.endswith('uniref_gene_map.txt'):
+            temp_uniref_gene_file.append(args.gene_path+'/hits/'+map_file)
     no_hits_faa = utilities.name_temp_file('no_hits_genes.faa')
-    no_hits_map = utilities.name_temp_file('no_hits_map.txt')
+    no_hits_name = utilities.name_temp_file('no_hits_name.txt')
     hits_faa = utilities.name_temp_file('hits_genes.faa')
-    hits_map = utilities.name_temp_file('hits_map.txt')
+    hits_name = utilities.name_temp_file('hits_name.txt')
+    uniref_gene_file = utilities.name_temp_file('uniref_gene_map.txt')
     
     utilities.execute_command("cat", temp_no_hits_faa, temp_no_hits_faa, [no_hits_faa], no_hits_faa)    
-    utilities.execute_command("cat", temp_no_hits_map, temp_no_hits_map, [no_hits_map], no_hits_map)
+    utilities.execute_command("cat", temp_no_hits_name, temp_no_hits_name, [no_hits_name], no_hits_name)
     utilities.execute_command("cat", temp_hits_faa, temp_hits_faa, [hits_faa], hits_faa)    
-    utilities.execute_command("cat", temp_hits_map, temp_hits_map, [hits_map], hits_map)
-    # Run diamond
-    #alignment_file = utilities.diamond_alignment(genes_file, args.uniref )
-    
-    
-    # Infer abundance for sufficient hits to  uniref90 and no_hits
-    #hits_map, no_hits_map = utilities.Infer_aligmnets(alignment_file, config.temp_dir)
-    
-    
-    # select sequence for insufficient hits
-    #no_hits_genes_faa = utilities.select_sequnces(genes_file, no_hits_map, output_name = 'no_hits.faa')
-    
-    # select sequence for sufficient hits 
-    #hits_genes_faa = utilities.select_sequnces(genes_file, hits_map, output_name = 'hits.faa')
+    utilities.execute_command("cat", temp_hits_name, temp_hits_name, [hits_name], hits_name)
+    utilities.execute_command("cat", temp_hits_name, temp_hits_name, [hits_name], hits_name)
 
     # Cluster no sufficient hits using CD-Hit
     cluster_gene_file, cluster_alignments = utilities.cluster_genes(no_hits_faa)
@@ -116,7 +109,7 @@ def main():
     
         
     # Join gene families and write them to the output directory as gene_families_table.txt
-    gene_families_table = utilities.gene2genefamilies(args.gene_path, mapping_cluster, hits_map, args.scale)
+    gene_families_table = utilities.gene2genefamilies(args.gene_path, mapping_cluster, uniref_gene_file, args.scale)
     
     # move the the gene families output table under main output folder from temp files
     

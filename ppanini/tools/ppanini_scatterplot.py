@@ -253,7 +253,7 @@ def master_plot(path, size = 5):
 	
 	plt.savefig(path + '/fig4b_s'+'sclae_'+str(data_scale)+'.pdf', bbox_inches='tight', pad_inches = 0, dpi=300) 
 '''
-def scatter_plot_metagenomic_priority(axe, ppanini_table, title = None, score_type = 'universe', pan_genome_score = None, scale = None, output_path = None, size = 3):
+def scatter_plot_metagenomic_priority(axe, ppanini_table, title = None, score_type = 'universe', pan_genome_score = None, scale = None, output_path = None, size = 3, draw_contour = True):
     if axe == None:
     	fig, axe = plt.subplots(1, figsize=(size, size))
     #mp_gp = {}
@@ -263,7 +263,7 @@ def scatter_plot_metagenomic_priority(axe, ppanini_table, title = None, score_ty
     mp = ppanini_table['ppanini_score']
     #abund = np.array(abund)/max(abund)
     #prev = np.array(prev)/max(prev)
-    draw_contour = True
+    draw_contour = draw_contour
     if score_type == 'universe':
         
         if  pan_genome_score:
@@ -440,12 +440,13 @@ def priority_scatter(args):
 	scatter_plot_metagenomic_priority(None, ppanini_output, diamond_output, no_uniq_genomes, title = None,scale = None , output_path=args.path+'/'+args.outfile, size = args.size)
 
 
-def scatter_plot_prev_abund(axe, ppanini_table, title, characterization_cat ='', essential_genes = '', xscale = 'log', yscale = 'log', output_path = None, size = 3):
+def scatter_plot_prev_abund(axe, ppanini_table, title, characterization_cat ='', essential_genes = '', xscale = 'log', yscale = 'log', output_path = None, size = 3, num_rand = None):
     if axe == None:
         fig, axe = plt.subplots(1, figsize=(size, size))
     #mp_gp = {}
     import random
-    num_rand = len(ppanini_table.index) #
+    if not num_rand:
+        num_rand = len(ppanini_table.index) #
 
     idxs = random.sample(range(len(ppanini_table.index)), min(num_rand, len(ppanini_table.index)))
 

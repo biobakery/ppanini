@@ -83,7 +83,7 @@ setuptools.setup(
             'ppanini_infer_gene = ppanini.tools.ppanini_infer_gene:main',
             'ppanini_cluster2genes = ppanini.tools.ppanini_cluster2genes:main',
             'ppanini_press = ppanini.tools.ppanini_press:main',
-            'ppanini_fasta_select = ppanini.tools.fasta_select:main'            
+            'ppanini_fasta_select = ppanini.tools.ppanini_fasta_select:main'            
         ]},
     test_suite= 'ppanini_test.get_unittests()',
     zip_safe = False

@@ -26,7 +26,6 @@ def get_args():
     parser.add_argument( "--min-qcover", type=float, required=True )
     parser.add_argument( "--min-scover", type=float, required=True )
     parser.add_argument( "--all-valid-hits", action="store_true" )
-    parser.add_argument( "--json", action="store_true" )
     args = parser.parse_args()
     return args
 def main():
@@ -76,15 +75,18 @@ def main():
                 polymap_all.setdefault( uniref, {} )[gene] = 1 
                 unirefs.setdefault( gene, set( ) ).add( uniref )
                 
-    if args.json:
-        f=open(args.output+'/json_map_uniref_gene.txt',"wt")
-        f.write(json.dumps(polymap_all))
+    # use gene-uniref map for genes that pass the thresholds
+    #f1=open(args.output+'/map_uniref_gene.txt',"wt")
+    #for uniref in unirefs:
+    #    f1.write ("%s\t%s\n" % (uniref,str(';'.join(gene for gene in polymap_all.get(uniref)))))
+    #
+    # use gene-uniref map for genes that pass the thresholds
+    with open(args.output+'/map_uniref_gene.txt', 'wt') as csv_file:
+            writer = csv.writer(csv_file, delimiter='\t')
+            for gene in unirefs:
+               writer.writerow([list(unirefs[gene])[0]], gene)
     
-    f1=open(args.output+'/map_uniref_gene.txt',"wt")
-    for cluster in polymap_all:
-        f1.write ("%s\t%s\n" % (cluster,str(';'.join(gene for gene in polymap_all.get(cluster)))))
-            #f1.write([cluster, polymap_all.get(cluster)])
-    
+    # make dictionary for genes that don't pass the threshold against uniref    
     for row in iter_rows( args.hits ):
         gene = row[0]
         if gene not in unirefs:
@@ -94,7 +96,7 @@ def main():
     with open(args.output+'/hits.txt', 'wt') as csv_file:
             writer = csv.writer(csv_file, delimiter='\t')
             for gene in unirefs:
-               writer.writerow([list(unirefs[gene])[0], gene])
+               writer.writerow([gene])
     # list of genes that doesn't pass the threshold for mapping to uniref  
     with open(args.output+'/no_hits.txt', 'wt') as csv_file:
             writer = csv.writer(csv_file, delimiter='\t')
