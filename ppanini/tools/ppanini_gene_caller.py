@@ -122,6 +122,15 @@ def main():
             config.temp_dir = temp_dir+'/prodigal_output/'
             utilities.make_directory(config.temp_dir)
             genes_file_gff, genes_file_fna, genes_file_faa = utilities.genecall(new_contig_file)
+            
+            # move the file to root of the output directory then the other samples can start
+            if not os.path.isfile(config.output_folder+"/prodigal.gff"):
+                shutil.move(genes_file_gff, config.output_folder+'/prodigal.gff')
+            if not os.path.isfile(config.output_folder+"/prodigal.faa"):
+                shutil.move(genes_file_faa, config.output_folder+'/prodigal.faa')
+            genes_file_gff = config.output_folder+ '/prodigal.gff'
+            #genes_file_fna = config.output_folder+ '/prodigal.fna'
+            genes_file_faa = config.output_folder + '/prodigal.faa'
         else:
             genes_file_gff = config.output_folder+ '/prodigal.gff'
             #genes_file_fna = config.output_folder+ '/prodigal.fna'
@@ -183,10 +192,6 @@ def main():
             shutil.move(no_hits, config.output_folder+'/no_hits/' + 'no_hits.txt')
             shutil.move(hits, config.output_folder+'/hits/' + 'hits.txt')
             shutil.move(uniref_gene_map, config.output_folder+'/hits/' + 'uniref_gene_map.txt')
-            if not os.path.isfile(config.output_folder+"/prodigal.gff"):
-                shutil.move(genes_file_gff, config.output_folder+'/prodigal.gff')
-            if not os.path.isfile(config.output_folder+"/prodigal.faa"):
-                shutil.move(genes_file_faa, config.output_folder+'/prodigal.faa')
             print ("Main output files for ppanini_press are written in: \n%s\n%s\n%s\n%s\n%s")% (config.output_folder+'/'+os.path.basename(os.path.normpath(abundance_file)),
                                                 config.output_folder+'/no_hits/' + 'no_hits.faa',
                                                 config.output_folder+'/no_hits/' + 'no_hits.txt',
