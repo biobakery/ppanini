@@ -187,11 +187,11 @@ def main():
             # move the three main output under main output folder from temp files
             # if there is more than one contig and the prodigal outputs ahvn't been produces (first sample run)
             
-            shutil.copyfile(no_hits_genes_faa, config.output_folder+'/no_hits/' + 'no_hits.faa')
-            shutil.copyfile(hits_genes_faa, config.output_folder+'/hits/' + 'hits.faa')
-            shutil.copyfile(no_hits, config.output_folder+'/no_hits/' + 'no_hits.txt')
-            shutil.copyfile(hits, config.output_folder+'/hits/' + 'hits.txt')
-            shutil.copyfile(uniref_gene_map, config.output_folder+'/hits/' + 'uniref_gene_map.txt')
+            shutil.move(no_hits_genes_faa, config.output_folder+'/no_hits/' + 'no_hits.faa')
+            shutil.move(hits_genes_faa, config.output_folder+'/hits/' + 'hits.faa')
+            shutil.move(no_hits, config.output_folder+'/no_hits/' + 'no_hits.txt')
+            shutil.move(hits, config.output_folder+'/hits/' + 'hits.txt')
+            shutil.move(uniref_gene_map, config.output_folder+'/hits/' + 'uniref_gene_map.txt')
             print ("Main output files for ppanini_press are written in: \n%s\n%s\n%s\n%s\n%s\n%s")% (config.output_folder+'/'+os.path.basename(os.path.normpath(abundance_file)),
                                                 config.output_folder+'/no_hits/' + 'no_hits.faa',
                                                 config.output_folder+'/no_hits/' + 'no_hits.txt',
@@ -202,11 +202,11 @@ def main():
     if not args.one_contig:
         # move the three main output under main output folder from temp files
         
-        shutil.copyfile(no_hits_genes_faa, config.output_folder+'/no_hits/'+ config.file_basename+ '_no_hits.faa')
-        shutil.copyfile(hits_genes_faa, config.output_folder+'/hits/'+ config.file_basename+ '_hits.faa')
-        shutil.copyfile(no_hits, config.output_folder+'/no_hits/'+ config.file_basename+ '_no_hits.txt')
-        shutil.copyfile(hits, config.output_folder+'/hits/'+ config.file_basename+ '_hits.txt')
-        shutil.copyfile(uniref_gene_map, config.output_folder+'/hits/'+ config.file_basename+ '_uniref_gene_map.txt')
+        shutil.move(no_hits_genes_faa, config.output_folder+'/no_hits/'+ config.file_basename+ '_no_hits.faa')
+        shutil.move(hits_genes_faa, config.output_folder+'/hits/'+ config.file_basename+ '_hits.faa')
+        shutil.move(no_hits, config.output_folder+'/no_hits/'+ config.file_basename+ '_no_hits.txt')
+        shutil.move(hits, config.output_folder+'/hits/'+ config.file_basename+ '_hits.txt')
+        shutil.move(uniref_gene_map, config.output_folder+'/hits/'+ config.file_basename+ '_uniref_gene_map.txt')
         print ("Main output files for ppanini_press are written in: \n%s\n%s\n%s\n%s\n%s\n%s")% (config.output_folder+'/'+os.path.basename(os.path.normpath(abundance_file)),
                                             config.output_folder+'/no_hits/'+ config.file_basename+ '_no_hits.faa',
                                             config.output_folder+'/no_hits/'+ config.file_basename+ '_no_hits.txt',

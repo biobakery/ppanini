@@ -85,7 +85,7 @@ def main():
         elif gene_file.endswith('_hits.txt'):
             temp_hits_name.append(args.gene_path+'/hits/'+gene_file)
     for map_file in os.listdir(args.gene_path+'/hits/'):  
-        if gene_file.endswith('uniref_gene_map.txt'):
+        if map_file.endswith('uniref_gene_map.txt'):
             temp_uniref_gene_file.append(args.gene_path+'/hits/'+map_file)
     no_hits_faa = utilities.name_temp_file('no_hits_genes.faa')
     no_hits_name = utilities.name_temp_file('no_hits_name.txt')
