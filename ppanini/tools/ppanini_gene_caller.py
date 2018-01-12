@@ -160,7 +160,9 @@ def main():
         # select sequence for sufficient hits 
         hits_genes_faa = utilities.select_sequnces(genes_file_faa, hits, output_name = '_hits.faa')
     else:
-        if not os.path.isfile(config.output_folder+'/no_hits/no_hits.txt') or not os.path.isfile(config.output_folder+'/hits/uniref_gene_map'): 
+        if not os.path.isfile(config.output_folder+'/no_hits/no_hits.txt') or\
+         not os.path.isfile(config.output_folder+'/hits/hits.txt') or\
+         not os.path.isfile(config.output_folder+'/hits/uniref_gene_map.txt'): 
             # Run diamond
             uniref_alignment_file = utilities.diamond_alignment(genes_file_faa, args.uniref )
             
