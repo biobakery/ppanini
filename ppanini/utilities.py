@@ -901,7 +901,7 @@ def mapping_clusters_genes(cluster_gene_file):
     """
     # name the genes cluster output 
     #mapper_cluster_dir = name_temp_file('')
-    mapper_cluster_genes = name_temp_file('map_cluster_gene.txt')
+    mapper_cluster_genes = name_temp_file('cluster_gene_map.txt')
 
     # align user input to database
     exe="ppanini_cluster2genes"
@@ -919,7 +919,7 @@ def gene2genefamilies(tables, mapping_cluster, mapping_uniref, scale):
     """
    #ppanini_join_tables -i tables/ 
     #-o hmp_sub_nares_genefamilies_abund.tsv 
-    #--mapping-cluster cd_hit_clust_temp/map_cluster_gene.txt 
+    #--mapping-cluster cd_hit_clust_temp/cluster_gene_map.txt 
     #--mapping-uniref ./hmp_nares_map_uniref_gene.txt
     """
     # name the genes cluster output 
