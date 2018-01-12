@@ -192,7 +192,7 @@ def main():
             shutil.move(no_hits, config.output_folder+'/no_hits/' + 'no_hits.txt')
             shutil.move(hits, config.output_folder+'/hits/' + 'hits.txt')
             shutil.move(uniref_gene_map, config.output_folder+'/hits/' + 'uniref_gene_map.txt')
-            print ("Main output files for ppanini_press are written in: \n%s\n%s\n%s\n%s\n%s")% (config.output_folder+'/'+os.path.basename(os.path.normpath(abundance_file)),
+            print ("Main output files for ppanini_press are written in: \n%s\n%s\n%s\n%s\n%s\n%s")% (config.output_folder+'/'+os.path.basename(os.path.normpath(abundance_file)),
                                                 config.output_folder+'/no_hits/' + 'no_hits.faa',
                                                 config.output_folder+'/no_hits/' + 'no_hits.txt',
                                                 config.output_folder+'/hits/' + 'hits.faa',
@@ -207,7 +207,7 @@ def main():
         shutil.move(no_hits, config.output_folder+'/no_hits/'+ config.file_basename+ '_no_hits.txt')
         shutil.move(hits, config.output_folder+'/hits/'+ config.file_basename+ '_hits.txt')
         shutil.move(uniref_gene_map, config.output_folder+'/hits/'+ config.file_basename+ '_uniref_gene_map.txt')
-        print ("Main output files for ppanini_press are written in: \n%s\n%s\n%s\n%s\n%s")% (config.output_folder+'/'+os.path.basename(os.path.normpath(abundance_file)),
+        print ("Main output files for ppanini_press are written in: \n%s\n%s\n%s\n%s\n%s\n%s")% (config.output_folder+'/'+os.path.basename(os.path.normpath(abundance_file)),
                                             config.output_folder+'/no_hits/'+ config.file_basename+ '_no_hits.faa',
                                             config.output_folder+'/no_hits/'+ config.file_basename+ '_no_hits.txt',
                                             config.output_folder+'/hits/'+ config.file_basename+ '_hits.faa',
