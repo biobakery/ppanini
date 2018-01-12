@@ -75,12 +75,12 @@ def main():
     temp_hits_faa = []
     temp_uniref_gene_file = []
     for gene_file in os.listdir(args.gene_path+'/no_hits/'):          
-        if gene_file.endswith('_no_hits.faa'):
+        if gene_file.endswith('no_hits.faa'):
             temp_no_hits_faa.append(args.gene_path+'/no_hits/'+gene_file)
-        elif gene_file.endswith('_no_hits.txt'):
+        elif gene_file.endswith('no_hits.txt'):
             temp_no_hits_name.append(args.gene_path+'/no_hits/'+gene_file)
     for gene_file in os.listdir(args.gene_path+'/hits/'):  
-        if gene_file.endswith('_hits.faa'):
+        if gene_file.endswith('hits.faa'):
             temp_hits_faa.append(args.gene_path+'/hits/'+gene_file)
         elif gene_file.endswith('_hits.txt'):
             temp_hits_name.append(args.gene_path+'/hits/'+gene_file)
