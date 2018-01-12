@@ -81,7 +81,7 @@ def main():
     #    f1.write ("%s\t%s\n" % (uniref,str(';'.join(gene for gene in polymap_all.get(uniref)))))
     #
     # use gene-uniref map for genes that pass the thresholds
-    with open(args.output+'/map_uniref_gene.txt', 'wt') as csv_file:
+    with open(args.output+'/uniref_gene_map.txt', 'wt') as csv_file:
             writer = csv.writer(csv_file, delimiter='\t')
             for gene in unirefs:
                writer.writerow([list(unirefs[gene])[0]], gene)

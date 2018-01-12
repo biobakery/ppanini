@@ -150,17 +150,17 @@ def main():
     alignment_file = utilities.diamond_alignment(genes_file_faa, args.uniref )
     
     # Infer abundance for sufficient hits to  uniref90 and no_hits
-    hits_map, no_hits_map = utilities.Infer_aligmnets(alignment_file, config.temp_dir)
+    hits, no_hits, uniref_gene_map = utilities.Infer_aligmnets(alignment_file, config.temp_dir)
     
     # write map file to the output
-    #with open(config.output_folder+'/'+config.file_basename+'_hits_map.txt' , 'w') as foo:
-    #    foo.writelines(hits_map) #header
+    #with open(config.output_folder+'/'+config.file_basename+'_hits.txt' , 'w') as foo:
+    #    foo.writelines(hits) #header
     
     # select sequence for insufficient hits
-    no_hits_genes_faa = utilities.select_sequnces(genes_file_faa, no_hits_map, output_name = '_no_hits.faa')
+    no_hits_genes_faa = utilities.select_sequnces(genes_file_faa, no_hits, output_name = '_no_hits.faa')
     
     # select sequence for sufficient hits 
-    hits_genes_faa = utilities.select_sequnces(genes_file_faa, hits_map, output_name = '_hits.faa')
+    hits_genes_faa = utilities.select_sequnces(genes_file_faa, hits, output_name = '_hits.faa')
     
     
     # move the three main output under main output folder from temp files
@@ -169,8 +169,9 @@ def main():
     
     shutil.move(no_hits_genes_faa, config.output_folder+'/no_hits/'+ config.file_basename+ '_no_hits.faa')
     shutil.move(hits_genes_faa, config.output_folder+'/hits/'+ config.file_basename+ '_hits.faa')
-    shutil.move(no_hits_map, config.output_folder+'/no_hits/'+ config.file_basename+ '_no_hits.txt')
-    shutil.move(hits_map, config.output_folder+'/hits/'+ config.file_basename+ '_hits.txt')
+    shutil.move(no_hits, config.output_folder+'/no_hits/'+ config.file_basename+ '_no_hits.txt')
+    shutil.move(hits, config.output_folder+'/hits/'+ config.file_basename+ '_hits.txt')
+    shutil.move(uniref_gene_map, config.output_folder+'/hits/'+ config.file_basename+ '_uniref_gene_map.txt')
     if not os.path.isfile(config.output_folder+"/prodigal.gff"):
         shutil.move(genes_file_gff, config.output_folder+'/prodigal.gff')
     if not os.path.isfile(config.output_folder+"/prodigal.faa"):
@@ -179,7 +180,8 @@ def main():
                                         config.output_folder+'/no_hits/'+ config.file_basename+ '_no_hits.faa',
                                         config.output_folder+'/no_hits/'+ config.file_basename+ '_no_hits.txt',
                                         config.output_folder+'/hits/'+ config.file_basename+ '_hits.faa',
-                                        config.output_folder+'/hits/'+ config.file_basename+ '_hits.txt')
+                                        config.output_folder+'/hits/'+ config.file_basename+ '_hits.txt',
+                                        config.output_folder+'/hits/'+ config.file_basename+ '_uniref_gene_map.txt')
         
         
 if __name__ == '__main__':

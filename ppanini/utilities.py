@@ -835,8 +835,9 @@ def Infer_aligmnets(alignment_file, output):
     Run infer_abundance to get sufficnet maaped genes (hits) and insufficient genes (no_hits)
     """
     # name the hits and no hits file
-    hits_map =output+'/hits.txt'# name_temp_file('_hits.txt')
-    no_hits_map = output+'/no_hits.txt' #no_hits_map = name_temp_file('_no_hits.txt')
+    hits =output+'/hits.txt'# name_temp_file('_hits.txt')
+    no_hits = output+'/no_hits.txt' #no_hits_map = name_temp_file('_no_hits.txt')
+    uniref_gene_map = output+'/uniref_gene_map.txt'
     #print (hits_map)
     # align user input to database
     exe="ppanini_infer_gene"
@@ -850,9 +851,9 @@ def Infer_aligmnets(alignment_file, output):
     
     args+=opts
 
-    execute_command(exe,args,[alignment_file],[hits_map, no_hits_map])
+    execute_command(exe,args,[alignment_file],[hits, no_hits])
 
-    return hits_map, no_hits_map
+    return hits, no_hits, uniref_gene_map
 def select_sequnces(fasta_file, sequnces_names, output_name = 'selected_genes.faa'):
     """
     Gets a fasta file and a list of names and returen sequnces for the list
