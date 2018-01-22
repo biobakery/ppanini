@@ -141,7 +141,7 @@ def get_fpr_tpr(input_ppanini, essential_genes, beta =.5):
     if beta == 0.5:
         ppanini_score = ppanini_table['ppanini_score']
     else:
-        ppanini_score = 1/((beta/ppanini_table['prevalence_percentile'])+((1.0-beta)/ppanini_table['abund_percentile']))
+        ppanini_score = 1.0/((beta/ppanini_table['prevalence_percentile'])+((1.0-beta)/ppanini_table['abund_percentile']))
     abun = [float(val) for val in abun]
     sorted_abun = sorted(abun)
     ground_truth = [1 if gene_id  in essential_genes else 0 for gene_id in gene_families ]
