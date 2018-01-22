@@ -193,8 +193,13 @@ def get_no_niche_prevalence_abundance(centroids_data_matrix):
     
     summary_table['abund_percentile'] = scipy.stats.rankdata(summary_table['mean_abundance'], method='average') #/summary_table.shape[0]
     summary_table['abund_percentile'] = summary_table['abund_percentile'] / summary_table['abund_percentile'].max()
+    
     # Calculate PPANINI score
-    summary_table['ppanini_score'] = 1/((config.beta/summary_table['prevalence_percentile'])+((1-config.beta)/summary_table['abund_percentile']))   
+    # Weighted Harmonic mean
+    #summary_table['ppanini_score'] = 1/((config.beta/summary_table['prevalence_percentile'])+((1-config.beta)/summary_table['abund_percentile'])) 
+    
+    # Geometric mean
+    summary_table['ppanini_score'] = (summary_table['prevalence_percentile'] * summary_table['abund_percentile']) **(1.0/2.0)   
     
     return summary_table 
 
