@@ -446,7 +446,7 @@ def scatter_plot_prev_abund(axe, ppanini_table, title, characterization_cat ='',
     #mp_gp = {}
     import random
     if not num_rand:
-        num_rand = len(ppanini_table.index) #
+        num_rand = 1000#len(ppanini_table.index) #
 
     idxs = random.sample(range(len(ppanini_table.index)), min(num_rand, len(ppanini_table.index)))
 
@@ -454,16 +454,16 @@ def scatter_plot_prev_abund(axe, ppanini_table, title, characterization_cat ='',
     #abund = ppanini_table['abundance']
     ppanaini_scores = ppanini_table['ppanini_score'][idxs]
     #print ppanaini_scores
-    prev = np.array(ppanini_table['prevalence_percentile'][idxs]) #alpha_prevalence
-    abund = np.array(ppanini_table['abund_percentile'][idxs])
+    prev = np.array(ppanini_table['alpha_prevalence'][idxs]) #alpha_prevalence
+    abund = np.array(ppanini_table['abundance'][idxs])
     if xscale == 'log':
-        all_prev = np.log(np.array(ppanini_table['prevalence_percentile']))
+        all_prev = np.log(np.array(ppanini_table['alpha_prevalence']))
     else: 
-        all_prev = np.array(ppanini_table['prevalence_percentile'])
+        all_prev = np.array(ppanini_table['alpha_prevalence'])
     if yscale == 'log':
-        all_abund = np.log(np.array(ppanini_table['abund_percentile']))
+        all_abund = np.log(np.array(ppanini_table['abundance']))
     else:
-        all_abund = np.array(ppanini_table['abund_percentile'])
+        all_abund = np.array(ppanini_table['abundance'])
     
     go_term = ppanini_table['GO'][idxs]
     
@@ -616,8 +616,8 @@ def scatter_plot_prev_abund(axe, ppanini_table, title, characterization_cat ='',
     new_X= [a for a,b in zip (prev,test) if ~b]
     new_Y= [a for a,b in zip (abund,test) if ~b]
     print new_X , new_Y'''
-    X, Y, Z = density_estimation(prev, abund)
-    axe.contour(X, Y, Z, linewidths = .5, alpha = .75)
+    #X, Y, Z = density_estimation(prev, abund)
+    #axe.contour(X, Y, Z, linewidths = .5, alpha = .75)
     if yscale == 'log':
         axe.set_ylabel('Relative abundance (log)', fontsize=6)
     if xscale == 'log':

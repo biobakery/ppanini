@@ -25,6 +25,7 @@ def get_args ():
     parser.add_argument( 
         "-o", "--output", 
         default=None,
+        required = True,
         help="Path for outputs",
         )
     parser.add_argument(
