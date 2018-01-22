@@ -455,15 +455,15 @@ def scatter_plot_prev_abund(axe, ppanini_table, title, characterization_cat ='',
     ppanaini_scores = ppanini_table['ppanini_score'][idxs]
     #print ppanaini_scores
     prev = np.array(ppanini_table['alpha_prevalence'][idxs]) #alpha_prevalence
-    abund = np.array(ppanini_table['abundance'][idxs])
+    abund = np.array(ppanini_table['mean_abundance'][idxs])
     if xscale == 'log':
         all_prev = np.log(np.array(ppanini_table['alpha_prevalence']))
     else: 
         all_prev = np.array(ppanini_table['alpha_prevalence'])
     if yscale == 'log':
-        all_abund = np.log(np.array(ppanini_table['abundance']))
+        all_abund = np.log(np.array(ppanini_table['mean_abundance']))
     else:
-        all_abund = np.array(ppanini_table['abundance'])
+        all_abund = np.array(ppanini_table['mean_abundance'])
     
     go_term = ppanini_table['GO'][idxs]
     
