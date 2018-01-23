@@ -141,7 +141,8 @@ def get_fpr_tpr(input_ppanini, essential_genes, beta =.5):
     if beta == 0.5:
         ppanini_score = ppanini_table['ppanini_score']
     else:
-        ppanini_score = 1.0/((beta/ppanini_table['prevalence_percentile'])+((1.0-beta)/ppanini_table['abund_percentile']))
+        #ppanini_score = 1.0/((beta/ppanini_table['prevalence_percentile'])+((1.0-beta)/ppanini_table['abund_percentile']))
+        ppanini_score = (ppanini_table['prevalence_percentile']**(beta)) * (ppanini_table['abund_percentile']**(1.0-beta))
     abun = [float(val) for val in abun]
     sorted_abun = sorted(abun)
     ground_truth = [1 if gene_id  in essential_genes else 0 for gene_id in gene_families ]
@@ -198,7 +199,7 @@ def roc_plot(roc_info=None, figure_name='roc_plot_ppanini', size= 5, title = '',
         plt.rcParams.update(params)
         axe.plot(fpr[roc_info[i][0]], tpr[roc_info[i][0]], linewidth=1.0, label='{0} (area = {1:0.2f})'
                                        ''.format(str(roc_info[i][0]), roc_auc[roc_info[i][0]]))   
-    axe.plot([0, 1], [0, 1], 'k--', linewidth=0.75)
+    axe.plot([0, 1], [0, 1], 'k--', linewidth=0.5)
     axe.set_xlim([-0.01, 1.0])
     axe.set_ylim([-0.01, 1.01])
     axe.legend(loc="lower right")

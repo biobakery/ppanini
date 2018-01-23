@@ -446,10 +446,9 @@ def scatter_plot_prev_abund(axe, ppanini_table, title, characterization_cat ='',
     #mp_gp = {}
     import random
     if not num_rand:
-        num_rand = 1000#len(ppanini_table.index) #
+        num_rand = 5000#len(ppanini_table.index) #
 
     idxs = random.sample(range(len(ppanini_table.index)), min(num_rand, len(ppanini_table.index)))
-
     genes = ppanini_table.index[idxs]
     #abund = ppanini_table['abundance']
     ppanaini_scores = ppanini_table['ppanini_score'][idxs]
@@ -490,8 +489,7 @@ def scatter_plot_prev_abund(axe, ppanini_table, title, characterization_cat ='',
     #display_essential = np.array([True if characterization_cat == "Uniref and GO term" and go_val == go_val  and gene in essential_genes else 
     #True if characterization_cat == "Only Uniref" and gene.startswith('UniRef') and go_val != go_val and gene in essential_genes else False for
     #(go_val, gene) in zip(go_term, genes)])
-    display_essential = np.array([True if go_val == go_val  and gene in essential_genes else  False 
-                                  for (go_val, gene) in zip(go_term, genes)])
+    display_essential = np.array([True if gene in essential_genes else  False for  gene in ppanini_table.index])
 
     
     points_marker = np.array(['^' if val >= 0.75 else 'v' if val < 0.75 else '+'
@@ -499,12 +497,12 @@ def scatter_plot_prev_abund(axe, ppanini_table, title, characterization_cat ='',
     xp_all =  []
     yp_all =[]
     points_alpha = np.array([.35 if val >= 0.75 else .1 for val in ppanaini_scores])
-    
+    ''' 
     for xp, yp, mp, cp, ap in zip(x, y, points_marker, points_color, points_alpha):
         if xp == xp and yp == yp and xp and yp: #cp == color_dic[characterization_cat] and
             xp_all.append(xp)
             yp_all.append(yp)
-    '''        
+           
     axe.hist2d(xp_all, \
                    yp_all, \
                    #extent=[np.min(xp_all), np.max(xp_all), np.min(yp_all), np.max(yp_all)],
@@ -523,9 +521,8 @@ def scatter_plot_prev_abund(axe, ppanini_table, title, characterization_cat ='',
                    marginals=False)
     
     '''
-    
     for xp, yp, mp, cp, ap in zip(x, y, points_marker, points_color, points_alpha):
-        if cp != color_dic["Only Uniref"]:
+        if cp != color_dic["Unannotated"]:
             continue
         axe.scatter(xp, \
                    yp, \
@@ -543,7 +540,7 @@ def scatter_plot_prev_abund(axe, ppanini_table, title, characterization_cat ='',
                    marker=mp,\
                    label='')
     for xp, yp, mp, cp, ap in zip(x, y, points_marker, points_color, points_alpha):
-        if cp != color_dic["Unannotated"]:
+        if cp != color_dic["Only Uniref"]:
             continue
         axe.scatter(xp, \
                    yp, \
@@ -579,25 +576,25 @@ def scatter_plot_prev_abund(axe, ppanini_table, title, characterization_cat ='',
                    marker=mp,\
                    label='')
     #display_essential = display_essential[random.sample(range(len(ppanini_table.index)), min(2000, len(display_essential)))]
-    for xp, yp, mp, ap, de in zip(x, y, points_marker, points_alpha, display_essential):
+    for xp, yp, de in zip(all_prev, all_abund, display_essential):
         if de:
             axe.scatter(xp, \
                        yp, \
-                       s= 7,\
+                       s= 20,\
                        c= 'silver',\
                        cmap='jet', \
                        #edgecolor='',\
                        #cmap= color_dic[title],\
                        #'darkgoldenrod', \
                        ##'slategray'
-                       alpha=ap, \
-                       linewidths=0.1, \
-                       edgecolors= 'grey',
+                       alpha=0.25, \
+                       linewidths=0.25, \
+                       edgecolors= 'black',
                        #zorder=0, \
                        marker='*',\
                        label='')
     #print np.nanpercentile(x, 75), np.nanpercentile(y, 75)
-    axe.text(0.55, 0.1, "number of gene families:%d" % (len(xp_all)), fontsize=5, va="center", ha="center", transform=axe.transAxes)
+    axe.text(0.55, 0.1, "number of gene families: %d" % (len(ppanini_table.index)), fontsize=5, va="center", ha="center", transform=axe.transAxes)
     axe.axvline(x= np.nanpercentile(all_prev[~np.isnan(all_prev)], 75), color='black', linestyle='--', linewidth = .75)
     axe.axhline(y= np.nanpercentile(all_abund[~np.isnan(all_abund)], 75), color='black', linestyle='--', linewidth = .75)
 
