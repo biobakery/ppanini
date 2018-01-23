@@ -199,7 +199,7 @@ def get_no_niche_prevalence_abundance(centroids_data_matrix):
     #summary_table['ppanini_score'] = 1/((config.beta/summary_table['prevalence_percentile'])+((1-config.beta)/summary_table['abund_percentile'])) 
     
     # Geometric mean
-    summary_table['ppanini_score'] = (summary_table['prevalence_percentile']**(beta)) * (summary_table['abund_percentile']**(1.0-beta))   
+    summary_table['ppanini_score'] = (summary_table['prevalence_percentile']**(config.beta)) * (summary_table['abund_percentile']**(1.0-config.beta))   
     
     return summary_table 
 
