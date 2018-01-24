@@ -182,7 +182,7 @@ def get_no_niche_prevalence_abundance(centroids_data_matrix):
     # Calculate mean abundance of non zero values
     #df = centroids_data_matrix.replace(0, numpy.NaN)
     df = centroids_data_matrix
-    summary_table['mean_abundance'] = df.mean(axis = 1)
+    summary_table['mean_abundance'] = df.replace(0, numpy.nan).mean(axis = 1) 
 
         # Alpha prevalence 
     summary_table['alpha_prevalence'] = df.astype(bool).sum(axis=1)/df.shape[1]# df.count(axis = 1)/df.shape[1]
@@ -196,13 +196,13 @@ def get_no_niche_prevalence_abundance(centroids_data_matrix):
     
     # Calculate PPANINI score
     # Weighted Harmonic mean
-    #summary_table['ppanini_score'] = 1/((config.beta/summary_table['prevalence_percentile'])+((1-config.beta)/summary_table['abund_percentile'])) 
+    summary_table['ppanini_score'] = 1/((config.beta/summary_table['prevalence_percentile'])+((1-config.beta)/summary_table['abund_percentile'])) 
     
     # Geometric mean
     #summary_table['ppanini_score'] = (summary_table['prevalence_percentile']**(config.beta)) * (summary_table['abund_percentile']**(1.0-config.beta)) 
     
     # max
-    summary_table['ppanini_score'] = summary_table[['prevalence_percentile','abund_percentile']].max(axis=1)
+    #summary_table['ppanini_score'] = summary_table[['prevalence_percentile','abund_percentile']].max(axis=1)
 
     
     return summary_table 
