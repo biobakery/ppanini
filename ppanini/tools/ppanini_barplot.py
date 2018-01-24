@@ -84,6 +84,8 @@ def summerize_gene_table(ppanini_input, ppanini_output, scale = 'abundance', out
         if go_term !=  go_term: # if mapper[gene_family] is nan then is not equal to itself :)
             if gene_family.startswith('UniRef') and not gene_family.endswith('unknown'):
                 mapper.append('Protein_'+gene_family)
+            elif gene_family.startswith('UniRef') and gene_family.endswith('unknown'): 
+                mapper.append('NCBI_gene_'+gene_family)
             elif gene_family == 'UNMAPPED': 
                 mapper.append('Unannotated_'+gene_family)
             else:
@@ -92,7 +94,7 @@ def summerize_gene_table(ppanini_input, ppanini_output, scale = 'abundance', out
             mapper.append('Function_' + gene_family)
     # update gene family names 
     df_in.index = mapper        
-    summary_table = pd.DataFrame(index = df_in.columns, columns=['Unannotated', 'UniRef', 'GO'], dtype=float)
+    summary_table = pd.DataFrame(index = df_in.columns, columns=['Unannotated', 'NCBI_gene', 'UniRef', 'GO'], dtype=float)
     summary_table[:] = 0.0000
     sum1 =0.0
     for sample in list(df_in.columns):

@@ -901,7 +901,7 @@ def mapping_clusters_genes(cluster_gene_file):
     """
     # name the genes cluster output 
     #mapper_cluster_dir = name_temp_file('')
-    mapper_cluster_genes = name_temp_file('cluster_gene_map.txt')
+    mapper_cluster_genes = name_temp_file('cd-hit_gene_map.txt')
 
     # align user input to database
     exe="ppanini_cluster2genes"

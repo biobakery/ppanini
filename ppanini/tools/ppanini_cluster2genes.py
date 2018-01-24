@@ -46,10 +46,10 @@ def main():
                 if line.endswith('*'):
                     polymap_all[cluster]['representaive_gene']= gene
     if args.json:
-        f=open(args.output+'/map_cluster_gene.json',"wt")
+        f=open(args.output+'/cd-hit_gene_map.txt.json',"wt")
         f.write(json.dumps(polymap_all))
     
-    f1=open(args.output+'/map_cluster_gene.txt',"wt")
+    f1=open(args.output+'/cd-hit_gene_map.txt',"wt")
     # cluster_id  cluster_rep genes
     for cluster in polymap_all:
         f1.write ("%s\t%s\t%s\n" % (cluster, str(';'.join(gene for gene in polymap_all.get(cluster)  if gene != 'representaive_gene')), polymap_all[cluster]['representaive_gene']))
