@@ -107,6 +107,7 @@ def summerize_gene_table(ppanini_input, ppanini_output, scale = 'abundance', out
             summary_table.loc[sample, 'GO'] = df_in.loc[df_in.index.str.startswith('Function_'),sample].sum() * 1.00 /sum1 
             summary_table.loc[sample, 'UniRef'] = df_in.loc[df_in.index.str.startswith('Protein_'), sample].sum() * 1.00 /sum1 
             summary_table.loc[sample, 'Unannotated'] = df_in.loc[df_in.index.str.startswith('Unannotated_'), sample].sum() * 1.00/sum1
+            summary_table.loc[sample, 'NCBI_gene'] = df_in.loc[df_in.index.str.startswith('NCBI_gene_'), sample].sum() * 1.00/sum1
         elif scale == 'counts':
             sum1 = sum(df_in[sample]>0.00)
             # skip sample with all rows zero
@@ -116,8 +117,8 @@ def summerize_gene_table(ppanini_input, ppanini_output, scale = 'abundance', out
             summary_table.loc[sample, 'GO'] = sum(df_in.loc[df_in.index.str.startswith('Function_'),sample]> 0.0) * 1.00 /sum1 
             summary_table.loc[sample, 'UniRef'] = sum(df_in.loc[df_in.index.str.startswith('Protein_'), sample]> 0.0) * 1.00 /sum1 
             summary_table.loc[sample, 'Unannotated'] = sum(df_in.loc[df_in.index.str.startswith('Unannotated_'), sample]>0.0) * 1.00/sum1
-            
-    summary_table.sort_values(by=['Unannotated', 'UniRef', 'GO' ], ascending=[0, 0 , 0], inplace= True) #
+            summary_table.loc[sample, 'NCBI_gene'] = sum(df_in.loc[df_in.index.str.startswith('NCBI_gene_'), sample]>0.0) * 1.00/sum1
+    summary_table.sort_values(by=['Unannotated', 'NCBI_gene', 'UniRef', 'GO' ], ascending=[0, 0 , 0, 0], inplace= True) #
     
     if output_path == None:
         output_path = './ppanini_barplot'
@@ -156,6 +157,20 @@ def stack_barplot(df, output_path = None, axe = None, legend = True, legend_titl
             # with alpha 0.5
             alpha=0.9,
             # with color
+            color='yellow',#'silver',#'#F1911E',
+            linewidth=0)
+    axe.bar(bar_l,
+            df['NCBI_gene'],
+            # set the width
+            width=bar_width,
+            # with pre_score on the bottom
+            #bottom=df['Unannotated'],
+            # with the label mid score
+            label='Novel NCBI gene', #hypothetical unannotated',
+            bottom= df['Unannotated'],
+            # with alpha 0.5
+            alpha=0.9,
+            # with color
             color='gold',#'silver',#'#F1911E',
             linewidth=0)
     
@@ -166,7 +181,7 @@ def stack_barplot(df, output_path = None, axe = None, legend = True, legend_titl
             width=bar_width,
             # with the label pre score
             label='Homologous protein in UniRef',
-            bottom= df['Unannotated'],
+            bottom= [i+j for i,j in zip(df['Unannotated'],df['NCBI_gene'])],
             # with alpha 0.5
             alpha=0.9,
             # with color
@@ -181,7 +196,7 @@ def stack_barplot(df, output_path = None, axe = None, legend = True, legend_titl
             width=bar_width,
             # with the label pre score
             label='Functionally known in GO',
-            bottom=[i+j for i,j in zip(df['Unannotated'],df['UniRef'])],
+            bottom=[i+j+k for i,j,k in zip(df['Unannotated'],df['NCBI_gene'], df['UniRef'])],
             # with alpha 0.5
             alpha=0.9,
             # with color

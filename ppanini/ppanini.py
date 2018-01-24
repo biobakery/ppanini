@@ -474,9 +474,21 @@ def _main():
     ppanini_output_file_path = config.temp_dir+'/'+config.basename+'_table.txt' 
     # Write PPANINI output table
     imp_centroids.to_csv(ppanini_output_file_path, sep='\t')
+    
+    if config.verbose =='DEBUG':
+        print "--- Prioritized gene families table is written to the output ..."        
+    # make a ppanini barplt
+    if config.verbose =='DEBUG':
+        print ("let's make a PPANINI barplot for characterization picture")
+    utilities.execute_command('ppanini_barplot', ['-i1', config.temp_dir+'/temp/'+config.basename+'_abundance_table.txt',\
+                                                  '-i2',ppanini_output_file_path,\
+                                                  '-o', config.temp_dir], 
+                                                  [ppanini_output_file_path, config.temp_dir+'/temp/'+config.basename+'_abundance_table.txt'],
+                                                  [config.temp_dir+'/'+config.basename+'_barplot.txt'] )
     if config.verbose =='DEBUG':
         print ("--- The PPANINI output is written in %s ..." % (config.output_folder))
         print "--- PPANINI process is successfully completed ..."
+    
 
 if __name__ == '__main__':
 	_main()
