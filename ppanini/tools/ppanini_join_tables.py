@@ -94,11 +94,11 @@ def join_gene_tables(gene_tables,output,verbose=None, mapper= None, scale = None
                 # add the gene abundance to its cluster and use its cluster name
                 if mapper and gene in mapper:
                     gene = mapper[gene].keys()[0]
-                    print ("mapping cluster found for:", gene )
+                    #print ("mapping cluster found for:", gene )
                     find_count += 1
 
                 else:
-                    print ("No mapping cluster found for:", gene )
+                    #print ("No mapping cluster found for:", gene )
                     miss_count += 1
                     continue
             except IndexError:
