@@ -86,7 +86,7 @@ def join_gene_tables(gene_tables,output,verbose=None, mapper= None, scale = None
                     # no scale, use the raw counts
                     data_points = [data[6]]
                 else:system.exit("scale is not valid!")
-                print (data[1]+'_'+data[0])
+                #print (data[1]+'_'+data[0])
                 
                 # bind sample name and gene id to use as gene name
                 gene = data[1]+'_'+data[0].split("_")[1]
@@ -98,7 +98,7 @@ def join_gene_tables(gene_tables,output,verbose=None, mapper= None, scale = None
                     find_count += 1
 
                 else:
-                    #print ("No mapping cluster found for:", gene )
+                    print ("No mapping cluster found for:", gene )
                     miss_count += 1
                     continue
             except IndexError:
@@ -113,7 +113,7 @@ def join_gene_tables(gene_tables,output,verbose=None, mapper= None, scale = None
                 elif fill < 0:
                     # add data point to other data point from the same sample
                     current_data_points=current_data.split(GENE_TABLE_DELIMITER)
-                    for i,point in enumerate(data_points):
+                    for i, point in enumerate(data_points):
                         store_index=len(data_points)*-1-1+i
                         current_data_points[store_index]=str(float(current_data_points[store_index])+float(point))
                     gene_table_data[gene] = GENE_TABLE_DELIMITER.join(current_data_points)

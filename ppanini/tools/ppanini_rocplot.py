@@ -45,34 +45,30 @@ with warnings.catch_warnings():
 
 #from . import plot_metagenome_genome 
 from .. import utilities
-from ..utilities import load_polymap_dic,load_polymap
+from ..utilities import load_polymap_dic,load_polymap, intersect
 
 from .. import config
 #from . import plot_metagenome_genome
-def fpr_tpr_genome(input_ppanini, essential_genes, metagenomic_table = None , n_uniq_genomes = None, score_type = 'universe', pan_genome_score = None):
+
+def fpr_tpr_genome(ppanini_table, essential_genes, metagenomic_table = None , n_uniq_genomes = None, score_type = 'universe', 
+                   gene_families = None, pan_genome_score = None):
     # calculate genomic score 
     
-    ppanini_table = pd.DataFrame.from_csv(input_ppanini, sep='\t', index_col=0, header =0)
-    genes = list(ppanini_table.index )
-    #['gene']
-    #print metagenomic_table.values()[1:100]
-    #/float(n_uniq_genomes) 
-    #genes = metagenomic_table.keys()
+    gene_families = intersect(ppanini_table.index, pan_genome_score)
     if score_type == 'universe':
         
         if  pan_genome_score:
-            gp_pangenome = [float(pan_genome_score[gene]) if gene in pan_genome_score else float(0.0) for gene in genes]
-            #gp = [x + y for x, y in zip(gp_niche, gp_pangenome)]
+            gp_pangenome = [float(pan_genome_score[gene])  for gene in gene_families] #if gene in pan_genome_score else float(0.0)
             gp = gp_pangenome
         else:
             sys.exit("Please provide pangenome score dictionary")
     elif score_type == 'niche':
         gp_niche = np.zeros(len(metagenomic_table))
         uniq_genomes = []
-        gp_niche = [len(metagenomic_table[gene])/float(n_uniq_genomes) for gene in genes]
+        gp_niche = [len(metagenomic_table[gene])/float(n_uniq_genomes) for gene in gene_families]
         gp_niche = np.array(gp_niche)
         gp = gp_niche
-    ground_truth = [1 if gene_id  in essential_genes else 0 for gene_id in genes ]
+    ground_truth = [1 if gene_id  in essential_genes else 0 for gene_id in gene_families ]
     fpr, tpr, _  = roc_curve( ground_truth, gp, pos_label = 1)
     return fpr, tpr
     
@@ -116,42 +112,31 @@ def load_multiple_roc(args):
         print "ValueError for general roc plot"
     print "The ROC evaluation is successfully done!" 
 
-def get_fpr_tpr(input_ppanini, essential_genes, beta =.5):
+def get_fpr_tpr(ppanini_table, essential_genes, gene_families = None, beta =.5):
     fpr = dict()
     tpr = dict()
     true = dict()
     score = dict()
-   
-    #if config.verbose =='DEBUG':
-    #    print "PPANINI ROC plot evaluation!"
 
-    ppanini_table = pd.DataFrame.from_csv(input_ppanini, sep='\t', index_col=0, header =0)
-    #print ppanini_table['ppanini_score'][1:10]
-    
-    #ppanini_table = ppanini_table[ppanini_table['ppanini_score'] > 18.75]
-    gene_families = list(ppanini_table.index  )
-    #n = len(gene_families)-1
-    #print config.gene_families[0:10]
-    prev = ppanini_table['prevalence_percentile']
-    #prev = [float(val) for val in prev]
-    
-    #sorted_prev = sorted(prev)
-    abun = ppanini_table['abund_percentile']
-       
-    if beta == 0.5:
-        ppanini_score = ppanini_table['ppanini_score']
+    if gene_families:
+        if beta == 0.5:
+            ppanini_score = ppanini_table.loc[set(gene_families),'ppanini_score']
+        else:
+            ppanini_score = 1.0/((beta/ppanini_table.loc[set(gene_families), 'prevalence_percentile'])+\
+                                  ((1.0-beta)/ppanini_table.loc[set(gene_families), 'abund_percentile']))
     else:
-        ppanini_score = 1.0/((beta/ppanini_table['prevalence_percentile'])+((1.0-beta)/ppanini_table['abund_percentile']))
+        gene_families = ppanini_table.index
+        if beta == 0.5:
+            ppanini_score = ppanini_table['ppanini_score']
+        else:
+            ppanini_score = 1.0/((beta/ppanini_table['prevalence_percentile'])+\
+                                  ((1.0-beta)/ppanini_table['abund_percentile']))
+        
         #ppanini_score = ppanini_table[['prevalence_percentile','abund_percentile']].max(axis=1)
-    abun = [float(val) for val in abun]
-    sorted_abun = sorted(abun)
-    ground_truth = [1 if gene_id  in essential_genes else 0 for gene_id in gene_families ]
+    ground_truth = [1 if (gene_id  in essential_genes) else 0 for gene_id in gene_families ]
     score[beta] = ppanini_score
-
-    
     true[beta] = ground_truth
-   
-    assert(len(true[beta])==len(score[beta])) 
+    assert(len(score[beta])==len(true[beta])) 
     fpr[beta], tpr[beta], _  = roc_curve( true[beta], score[beta], pos_label = 1)
     return fpr[beta], tpr[beta]
     

@@ -98,7 +98,7 @@ def summerize_gene_table(ppanini_input, ppanini_output, scale = 'abundance', out
     summary_table[:] = 0.0000
     sum1 =0.0
     for sample in list(df_in.columns):
-        
+        sum1 = 0.0
         if scale == 'abundance':
             sum1 = sum(df_in[sample])
             # skip sample with all rows zero
@@ -155,7 +155,7 @@ def stack_barplot(df, output_path = None, axe = None, legend = True, legend_titl
             # with the label mid score
             label='Novel protein', #hypothetical unannotated',
             # with alpha 0.5
-            alpha=0.9,
+            alpha=0.99,
             # with color
             color='yellow',#'silver',#'#F1911E',
             linewidth=0)
@@ -169,7 +169,7 @@ def stack_barplot(df, output_path = None, axe = None, legend = True, legend_titl
             label='Novel NCBI gene', #hypothetical unannotated',
             bottom= df['Unannotated'],
             # with alpha 0.5
-            alpha=0.9,
+            alpha=0.99,
             # with color
             color='gold',#'silver',#'#F1911E',
             linewidth=0)
@@ -183,7 +183,7 @@ def stack_barplot(df, output_path = None, axe = None, legend = True, legend_titl
             label='Homologous protein in UniRef',
             bottom= [i+j for i,j in zip(df['Unannotated'],df['NCBI_gene'])],
             # with alpha 0.5
-            alpha=0.9,
+            alpha=0.99,
             # with color
             color= 'blue',#'#29CF66',
             linewidth=0)
@@ -198,7 +198,7 @@ def stack_barplot(df, output_path = None, axe = None, legend = True, legend_titl
             label='Functionally known in GO',
             bottom=[i+j+k for i,j,k in zip(df['Unannotated'],df['NCBI_gene'], df['UniRef'])],
             # with alpha 0.5
-            alpha=0.9,
+            alpha=0.99,
             # with color
             color='limegreen',#'#29CE66',
             linewidth=0)

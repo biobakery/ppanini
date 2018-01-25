@@ -1363,6 +1363,10 @@ def ncolors( n, colormap="jet" ):
         """utility for defining N evenly spaced colors across a color map"""
         cmap = plt.get_cmap( colormap )
         cmap_max = cmap.N
-        return [cmap( int( k * cmap_max / (n - 1) ) ) for k in range( n )]        
+        return [cmap( int( k * cmap_max / (n - 1) ) ) for k in range( n )]  
+
+def intersect(a, b):
+    """ return the intersection of two lists """
+    return list(set(set(a) & set(b)))      
         
         
