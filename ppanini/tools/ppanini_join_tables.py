@@ -89,12 +89,13 @@ def join_gene_tables(gene_tables,output,verbose=None, mapper= None, scale = None
                 #print (data[1]+'_'+data[0])
                 
                 # bind sample name and gene id to use as gene name
-                gene = data[1]+'_'+data[0].split("_")[1]
+                gene = data[1]+'_'+data[0]#.split("_")[1]
                 
                 # add the gene abundance to its cluster and use its cluster name
                 if mapper and gene in mapper:
-                    gene = mapper[gene].keys()[0]
                     print ("mapping cluster found for:", gene )
+                    gene = mapper[gene].keys()[0]
+                    print ("cluster :", gene )
                     find_count += 1
 
                 else:
