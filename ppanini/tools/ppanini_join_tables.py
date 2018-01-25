@@ -18,6 +18,7 @@ import tempfile
 import os
 import shutil
 import re
+import logging
 from ..utilities import gzip_bzip2_biom_open_readlines, process_gene_table_with_header, rev_load_polymap, load_polymap_dic
 from .. import config
 
@@ -89,20 +90,17 @@ def join_gene_tables(gene_tables,output,verbose=None, mapper= None, scale = None
                 #print (data[1]+'_'+data[0])
                 
                 # bind sample name and gene id to use as gene name
-                if '_' in data[0]:
-                    gene = data[1]+'_'+data[0].split("_")[1]
-                else:
-                    gene = data[1]+'_'+data[0]
+                gene = data[1]+'_'+data[0].split("_")[1]
                 
                 # add the gene abundance to its cluster and use its cluster name
                 if mapper and gene in mapper:
-                    print ("mapping cluster found for:", gene )
+                    #print ("mapping cluster found for:", gene )
                     gene = mapper[gene].keys()[0]
-                    print ("cluster :", gene )
+                    #print ("cluster :", gene )
                     find_count += 1
 
                 else:
-                    print ("No mapping cluster found for:", gene )
+                    #print ("No mapping cluster found for:", gene )
                     miss_count += 1
                     continue
             except IndexError:
@@ -153,6 +151,10 @@ def join_gene_tables(gene_tables,output,verbose=None, mapper= None, scale = None
         file_handle.write(gene+GENE_TABLE_DELIMITER+current_data.rstrip(GENE_TABLE_DELIMITER)+"\n")
     
     print "Matched genes to clusters : ", find_count, " Unmatched genes: ", miss_count
+    LOG_FILENAME = os.path.dirname(os.path.realpath(output))+'/mapping.log'
+    logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO)
+
+    logging.debug("Matched genes to clusters : ", find_count, " Unmatched genes: ", miss_count)
     file_handle.close()
 
 def get_args():
