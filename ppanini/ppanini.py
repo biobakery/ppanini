@@ -183,12 +183,12 @@ def get_no_niche_prevalence_abundance(centroids_data_matrix):
     #df = centroids_data_matrix.replace(0, numpy.NaN)
     df = centroids_data_matrix
     tem_nan_def = df
-    tem_nan_def[tem_nan_def<config.detection_abundance] = numpy.nan
+    tem_nan_def[tem_nan_def<config.abundance_detection_level] = numpy.nan
     summary_table['mean_abundance'] = tem_nan_def.mean(axis = 1)  #df.replace(0, numpy.nan).mean(axis = 1) #
     summary_table['mean_abundance'] = summary_table['mean_abundance'].fillna(0) 
     #print summary_table.loc[0,: ]
         # Alpha prevalence 
-    summary_table['alpha_prevalence'] = df[df>=config.detection_abundance].sum(axis=1)/df.shape[1]#df.astype(bool).sum(axis=1)/df.shape[1]# df.count(axis = 1)/df.shape[1]
+    summary_table['alpha_prevalence'] = df[df>=config.abundance_detection_level].sum(axis=1)/df.shape[1]#df.astype(bool).sum(axis=1)/df.shape[1]# df.count(axis = 1)/df.shape[1]
     summary_table['alpha_prevalence'] = summary_table['alpha_prevalence'].fillna(0)
     # Calculate percentile for prevalence and abundance
     summary_table['prevalence_percentile'] = scipy.stats.rankdata(summary_table['alpha_prevalence'], method='average') #/summary_table.shape[0]
@@ -388,7 +388,7 @@ def read_parameters():
     parser.add_argument('--basename', default = config.basename, help='BASENAME for all the output files')
     parser.add_argument('--uniref2go', default = config.uniref2go, help='uniref to GO term mapping file')
     parser.add_argument('--log-level', dest = 'log_level',  default=config.log_level, help='Choices: [DEBUG, INFO, WARNING, ERROR, CRITICAL]')
-    parser.add_argument('--abundance-detection-level', dest = 'detection_abundance', default= config.detection_abundance, type=float,help='Detection level of normalized relative abundance')
+    parser.add_argument('--abundance-detection-level', dest = 'abundance_detection_level', default= config.abundance_detection_level, type=float,help='Detection level of normalized relative abundance')
     #parser.add_argument('--threads', default= config.nprocesses, type=int,help='Number of threads')
     parser.add_argument('--tshld-abund', dest = 'tshld_abund', default=config.tshld_abund, type = float,help='[X] Percentile Cutoff for Abundance; Default=75th')
     parser.add_argument('--tshld-prev', dest = 'tshld_prev', default=config.tshld_prev, type =float, help='Percentile cutoff for Prevalence')
@@ -403,7 +403,7 @@ def read_parameters():
     config.input_table = args.input_table
     config.bypass_clustering = True
     config.uniref2go = args.uniref2go
-    config.detection_abundance = args.detection_abundance
+    config.abundance_detection_level = args.abundance_detection_level
     
 def run():
  
