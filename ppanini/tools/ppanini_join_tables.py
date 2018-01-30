@@ -60,7 +60,7 @@ def join_gene_tables(gene_tables,output,verbose=None, mapper= None, scale = None
         file_basename='.'.join(os.path.basename(gene_table).split('.')[:-1])
         file_basenames.append(file_basename)
         
-        if False:
+        if header:
             header_info=header.split(GENE_TABLE_DELIMITER)
             if not start_column_id:
                 start_column_id=header_info[0]
@@ -78,11 +78,11 @@ def join_gene_tables(gene_tables,output,verbose=None, mapper= None, scale = None
             try:
                 # Normalize counts
                 if scale == 'rpk':
-                    if int(data[5]) >0:
-                        data_points = [str(int(data[6]) * 1000.0/int(data[5]))]#hits * 1000/len 
-                    else:
+                    #if int(data[5]) >0:
+                    data_points = [str(int(data[6]) * 1000.0/int(data[5]))]#hits * 1000/len 
+                    #else:
                         # use row counts if the count is zero
-                        data_points = [data[6]]
+                     #   data_points = [data[6]]
                 elif scale == 'count':
                     # no scale, use the raw counts
                     data_points = [data[6]]
@@ -152,7 +152,7 @@ def join_gene_tables(gene_tables,output,verbose=None, mapper= None, scale = None
     
     print "Matched genes to clusters : ", find_count, " Unmatched genes: ", miss_count
     LOG_FILENAME = os.path.dirname(os.path.realpath(output))+'/mapping.log'
-    logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO)
+    logging.basicConfig(filename=LOG_FILENAME,level=logging.DEBUG)
 
     logging.debug("Matched genes to clusters : ", find_count, " Unmatched genes: ", miss_count)
     file_handle.close()

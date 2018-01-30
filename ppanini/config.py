@@ -11,6 +11,7 @@ nprocesses = 1
 # prioritizing thresholds 
 tshld_abund = 75
 tshld_prev = 75
+abundance_detection_level = 0.0001
 beta  = 0.5
 tshld = None
 summary_table = None

@@ -117,13 +117,12 @@ def get_fpr_tpr(ppanini_table, essential_genes, gene_families = None, beta =.5):
     tpr = dict()
     true = dict()
     score = dict()
-
     if gene_families:
         if beta == 0.5:
-            ppanini_score = ppanini_table.loc[set(gene_families),'ppanini_score']
+            ppanini_score = ppanini_table.loc[gene_families,'ppanini_score']
         else:
-            ppanini_score = 1.0/((beta/ppanini_table.loc[set(gene_families), 'prevalence_percentile'])+\
-                                  ((1.0-beta)/ppanini_table.loc[set(gene_families), 'abund_percentile']))
+            ppanini_score = 1.0/((beta/ppanini_table.loc[gene_families, 'prevalence_percentile'])+\
+                                  ((1.0-beta)/ppanini_table.loc[gene_families, 'abund_percentile']))
     else:
         gene_families = ppanini_table.index
         if beta == 0.5:
@@ -132,7 +131,7 @@ def get_fpr_tpr(ppanini_table, essential_genes, gene_families = None, beta =.5):
             ppanini_score = 1.0/((beta/ppanini_table['prevalence_percentile'])+\
                                   ((1.0-beta)/ppanini_table['abund_percentile']))
         
-        #ppanini_score = ppanini_table[['prevalence_percentile','abund_percentile']].max(axis=1)
+    #print gene_families[0:10], ppanini_score[0:10]
     ground_truth = [1 if (gene_id  in essential_genes) else 0 for gene_id in gene_families ]
     score[beta] = ppanini_score
     true[beta] = ground_truth
