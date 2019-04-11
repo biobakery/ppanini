@@ -1,0 +1,2 @@
+recursive-include ppanini/tests/data/ *
+recursive-include ppanini/data/ *
