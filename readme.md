@@ -15,27 +15,28 @@ PPANINI provides a computational pipeline to prioritize microbial genes based on
 
 
 ## Contents ##
-* [PPANINI](#markdown-header-ppanini)
-    * [PPANINI Workflow](#markdown-header-ppanini-workflow)
-    * [Requirements](#markdown-header-requirements)
-    * [Installation](#markdown-header-installation)
-* [Getting Started with PPANINI](#markdown-header-getting-started-with-ppanini)
-    * [Test PPANINI](#markdown-header-test-ppanini)
-    * [Options](#markdown-header-options) 
-    * [Input](#markdown-header-input)
-    * [Output](#markdown-header-output)  
-* [Guides to PPANINI utility scripts](#markdown-header-guides-to-ppanini-utility-scripts)
-	* [ppanini_join_tables](#markdown-header-ppanini_join_tables)
-	* [ppanini_barplot](#markdown-header-ppanini_barplot)
-	* [Convert abundance unit](#markdown-header-convert-abundance-unit)
-* [Creating a gene table using PPANINI](#markdown-header-creating-a-gene-table-using-ppanini)
-    * [Requirements](#markdown-header-requirements)
-    * [Workflow](#markdown-header-workflow)
-    * [How to run](#markdown-header-how-to-run)
-         * [Step 1: gene abundance](#markdown-header-step-1-gene-abundance)
-         * [Step 2: join tables](#markdown-header-step-2-join-tables)
-         * [Step 3: gene families abundance](#markdown-header-step-3-gene-families-abundance)
-* [Creating a gene table using HUMAnN2](#markdown-header-creating-a-gene-table-using-humann2)
+- [PPANINI](#ppanini)
+  - [PPANINI Workflow](#ppanini-workflow)
+  - [REQUIREMENTS](#requirements)
+  - [INSTALLATION](#installation)
+- [Getting Started with PPANINI](#getting-started-with-ppanini)
+  - [TEST PPANINI](#test-ppanini)
+  - [Options](#options)
+  - [Input](#input)
+  - [Output](#output)
+- [Guides to PPANINI utility scripts](#guides-to-ppanini-utility-scripts)
+  - [ppanini_join_tables](#ppanini_join_tables)
+  - [ppanini_barplot](#ppanini_barplot)
+  - [Convert abundance units](#convert-abundance-units)
+  - [Creating a gene table using PPANINI](#creating-a-gene-table-using-ppanini)
+    - [Requirements](#requirements-1)
+    - [Workflow](#workflow)
+    - [How to run](#how-to-run)
+      - [Step 1: gene abundance](#step-1-gene-abundance)
+      - [Step 2: join tables](#step-2-join-tables)
+      - [Step 3: gene families abundance](#step-3-gene-families-abundance)
+  - [Creating a gene table using HUMAnN2](#creating-a-gene-table-using-humann2)
+  - [Contributions ##](#contributions-)
 
 
 ------------------------------------------------------------------------------------------------------------------------------
@@ -386,3 +387,7 @@ A gene family abundance table can be obtained from [HUMAnN2](http://huttenhower.
 2. Merge gene families abundance table for all sample using [humann2_join_tables](https://github.com/biobakery/biobakery/wiki/humann2#42-humann-20-for-multiple-samples).
 
 3. Create unstratified gene family abundance table from gene family abundance table using [humann2_split_stratified_table](https://github.com/biobakery/biobakery/wiki/humann2#52-visualizing-stratified-humann-20-output). Use the `genefamilies_unstratified.tsv` File form the output folder. Gene families from HUMAnN2 outputs are stratified by species, but for PPANINI we need use unstratified gene families.
+
+## Contributions ## 
+Thanks go to these wonderful people:
+
